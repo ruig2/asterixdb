@@ -1,0 +1,130 @@
+///////////////////////////////////////////////////////////////////////////
+// Design of new full-text search features
+// Target: Support Stopwords in AsterixDB
+
+//////////////////////////////////////////////////////
+// Step 1: Create a dataset
+DROP DATAVERSE MyDataVerse IF EXISTS;
+CREATE DATAVERSE MyDataVerse;
+
+USE MyDataVerse;
+
+CREATE TYPE MyMessageType AS {
+    myMessageId:    int,
+    myMessageBody:  string
+};
+
+CREATE DATASET MyMessageDataset(MyMessageType)
+    PRIMARY KEY myMessageId;
+
+//////////////////////////////////////////////////////
+// Step 2: Create a full-text filter and a configuration
+
+DROP TEXT SEARCH FILTER IF EXISTS my_StopWordFilter;
+CREATE TEXT SEARCH FILTER my_StopWordFilter AS {
+    // ?????? Maybe we can move the "type" part in the CREATE sentence such as CREATE TEXT SEARCH FILTER myStopWordFilter **TYPE STOPWORDS** ?
+    "Type": "stopwords",
+    // configure by a stopword list in a local file
+    "StopwordFilePath": "./my_stopword_list.txt",
+    // OR, configure by a list in the JSON
+    "StopwordList": ["a", "an", "the"]
+};
+
+// Full-text configuration is a pipeline of full-text filters
+CREATE TEXT SEARCH CONFIGURATION my_full_text_configuration AS {
+    // We may add other options to a configuration later such as "tokenizer" if we decide to support different tokenizers later
+    "FullTextFilterPipeline": [
+        "my_StopWordFilter",
+        "my_SynonymFilter", // Synonym Filter is not implemented yet
+        ...
+    ]
+};
+
+//////////////////////////////////////////////////////
+// Step 3: Apply the full-text configuration to the index
+
+DROP INDEX IF EXISTS my_MessageIndex;
+CREATE INDEX my_MessageIndex on MyMessageDataset(myMessageBody) TYPE FULLTEXT;
+
+// Set the index-time full-text configuration (the config when creating index);
+// The index-time full text search config of an index can be updated only when the index is EMPTY (otherwise the index
+will be corrupted and we want to avoid that)
+UPDATE INDEX my_MessageIndex WITH CONFIGURATION my_full_text_configuration;
+
+//////////////////////////////////////////////////////
+// Step 4: Select the full-text configuration created in Step 2
+
+// Assume the filters and configurations are stored in Metadata.`Fulltext`
+// ?????? Should we store filters and configurations in two dedicated tables under Metadata?
+SELECT Value ft from Metadata.`FullTextConfig` ft;
+// The result can be
+// [
+//      {   "FullTextType":             "FTConfig",  // we can skip this line if store filters and configs in two dedicated tables
+//          "FullTextConfigName":       "my_full_text_configuration",
+//          "FullTextFilterPipeline": [
+//              "my_StopWordFilter",
+//              "my_SynonymFilter",
+//          ],
+//          "UsedByIndices":            ["my_MessageIndex"]
+//      },
+//
+//      {   "FullTextType":             "FTFilter",
+//          "FullTextFilterType":       "STOPWORDS",
+//          "FullTextFilterName":       "my_StopWordFilter",
+//          // If the stopwords are loaded from a local file, then the words will be stored in the table and the local file woould **not** be read again
+//          "StopwordList": [
+//              "a",
+//              "an",
+//              "the"
+//          ],
+//          "UsedByFTConfigs":          ["my_full_text_configuration"]
+//      }
+// ]
+
+SELECT VALUE ix FROM Metadata.`Index` ix;
+//      The result can be
+//      {(
+//           // Existing fields
+//           "DataverseName": "MyDataVerse", "DatasetName": "MyMessageDataset", "IndexName": "my_MessageIndex", "IndexStructure": "SINGLE_PARTITION_WORD_INVIX", "SearchKey": [ [ "myMessageBody" ] ], "IsPrimary": false, "Timestamp": "Wed Dec 11 17:44:48 PST 2019", "PendingOp": 0,
+//           // New field if index type is FULLTEXT (i.e. "IndexStructure": "SINGLE_PARTITION_WORD_INVIX")
+//           "FullTextConfig": "my_full_text_configuration"
+//      )}
+
+
+//////////////////////////////////////////////////////
+// Step 5: Insert data into the dataset
+
+INSERT INTO MyMessageDataset ([
+   {
+      "myMessageId":    1,
+      "myMessageBody":  "the quick brown fox"
+   },
+
+   {
+      "myMessageId":    2,
+      "myMessageBody":  "a quick black fox"
+   },
+
+   {
+      "myMessageId":    3,
+      "myMessageBody":  "a smart black dog"
+   }
+]);
+
+//////////////////////////////////////////////////////
+// Step 6: Select data with a full-text configuration
+
+SELECT VALUE myMessage from MyMessageDataset myMessage
+    WHERE ftcontains(myMessage.myMessageBody, ["black", "fox"], {"mode":"all",
+    // ft_config can be an optional parameter; if not set then the index-time configuration (the config used in the above UPDATE INDEX command) will be used
+     "ft_config": "my_full_text_configuration"
+});
+
+//////////////////////////////////////////////////////
+// Step 7: Drop index, full-text filter and configuration
+
+DROP INDEX IF EXISTS my_MessageIndex;
+// Can be dropped only when not used in any indexes, e.g. "UsedByIndices" is empty
+DROP TEXT SEARCH CONFIGURATION my_full_text_configuration;
+// Can be dropped only when not used in any full-text configuration, e.g. "UsedByFTConfigs" is empty
+DROP TEXT SEARCH FILTER my_StopWordFilter;
