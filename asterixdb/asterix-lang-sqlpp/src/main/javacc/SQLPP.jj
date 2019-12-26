@@ -1236,6 +1236,7 @@ DropDatasetStatement DropDatasetSpecification(Token startStmtToken) throws Parse
   }
 }
 
+// DROP INDEX GleambookMessages.gbSenderLocIndex;
 IndexDropStatement DropIndexStatement(Token startStmtToken) throws ParseException:
 {
   IndexDropStatement stmt = null;
@@ -1259,6 +1260,34 @@ IndexDropStatement DropIndexSpecification(Token startStmtToken) throws ParseExce
     return addSourceLocation(stmt, startStmtToken);
   }
 }
+
+// DROP FULLTEXT Filter myStopwordFilter;
+FulltextFilterDropStatement DropFulltextFilterStatement(Token startStmtToken) throws ParseException:
+{
+  FulltextFilterDropStatement stmt = null;
+}
+{
+  <FULLTEXT> stmt = DropFulltextFilterSpecification(startStmtToken)
+  {
+    return stmt;
+  }
+}
+
+FulltextFilterDropStatement DropFulltextFilterSpecification(Token startStmtToken) throws ParseException:
+{
+  String fulltextType = null;
+  boolean ifExists = false;
+}
+{
+  fulltextType = Identifier() ifExists = IfExists()
+  {
+    System.out.println("Get a DropFulltext Statement!!!");
+    System.out.println("Identifier " + fulltextType.image);
+    System.out.println("ifExists " + Boolean.toString(ifExists));
+    return new FulltextFilterDropStatement();
+  }
+}
+
 
 NodeGroupDropStatement DropNodeGroupStatement(Token startStmtToken) throws ParseException:
 {
