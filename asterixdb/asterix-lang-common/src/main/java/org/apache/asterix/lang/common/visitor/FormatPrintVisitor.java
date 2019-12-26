@@ -79,6 +79,7 @@ import org.apache.asterix.lang.common.statement.DropDatasetStatement;
 import org.apache.asterix.lang.common.statement.ExternalDetailsDecl;
 import org.apache.asterix.lang.common.statement.FeedDropStatement;
 import org.apache.asterix.lang.common.statement.FeedPolicyDropStatement;
+import org.apache.asterix.lang.common.statement.FulltextConfigDropStatement;
 import org.apache.asterix.lang.common.statement.FulltextFilterDropStatement;
 import org.apache.asterix.lang.common.statement.FunctionDecl;
 import org.apache.asterix.lang.common.statement.FunctionDropStatement;
@@ -729,6 +730,13 @@ public class FormatPrintVisitor implements ILangVisitor<Void, Integer> {
     @Override
     public Void visit(FulltextFilterDropStatement del, Integer step) throws CompilationException {
         out.print(skip(step) + "drop fulltext filter ");
+        out.println(generateIfExists(del.getIfExists()) + SEMICOLON);
+        return null;
+    }
+
+    @Override
+    public Void visit(FulltextConfigDropStatement del, Integer step) throws CompilationException {
+        out.print(skip(step) + "drop fulltext config ");
         out.println(generateIfExists(del.getIfExists()) + SEMICOLON);
         return null;
     }

@@ -56,6 +56,7 @@ import org.apache.asterix.lang.common.statement.DisconnectFeedStatement;
 import org.apache.asterix.lang.common.statement.DropDatasetStatement;
 import org.apache.asterix.lang.common.statement.FeedDropStatement;
 import org.apache.asterix.lang.common.statement.FeedPolicyDropStatement;
+import org.apache.asterix.lang.common.statement.FulltextConfigDropStatement;
 import org.apache.asterix.lang.common.statement.FulltextFilterDropStatement;
 import org.apache.asterix.lang.common.statement.FunctionDecl;
 import org.apache.asterix.lang.common.statement.FunctionDropStatement;
@@ -142,6 +143,8 @@ public interface ILangVisitor<R, T> {
     R visit(IndexDropStatement del, T arg) throws CompilationException;
 
     R visit(FulltextFilterDropStatement del, T arg) throws CompilationException;
+
+    R visit(FulltextConfigDropStatement del, T arg) throws CompilationException;
 
     R visit(NodeGroupDropStatement del, T arg) throws CompilationException;
 

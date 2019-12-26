@@ -69,6 +69,8 @@ public interface Statement extends ILangExpression {
         CREATE_INDEX,
         CREATE_DATAVERSE,
         INDEX_DROP,
+        FULLTEXT_FILTER_DROP,
+        FULLTEXT_CONFIG_DROP,
         CREATE_FEED,
         DROP_FEED,
         START_FEED,

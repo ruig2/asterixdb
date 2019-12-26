@@ -24,7 +24,7 @@ import org.apache.asterix.lang.common.base.AbstractStatement;
 import org.apache.asterix.lang.common.struct.Identifier;
 import org.apache.asterix.lang.common.visitor.base.ILangVisitor;
 
-public class FulltextFilterDropStatement extends AbstractStatement {
+public class FulltextConfigDropStatement extends AbstractStatement {
 
     private DataverseName dataverseName;
     private Identifier datasetName;
@@ -32,7 +32,7 @@ public class FulltextFilterDropStatement extends AbstractStatement {
     private boolean ifExists;
 
     //public FulltextFilterDropStatement(DataverseName dataverseName, Identifier datasetName, Identifier indexName,
-    public FulltextFilterDropStatement(boolean ifExists) {
+    public FulltextConfigDropStatement(boolean ifExists) {
         //this.dataverseName = dataverseName;
         //this.datasetName = datasetName;
         //this.indexName = indexName;
