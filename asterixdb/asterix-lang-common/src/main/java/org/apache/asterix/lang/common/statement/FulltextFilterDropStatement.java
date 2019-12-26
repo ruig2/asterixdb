@@ -33,8 +33,7 @@ public class FulltextFilterDropStatement extends AbstractStatement {
     private boolean ifExists;
 
     //public FulltextFilterDropStatement(DataverseName dataverseName, Identifier datasetName, Identifier indexName,
-    public FulltextFilterDropStatement(
-            boolean ifExists) {
+    public FulltextFilterDropStatement(boolean ifExists) {
         //this.dataverseName = dataverseName;
         //this.datasetName = datasetName;
         //this.indexName = indexName;
