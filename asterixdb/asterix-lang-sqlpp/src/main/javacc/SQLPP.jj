@@ -1208,8 +1208,7 @@ Statement DropStatement() throws ParseException:
     | stmt = DropFunctionStatement(startToken)
     | stmt = DropFeedStatement(startToken)
     | stmt = DropFeedPolicyStatement(startToken)
-    | stmt = DropFulltextFilterStatement(startToken)
-    | stmt = DropFulltextConfigStatement(startToken)
+    | stmt = DropFulltextStatement(startToken)
   )
   {
     return stmt;
@@ -1266,12 +1265,16 @@ IndexDropStatement DropIndexSpecification(Token startStmtToken) throws ParseExce
 }
 
 // DROP FULLTEXT Filter myStopwordFilter;
-FulltextFilterDropStatement DropFulltextFilterStatement(Token startStmtToken) throws ParseException:
+Statement DropFulltextStatement(Token startStmtToken) throws ParseException:
 {
-  FulltextFilterDropStatement stmt = null;
+  Statement stmt = null;
 }
 {
-  <FULLTEXT> <FILTER> stmt = DropFulltextFilterSpecification(startStmtToken)
+  <FULLTEXT>
+  (
+    (<FILTER> stmt = DropFulltextFilterSpecification(startStmtToken))
+    | (stmt = DropFulltextConfigSpecification(startStmtToken))
+  )
   {
     return stmt;
   }
@@ -1292,18 +1295,6 @@ FulltextFilterDropStatement DropFulltextFilterSpecification(Token startStmtToken
   }
 }
 
-// DROP FULLTEXT config myEnglishConfig;
-FulltextConfigDropStatement DropFulltextConfigStatement(Token startStmtToken) throws ParseException:
-{
-  FulltextConfigDropStatement stmt = null;
-}
-{
-  <FULLTEXT> stmt = DropFulltextConfigSpecification(startStmtToken)
-  {
-    return stmt;
-  }
-}
-
 FulltextConfigDropStatement DropFulltextConfigSpecification(Token startStmtToken) throws ParseException:
 {
   String fulltextType = null;
@@ -1313,7 +1304,7 @@ FulltextConfigDropStatement DropFulltextConfigSpecification(Token startStmtToken
 {
   fulltextType = Identifier() filterName = Identifier() ifExists = IfExists()
   {
-    System.out.println("Get a DropFulltext Statement!!!");
+    System.out.println("Get a Drop Fulltext Config Statement!!!");
     System.out.println("Identifier1 " + fulltextType);
     System.out.println("Identifier2 " + filterName);
     System.out.println("ifExists " + ifExists);
