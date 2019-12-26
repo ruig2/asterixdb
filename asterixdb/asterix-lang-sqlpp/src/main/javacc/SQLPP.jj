@@ -139,6 +139,7 @@ import org.apache.asterix.lang.common.statement.FeedPolicyDropStatement;
 import org.apache.asterix.lang.common.statement.FunctionDecl;
 import org.apache.asterix.lang.common.statement.FunctionDropStatement;
 import org.apache.asterix.lang.common.statement.IndexDropStatement;
+import org.apache.asterix.lang.common.statement.FulltextFilterDropStatement;
 import org.apache.asterix.lang.common.statement.InsertStatement;
 import org.apache.asterix.lang.common.statement.InternalDetailsDecl;
 import org.apache.asterix.lang.common.statement.LoadStatement;
@@ -1206,6 +1207,7 @@ Statement DropStatement() throws ParseException:
     | stmt = DropFunctionStatement(startToken)
     | stmt = DropFeedStatement(startToken)
     | stmt = DropFeedPolicyStatement(startToken)
+    | stmt = DropFulltextFilterStatement(startToken)
   )
   {
     return stmt;
@@ -1276,16 +1278,18 @@ FulltextFilterDropStatement DropFulltextFilterStatement(Token startStmtToken) th
 FulltextFilterDropStatement DropFulltextFilterSpecification(Token startStmtToken) throws ParseException:
 {
   String fulltextType = null;
+  String filterName = null;
   boolean ifExists = false;
 }
 {
-  fulltextType = Identifier() ifExists = IfExists()
+  fulltextType = Identifier() filterName = Identifier() ifExists = IfExists()
   {
-    System.out.println("Get a DropFulltext Statement!!!");
-    System.out.println("Identifier " + fulltextType.image);
-    System.out.println("ifExists " + Boolean.toString(ifExists));
-    return new FulltextFilterDropStatement();
-  }
+  System.out.println("Get a DropFulltext Statement!!!");
+  System.out.println("Identifier1 " + fulltextType);
+  System.out.println("Identifier2 " + fulltextType);
+  System.out.println("ifExists " + ifExists);
+  return new FulltextFilterDropStatement(ifExists);
+}
 }
 
 
