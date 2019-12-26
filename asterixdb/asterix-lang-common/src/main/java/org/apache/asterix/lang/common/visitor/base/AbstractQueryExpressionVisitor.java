@@ -39,6 +39,7 @@ import org.apache.asterix.lang.common.statement.DisconnectFeedStatement;
 import org.apache.asterix.lang.common.statement.DropDatasetStatement;
 import org.apache.asterix.lang.common.statement.FeedDropStatement;
 import org.apache.asterix.lang.common.statement.FeedPolicyDropStatement;
+import org.apache.asterix.lang.common.statement.FulltextConfigDropStatement;
 import org.apache.asterix.lang.common.statement.FulltextFilterDropStatement;
 import org.apache.asterix.lang.common.statement.FunctionDecl;
 import org.apache.asterix.lang.common.statement.FunctionDropStatement;
@@ -180,6 +181,11 @@ public abstract class AbstractQueryExpressionVisitor<R, T> implements ILangVisit
 
     @Override
     public R visit(FulltextFilterDropStatement del, T arg) throws CompilationException {
+        return null;
+    }
+
+    @Override
+    public R visit(FulltextConfigDropStatement del, T arg) throws CompilationException {
         return null;
     }
 

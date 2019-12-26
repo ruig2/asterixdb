@@ -140,6 +140,7 @@ import org.apache.asterix.lang.common.statement.FunctionDecl;
 import org.apache.asterix.lang.common.statement.FunctionDropStatement;
 import org.apache.asterix.lang.common.statement.IndexDropStatement;
 import org.apache.asterix.lang.common.statement.FulltextFilterDropStatement;
+import org.apache.asterix.lang.common.statement.FulltextConfigDropStatement;
 import org.apache.asterix.lang.common.statement.InsertStatement;
 import org.apache.asterix.lang.common.statement.InternalDetailsDecl;
 import org.apache.asterix.lang.common.statement.LoadStatement;
@@ -1208,6 +1209,7 @@ Statement DropStatement() throws ParseException:
     | stmt = DropFeedStatement(startToken)
     | stmt = DropFeedPolicyStatement(startToken)
     | stmt = DropFulltextFilterStatement(startToken)
+    | stmt = DropFulltextConfigStatement(startToken)
   )
   {
     return stmt;
@@ -1269,13 +1271,40 @@ FulltextFilterDropStatement DropFulltextFilterStatement(Token startStmtToken) th
   FulltextFilterDropStatement stmt = null;
 }
 {
-  <FULLTEXT> stmt = DropFulltextFilterSpecification(startStmtToken)
+  <FULLTEXT> <FILTER> stmt = DropFulltextFilterSpecification(startStmtToken)
   {
     return stmt;
   }
 }
 
 FulltextFilterDropStatement DropFulltextFilterSpecification(Token startStmtToken) throws ParseException:
+{
+  String filterName = null;
+  boolean ifExists = false;
+}
+{
+  filterName = Identifier() ifExists = IfExists()
+  {
+    System.out.println("Get a Drop Fulltext Filter Statement!!!");
+    System.out.println("Identifier " + filterName);
+    System.out.println("ifExists " + ifExists);
+    return new FulltextFilterDropStatement(ifExists);
+  }
+}
+
+// DROP FULLTEXT config myEnglishConfig;
+FulltextConfigDropStatement DropFulltextConfigStatement(Token startStmtToken) throws ParseException:
+{
+  FulltextConfigDropStatement stmt = null;
+}
+{
+  <FULLTEXT> stmt = DropFulltextConfigSpecification(startStmtToken)
+  {
+    return stmt;
+  }
+}
+
+FulltextConfigDropStatement DropFulltextConfigSpecification(Token startStmtToken) throws ParseException:
 {
   String fulltextType = null;
   String filterName = null;
@@ -1284,12 +1313,12 @@ FulltextFilterDropStatement DropFulltextFilterSpecification(Token startStmtToken
 {
   fulltextType = Identifier() filterName = Identifier() ifExists = IfExists()
   {
-  System.out.println("Get a DropFulltext Statement!!!");
-  System.out.println("Identifier1 " + fulltextType);
-  System.out.println("Identifier2 " + fulltextType);
-  System.out.println("ifExists " + ifExists);
-  return new FulltextFilterDropStatement(ifExists);
-}
+    System.out.println("Get a DropFulltext Statement!!!");
+    System.out.println("Identifier1 " + fulltextType);
+    System.out.println("Identifier2 " + filterName);
+    System.out.println("ifExists " + ifExists);
+    return new FulltextConfigDropStatement(ifExists);
+  }
 }
 
 

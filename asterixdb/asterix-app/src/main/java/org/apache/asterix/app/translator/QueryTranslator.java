@@ -338,6 +338,12 @@ public class QueryTranslator extends AbstractLangTranslator implements IStatemen
                     case INDEX_DROP:
                         handleIndexDropStatement(metadataProvider, stmt, hcc, requestParameters);
                         break;
+                    case FULLTEXT_FILTER_DROP:
+                        handleFulltextFilterDrop();
+                        break;
+                    case FULLTEXT_CONFIG_DROP:
+                        handleFulltextConfigDrop();
+                        break;
                     case TYPE_DROP:
                         handleTypeDropStatement(metadataProvider, stmt);
                         break;
@@ -1685,6 +1691,14 @@ public class QueryTranslator extends AbstractLangTranslator implements IStatemen
             metadataProvider.getLocks().unlock();
             ExternalDatasetsRegistry.INSTANCE.releaseAcquiredLocks(metadataProvider);
         }
+    }
+
+    protected void handleFulltextFilterDrop() {
+        return;
+    }
+
+    protected void handleFulltextConfigDrop() {
+        return;
     }
 
     protected void handleTypeDropStatement(MetadataProvider metadataProvider, Statement stmt) throws Exception {
