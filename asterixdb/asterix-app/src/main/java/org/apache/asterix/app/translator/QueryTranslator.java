@@ -323,6 +323,12 @@ public class QueryTranslator extends AbstractLangTranslator implements IStatemen
                     case CREATE_INDEX:
                         handleCreateIndexStatement(metadataProvider, stmt, hcc, requestParameters);
                         break;
+                    case CREATE_FULLTEXT_FILTER:
+                        handleCreateFulltextFilterStatement();
+                        break;
+                    case CREATE_FULLTEXT_CONFIG:
+                        handleCreateFulltextConfigStatement();
+                        break;
                     case TYPE_DECL:
                         handleCreateTypeStatement(metadataProvider, stmt);
                         break;
@@ -972,6 +978,14 @@ public class QueryTranslator extends AbstractLangTranslator implements IStatemen
         } finally {
             metadataProvider.getLocks().unlock();
         }
+    }
+
+    public void handleCreateFulltextFilterStatement() {
+        return;
+    }
+
+    public void handleCreateFulltextConfigStatement() {
+        return;
     }
 
     protected void doCreateIndex(IHyracksClientConnection hcc, MetadataProvider metadataProvider, Dataset ds,

@@ -68,6 +68,8 @@ import org.apache.asterix.lang.common.statement.ConnectFeedStatement;
 import org.apache.asterix.lang.common.statement.CreateDataverseStatement;
 import org.apache.asterix.lang.common.statement.CreateFeedPolicyStatement;
 import org.apache.asterix.lang.common.statement.CreateFeedStatement;
+import org.apache.asterix.lang.common.statement.CreateFulltextConfigStatement;
+import org.apache.asterix.lang.common.statement.CreateFulltextFilterStatement;
 import org.apache.asterix.lang.common.statement.CreateFunctionStatement;
 import org.apache.asterix.lang.common.statement.CreateIndexStatement;
 import org.apache.asterix.lang.common.statement.DatasetDecl;
@@ -691,6 +693,18 @@ public class FormatPrintVisitor implements ILangVisitor<Void, Integer> {
         }
         out.println(SEMICOLON);
         out.println();
+        return null;
+    }
+
+    @Override
+    public Void visit(CreateFulltextFilterStatement cis, Integer step) throws CompilationException {
+        out.print(skip(step) + "create fulltext filter ");
+        return null;
+    }
+
+    @Override
+    public Void visit(CreateFulltextConfigStatement cis, Integer step) throws CompilationException {
+        out.print(skip(step) + "create fulltext config ");
         return null;
     }
 

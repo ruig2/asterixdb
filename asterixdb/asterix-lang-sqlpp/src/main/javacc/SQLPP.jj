@@ -127,6 +127,8 @@ import org.apache.asterix.lang.common.statement.CreateFeedPolicyStatement;
 import org.apache.asterix.lang.common.statement.CreateFeedStatement;
 import org.apache.asterix.lang.common.statement.CreateFunctionStatement;
 import org.apache.asterix.lang.common.statement.CreateIndexStatement;
+import org.apache.asterix.lang.common.statement.CreateFulltextFilterStatement;
+import org.apache.asterix.lang.common.statement.CreateFulltextConfigStatement;
 import org.apache.asterix.lang.common.statement.DatasetDecl;
 import org.apache.asterix.lang.common.statement.DataverseDecl;
 import org.apache.asterix.lang.common.statement.DataverseDropStatement;
@@ -222,6 +224,8 @@ class SQLPPParser extends ScopeChecker implements IParser {
     private static final String UNBOUNDED = "UNBOUNDED";
 
     private static final String INT_TYPE_NAME = "int";
+    private static final String FULLTEXT_FILTER = "filter";
+    private static final String FULLTEXT_CONFIG = "config";
 
     // error configuration
     protected static final boolean REPORT_EXPECTED_TOKENS = false;
@@ -588,6 +592,7 @@ Statement CreateStatement() throws ParseException:
     | stmt = CreateFunctionStatement(startToken)
     | stmt = CreateFeedStatement(startToken)
     | stmt = CreateFeedPolicyStatement(startToken)
+    | stmt = CreateFulltextStatement(startToken)
   )
   {
     return stmt;
@@ -1082,6 +1087,73 @@ CreateFeedPolicyStatement FeedPolicySpecification(Token startStmtToken) throws P
   }
 }
 
+Statement CreateFulltextStatement(Token startStmtToken) throws ParseException:
+{
+  Statement stmt = null;
+}
+{
+  (
+    <FULLTEXT>
+    (
+      <FILTER> stmt = CreateFulltextFilterSpec(startStmtToken)
+      | stmt = CreateFulltextConfigSpec(startStmtToken)
+    )
+  )
+  {
+    return stmt;
+  }
+}
+
+CreateFulltextFilterStatement CreateFulltextFilterSpec(Token startStmtToken) throws ParseException:
+{
+  CreateFulltextFilterStatement stmt = new CreateFulltextFilterStatement();
+  String filterName = null;
+  boolean ifNotExists = false;
+  Pair<DataverseName,Identifier> nameComponents = null;
+  Pair<Integer, Pair<List<String>, IndexedTypeExpression>> fieldPair = null;
+  IndexParams indexType = null;
+  boolean enforced = false;
+}
+{
+  (
+    filterName = Identifier() ifNotExists = IfNotExists()
+    <AS>
+    <LEFTBRACE>
+    <RIGHTBRACE>
+  )
+  {
+    System.out.println("!!! Get  Create Fulltext Filter command");
+    System.out.println("!!! Filter name " + filterName);
+    return stmt;
+  }
+}
+
+CreateFulltextConfigStatement CreateFulltextConfigSpec(Token startStmtToken) throws ParseException:
+{
+  CreateFulltextConfigStatement stmt = new CreateFulltextConfigStatement();
+  String taskName = null;
+  String configName = null;
+  boolean ifNotExists = false;
+  Pair<DataverseName,Identifier> nameComponents = null;
+  Pair<Integer, Pair<List<String>, IndexedTypeExpression>> fieldPair = null;
+  IndexParams indexType = null;
+  boolean enforced = false;
+}
+{
+  (
+    taskName = Identifier() configName = Identifier() ifNotExists = IfNotExists()
+    <AS>
+    <LEFTBRACE>
+    <RIGHTBRACE>
+  )
+  {
+    System.out.println("Get Create Fulltext Config statement");
+    System.out.println("taskName " + taskName);
+    System.out.println("configName " + configName);
+
+    return stmt;
+  }
+}
 List<VarIdentifier> ParameterList() throws ParseException:
 {
   List<VarIdentifier> paramList = new ArrayList<VarIdentifier>();
