@@ -1106,24 +1106,25 @@ Statement CreateFulltextStatement(Token startStmtToken) throws ParseException:
 
 CreateFulltextFilterStatement CreateFulltextFilterSpec(Token startStmtToken) throws ParseException:
 {
-  CreateFulltextFilterStatement stmt = new CreateFulltextFilterStatement();
+  CreateFulltextFilterStatement stmt = null;
   String filterName = null;
   boolean ifNotExists = false;
-  Pair<DataverseName,Identifier> nameComponents = null;
-  Pair<Integer, Pair<List<String>, IndexedTypeExpression>> fieldPair = null;
-  IndexParams indexType = null;
-  boolean enforced = false;
+  // Use a more general expression and decode fields (e.g. filter type and stopword list) later from it
+  // The decoding pharse is postponed to the handleCreateFulltextFilterStatement() pharse to minimize the logic in the SQLPP parser
+  Expression expr = null;
 }
 {
   (
     filterName = Identifier() ifNotExists = IfNotExists()
     <AS>
-    <LEFTBRACE>
-    <RIGHTBRACE>
+    expr = Expression()
   )
   {
     System.out.println("!!! Get  Create Fulltext Filter command");
     System.out.println("!!! Filter name " + filterName);
+    System.out.println("!!! expr " + expr.toString());
+
+    stmt = new CreateFulltextFilterStatement(filterName, ifNotExists, expr);
     return stmt;
   }
 }
