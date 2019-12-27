@@ -68,6 +68,8 @@ public interface Statement extends ILangExpression {
         WRITE,
         CREATE_INDEX,
         CREATE_DATAVERSE,
+        CREATE_FULLTEXT_FILTER,
+        CREATE_FULLTEXT_CONFIG,
         INDEX_DROP,
         FULLTEXT_FILTER_DROP,
         FULLTEXT_CONFIG_DROP,
