@@ -222,10 +222,9 @@ class SQLPPParser extends ScopeChecker implements IParser {
     private static final String ROWS = "ROWS";
     private static final String TIES = "TIES";
     private static final String UNBOUNDED = "UNBOUNDED";
+    private static final String FULLTEXT_CONFIG = "CONFIG";
 
     private static final String INT_TYPE_NAME = "int";
-    private static final String FULLTEXT_FILTER = "filter";
-    private static final String FULLTEXT_CONFIG = "config";
 
     // error configuration
     protected static final boolean REPORT_EXPECTED_TOKENS = false;
@@ -1096,7 +1095,7 @@ Statement CreateFulltextStatement(Token startStmtToken) throws ParseException:
     <FULLTEXT>
     (
       <FILTER> stmt = CreateFulltextFilterSpec(startStmtToken)
-      | "config" stmt = CreateFulltextConfigSpec(startStmtToken)
+      | (<IDENTIFIER> { expectToken(FULLTEXT_CONFIG); } stmt = CreateFulltextConfigSpec(startStmtToken))
     )
   )
   {
@@ -1342,8 +1341,8 @@ Statement DropFulltextStatement(Token startStmtToken) throws ParseException:
 {
   <FULLTEXT>
   (
-    (<FILTER> stmt = DropFulltextFilterSpecification(startStmtToken))
-    | (stmt = DropFulltextConfigSpecification(startStmtToken))
+    <FILTER> stmt = DropFulltextFilterSpecification(startStmtToken)
+     | (<IDENTIFIER> { expectToken(FULLTEXT_CONFIG); } stmt = DropFulltextConfigSpecification(startStmtToken))
   )
   {
     return stmt;
@@ -1367,16 +1366,14 @@ FulltextFilterDropStatement DropFulltextFilterSpecification(Token startStmtToken
 
 FulltextConfigDropStatement DropFulltextConfigSpecification(Token startStmtToken) throws ParseException:
 {
-  String fulltextType = null;
-  String filterName = null;
+  String configName = null;
   boolean ifExists = false;
 }
 {
-  fulltextType = Identifier() filterName = Identifier() ifExists = IfExists()
+  configName = Identifier() ifExists = IfExists()
   {
     System.out.println("Get a Drop Fulltext Config Statement!!!");
-    System.out.println("Identifier1 " + fulltextType);
-    System.out.println("Identifier2 " + filterName);
+    System.out.println("Identifier " + configName);
     System.out.println("ifExists " + ifExists);
     return new FulltextConfigDropStatement(ifExists);
   }
