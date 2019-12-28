@@ -18,121 +18,34 @@
  */
 package org.apache.asterix.lang.common.statement;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import org.apache.asterix.common.config.DatasetConfig.IndexType;
 import org.apache.asterix.common.exceptions.CompilationException;
-import org.apache.asterix.common.metadata.DataverseName;
 import org.apache.asterix.lang.common.base.AbstractStatement;
-import org.apache.asterix.lang.common.expression.IndexedTypeExpression;
-import org.apache.asterix.lang.common.struct.Identifier;
+import org.apache.asterix.lang.common.base.Expression;
 import org.apache.asterix.lang.common.visitor.base.ILangVisitor;
-import org.apache.hyracks.algebricks.common.utils.Pair;
 
 public class CreateFulltextConfigStatement extends AbstractStatement {
 
-    private Identifier indexName;
-    private DataverseName dataverseName;
-    private Identifier datasetName;
-    private List<Pair<List<String>, IndexedTypeExpression>> fieldExprs = new ArrayList<>();
-    private List<Integer> fieldIndexIndicators = new ArrayList<>();
-    private IndexType indexType = IndexType.BTREE;
-    private boolean enforced;
+    private String configName;
     private boolean ifNotExists;
+    private Expression expr;
 
-    // Specific to NGram indexes.
-    private int gramLength = -1;
-
-    public CreateFulltextConfigStatement() {
-    }
-
-    public void setGramLength(int gramLength) {
-        this.gramLength = gramLength;
-    }
-
-    public int getGramLength() {
-        return gramLength;
-    }
-
-    public Identifier getIndexName() {
-        return indexName;
-    }
-
-    public void setIndexName(Identifier indexName) {
-        this.indexName = indexName;
-    }
-
-    public DataverseName getDataverseName() {
-        return dataverseName;
-    }
-
-    public void setDataverseName(DataverseName dataverseName) {
-        this.dataverseName = dataverseName;
-    }
-
-    public Identifier getDatasetName() {
-        return datasetName;
-    }
-
-    public void setDatasetName(Identifier datasetName) {
-        this.datasetName = datasetName;
-    }
-
-    public List<Pair<List<String>, IndexedTypeExpression>> getFieldExprs() {
-        return fieldExprs;
-    }
-
-    public void addFieldExprPair(Pair<List<String>, IndexedTypeExpression> fp) {
-        this.fieldExprs.add(fp);
-    }
-
-    public List<Integer> getFieldSourceIndicators() {
-        return fieldIndexIndicators;
-    }
-
-    public void addFieldIndexIndicator(Integer index) {
-        fieldIndexIndicators.add(index);
-    }
-
-    public IndexType getIndexType() {
-        return indexType;
-    }
-
-    public void setIndexType(IndexType indexType) {
-        this.indexType = indexType;
-    }
-
-    public boolean isEnforced() {
-        return enforced;
-    }
-
-    public void setEnforced(boolean isEnforced) {
-        this.enforced = isEnforced;
-    }
-
-    public void setIfNotExists(boolean ifNotExists) {
+    public CreateFulltextConfigStatement(String configName, boolean ifNotExists, Expression expr) {
+        this.configName = configName;
         this.ifNotExists = ifNotExists;
+        this.expr = expr;
+    }
+
+    public String getConfigName() {
+        return configName;
     }
 
     public boolean getIfNotExists() {
-        return this.ifNotExists;
+        return ifNotExists;
     }
 
     @Override
     public Kind getKind() {
         return Kind.CREATE_FULLTEXT_CONFIG;
-    }
-
-    public boolean hasMetaField() {
-        if (fieldIndexIndicators != null) {
-            for (Integer indicator : fieldIndexIndicators) {
-                if (indicator.intValue() != 0) {
-                    return true;
-                }
-            }
-        }
-        return false;
     }
 
     @Override
