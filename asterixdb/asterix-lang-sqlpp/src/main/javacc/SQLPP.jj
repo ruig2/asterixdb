@@ -1096,7 +1096,7 @@ Statement CreateFulltextStatement(Token startStmtToken) throws ParseException:
     <FULLTEXT>
     (
       <FILTER> stmt = CreateFulltextFilterSpec(startStmtToken)
-      | stmt = CreateFulltextConfigSpec(startStmtToken)
+      | "config" stmt = CreateFulltextConfigSpec(startStmtToken)
     )
   )
   {
@@ -1131,26 +1131,23 @@ CreateFulltextFilterStatement CreateFulltextFilterSpec(Token startStmtToken) thr
 
 CreateFulltextConfigStatement CreateFulltextConfigSpec(Token startStmtToken) throws ParseException:
 {
-  CreateFulltextConfigStatement stmt = new CreateFulltextConfigStatement();
-  String taskName = null;
+  CreateFulltextConfigStatement stmt = null;
   String configName = null;
   boolean ifNotExists = false;
-  Pair<DataverseName,Identifier> nameComponents = null;
-  Pair<Integer, Pair<List<String>, IndexedTypeExpression>> fieldPair = null;
-  IndexParams indexType = null;
-  boolean enforced = false;
+  Expression expr = null;
 }
 {
   (
-    taskName = Identifier() configName = Identifier() ifNotExists = IfNotExists()
+    configName = Identifier() ifNotExists = IfNotExists()
     <AS>
-    <LEFTBRACE>
-    <RIGHTBRACE>
+    expr = Expression()
   )
   {
     System.out.println("Get Create Fulltext Config statement");
-    System.out.println("taskName " + taskName);
     System.out.println("configName " + configName);
+    System.out.println("expr " + expr);
+
+    stmt = new CreateFulltextConfigStatement(configName, ifNotExists, expr);
 
     return stmt;
   }
