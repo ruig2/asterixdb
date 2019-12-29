@@ -1360,7 +1360,7 @@ FulltextFilterDropStatement DropFulltextFilterSpecification(Token startStmtToken
     System.out.println("Get a Drop Fulltext Filter Statement!!!");
     System.out.println("Identifier " + filterName);
     System.out.println("ifExists " + ifExists);
-    return new FulltextFilterDropStatement(ifExists);
+    return new FulltextFilterDropStatement(filterName, ifExists);
   }
 }
 
@@ -1375,7 +1375,7 @@ FulltextConfigDropStatement DropFulltextConfigSpecification(Token startStmtToken
     System.out.println("Get a Drop Fulltext Config Statement!!!");
     System.out.println("Identifier " + configName);
     System.out.println("ifExists " + ifExists);
-    return new FulltextConfigDropStatement(ifExists);
+    return new FulltextConfigDropStatement(configName, ifExists);
   }
 }
 

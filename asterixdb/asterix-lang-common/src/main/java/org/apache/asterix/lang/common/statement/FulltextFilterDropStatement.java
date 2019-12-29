@@ -19,23 +19,16 @@
 package org.apache.asterix.lang.common.statement;
 
 import org.apache.asterix.common.exceptions.CompilationException;
-import org.apache.asterix.common.metadata.DataverseName;
 import org.apache.asterix.lang.common.base.AbstractStatement;
-import org.apache.asterix.lang.common.struct.Identifier;
 import org.apache.asterix.lang.common.visitor.base.ILangVisitor;
 
 public class FulltextFilterDropStatement extends AbstractStatement {
 
-    private DataverseName dataverseName;
-    private Identifier datasetName;
-    private Identifier indexName;
+    private String filterName;
     private boolean ifExists;
 
-    //public FulltextFilterDropStatement(DataverseName dataverseName, Identifier datasetName, Identifier indexName,
-    public FulltextFilterDropStatement(boolean ifExists) {
-        //this.dataverseName = dataverseName;
-        //this.datasetName = datasetName;
-        //this.indexName = indexName;
+    public FulltextFilterDropStatement(String filterName, boolean ifExists) {
+        this.filterName = filterName;
         this.ifExists = ifExists;
     }
 
@@ -46,6 +39,10 @@ public class FulltextFilterDropStatement extends AbstractStatement {
 
     public boolean getIfExists() {
         return ifExists;
+    }
+
+    public String getFilterName() {
+        return filterName;
     }
 
     @Override

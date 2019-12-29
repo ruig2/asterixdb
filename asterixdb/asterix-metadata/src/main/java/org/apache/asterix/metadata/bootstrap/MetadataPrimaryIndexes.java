@@ -59,6 +59,8 @@ public class MetadataPrimaryIndexes {
             new MetadataIndexImmutableProperties(MetadataConstants.COMPACTION_POLICY_DATASET_NAME, 13, 13);
     public static final MetadataIndexImmutableProperties PROPERTIES_EXTERNAL_FILE =
             new MetadataIndexImmutableProperties(MetadataConstants.EXTERNAL_FILE_DATASET_NAME, 14, 14);
+    public static final MetadataIndexImmutableProperties PROPERTIES_FULLTEXT_CONFIG =
+            new MetadataIndexImmutableProperties(MetadataConstants.FULLTEXT_CONFIG, 15, 15);
 
     public static final IMetadataIndex DATAVERSE_DATASET =
             new MetadataIndex(PROPERTIES_DATAVERSE, 2, new IAType[] { BuiltinType.ASTRING },
@@ -133,6 +135,14 @@ public class MetadataPrimaryIndexes {
                     Arrays.asList(MetadataRecordTypes.FIELD_NAME_FEED_NAME),
                     Arrays.asList(MetadataRecordTypes.FIELD_NAME_DATASET_NAME)),
             0, MetadataRecordTypes.FEED_CONNECTION_RECORDTYPE, true, new int[] { 0, 1, 2 });
+
+    // xxxxx: in progress
+    public static final IMetadataIndex FULLTEXT_CONFIG_DATASET = new MetadataIndex(PROPERTIES_FULLTEXT_CONFIG, 4,
+            new IAType[] { BuiltinType.ASTRING, BuiltinType.ASTRING, BuiltinType.ASTRING },
+            Arrays.asList(Arrays.asList("abc"),
+                    Arrays.asList("def"),
+                    Arrays.asList("hij")),
+            0, MetadataRecordTypes.FULLTEXT_CONFIG_RECORDTYPE, true, new int[] { 0, 1, 2 });
 
     private MetadataPrimaryIndexes() {
     }

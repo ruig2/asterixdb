@@ -468,6 +468,18 @@ public final class MetadataRecordTypes {
             //IsOpen?
             true);
 
+    //-------------------------------------- Fulltext Config ---------------------------------------//
+    public static final String RECORD_NAME_FULLTEXT_CONFIG = "FulltextConfigRecordType";
+    public static final ARecordType FULLTEXT_CONFIG_RECORDTYPE = createRecordType(
+            // RecordTypeName
+            RECORD_NAME_FULLTEXT_CONFIG,
+            // FieldNames
+            new String[] { "abc", "def" },
+            // FieldTypes
+            new IAType[] { BuiltinType.ASTRING, BuiltinType.ASTRING },
+            //IsOpen?
+            true);
+
     // private members
     private MetadataRecordTypes() {
     }

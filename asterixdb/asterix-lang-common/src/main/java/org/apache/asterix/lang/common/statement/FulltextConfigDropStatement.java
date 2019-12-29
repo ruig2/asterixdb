@@ -19,29 +19,26 @@
 package org.apache.asterix.lang.common.statement;
 
 import org.apache.asterix.common.exceptions.CompilationException;
-import org.apache.asterix.common.metadata.DataverseName;
 import org.apache.asterix.lang.common.base.AbstractStatement;
-import org.apache.asterix.lang.common.struct.Identifier;
 import org.apache.asterix.lang.common.visitor.base.ILangVisitor;
 
 public class FulltextConfigDropStatement extends AbstractStatement {
 
-    private DataverseName dataverseName;
-    private Identifier datasetName;
-    private Identifier indexName;
+    private String configName;
     private boolean ifExists;
 
-    //public FulltextFilterDropStatement(DataverseName dataverseName, Identifier datasetName, Identifier indexName,
-    public FulltextConfigDropStatement(boolean ifExists) {
-        //this.dataverseName = dataverseName;
-        //this.datasetName = datasetName;
-        //this.indexName = indexName;
+    public FulltextConfigDropStatement(String configName, boolean ifExists) {
+        this.configName = configName;
         this.ifExists = ifExists;
     }
 
     @Override
     public Kind getKind() {
         return Kind.FULLTEXT_FILTER_DROP;
+    }
+
+    public String getConfigName() {
+        return configName;
     }
 
     public boolean getIfExists() {
