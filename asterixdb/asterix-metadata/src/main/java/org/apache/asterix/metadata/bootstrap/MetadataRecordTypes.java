@@ -474,11 +474,12 @@ public final class MetadataRecordTypes {
             // RecordTypeName
             RECORD_NAME_FULLTEXT_CONFIG,
             // FieldNames
-            new String[] { "abc", "def" },
+            new String[] { "FulltextConfigs", "FulltextFilters" },
             // FieldTypes
             new IAType[] { BuiltinType.ASTRING, BuiltinType.ASTRING },
             //IsOpen?
-            true);
+            true
+    );
 
     // private members
     private MetadataRecordTypes() {
