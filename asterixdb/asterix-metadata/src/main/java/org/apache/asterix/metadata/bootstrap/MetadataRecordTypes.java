@@ -101,6 +101,9 @@ public final class MetadataRecordTypes {
     public static final String FIELD_NAME_WORKING_MEMORY_SIZE = "WorkingMemorySize";
     public static final String FIELD_NAME_APPLIED_FUNCTIONS = "AppliedFunctions";
     public static final String FIELD_NAME_WHERE_CLAUSE = "WhereClause";
+    public static final String FIELD_NAME_FULLTEXT_FILTERS = "FulltextFilters";
+    public static final String FIELD_NAME_FULLTEXT_CONFIGS = "FulltextConfigs";
+
 
     //---------------------------------- Record Types Creation ----------------------------------//
     //--------------------------------------- Properties ----------------------------------------//
@@ -474,8 +477,9 @@ public final class MetadataRecordTypes {
             // RecordTypeName
             RECORD_NAME_FULLTEXT_CONFIG,
             // FieldNames
-            new String[] { "FulltextConfigs", "FulltextFilters" },
+            new String[] { FIELD_NAME_FULLTEXT_FILTERS, FIELD_NAME_FULLTEXT_CONFIGS },
             // FieldTypes
+            // xxxxx ?????
             new IAType[] { BuiltinType.ASTRING, BuiltinType.ASTRING },
             //IsOpen?
             true
