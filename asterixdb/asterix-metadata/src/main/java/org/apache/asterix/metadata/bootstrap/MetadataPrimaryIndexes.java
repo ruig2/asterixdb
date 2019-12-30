@@ -24,8 +24,14 @@ import java.util.Arrays;
 import org.apache.asterix.common.metadata.MetadataIndexImmutableProperties;
 import org.apache.asterix.metadata.api.IMetadataIndex;
 import org.apache.asterix.metadata.utils.MetadataConstants;
+import org.apache.asterix.om.base.AString;
 import org.apache.asterix.om.types.BuiltinType;
 import org.apache.asterix.om.types.IAType;
+
+import static org.apache.asterix.metadata.bootstrap.MetadataRecordTypes.FIELD_NAME_FULLTEXT_FILTERS;
+import static org.apache.asterix.metadata.bootstrap.MetadataRecordTypes.FULLTEXT_FILTERS_ORDERED_LIST_TYPE;
+import static org.apache.asterix.om.types.AOrderedListType.FULL_OPEN_ORDEREDLIST_TYPE;
+import static org.apache.asterix.om.types.AUnorderedListType.FULLY_OPEN_UNORDEREDLIST_TYPE;
 
 /**
  * Contains static primary-index descriptors of all metadata datasets.
@@ -136,12 +142,10 @@ public class MetadataPrimaryIndexes {
                     Arrays.asList(MetadataRecordTypes.FIELD_NAME_DATASET_NAME)),
             0, MetadataRecordTypes.FEED_CONNECTION_RECORDTYPE, true, new int[] { 0, 1, 2 });
 
-    // xxxxx: in progress
+    // TTTTTTTTTTTTTT ToDo: in progress
     public static final IMetadataIndex FULLTEXT_CONFIG_DATASET = new MetadataIndex(PROPERTIES_FULLTEXT_CONFIG, 2,
-            new IAType[] { BuiltinType.ASTRING, BuiltinType.ASTRING },
-            Arrays.asList( Arrays.asList(MetadataRecordTypes.FIELD_NAME_FULLTEXT_FILTERS),
-                    Arrays.asList(MetadataRecordTypes.FIELD_NAME_FULLTEXT_CONFIGS)
-                    ),
+            new IAType[] { BuiltinType.ASTRING },
+            Arrays.asList(Arrays.asList(FIELD_NAME_FULLTEXT_FILTERS)),
             0, MetadataRecordTypes.FULLTEXT_CONFIG_RECORDTYPE, true, new int[] { 0, 1 });
 
     private MetadataPrimaryIndexes() {
