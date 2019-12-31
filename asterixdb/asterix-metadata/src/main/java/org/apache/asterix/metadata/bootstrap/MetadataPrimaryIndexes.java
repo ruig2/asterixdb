@@ -142,8 +142,13 @@ public class MetadataPrimaryIndexes {
     // (e.g. numbers of field names and types)
     // TTTTTTTTTTTTTT ToDo: in progress
     public static final IMetadataIndex FULLTEXT_CONFIG_DATASET =
-            new MetadataIndex(PROPERTIES_FULLTEXT_CONFIG, 2, new IAType[] { BuiltinType.ASTRING },
-                    Arrays.asList(Arrays.asList(MetadataRecordTypes.FIELD_NAME_DATAVERSE_NAME)), 0,
+            new MetadataIndex(PROPERTIES_FULLTEXT_CONFIG, 3,
+                    new IAType[] { BuiltinType.ASTRING, BuiltinType.ASTRING },
+                    Arrays.asList(
+                            Arrays.asList(MetadataRecordTypes.FIELD_NAME_FULLTEXT_FILTERS),
+                            Arrays.asList(MetadataRecordTypes.FIELD_NAME_FULLTEXT_CONFIGS)
+                    ),
+                    0,
                     MetadataRecordTypes.FULLTEXT_CONFIG_RECORDTYPE, true, new int[] { 0 });
 
     private MetadataPrimaryIndexes() {
