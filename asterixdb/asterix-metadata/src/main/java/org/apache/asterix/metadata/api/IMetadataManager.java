@@ -406,6 +406,14 @@ public interface IMetadataManager extends IMetadataBootstrap {
     List<Function> getDataverseFunctions(MetadataTransactionContext ctx, DataverseName dataverseName)
             throws AlgebricksException;
 
+    void addFulltextFilter();
+    void getFulltextFilter();
+    void dropFulltextFilter();
+
+    void addFulltextConfig();
+    void getFulltextConfig();
+    void dropFulltextConfig();
+
     /**
      * @param mdTxnCtx
      *            MetadataTransactionContext of an active metadata transaction.

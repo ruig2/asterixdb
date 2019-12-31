@@ -491,6 +491,7 @@ public final class MetadataRecordTypes {
                     // RecordTypeName
                     RECORD_NAME_FULLTEXT_CONFIG,
                     // FieldNames
+                    // ToDo: create a type for FIELD_NAME_FULLTEXT_CONFIGS
                     new String[] { FIELD_NAME_DATAVERSE_NAME, FIELD_NAME_FULLTEXT_FILTERS,
                             FIELD_NAME_FULLTEXT_CONFIGS },
                     // FieldTypes

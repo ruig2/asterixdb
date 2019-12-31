@@ -139,7 +139,7 @@ public class MetadataPrimaryIndexes {
             0, MetadataRecordTypes.FEED_CONNECTION_RECORDTYPE, true, new int[] { 0, 1, 2 });
 
     // ToDo: create a dedicated class for the metadata index field to avoid unmatched information
-    // (e.g. numbers of field names and types)
+    // (e.g. numbers of field names and types) and get rid of numFields in MetadataIndex.
     // TTTTTTTTTTTTTT ToDo: in progress
     public static final IMetadataIndex FULLTEXT_CONFIG_DATASET =
             new MetadataIndex(PROPERTIES_FULLTEXT_CONFIG, 3,
