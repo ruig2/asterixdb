@@ -26,8 +26,6 @@ import org.apache.asterix.om.types.AUnorderedListType;
 import org.apache.asterix.om.types.BuiltinType;
 import org.apache.asterix.om.types.IAType;
 
-import static org.apache.asterix.om.types.AOrderedListType.FULL_OPEN_ORDEREDLIST_TYPE;
-import static org.apache.asterix.om.types.AUnorderedListType.FULLY_OPEN_UNORDEREDLIST_TYPE;
 import static org.apache.asterix.om.types.BuiltinType.ASTRING;
 
 /**
@@ -480,20 +478,25 @@ public final class MetadataRecordTypes {
     // TTTTTTTTTTTTTTTTTTT TO will polish later
     // Ordered List or Unordered List?
     // Unordered list is an MULTISET?
-    public static final AOrderedListType FULLTEXT_FILTERS_ORDERED_LIST_TYPE
-            = new AOrderedListType(BuiltinType.ANY, "FULL_TEXT_FILTER_TYPE");
+    public static final AOrderedListType FULLTEXT_FILTERS_ORDERED_LIST_TYPE =
+            new AOrderedListType( createRecordType(null,
+                    new String[] { "FullTextFilterType", "FullTextFilterName", "UsedByFTConfigs" },
+                    new IAType[] { ASTRING, ASTRING, new AOrderedListType( ASTRING, null ) },
+                    true
+                ), null);
 
     public static final String RECORD_NAME_FULLTEXT_CONFIG = "FulltextConfigRecordType";
-    public static final ARecordType FULLTEXT_CONFIG_RECORDTYPE = createRecordType(
-            // RecordTypeName
-            RECORD_NAME_FULLTEXT_CONFIG,
-            // FieldNames
-            new String[] { FIELD_NAME_DATAVERSE_NAME, FIELD_NAME_FULLTEXT_FILTERS, FIELD_NAME_FULLTEXT_CONFIGS },
-            // FieldTypes
-            new IAType[] { ASTRING, ASTRING, ASTRING },
-            //IsOpen?
-            true
-    );
+    public static final ARecordType FULLTEXT_CONFIG_RECORDTYPE =
+            createRecordType(
+                    // RecordTypeName
+                    RECORD_NAME_FULLTEXT_CONFIG,
+                    // FieldNames
+                    new String[] { FIELD_NAME_DATAVERSE_NAME, FIELD_NAME_FULLTEXT_FILTERS,
+                            FIELD_NAME_FULLTEXT_CONFIGS },
+                    // FieldTypes
+                    new IAType[] { ASTRING, FULLTEXT_FILTERS_ORDERED_LIST_TYPE, ASTRING },
+                    //IsOpen?
+                    true);
 
     // private members
     private MetadataRecordTypes() {
