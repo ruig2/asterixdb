@@ -23,6 +23,7 @@ import java.io.FileInputStream;
 import java.io.InputStream;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
@@ -38,6 +39,7 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 
+import com.google.common.collect.ImmutableList;
 import org.apache.asterix.active.ActivityState;
 import org.apache.asterix.active.EntityId;
 import org.apache.asterix.active.IActiveEntityEventsListener;
@@ -148,6 +150,7 @@ import org.apache.asterix.metadata.entities.Function;
 import org.apache.asterix.metadata.entities.Index;
 import org.apache.asterix.metadata.entities.InternalDatasetDetails;
 import org.apache.asterix.metadata.entities.NodeGroup;
+import org.apache.asterix.metadata.entities.fulltext.StopwordFulltextFilter;
 import org.apache.asterix.metadata.feeds.FeedMetadataUtil;
 import org.apache.asterix.metadata.lock.ExternalDatasetsRegistry;
 import org.apache.asterix.metadata.utils.DatasetUtil;
@@ -324,7 +327,7 @@ public class QueryTranslator extends AbstractLangTranslator implements IStatemen
                         handleCreateIndexStatement(metadataProvider, stmt, hcc, requestParameters);
                         break;
                     case CREATE_FULLTEXT_FILTER:
-                        handleCreateFulltextFilterStatement();
+                        handleCreateFulltextFilterStatement(metadataProvider, stmt);
                         break;
                     case CREATE_FULLTEXT_CONFIG:
                         handleCreateFulltextConfigStatement();
@@ -980,7 +983,27 @@ public class QueryTranslator extends AbstractLangTranslator implements IStatemen
         }
     }
 
-    public void handleCreateFulltextFilterStatement() {
+    public void handleCreateFulltextFilterStatement(MetadataProvider metadataProvider, Statement stmt) {
+        MetadataTransactionContext mdTxnCtx = null;
+        try {
+            mdTxnCtx = MetadataManager.INSTANCE.beginTransaction();
+        } catch (RemoteException e) {
+            e.printStackTrace();
+        }
+        metadataProvider.setMetadataTxnContext(mdTxnCtx);
+
+        try {
+            MetadataManager.INSTANCE.addFulltextFilter(
+                    mdTxnCtx,
+                    new StopwordFulltextFilter(
+                            "my_stopword_filter",
+                            ImmutableList.of("a", "an", "the")
+                    )
+            );
+        } catch (AlgebricksException e) {
+            e.printStackTrace();
+        }
+
         return;
     }
 

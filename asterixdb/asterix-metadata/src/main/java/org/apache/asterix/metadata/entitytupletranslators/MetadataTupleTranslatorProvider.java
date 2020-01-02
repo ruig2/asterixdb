@@ -64,6 +64,10 @@ public class MetadataTupleTranslatorProvider {
         return new FunctionTupleTranslator(getTuple);
     }
 
+    public FulltextFilterTupleTranslator getFulltextFilterTupleTranslator(boolean getTuple) {
+        return new FulltextFilterTupleTranslator(getTuple);
+    }
+
     public IndexTupleTranslator getIndexTupleTranslator(TxnId txnId, MetadataNode metadataNode, boolean getTuple) {
         return new IndexTupleTranslator(txnId, metadataNode, getTuple);
     }

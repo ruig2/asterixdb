@@ -39,6 +39,8 @@ import org.apache.asterix.external.indexing.ExternalFile;
 import org.apache.asterix.metadata.api.IAsterixStateProxy;
 import org.apache.asterix.metadata.api.IExtensionMetadataEntity;
 import org.apache.asterix.metadata.api.IExtensionMetadataSearchKey;
+import org.apache.asterix.metadata.api.IFulltextConfig;
+import org.apache.asterix.metadata.api.IFulltextFilter;
 import org.apache.asterix.metadata.api.IMetadataManager;
 import org.apache.asterix.metadata.api.IMetadataNode;
 import org.apache.asterix.metadata.entities.CompactionPolicy;
@@ -617,6 +619,41 @@ public abstract class MetadataManager implements IMetadataManager {
             throw new MetadataException(ErrorCode.REMOTE_EXCEPTION_WHEN_CALLING_METADATA_NODE, e);
         }
     }
+
+    @Override public void addFulltextFilter(MetadataTransactionContext mdTxnCtx, IFulltextFilter filter)
+            throws AlgebricksException {
+        try {
+            System.out.println("in MetadataManager...");
+            metadataNode.addFulltextFilter(mdTxnCtx.getTxnId(), filter);
+        } catch (RemoteException e) {
+            e.printStackTrace();
+        }
+
+        // in progress...
+        //mdTxnCtx.addFilter(filter);
+    }
+
+    /*
+    @Override public IFulltextFilter getFulltextFilter(String name) {
+        return null;
+    }
+
+    @Override public void dropFulltextFilter() {
+
+    }
+
+    @Override public void addFulltextConfig(IFulltextConfig config) {
+
+    }
+
+    @Override public IFulltextConfig getFulltextConfig(String name) {
+        return null;
+    }
+
+    @Override public void dropFulltextConfig() {
+
+    }
+     */
 
     @Override
     public void addFeedPolicy(MetadataTransactionContext mdTxnCtx, FeedPolicyEntity feedPolicy)

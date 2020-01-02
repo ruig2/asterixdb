@@ -48,6 +48,8 @@ import org.apache.asterix.metadata.api.ExtensionMetadataDataset;
 import org.apache.asterix.metadata.api.ExtensionMetadataDatasetId;
 import org.apache.asterix.metadata.api.IExtensionMetadataEntity;
 import org.apache.asterix.metadata.api.IExtensionMetadataSearchKey;
+import org.apache.asterix.metadata.api.IFulltextConfig;
+import org.apache.asterix.metadata.api.IFulltextFilter;
 import org.apache.asterix.metadata.api.IMetadataEntityTupleTranslator;
 import org.apache.asterix.metadata.api.IMetadataExtension;
 import org.apache.asterix.metadata.api.IMetadataIndex;
@@ -77,6 +79,7 @@ import org.apache.asterix.metadata.entitytupletranslators.ExternalFileTupleTrans
 import org.apache.asterix.metadata.entitytupletranslators.FeedConnectionTupleTranslator;
 import org.apache.asterix.metadata.entitytupletranslators.FeedPolicyTupleTranslator;
 import org.apache.asterix.metadata.entitytupletranslators.FeedTupleTranslator;
+import org.apache.asterix.metadata.entitytupletranslators.FulltextFilterTupleTranslator;
 import org.apache.asterix.metadata.entitytupletranslators.FunctionTupleTranslator;
 import org.apache.asterix.metadata.entitytupletranslators.IndexTupleTranslator;
 import org.apache.asterix.metadata.entitytupletranslators.LibraryTupleTranslator;
@@ -444,6 +447,45 @@ public class MetadataNode implements IMetadataNode {
             }
         }
     }
+
+    @Override
+    public void addFulltextFilter(TxnId txnId, IFulltextFilter filter) throws AlgebricksException {
+        // Insert into the 'FulltextConfig' dataset.
+        System.out.println("in MetadataNode...");
+
+        try {
+            FulltextFilterTupleTranslator tupleReaderWriter = tupleTranslatorProvider.getFulltextFilterTupleTranslator(true);
+            ITupleReference filterTuple = tupleReaderWriter.getTupleFromMetadataEntity(filter);
+            insertTupleIntoIndex(txnId, MetadataPrimaryIndexes.FUNCTION_DATASET, filterTuple);
+        } catch (HyracksDataException e) {
+            e.printStackTrace();
+        }
+
+        return;
+    }
+
+    /*
+    @Override public IFulltextFilter getFulltextFilter(TxnId txnId, String name) {
+        return null;
+    }
+
+    @Override public void dropFulltextFilter(TxnId txnId) {
+
+    }
+
+    @Override public void addFulltextConfig(TxnId txnId, IFulltextConfig config) {
+
+    }
+
+    @Override public IFulltextConfig getFulltextConfig(TxnId txnId, String name) {
+        return null;
+    }
+
+    @Override public void dropFulltextConfig(TxnId txnId) {
+
+    }
+
+     */
 
     private void insertTupleIntoIndex(TxnId txnId, IMetadataIndex metadataIndex, ITupleReference tuple)
             throws HyracksDataException {
