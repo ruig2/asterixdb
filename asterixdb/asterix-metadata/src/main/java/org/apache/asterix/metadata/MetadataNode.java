@@ -456,7 +456,7 @@ public class MetadataNode implements IMetadataNode {
         try {
             FulltextFilterTupleTranslator tupleReaderWriter = tupleTranslatorProvider.getFulltextFilterTupleTranslator(true);
             ITupleReference filterTuple = tupleReaderWriter.getTupleFromMetadataEntity(filter);
-            insertTupleIntoIndex(txnId, MetadataPrimaryIndexes.FUNCTION_DATASET, filterTuple);
+            insertTupleIntoIndex(txnId, MetadataPrimaryIndexes.FULLTEXT_CONFIG_DATASET, filterTuple);
         } catch (HyracksDataException e) {
             e.printStackTrace();
         }
