@@ -6,11 +6,11 @@ public class StopwordFulltextFilter extends AbstractFulltextFilter {
     ImmutableList<String> stopwordList;
 
     @Override public FulltextFilterType getType() {
-        return FulltextFilterType.Stopword;
+        return FulltextFilterType.STOPWORD;
     }
 
     public StopwordFulltextFilter(String name, ImmutableList<String> stopwordList) {
-        super(name, FulltextFilterType.Stopword);
+        super(name, FulltextFilterType.STOPWORD);
         this.stopwordList = stopwordList;
     }
 }

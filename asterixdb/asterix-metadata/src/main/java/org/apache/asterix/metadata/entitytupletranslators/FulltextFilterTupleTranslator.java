@@ -1,14 +1,8 @@
 package org.apache.asterix.metadata.entitytupletranslators;
 
 import com.google.common.collect.ImmutableList;
-import org.apache.asterix.common.transactions.TxnId;
-import org.apache.asterix.metadata.MetadataNode;
 import org.apache.asterix.metadata.api.IFulltextFilter;
-import static org.apache.asterix.metadata.api.IFulltextFilter.FulltextFilterType.Stopword;
-import static org.apache.asterix.metadata.api.IFulltextFilter.FulltextFilterType.Synonym;
-import org.apache.asterix.metadata.api.IMetadataIndex;
 import org.apache.asterix.metadata.bootstrap.MetadataPrimaryIndexes;
-import org.apache.asterix.metadata.entities.fulltext.AbstractFulltextFilter;
 import org.apache.asterix.metadata.entities.fulltext.StopwordFulltextFilter;
 import org.apache.asterix.om.base.ARecord;
 import org.apache.hyracks.algebricks.common.exceptions.AlgebricksException;
@@ -47,9 +41,9 @@ public class FulltextFilterTupleTranslator extends AbstractTupleTranslator<IFull
         tuple.reset(tupleBuilder.getFieldEndOffsets(), tupleBuilder.getByteArray());
 
         switch (filter.getType()) {
-            case Stopword:
+            case STOPWORD:
                 break;
-            case Synonym:
+            case SYNONYM:
                 break;
             default:
                 break;

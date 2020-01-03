@@ -1,8 +1,6 @@
 package org.apache.asterix.metadata.entities.fulltext;
 
-import com.google.common.collect.ImmutableList;
 import org.apache.asterix.metadata.api.IFulltextFilter;
-import org.apache.hyracks.algebricks.common.exceptions.NotImplementedException;
 
 import java.util.List;
 
@@ -14,6 +12,10 @@ public abstract class AbstractFulltextFilter implements IFulltextFilter {
     public AbstractFulltextFilter(String name, FulltextFilterType type) {
         this.name = name;
         this.type = type;
+    }
+
+    @Override public FulltextCategory getCategory() {
+        return FulltextCategory.FULLTEXT_FILTER;
     }
 
     @Override public String getName() {
