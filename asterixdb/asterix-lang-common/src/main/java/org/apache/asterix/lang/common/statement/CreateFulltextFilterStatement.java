@@ -21,6 +21,7 @@ package org.apache.asterix.lang.common.statement;
 import org.apache.asterix.common.exceptions.CompilationException;
 import org.apache.asterix.lang.common.base.AbstractStatement;
 import org.apache.asterix.lang.common.base.Expression;
+import org.apache.asterix.lang.common.base.Statement;
 import org.apache.asterix.lang.common.visitor.base.ILangVisitor;
 
 public class CreateFulltextFilterStatement extends AbstractStatement {
@@ -66,4 +67,8 @@ public class CreateFulltextFilterStatement extends AbstractStatement {
         return Category.DDL;
     }
 
+    public static boolean checkExpression(Statement stmt) {
+        // in progress...
+        return true;
+    }
 }

@@ -100,6 +100,7 @@ import org.apache.asterix.lang.common.statement.ConnectFeedStatement;
 import org.apache.asterix.lang.common.statement.CreateDataverseStatement;
 import org.apache.asterix.lang.common.statement.CreateFeedPolicyStatement;
 import org.apache.asterix.lang.common.statement.CreateFeedStatement;
+import org.apache.asterix.lang.common.statement.CreateFulltextFilterStatement;
 import org.apache.asterix.lang.common.statement.CreateFunctionStatement;
 import org.apache.asterix.lang.common.statement.CreateIndexStatement;
 import org.apache.asterix.lang.common.statement.DatasetDecl;
@@ -984,6 +985,8 @@ public class QueryTranslator extends AbstractLangTranslator implements IStatemen
     }
 
     public void handleCreateFulltextFilterStatement(MetadataProvider metadataProvider, Statement stmt) {
+        CreateFulltextFilterStatement.checkExpression(stmt);
+
         MetadataTransactionContext mdTxnCtx = null;
         try {
             mdTxnCtx = MetadataManager.INSTANCE.beginTransaction();
@@ -995,6 +998,8 @@ public class QueryTranslator extends AbstractLangTranslator implements IStatemen
         try {
             MetadataManager.INSTANCE.addFulltextFilter(
                     mdTxnCtx,
+                    // In progress...
+                    // Get the parameters from stmt
                     new StopwordFulltextFilter(
                             "my_stopword_filter",
                             ImmutableList.of("a", "an", "the")

@@ -46,7 +46,7 @@ public class FulltextBasicTupleTranslator extends AbstractTupleTranslator<IFullt
     }
 
     @Override
-    protected IFulltextFilter createMetadataEntityFromARecord(ARecord aRecord)
+    protected IFulltextBasic createMetadataEntityFromARecord(ARecord aRecord)
             throws HyracksDataException, AlgebricksException {
         // in progress...
         return new StopwordFulltextFilter(
