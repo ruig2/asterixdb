@@ -106,6 +106,7 @@ public final class MetadataRecordTypes {
     public static final String FIELD_NAME_WHERE_CLAUSE = "WhereClause";
     public static final String FIELD_NAME_FULLTEXT_CATEGORY = "FulltextCategory";
     public static final String FIELD_NAME_FULLTEXT_ENTITY_NAME = "FulltextEntityName";
+    public static final String FIELD_NAME_FULLTEXT_FILTER_CATEGORY = "FulltextFilterCategory";
 
 
     //---------------------------------- Record Types Creation ----------------------------------//
@@ -479,12 +480,8 @@ public final class MetadataRecordTypes {
     // TTTTTTTTTTTTTTTTTTT TO will polish later
     // Ordered List or Unordered List?
     // Unordered list is an MULTISET?
-    public static final AOrderedListType FULLTEXT_FILTERS_ORDERED_LIST_TYPE =
-            new AOrderedListType( createRecordType(null,
-                    new String[] { "FullTextFilterType", "FullTextFilterName", "UsedByFTConfigs" },
-                    new IAType[] { ASTRING, ASTRING, new AOrderedListType( ASTRING, null ) },
-                    true
-                ), null);
+    public static final int FULLTEXT_ENTITY_ARECORD_FULLTEXT_CATEGORY_FIELD_INDEX = 0;
+    public static final int FULLTEXT_ENTITY_ARECORD_FULLTEXT_ENTITY_NAME_FIELD_INDEX = 1;
 
     public static final String RECORD_NAME_FULLTEXT_ENTITY = "FulltextEntityRecordType";
     public static final ARecordType FULLTEXT_CONFIG_RECORDTYPE =

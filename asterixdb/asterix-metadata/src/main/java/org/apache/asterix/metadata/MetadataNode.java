@@ -79,7 +79,7 @@ import org.apache.asterix.metadata.entitytupletranslators.ExternalFileTupleTrans
 import org.apache.asterix.metadata.entitytupletranslators.FeedConnectionTupleTranslator;
 import org.apache.asterix.metadata.entitytupletranslators.FeedPolicyTupleTranslator;
 import org.apache.asterix.metadata.entitytupletranslators.FeedTupleTranslator;
-import org.apache.asterix.metadata.entitytupletranslators.FulltextFilterTupleTranslator;
+import org.apache.asterix.metadata.entitytupletranslators.FulltextBasicTupleTranslator;
 import org.apache.asterix.metadata.entitytupletranslators.FunctionTupleTranslator;
 import org.apache.asterix.metadata.entitytupletranslators.IndexTupleTranslator;
 import org.apache.asterix.metadata.entitytupletranslators.LibraryTupleTranslator;
@@ -454,10 +454,11 @@ public class MetadataNode implements IMetadataNode {
         System.out.println("in MetadataNode...");
 
         try {
-            FulltextFilterTupleTranslator tupleReaderWriter = tupleTranslatorProvider.getFulltextFilterTupleTranslator(true);
+            FulltextBasicTupleTranslator tupleReaderWriter = tupleTranslatorProvider.getFulltextBasicTupleTranslator(true);
             ITupleReference filterTuple = tupleReaderWriter.getTupleFromMetadataEntity(filter);
             insertTupleIntoIndex(txnId, MetadataPrimaryIndexes.FULLTEXT_CONFIG_DATASET, filterTuple);
         } catch (HyracksDataException e) {
+            // ToDo: Handle duplicated key error
             e.printStackTrace();
         }
 

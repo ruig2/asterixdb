@@ -6,25 +6,24 @@ import java.util.List;
 
 public interface IFulltextFilter extends IFulltextBasic {
 
-    enum FulltextFilterType {
+    enum FulltextFilterCategory {
         // Assume the number of filter types are less than 2^8 = 256
         // When serializing the filter, only 8 bits will be reserved for the filter type
         // And don't change the existing value of the enums because this may corrupt the programs with older versions
         STOPWORD((byte)0),
         SYNONYM((byte)1);
 
-        private final byte value;
-        FulltextFilterType(byte value) {
-            this.value = value;
+        private final byte id;
+        FulltextFilterCategory(byte id) {
+            this.id = id;
         }
 
-        public byte getValue() {
-            return this.value;
+        public byte getId() {
+            return this.id;
         }
     }
 
-    FulltextFilterType getType();
-    String getName();
+    FulltextFilterCategory getFilterCategory();
     List<String> getUsedByFTConfigs();
     void addUsedByFTConfigs(String ftConfigName);
 }

@@ -2,19 +2,22 @@ package org.apache.asterix.metadata.entities.fulltext;
 
 import org.apache.asterix.metadata.api.IFulltextFilter;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public abstract class AbstractFulltextFilter implements IFulltextFilter {
     private String name = null;
-    private FulltextFilterType type;
+    private FulltextFilterCategory type;
     private List<String> usedByFTConfigs;
 
-    public AbstractFulltextFilter(String name, FulltextFilterType type) {
+    public AbstractFulltextFilter(String name, FulltextFilterCategory type) {
         this.name = name;
         this.type = type;
+        this.usedByFTConfigs = new ArrayList<>();
     }
 
-    @Override public FulltextCategory getCategory() {
+    @Override
+    public FulltextCategory getCategory() {
         return FulltextCategory.FULLTEXT_FILTER;
     }
 
@@ -22,7 +25,8 @@ public abstract class AbstractFulltextFilter implements IFulltextFilter {
         return name;
     }
 
-    @Override public FulltextFilterType getType() {
+    @Override
+    public FulltextFilterCategory getFilterCategory() {
         return type;
     }
 
