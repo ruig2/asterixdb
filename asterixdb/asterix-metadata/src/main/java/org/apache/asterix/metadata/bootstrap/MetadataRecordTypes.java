@@ -24,6 +24,7 @@ import org.apache.asterix.om.types.ARecordType;
 import org.apache.asterix.om.types.AUnionType;
 import org.apache.asterix.om.types.AUnorderedListType;
 import org.apache.asterix.om.types.BuiltinType;
+import static org.apache.asterix.om.types.BuiltinType.AINT8;
 import org.apache.asterix.om.types.IAType;
 
 import static org.apache.asterix.om.types.BuiltinType.ASTRING;
@@ -103,8 +104,8 @@ public final class MetadataRecordTypes {
     public static final String FIELD_NAME_WORKING_MEMORY_SIZE = "WorkingMemorySize";
     public static final String FIELD_NAME_APPLIED_FUNCTIONS = "AppliedFunctions";
     public static final String FIELD_NAME_WHERE_CLAUSE = "WhereClause";
-    public static final String FIELD_NAME_FULLTEXT_FILTERS = "FulltextFilters";
-    public static final String FIELD_NAME_FULLTEXT_CONFIGS = "FulltextConfigs";
+    public static final String FIELD_NAME_FULLTEXT_CATEGORY = "FulltextCategory";
+    public static final String FIELD_NAME_FULLTEXT_ENTITY_NAME = "FulltextEntityName";
 
 
     //---------------------------------- Record Types Creation ----------------------------------//
@@ -485,18 +486,14 @@ public final class MetadataRecordTypes {
                     true
                 ), null);
 
-    public static final String RECORD_NAME_FULLTEXT_CONFIG = "FulltextConfigRecordType";
+    public static final String RECORD_NAME_FULLTEXT_ENTITY = "FulltextEntityRecordType";
     public static final ARecordType FULLTEXT_CONFIG_RECORDTYPE =
             createRecordType(
-                    // RecordTypeName
-                    RECORD_NAME_FULLTEXT_CONFIG,
-                    // FieldNames
-                    // ToDo: create a type for FIELD_NAME_FULLTEXT_CONFIGS
-                    new String[] { FIELD_NAME_DATAVERSE_NAME, FIELD_NAME_FULLTEXT_FILTERS,
-                            FIELD_NAME_FULLTEXT_CONFIGS },
-                    // FieldTypes
-                    new IAType[] { ASTRING, FULLTEXT_FILTERS_ORDERED_LIST_TYPE, ASTRING },
-                    //IsOpen?
+                    RECORD_NAME_FULLTEXT_ENTITY,
+                    // Only two fields are in common in both FulltextFilter and FulltextConfig
+                    // Other specific fields in FulltextFilter and FulltextConfig are OPEN
+                    new String[] { FIELD_NAME_FULLTEXT_CATEGORY, FIELD_NAME_FULLTEXT_ENTITY_NAME },
+                    new IAType[] { AINT8, ASTRING },
                     true);
 
     // private members
