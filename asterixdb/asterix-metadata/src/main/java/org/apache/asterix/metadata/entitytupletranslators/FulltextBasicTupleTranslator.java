@@ -10,6 +10,7 @@ import org.apache.asterix.metadata.api.IFulltextFilter;
 import org.apache.asterix.metadata.bootstrap.MetadataPrimaryIndexes;
 import org.apache.asterix.metadata.bootstrap.MetadataRecordTypes;
 import static org.apache.asterix.metadata.bootstrap.MetadataRecordTypes.FULLTEXT_ENTITY_ARECORD_FULLTEXT_CATEGORY_FIELD_INDEX;
+import static org.apache.asterix.metadata.bootstrap.MetadataRecordTypes.FULLTEXT_ENTITY_ARECORD_FULLTEXT_ENTITY_NAME_FIELD_INDEX;
 import org.apache.asterix.metadata.entities.fulltext.StopwordFulltextFilter;
 import org.apache.asterix.om.base.AInt8;
 import org.apache.asterix.om.base.ARecord;
@@ -49,9 +50,10 @@ public class FulltextBasicTupleTranslator extends AbstractTupleTranslator<IFullt
     protected IFulltextBasic createMetadataEntityFromARecord(ARecord aRecord)
             throws HyracksDataException, AlgebricksException {
         // in progress...
+        // ??? This method is never called because the full-text filters are not flushed to disk
         return new StopwordFulltextFilter(
-                "my_stopword_filter",
-                ImmutableList.of("a", "an", "the")
+                "decoded_my_stopword_filter",
+                ImmutableList.of("aaa", "bbb", "ccc")
         );
     }
 
@@ -138,7 +140,7 @@ public class FulltextBasicTupleTranslator extends AbstractTupleTranslator<IFullt
         fieldValue.reset();
         aString.setValue(fulltextBasic.getName());
         stringSerde.serialize(aString, fieldValue.getDataOutput());
-        recordBuilder.addField(FULLTEXT_ENTITY_ARECORD_FULLTEXT_CATEGORY_FIELD_INDEX, fieldValue);
+        recordBuilder.addField(FULLTEXT_ENTITY_ARECORD_FULLTEXT_ENTITY_NAME_FIELD_INDEX, fieldValue);
 
         switch (fulltextBasic.getCategory()) {
             case FULLTEXT_FILTER:
