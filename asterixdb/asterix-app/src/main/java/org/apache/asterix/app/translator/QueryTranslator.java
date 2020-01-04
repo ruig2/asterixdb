@@ -1032,7 +1032,7 @@ public class QueryTranslator extends AbstractLangTranslator implements IStatemen
                     // In progress...
                     // Get the parameters from stmt
                     new StopwordFulltextFilter(
-                            "my_stopword_filter",
+                            stmtCreateFilter.getFilterName(),
                             stopwordsBuilder.build()
                     )
             );
