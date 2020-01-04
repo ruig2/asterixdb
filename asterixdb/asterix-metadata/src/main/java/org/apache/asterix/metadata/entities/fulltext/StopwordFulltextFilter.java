@@ -7,12 +7,12 @@ import java.util.List;
 public class StopwordFulltextFilter extends AbstractFulltextFilter {
     ImmutableList<String> stopwordList;
 
-    @Override public FulltextFilterCategory getFilterCategory() {
-        return FulltextFilterCategory.STOPWORD;
+    @Override public FulltextFilterKind getFilterKind() {
+        return FulltextFilterKind.STOPWORD;
     }
 
     public StopwordFulltextFilter(String name, ImmutableList<String> stopwordList) {
-        super(name, FulltextFilterCategory.STOPWORD);
+        super(name, FulltextFilterKind.STOPWORD);
         this.stopwordList = stopwordList;
     }
 

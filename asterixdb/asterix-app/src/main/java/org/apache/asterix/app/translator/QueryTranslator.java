@@ -90,11 +90,16 @@ import org.apache.asterix.external.indexing.IndexingConstants;
 import org.apache.asterix.external.operators.FeedIntakeOperatorNodePushable;
 import org.apache.asterix.external.util.ExternalDataConstants;
 import org.apache.asterix.formats.nontagged.TypeTraitProvider;
+import org.apache.asterix.lang.common.base.Expression;
 import org.apache.asterix.lang.common.base.IReturningStatement;
 import org.apache.asterix.lang.common.base.IRewriterFactory;
 import org.apache.asterix.lang.common.base.IStatementRewriter;
 import org.apache.asterix.lang.common.base.Statement;
+import org.apache.asterix.lang.common.expression.FieldBinding;
 import org.apache.asterix.lang.common.expression.IndexedTypeExpression;
+import org.apache.asterix.lang.common.expression.ListConstructor;
+import org.apache.asterix.lang.common.expression.LiteralExpr;
+import org.apache.asterix.lang.common.expression.RecordConstructor;
 import org.apache.asterix.lang.common.statement.CompactStatement;
 import org.apache.asterix.lang.common.statement.ConnectFeedStatement;
 import org.apache.asterix.lang.common.statement.CreateDataverseStatement;
@@ -984,8 +989,34 @@ public class QueryTranslator extends AbstractLangTranslator implements IStatemen
         }
     }
 
-    public void handleCreateFulltextFilterStatement(MetadataProvider metadataProvider, Statement stmt) {
+    public void handleCreateFulltextFilterStatement(MetadataProvider metadataProvider, Statement stmt)
+            throws Exception {
         CreateFulltextFilterStatement.checkExpression(stmt);
+
+        CreateFulltextFilterStatement stmtCreateFilter = (CreateFulltextFilterStatement) stmt;
+        RecordConstructor rc = (RecordConstructor)stmtCreateFilter.getExpression();
+
+        // In progress...
+        // What's the best way to parse the fb?
+        List<FieldBinding> fb = rc.getFbList();
+
+        // "Type": "stopwords"
+        String typeStr = ((LiteralExpr)(fb.get(0).getRightExpr())).getValue().getStringValue().toLowerCase();
+        ImmutableList.Builder stopwordsBuilder = ImmutableList.<String>builder();
+
+        ImmutableList.<String>builder()
+                .add("Geeks", "For", "Geeks")
+                .build();
+
+        switch (typeStr) {
+            case "stopwords":
+                for (Expression l : ((ListConstructor)(fb.get(1).getRightExpr())).getExprList()) {
+                    stopwordsBuilder.add( ((LiteralExpr)l).getValue().getStringValue() );
+                }
+                break;
+            default:
+                throw new Exception("parameter not recognized");
+        }
 
         MetadataTransactionContext mdTxnCtx = null;
         try {
@@ -1002,7 +1033,7 @@ public class QueryTranslator extends AbstractLangTranslator implements IStatemen
                     // Get the parameters from stmt
                     new StopwordFulltextFilter(
                             "my_stopword_filter",
-                            ImmutableList.of("a", "an", "the")
+                            stopwordsBuilder.build()
                     )
             );
         } catch (AlgebricksException e) {

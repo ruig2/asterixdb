@@ -7,10 +7,10 @@ import java.util.List;
 
 public abstract class AbstractFulltextFilter implements IFulltextFilter {
     private String name = null;
-    private FulltextFilterCategory type;
+    private FulltextFilterKind type;
     private List<String> usedByFTConfigs;
 
-    public AbstractFulltextFilter(String name, FulltextFilterCategory type) {
+    public AbstractFulltextFilter(String name, FulltextFilterKind type) {
         this.name = name;
         this.type = type;
         this.usedByFTConfigs = new ArrayList<>();
@@ -26,7 +26,7 @@ public abstract class AbstractFulltextFilter implements IFulltextFilter {
     }
 
     @Override
-    public FulltextFilterCategory getFilterCategory() {
+    public FulltextFilterKind getFilterKind() {
         return type;
     }
 

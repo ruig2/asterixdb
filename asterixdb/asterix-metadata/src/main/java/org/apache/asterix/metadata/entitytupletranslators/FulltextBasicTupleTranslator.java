@@ -2,7 +2,6 @@ package org.apache.asterix.metadata.entitytupletranslators;
 
 import com.google.common.collect.ImmutableList;
 import org.apache.asterix.builders.OrderedListBuilder;
-import org.apache.asterix.builders.UnorderedListBuilder;
 import org.apache.asterix.formats.nontagged.SerializerDeserializerProvider;
 import org.apache.asterix.metadata.api.IFulltextBasic;
 import org.apache.asterix.metadata.api.IFulltextConfig;
@@ -14,9 +13,7 @@ import static org.apache.asterix.metadata.bootstrap.MetadataRecordTypes.FULLTEXT
 import org.apache.asterix.metadata.entities.fulltext.StopwordFulltextFilter;
 import org.apache.asterix.om.base.AInt8;
 import org.apache.asterix.om.base.ARecord;
-import org.apache.asterix.om.base.AString;
 import org.apache.asterix.om.types.AOrderedListType;
-import org.apache.asterix.om.types.AUnorderedListType;
 import org.apache.asterix.om.types.BuiltinType;
 import org.apache.hyracks.algebricks.common.exceptions.AlgebricksException;
 import org.apache.hyracks.algebricks.common.exceptions.NotImplementedException;
@@ -27,7 +24,6 @@ import org.apache.hyracks.dataflow.common.comm.io.ArrayTupleReference;
 import org.apache.hyracks.dataflow.common.data.accessors.ITupleReference;
 
 import java.util.List;
-import java.util.Map;
 
 public class FulltextBasicTupleTranslator extends AbstractTupleTranslator<IFulltextBasic> {
 
@@ -57,7 +53,7 @@ public class FulltextBasicTupleTranslator extends AbstractTupleTranslator<IFullt
         );
     }
 
-    private void writeFilterCategory2RecordBuilder(IFulltextFilter.FulltextFilterCategory category)
+    private void writeFilterCategory2RecordBuilder(IFulltextFilter.FulltextFilterKind category)
             throws HyracksDataException {
         fieldName.reset();
         aString.setValue(MetadataRecordTypes.FIELD_NAME_FULLTEXT_FILTER_CATEGORY);
@@ -92,13 +88,13 @@ public class FulltextBasicTupleTranslator extends AbstractTupleTranslator<IFullt
     }
 
     private void writeStopwordFilter(StopwordFulltextFilter stopwordFilter) throws HyracksDataException {
-        writeFilterCategory2RecordBuilder(stopwordFilter.getFilterCategory());
+        writeFilterCategory2RecordBuilder(stopwordFilter.getFilterKind());
         writeOrderedList2RecordBuilder("UsedByFTConfigs", stopwordFilter.getUsedByFTConfigs());
         writeOrderedList2RecordBuilder("StopwordList", stopwordFilter.getStopwordList());
     }
 
     private void writeFulltextFilter(IFulltextFilter filter) throws HyracksDataException {
-        switch (filter.getFilterCategory()) {
+        switch (filter.getFilterKind()) {
             case STOPWORD:
                 writeStopwordFilter( (StopwordFulltextFilter) filter );
                 break;
