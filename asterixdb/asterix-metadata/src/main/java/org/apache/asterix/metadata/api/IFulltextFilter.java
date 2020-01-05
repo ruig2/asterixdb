@@ -4,7 +4,7 @@ import java.util.List;
 
 // in progress...
 
-public interface IFulltextFilter extends IFulltextBasic {
+public interface IFulltextFilter extends IFulltextEntity {
 
     enum FulltextFilterKind {
         // Assume the number of filter types are less than 2^8 = 256

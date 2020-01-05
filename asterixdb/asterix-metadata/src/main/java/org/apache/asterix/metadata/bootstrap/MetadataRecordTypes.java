@@ -104,9 +104,9 @@ public final class MetadataRecordTypes {
     public static final String FIELD_NAME_WORKING_MEMORY_SIZE = "WorkingMemorySize";
     public static final String FIELD_NAME_APPLIED_FUNCTIONS = "AppliedFunctions";
     public static final String FIELD_NAME_WHERE_CLAUSE = "WhereClause";
-    public static final String FIELD_NAME_FULLTEXT_CATEGORY = "FulltextCategory";
+    public static final String FIELD_NAME_FULLTEXT_CATEGORY = "FulltextEntityCategory";
     public static final String FIELD_NAME_FULLTEXT_ENTITY_NAME = "FulltextEntityName";
-    public static final String FIELD_NAME_FULLTEXT_FILTER_CATEGORY = "FulltextFilterCategory";
+    public static final String FIELD_NAME_FULLTEXT_FILTER_CATEGORY = "FulltextFilterKind";
 
 
     //---------------------------------- Record Types Creation ----------------------------------//

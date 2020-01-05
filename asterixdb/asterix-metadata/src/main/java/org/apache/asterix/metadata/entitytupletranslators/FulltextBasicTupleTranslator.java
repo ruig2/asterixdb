@@ -3,7 +3,7 @@ package org.apache.asterix.metadata.entitytupletranslators;
 import com.google.common.collect.ImmutableList;
 import org.apache.asterix.builders.OrderedListBuilder;
 import org.apache.asterix.formats.nontagged.SerializerDeserializerProvider;
-import org.apache.asterix.metadata.api.IFulltextBasic;
+import org.apache.asterix.metadata.api.IFulltextEntity;
 import org.apache.asterix.metadata.api.IFulltextConfig;
 import org.apache.asterix.metadata.api.IFulltextFilter;
 import org.apache.asterix.metadata.bootstrap.MetadataPrimaryIndexes;
@@ -25,7 +25,7 @@ import org.apache.hyracks.dataflow.common.data.accessors.ITupleReference;
 
 import java.util.List;
 
-public class FulltextBasicTupleTranslator extends AbstractTupleTranslator<IFulltextBasic> {
+public class FulltextBasicTupleTranslator extends AbstractTupleTranslator<IFulltextEntity> {
 
     private static final int FULLTEXT_FILTER_PAYLOAD_TUPLE_FIELD_INDEX = 2;
     protected final ArrayTupleReference tuple;
@@ -43,7 +43,7 @@ public class FulltextBasicTupleTranslator extends AbstractTupleTranslator<IFullt
     }
 
     @Override
-    protected IFulltextBasic createMetadataEntityFromARecord(ARecord aRecord)
+    protected IFulltextEntity createMetadataEntityFromARecord(ARecord aRecord)
             throws HyracksDataException, AlgebricksException {
         // in progress...
         // ??? This method is never called because the full-text filters are not flushed to disk
@@ -111,7 +111,7 @@ public class FulltextBasicTupleTranslator extends AbstractTupleTranslator<IFullt
 
 
     @Override
-    public ITupleReference getTupleFromMetadataEntity(IFulltextBasic fulltextBasic)
+    public ITupleReference getTupleFromMetadataEntity(IFulltextEntity fulltextBasic)
             throws AlgebricksException, HyracksDataException {
         tupleBuilder.reset();
 
