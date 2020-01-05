@@ -620,7 +620,8 @@ public abstract class MetadataManager implements IMetadataManager {
         }
     }
 
-    @Override public void addFulltextFilter(MetadataTransactionContext mdTxnCtx, IFulltextFilter filter)
+    @Override
+    public void addFulltextFilter(MetadataTransactionContext mdTxnCtx, IFulltextFilter filter)
             throws AlgebricksException {
         try {
             System.out.println("in MetadataManager...");
@@ -633,11 +634,12 @@ public abstract class MetadataManager implements IMetadataManager {
         //mdTxnCtx.addFilter(filter);
     }
 
-    /*
-    @Override public IFulltextFilter getFulltextFilter(String name) {
+    @Override
+    public IFulltextFilter getFulltextFilter(String name) {
         return null;
     }
 
+    /*
     @Override public void dropFulltextFilter() {
 
     }

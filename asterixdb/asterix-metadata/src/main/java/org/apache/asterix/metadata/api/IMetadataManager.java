@@ -408,8 +408,8 @@ public interface IMetadataManager extends IMetadataBootstrap {
 
     void addFulltextFilter(MetadataTransactionContext mdTxnCtx, IFulltextFilter filter) throws AlgebricksException;
 
-    /*
     IFulltextFilter getFulltextFilter(String name);
+    /*
     void dropFulltextFilter();
 
     void addFulltextConfig(IFulltextConfig config);

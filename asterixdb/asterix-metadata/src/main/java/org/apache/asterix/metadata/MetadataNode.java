@@ -465,6 +465,10 @@ public class MetadataNode implements IMetadataNode {
         return;
     }
 
+    @Override public IFulltextFilter getFulltextFilter(TxnId txnId, String name) {
+        return null;
+    }
+
     /*
     @Override public IFulltextFilter getFulltextFilter(TxnId txnId, String name) {
         return null;
