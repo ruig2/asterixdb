@@ -411,7 +411,7 @@ public interface IMetadataManager extends IMetadataBootstrap {
     IFulltextFilter getFulltextFilter(String name);
     /*
     void dropFulltextFilter();
-
+    
     void addFulltextConfig(IFulltextConfig config);
     IFulltextConfig getFulltextConfig(String name);
     void dropFulltextConfig();

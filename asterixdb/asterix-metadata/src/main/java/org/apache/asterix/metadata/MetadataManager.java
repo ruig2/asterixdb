@@ -39,7 +39,6 @@ import org.apache.asterix.external.indexing.ExternalFile;
 import org.apache.asterix.metadata.api.IAsterixStateProxy;
 import org.apache.asterix.metadata.api.IExtensionMetadataEntity;
 import org.apache.asterix.metadata.api.IExtensionMetadataSearchKey;
-import org.apache.asterix.metadata.api.IFulltextConfig;
 import org.apache.asterix.metadata.api.IFulltextFilter;
 import org.apache.asterix.metadata.api.IMetadataManager;
 import org.apache.asterix.metadata.api.IMetadataNode;
@@ -636,24 +635,64 @@ public abstract class MetadataManager implements IMetadataManager {
 
     @Override
     public IFulltextFilter getFulltextFilter(String name) {
-        return null;
+        // Support ctx.getFulltextFilter() and cache.getFulltextFilter() similar to the following getIndex() logic later
+        /*
+        // First look in the context to see if this transaction created the
+        // requested index itself (but the index is still uncommitted).
+        Index index = ctx.getIndex(dataverseName, datasetName, indexName);
+        if (index != null) {
+            // Don't add this index to the cache, since it is still
+            // uncommitted.
+            return index;
+        }
+        
+        if (ctx.indexIsDropped(dataverseName, datasetName, indexName)) {
+            // Index has been dropped by this transaction but could still be
+            // in the cache.
+            return null;
+        }
+        
+        index = cache.getIndex(dataverseName, datasetName, indexName);
+        if (index != null) {
+            // Index is already in the cache, don't add it again.
+            return index;
+        }
+         */
+        IFulltextFilter filter = null;
+
+        /*
+        try {
+            filter = metadataNode.getIndex(ctx.getTxnId(), dataverseName, datasetName, indexName);
+        } catch (RemoteException e) {
+            throw new MetadataException(ErrorCode.REMOTE_EXCEPTION_WHEN_CALLING_METADATA_NODE, e);
+        }
+        // We fetched the index from the MetadataNode. Add it to the cache
+        // when this transaction commits.
+        if (index != null) {
+            ctx.addIndex(index);
+        }
+        return index;
+        
+         */
+
+        return filter;
     }
 
     /*
     @Override public void dropFulltextFilter() {
-
+    
     }
-
+    
     @Override public void addFulltextConfig(IFulltextConfig config) {
-
+    
     }
-
+    
     @Override public IFulltextConfig getFulltextConfig(String name) {
         return null;
     }
-
+    
     @Override public void dropFulltextConfig() {
-
+    
     }
      */
 

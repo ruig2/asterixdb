@@ -1021,12 +1021,7 @@ public class QueryTranslator extends AbstractLangTranslator implements IStatemen
         MetadataTransactionContext mdTxnCtx = null;
         try {
             mdTxnCtx = MetadataManager.INSTANCE.beginTransaction();
-        } catch (RemoteException e) {
-            e.printStackTrace();
-        }
         metadataProvider.setMetadataTxnContext(mdTxnCtx);
-
-        try {
             MetadataManager.INSTANCE.addFulltextFilter(
                     mdTxnCtx,
                     // In progress...
@@ -1038,6 +1033,10 @@ public class QueryTranslator extends AbstractLangTranslator implements IStatemen
             );
         } catch (AlgebricksException e) {
             e.printStackTrace();
+        } catch (RemoteException e) {
+            e.printStackTrace();
+        } finally {
+            //MetadataManager.INSTANCE.commitTransaction(mdTxnCtx);
         }
 
         return;

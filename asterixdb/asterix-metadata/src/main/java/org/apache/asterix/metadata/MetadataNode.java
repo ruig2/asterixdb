@@ -48,7 +48,6 @@ import org.apache.asterix.metadata.api.ExtensionMetadataDataset;
 import org.apache.asterix.metadata.api.ExtensionMetadataDatasetId;
 import org.apache.asterix.metadata.api.IExtensionMetadataEntity;
 import org.apache.asterix.metadata.api.IExtensionMetadataSearchKey;
-import org.apache.asterix.metadata.api.IFulltextConfig;
 import org.apache.asterix.metadata.api.IFulltextFilter;
 import org.apache.asterix.metadata.api.IMetadataEntityTupleTranslator;
 import org.apache.asterix.metadata.api.IMetadataExtension;
@@ -79,7 +78,7 @@ import org.apache.asterix.metadata.entitytupletranslators.ExternalFileTupleTrans
 import org.apache.asterix.metadata.entitytupletranslators.FeedConnectionTupleTranslator;
 import org.apache.asterix.metadata.entitytupletranslators.FeedPolicyTupleTranslator;
 import org.apache.asterix.metadata.entitytupletranslators.FeedTupleTranslator;
-import org.apache.asterix.metadata.entitytupletranslators.FulltextBasicTupleTranslator;
+import org.apache.asterix.metadata.entitytupletranslators.FulltextEntityTupleTranslator;
 import org.apache.asterix.metadata.entitytupletranslators.FunctionTupleTranslator;
 import org.apache.asterix.metadata.entitytupletranslators.IndexTupleTranslator;
 import org.apache.asterix.metadata.entitytupletranslators.LibraryTupleTranslator;
@@ -454,7 +453,8 @@ public class MetadataNode implements IMetadataNode {
         System.out.println("in MetadataNode...");
 
         try {
-            FulltextBasicTupleTranslator tupleReaderWriter = tupleTranslatorProvider.getFulltextBasicTupleTranslator(true);
+            FulltextEntityTupleTranslator tupleReaderWriter =
+                    tupleTranslatorProvider.getFulltextBasicTupleTranslator(true);
             ITupleReference filterTuple = tupleReaderWriter.getTupleFromMetadataEntity(filter);
             insertTupleIntoIndex(txnId, MetadataPrimaryIndexes.FULLTEXT_CONFIG_DATASET, filterTuple);
         } catch (HyracksDataException e) {
@@ -465,7 +465,25 @@ public class MetadataNode implements IMetadataNode {
         return;
     }
 
-    @Override public IFulltextFilter getFulltextFilter(TxnId txnId, String name) {
+    @Override
+    public IFulltextFilter getFulltextFilter(TxnId txnId, String filterName) {
+        /*
+        try {
+            ITupleReference searchKey = createTuple(METADATA_DATAVERSE_NAME, FULLTEXT_CONFIG_DATASET_NAME, filterName);
+            IndexTupleTranslator tupleReaderWriter =
+                    tupleTranslatorProvider.getIndexTupleTranslator(txnId, this, false);
+            IValueExtractor<Index> valueExtractor = new MetadataEntityValueExtractor<>(tupleReaderWriter);
+            List<Index> results = new ArrayList<>();
+            searchIndex(txnId, MetadataPrimaryIndexes.INDEX_DATASET, searchKey, valueExtractor, results);
+            if (results.isEmpty()) {
+                return null;
+            }
+            return results.get(0);
+        } catch (HyracksDataException e) {
+            throw new AlgebricksException(e);
+        }
+         */
+
         return null;
     }
 
@@ -473,23 +491,23 @@ public class MetadataNode implements IMetadataNode {
     @Override public IFulltextFilter getFulltextFilter(TxnId txnId, String name) {
         return null;
     }
-
+    
     @Override public void dropFulltextFilter(TxnId txnId) {
-
+    
     }
-
+    
     @Override public void addFulltextConfig(TxnId txnId, IFulltextConfig config) {
-
+    
     }
-
+    
     @Override public IFulltextConfig getFulltextConfig(TxnId txnId, String name) {
         return null;
     }
-
+    
     @Override public void dropFulltextConfig(TxnId txnId) {
-
+    
     }
-
+    
      */
 
     private void insertTupleIntoIndex(TxnId txnId, IMetadataIndex metadataIndex, ITupleReference tuple)

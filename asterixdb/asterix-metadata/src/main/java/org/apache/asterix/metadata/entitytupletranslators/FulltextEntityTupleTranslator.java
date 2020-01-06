@@ -1,15 +1,36 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 package org.apache.asterix.metadata.entitytupletranslators;
 
-import com.google.common.collect.ImmutableList;
+import static org.apache.asterix.metadata.bootstrap.MetadataRecordTypes.FULLTEXT_ENTITY_ARECORD_FULLTEXT_CATEGORY_FIELD_INDEX;
+import static org.apache.asterix.metadata.bootstrap.MetadataRecordTypes.FULLTEXT_ENTITY_ARECORD_FULLTEXT_ENTITY_NAME_FIELD_INDEX;
+
+import java.util.List;
+
 import org.apache.asterix.builders.OrderedListBuilder;
 import org.apache.asterix.formats.nontagged.SerializerDeserializerProvider;
-import org.apache.asterix.metadata.api.IFulltextEntity;
 import org.apache.asterix.metadata.api.IFulltextConfig;
+import org.apache.asterix.metadata.api.IFulltextEntity;
 import org.apache.asterix.metadata.api.IFulltextFilter;
 import org.apache.asterix.metadata.bootstrap.MetadataPrimaryIndexes;
 import org.apache.asterix.metadata.bootstrap.MetadataRecordTypes;
-import static org.apache.asterix.metadata.bootstrap.MetadataRecordTypes.FULLTEXT_ENTITY_ARECORD_FULLTEXT_CATEGORY_FIELD_INDEX;
-import static org.apache.asterix.metadata.bootstrap.MetadataRecordTypes.FULLTEXT_ENTITY_ARECORD_FULLTEXT_ENTITY_NAME_FIELD_INDEX;
 import org.apache.asterix.metadata.entities.fulltext.StopwordFulltextFilter;
 import org.apache.asterix.om.base.AInt8;
 import org.apache.asterix.om.base.ARecord;
@@ -23,16 +44,16 @@ import org.apache.hyracks.data.std.util.ArrayBackedValueStorage;
 import org.apache.hyracks.dataflow.common.comm.io.ArrayTupleReference;
 import org.apache.hyracks.dataflow.common.data.accessors.ITupleReference;
 
-import java.util.List;
+import com.google.common.collect.ImmutableList;
 
-public class FulltextBasicTupleTranslator extends AbstractTupleTranslator<IFulltextEntity> {
+public class FulltextEntityTupleTranslator extends AbstractTupleTranslator<IFulltextEntity> {
 
     private static final int FULLTEXT_FILTER_PAYLOAD_TUPLE_FIELD_INDEX = 2;
     protected final ArrayTupleReference tuple;
     protected final ISerializerDeserializer<AInt8> int8Serde =
             SerializerDeserializerProvider.INSTANCE.getSerializerDeserializer(BuiltinType.AINT8);
 
-    protected FulltextBasicTupleTranslator(boolean getTuple) {
+    protected FulltextEntityTupleTranslator(boolean getTuple) {
         super(getTuple, MetadataPrimaryIndexes.FULLTEXT_CONFIG_DATASET, FULLTEXT_FILTER_PAYLOAD_TUPLE_FIELD_INDEX);
         if (getTuple) {
             // in progress...
@@ -47,10 +68,7 @@ public class FulltextBasicTupleTranslator extends AbstractTupleTranslator<IFullt
             throws HyracksDataException, AlgebricksException {
         // in progress...
         // ??? This method is never called because the full-text filters are not flushed to disk
-        return new StopwordFulltextFilter(
-                "decoded_my_stopword_filter",
-                ImmutableList.of("aaa", "bbb", "ccc")
-        );
+        return new StopwordFulltextFilter("decoded_my_stopword_filter", ImmutableList.of("aaa", "bbb", "ccc"));
     }
 
     private void writeFilterCategory2RecordBuilder(IFulltextFilter.FulltextFilterKind category)
@@ -71,7 +89,7 @@ public class FulltextBasicTupleTranslator extends AbstractTupleTranslator<IFullt
         aString.setValue(strFieldName);
         stringSerde.serialize(aString, fieldName.getDataOutput());
 
-        OrderedListBuilder listBuilder  = new OrderedListBuilder();
+        OrderedListBuilder listBuilder = new OrderedListBuilder();
         listBuilder.reset(new AOrderedListType(BuiltinType.ASTRING, null));
         ArrayBackedValueStorage itemValue = new ArrayBackedValueStorage();
         for (String s : list) {
@@ -96,7 +114,7 @@ public class FulltextBasicTupleTranslator extends AbstractTupleTranslator<IFullt
     private void writeFulltextFilter(IFulltextFilter filter) throws HyracksDataException {
         switch (filter.getFilterKind()) {
             case STOPWORD:
-                writeStopwordFilter( (StopwordFulltextFilter) filter );
+                writeStopwordFilter((StopwordFulltextFilter) filter);
                 break;
             case SYNONYM:
             default:
@@ -108,7 +126,6 @@ public class FulltextBasicTupleTranslator extends AbstractTupleTranslator<IFullt
 
     private void getTupleForFulltextConfig(IFulltextConfig config) {
     }
-
 
     @Override
     public ITupleReference getTupleFromMetadataEntity(IFulltextEntity fulltextBasic)
