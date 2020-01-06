@@ -25,9 +25,9 @@ import java.util.List;
 import org.apache.asterix.metadata.api.IFulltextFilter;
 
 public abstract class AbstractFulltextFilter implements IFulltextFilter {
-    private String name = null;
-    private FulltextFilterKind type;
-    private List<String> usedByFTConfigs;
+    protected final String name;
+    protected FulltextFilterKind type;
+    protected List<String> usedByFTConfigs;
 
     public AbstractFulltextFilter(String name, FulltextFilterKind type) {
         this.name = name;
