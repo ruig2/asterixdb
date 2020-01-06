@@ -19,6 +19,8 @@
 
 package org.apache.asterix.metadata.api;
 
+import org.apache.commons.math3.exception.OutOfRangeException;
+
 import java.util.List;
 
 // in progress...
@@ -36,6 +38,18 @@ public interface IFulltextFilter extends IFulltextEntity {
 
         FulltextFilterKind(byte id) {
             this.id = id;
+        }
+
+        // How to improve this part?
+        public static FulltextFilterKind fromId(byte id) {
+            switch (id) {
+                case 0:
+                    return STOPWORD;
+                case 1:
+                    return SYNONYM;
+                default:
+                    throw new OutOfRangeException(id, 0, 1);
+            }
         }
 
         public byte getId() {

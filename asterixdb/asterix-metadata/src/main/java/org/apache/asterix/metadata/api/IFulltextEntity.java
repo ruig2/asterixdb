@@ -19,6 +19,8 @@
 
 package org.apache.asterix.metadata.api;
 
+import org.apache.commons.math3.exception.OutOfRangeException;
+
 public interface IFulltextEntity {
     enum FulltextEntityCategory {
         // in progress...
@@ -32,6 +34,19 @@ public interface IFulltextEntity {
         FulltextEntityCategory(byte id) {
             this.id = id;
         }
+
+        // How to improve this part?
+        public static FulltextEntityCategory fromId(byte id) {
+            switch (id) {
+                case 0:
+                    return FULLTEXT_FILTER;
+                case 1:
+                    return FULLTEXT_CONFIG;
+                default:
+                    throw new OutOfRangeException(id, 0, 1);
+            }
+        }
+
 
         public byte getId() {
             return this.id;

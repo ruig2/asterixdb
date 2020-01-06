@@ -22,18 +22,37 @@ package org.apache.asterix.metadata.entities.fulltext;
 import java.util.List;
 
 import com.google.common.collect.ImmutableList;
+import static org.apache.asterix.metadata.bootstrap.MetadataRecordTypes.FULLTEXT_ENTITY_ARECORD_FULLTEXT_ENTITY_NAME_FIELD_INDEX;
+import static org.apache.asterix.metadata.bootstrap.MetadataRecordTypes.FULLTEXT_ENTITY_ARECORD_STOPWORD_LIST_FIELD_INDEX;
+import static org.apache.asterix.metadata.bootstrap.MetadataRecordTypes.FULLTEXT_ENTITY_ARECORD_USED_BY_FT_CONFIGS_FIELD_INDEX;
+import org.apache.asterix.om.base.AOrderedList;
+import org.apache.asterix.om.base.ARecord;
+import org.apache.asterix.om.base.AString;
+import org.apache.asterix.om.base.IACursor;
 
 public class StopwordFulltextFilter extends AbstractFulltextFilter {
     ImmutableList<String> stopwordList;
 
-    @Override
-    public FulltextFilterKind getFilterKind() {
-        return FulltextFilterKind.STOPWORD;
-    }
-
     public StopwordFulltextFilter(String name, ImmutableList<String> stopwordList) {
         super(name, FulltextFilterKind.STOPWORD);
         this.stopwordList = stopwordList;
+    }
+
+    public static StopwordFulltextFilter createFilterFromARecord(ARecord aRecord) {
+        String name = ((AString) aRecord.getValueByPos(FULLTEXT_ENTITY_ARECORD_FULLTEXT_ENTITY_NAME_FIELD_INDEX)).getStringValue();
+        ImmutableList.Builder stopwordsBuilder = ImmutableList.<String> builder();
+        IACursor stopwordsCursor =((AOrderedList) (aRecord.getValueByPos(FULLTEXT_ENTITY_ARECORD_STOPWORD_LIST_FIELD_INDEX))).getCursor();
+        while (stopwordsCursor.next()) {
+            stopwordsBuilder.add(stopwordsCursor.get());
+        }
+        StopwordFulltextFilter filter = new StopwordFulltextFilter(name, stopwordsBuilder.build());
+
+        IACursor usedByConfigsCursor = ((AOrderedList) (aRecord.getValueByPos(FULLTEXT_ENTITY_ARECORD_USED_BY_FT_CONFIGS_FIELD_INDEX))).getCursor();
+        while (usedByConfigsCursor.next()) {
+            filter.usedByFTConfigs.add( ((AString)usedByConfigsCursor.get()).getStringValue() );
+        }
+
+        return filter;
     }
 
     public List<String> getStopwordList() {
