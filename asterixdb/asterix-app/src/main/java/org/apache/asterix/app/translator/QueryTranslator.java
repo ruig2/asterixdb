@@ -137,6 +137,7 @@ import org.apache.asterix.lang.common.util.FunctionUtil;
 import org.apache.asterix.metadata.IDatasetDetails;
 import org.apache.asterix.metadata.MetadataManager;
 import org.apache.asterix.metadata.MetadataTransactionContext;
+import org.apache.asterix.metadata.api.IFulltextFilter;
 import org.apache.asterix.metadata.bootstrap.MetadataBuiltinEntities;
 import org.apache.asterix.metadata.dataset.hints.DatasetHints;
 import org.apache.asterix.metadata.dataset.hints.DatasetHints.DatasetNodegroupCardinalityHint;
@@ -1031,6 +1032,9 @@ public class QueryTranslator extends AbstractLangTranslator implements IStatemen
         } finally {
             MetadataManager.INSTANCE.commitTransaction(mdTxnCtx);
         }
+
+        // Debug
+        IFulltextFilter filter = MetadataManager.INSTANCE.getFulltextFilter(mdTxnCtx, "first_StopWordFilter");
 
         return;
     }

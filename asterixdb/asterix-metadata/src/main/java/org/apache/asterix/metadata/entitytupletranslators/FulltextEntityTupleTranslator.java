@@ -41,6 +41,7 @@ import org.apache.hyracks.algebricks.common.exceptions.NotImplementedException;
 import org.apache.hyracks.api.dataflow.value.ISerializerDeserializer;
 import org.apache.hyracks.api.exceptions.HyracksDataException;
 import org.apache.hyracks.data.std.util.ArrayBackedValueStorage;
+import org.apache.hyracks.dataflow.common.comm.io.ArrayTupleBuilder;
 import org.apache.hyracks.dataflow.common.comm.io.ArrayTupleReference;
 import org.apache.hyracks.dataflow.common.data.accessors.ITupleReference;
 
@@ -128,7 +129,7 @@ public class FulltextEntityTupleTranslator extends AbstractTupleTranslator<IFull
     private void getTupleForFulltextConfig(IFulltextConfig config) {
     }
 
-    private void writeIndex(IFulltextEntity.FulltextEntityCategory category, String entityName)
+    private void writeIndex(IFulltextEntity.FulltextEntityCategory category, String entityName, ArrayTupleBuilder tupleBuilder)
             throws HyracksDataException {
         // Write the 2 primary-index key fields
         byte categoryId = category.getId();
@@ -145,7 +146,7 @@ public class FulltextEntityTupleTranslator extends AbstractTupleTranslator<IFull
             throws AlgebricksException, HyracksDataException {
         tupleBuilder.reset();
 
-        writeIndex(fulltextEntity.getCategory(), fulltextEntity.getName());
+        writeIndex(fulltextEntity.getCategory(), fulltextEntity.getName(), tupleBuilder);
 
         /////////////////////////////////////////////////////////
         // Write the record
@@ -180,8 +181,9 @@ public class FulltextEntityTupleTranslator extends AbstractTupleTranslator<IFull
 
     public ITupleReference createTupleAsIndex(IFulltextEntity.FulltextEntityCategory category, String entityName)
             throws HyracksDataException {
-        tupleBuilder.reset();
-        writeIndex(category, entityName);
+        // -1 to get the number of fields in index only
+        ArrayTupleBuilder tupleBuilder = new ArrayTupleBuilder(MetadataPrimaryIndexes.FULLTEXT_CONFIG_DATASET.getFieldCount() - 1);
+        writeIndex(category, entityName, tupleBuilder);
 
         tuple.reset(tupleBuilder.getFieldEndOffsets(), tupleBuilder.getByteArray());
         return tuple;
