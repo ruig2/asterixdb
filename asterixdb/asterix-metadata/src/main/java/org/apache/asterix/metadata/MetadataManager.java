@@ -55,6 +55,7 @@ import org.apache.asterix.metadata.entities.Index;
 import org.apache.asterix.metadata.entities.Library;
 import org.apache.asterix.metadata.entities.Node;
 import org.apache.asterix.metadata.entities.NodeGroup;
+import org.apache.asterix.metadata.entities.fulltext.StopwordFulltextFilter;
 import org.apache.asterix.om.types.ARecordType;
 import org.apache.asterix.transaction.management.opcallbacks.AbstractIndexModificationOperationCallback.Operation;
 import org.apache.hyracks.algebricks.common.exceptions.AlgebricksException;
@@ -634,7 +635,7 @@ public abstract class MetadataManager implements IMetadataManager {
     }
 
     @Override
-    public IFulltextFilter getFulltextFilter(String name) {
+    public IFulltextFilter getFulltextFilter(MetadataTransactionContext mdTxnCtx, String name) throws RemoteException {
         // Support ctx.getFulltextFilter() and cache.getFulltextFilter() similar to the following getIndex() logic later
         /*
         // First look in the context to see if this transaction created the
@@ -674,8 +675,10 @@ public abstract class MetadataManager implements IMetadataManager {
         return index;
         
          */
+        System.out.println("in MetadataManager...");
+        metadataNode.getFulltextFilter(mdTxnCtx.getTxnId(), "temp");
 
-        return filter;
+        return new StopwordFulltextFilter("temp", null);
     }
 
     /*

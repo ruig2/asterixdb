@@ -26,6 +26,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.google.common.collect.ImmutableList;
 import org.apache.asterix.common.api.IDatasetLifecycleManager;
 import org.apache.asterix.common.api.INcApplicationContext;
 import org.apache.asterix.common.config.DatasetConfig.DatasetType;
@@ -69,6 +70,7 @@ import org.apache.asterix.metadata.entities.InternalDatasetDetails;
 import org.apache.asterix.metadata.entities.Library;
 import org.apache.asterix.metadata.entities.Node;
 import org.apache.asterix.metadata.entities.NodeGroup;
+import org.apache.asterix.metadata.entities.fulltext.StopwordFulltextFilter;
 import org.apache.asterix.metadata.entitytupletranslators.CompactionPolicyTupleTranslator;
 import org.apache.asterix.metadata.entitytupletranslators.DatasetTupleTranslator;
 import org.apache.asterix.metadata.entitytupletranslators.DatasourceAdapterTupleTranslator;
@@ -466,7 +468,7 @@ public class MetadataNode implements IMetadataNode {
     }
 
     @Override
-    public IFulltextFilter getFulltextFilter(TxnId txnId, String filterName) {
+    public IFulltextFilter getFulltextFilter(TxnId txnId, String filterName) throws RemoteException {
         /*
         try {
             ITupleReference searchKey = createTuple(METADATA_DATAVERSE_NAME, FULLTEXT_CONFIG_DATASET_NAME, filterName);
@@ -484,14 +486,10 @@ public class MetadataNode implements IMetadataNode {
         }
          */
 
-        return null;
+        return new StopwordFulltextFilter("temp", ImmutableList.of("abc", "def"));
     }
 
     /*
-    @Override public IFulltextFilter getFulltextFilter(TxnId txnId, String name) {
-        return null;
-    }
-    
     @Override public void dropFulltextFilter(TxnId txnId) {
     
     }
