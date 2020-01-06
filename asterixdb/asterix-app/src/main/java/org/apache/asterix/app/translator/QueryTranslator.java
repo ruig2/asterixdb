@@ -1029,7 +1029,7 @@ public class QueryTranslator extends AbstractLangTranslator implements IStatemen
         } catch (RemoteException e) {
             e.printStackTrace();
         } finally {
-            //MetadataManager.INSTANCE.commitTransaction(mdTxnCtx);
+            MetadataManager.INSTANCE.commitTransaction(mdTxnCtx);
         }
 
         return;
