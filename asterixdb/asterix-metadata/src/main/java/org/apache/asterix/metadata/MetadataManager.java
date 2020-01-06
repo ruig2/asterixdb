@@ -635,7 +635,8 @@ public abstract class MetadataManager implements IMetadataManager {
     }
 
     @Override
-    public IFulltextFilter getFulltextFilter(MetadataTransactionContext mdTxnCtx, String name) throws RemoteException {
+    public IFulltextFilter getFulltextFilter(MetadataTransactionContext mdTxnCtx, String filterName) throws RemoteException {
+        // in progress...
         // Support ctx.getFulltextFilter() and cache.getFulltextFilter() similar to the following getIndex() logic later
         /*
         // First look in the context to see if this transaction created the
@@ -658,12 +659,9 @@ public abstract class MetadataManager implements IMetadataManager {
             // Index is already in the cache, don't add it again.
             return index;
         }
-         */
-        IFulltextFilter filter = null;
 
-        /*
         try {
-            filter = metadataNode.getIndex(ctx.getTxnId(), dataverseName, datasetName, indexName);
+            index = metadataNode.getIndex(ctx.getTxnId(), dataverseName, datasetName, indexName);
         } catch (RemoteException e) {
             throw new MetadataException(ErrorCode.REMOTE_EXCEPTION_WHEN_CALLING_METADATA_NODE, e);
         }
@@ -673,12 +671,16 @@ public abstract class MetadataManager implements IMetadataManager {
             ctx.addIndex(index);
         }
         return index;
-        
          */
-        System.out.println("in MetadataManager...");
-        metadataNode.getFulltextFilter(mdTxnCtx.getTxnId(), "temp");
 
-        return new StopwordFulltextFilter("temp", null);
+        System.out.println("in MetadataManager...");
+        try {
+            return metadataNode.getFulltextFilter(mdTxnCtx.getTxnId(), filterName);
+        } catch (AlgebricksException e) {
+            e.printStackTrace();
+        }
+
+        return new StopwordFulltextFilter("Failed to get filter", null);
     }
 
     /*

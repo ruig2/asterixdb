@@ -64,7 +64,7 @@ public class MetadataTupleTranslatorProvider {
         return new FunctionTupleTranslator(getTuple);
     }
 
-    public FulltextEntityTupleTranslator getFulltextBasicTupleTranslator(boolean getTuple) {
+    public FulltextEntityTupleTranslator getFulltextEntityTupleTranslator(boolean getTuple) {
         return new FulltextEntityTupleTranslator(getTuple);
     }
 

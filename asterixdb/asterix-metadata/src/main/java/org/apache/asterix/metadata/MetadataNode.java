@@ -49,6 +49,7 @@ import org.apache.asterix.metadata.api.ExtensionMetadataDataset;
 import org.apache.asterix.metadata.api.ExtensionMetadataDatasetId;
 import org.apache.asterix.metadata.api.IExtensionMetadataEntity;
 import org.apache.asterix.metadata.api.IExtensionMetadataSearchKey;
+import org.apache.asterix.metadata.api.IFulltextEntity;
 import org.apache.asterix.metadata.api.IFulltextFilter;
 import org.apache.asterix.metadata.api.IMetadataEntityTupleTranslator;
 import org.apache.asterix.metadata.api.IMetadataExtension;
@@ -456,7 +457,7 @@ public class MetadataNode implements IMetadataNode {
 
         try {
             FulltextEntityTupleTranslator tupleReaderWriter =
-                    tupleTranslatorProvider.getFulltextBasicTupleTranslator(true);
+                    tupleTranslatorProvider.getFulltextEntityTupleTranslator(true);
             ITupleReference filterTuple = tupleReaderWriter.getTupleFromMetadataEntity(filter);
             insertTupleIntoIndex(txnId, MetadataPrimaryIndexes.FULLTEXT_CONFIG_DATASET, filterTuple);
         } catch (HyracksDataException e) {
@@ -468,25 +469,24 @@ public class MetadataNode implements IMetadataNode {
     }
 
     @Override
-    public IFulltextFilter getFulltextFilter(TxnId txnId, String filterName) throws RemoteException {
-        /*
+    public IFulltextFilter getFulltextFilter(TxnId txnId, String filterName) throws RemoteException,
+            AlgebricksException {
         try {
-            ITupleReference searchKey = createTuple(METADATA_DATAVERSE_NAME, FULLTEXT_CONFIG_DATASET_NAME, filterName);
-            IndexTupleTranslator tupleReaderWriter =
-                    tupleTranslatorProvider.getIndexTupleTranslator(txnId, this, false);
-            IValueExtractor<Index> valueExtractor = new MetadataEntityValueExtractor<>(tupleReaderWriter);
-            List<Index> results = new ArrayList<>();
-            searchIndex(txnId, MetadataPrimaryIndexes.INDEX_DATASET, searchKey, valueExtractor, results);
+            FulltextEntityTupleTranslator translator = tupleTranslatorProvider.getFulltextEntityTupleTranslator(true);
+
+            ITupleReference searchKey =
+                    translator.createTupleAsIndex(IFulltextEntity.FulltextEntityCategory.FULLTEXT_FILTER, filterName);
+            IValueExtractor<IFulltextEntity> valueExtractor = new MetadataEntityValueExtractor<>(translator);
+            List<IFulltextEntity> results = new ArrayList<>();
+            searchIndex(txnId, MetadataPrimaryIndexes.FULLTEXT_CONFIG_DATASET, searchKey, valueExtractor, results);
             if (results.isEmpty()) {
                 return null;
             }
-            return results.get(0);
+            return (IFulltextFilter) results.get(0);
+            //return new StopwordFulltextFilter("temp", ImmutableList.of("abc", "def"));
         } catch (HyracksDataException e) {
             throw new AlgebricksException(e);
         }
-         */
-
-        return new StopwordFulltextFilter("temp", ImmutableList.of("abc", "def"));
     }
 
     /*

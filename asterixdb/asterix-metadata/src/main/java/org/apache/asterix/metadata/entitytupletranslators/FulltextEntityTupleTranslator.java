@@ -52,6 +52,7 @@ public class FulltextEntityTupleTranslator extends AbstractTupleTranslator<IFull
     protected final ArrayTupleReference tuple;
     protected final ISerializerDeserializer<AInt8> int8Serde =
             SerializerDeserializerProvider.INSTANCE.getSerializerDeserializer(BuiltinType.AINT8);
+    protected AInt8 categoryIdAInt8 = null;
 
     protected FulltextEntityTupleTranslator(boolean getTuple) {
         super(getTuple, MetadataPrimaryIndexes.FULLTEXT_CONFIG_DATASET, FULLTEXT_FILTER_PAYLOAD_TUPLE_FIELD_INDEX);
@@ -63,11 +64,11 @@ public class FulltextEntityTupleTranslator extends AbstractTupleTranslator<IFull
         }
     }
 
-    @Override
-    protected IFulltextEntity createMetadataEntityFromARecord(ARecord aRecord)
+    @Override protected IFulltextEntity createMetadataEntityFromARecord(ARecord aRecord)
             throws HyracksDataException, AlgebricksException {
         // in progress...
         // ??? This method is never called because the full-text filters are not flushed to disk
+        System.out.println("in FulltextEntityTupleTranslator.createMetadataEntityFromARecord()");
         return new StopwordFulltextFilter("decoded_my_stopword_filter", ImmutableList.of("aaa", "bbb", "ccc"));
     }
 
@@ -127,20 +128,24 @@ public class FulltextEntityTupleTranslator extends AbstractTupleTranslator<IFull
     private void getTupleForFulltextConfig(IFulltextConfig config) {
     }
 
-    @Override
-    public ITupleReference getTupleFromMetadataEntity(IFulltextEntity fulltextBasic)
-            throws AlgebricksException, HyracksDataException {
-        tupleBuilder.reset();
-
+    private void writeIndex(IFulltextEntity.FulltextEntityCategory category, String entityName)
+            throws HyracksDataException {
         // Write the 2 primary-index key fields
-        byte categoryId = fulltextBasic.getCategory().getId();
-        AInt8 categoryIdAInt8 = new AInt8(categoryId);
+        byte categoryId = category.getId();
+        categoryIdAInt8 = new AInt8(categoryId);
         int8Serde.serialize(categoryIdAInt8, tupleBuilder.getDataOutput());
         tupleBuilder.addFieldEndOffset();
 
-        aString.setValue(fulltextBasic.getName());
+        aString.setValue(entityName);
         stringSerde.serialize(aString, tupleBuilder.getDataOutput());
         tupleBuilder.addFieldEndOffset();
+    }
+
+    @Override public ITupleReference getTupleFromMetadataEntity(IFulltextEntity fulltextEntity)
+            throws AlgebricksException, HyracksDataException {
+        tupleBuilder.reset();
+
+        writeIndex(fulltextEntity.getCategory(), fulltextEntity.getName());
 
         /////////////////////////////////////////////////////////
         // Write the record
@@ -151,16 +156,16 @@ public class FulltextEntityTupleTranslator extends AbstractTupleTranslator<IFull
         recordBuilder.addField(FULLTEXT_ENTITY_ARECORD_FULLTEXT_CATEGORY_FIELD_INDEX, fieldValue);
 
         fieldValue.reset();
-        aString.setValue(fulltextBasic.getName());
+        aString.setValue(fulltextEntity.getName());
         stringSerde.serialize(aString, fieldValue.getDataOutput());
         recordBuilder.addField(FULLTEXT_ENTITY_ARECORD_FULLTEXT_ENTITY_NAME_FIELD_INDEX, fieldValue);
 
-        switch (fulltextBasic.getCategory()) {
+        switch (fulltextEntity.getCategory()) {
             case FULLTEXT_FILTER:
-                writeFulltextFilter((IFulltextFilter) fulltextBasic);
+                writeFulltextFilter((IFulltextFilter) fulltextEntity);
                 break;
             case FULLTEXT_CONFIG:
-                getTupleForFulltextConfig((IFulltextConfig) fulltextBasic);
+                getTupleForFulltextConfig((IFulltextConfig) fulltextEntity);
                 break;
             default:
                 break;
@@ -168,6 +173,15 @@ public class FulltextEntityTupleTranslator extends AbstractTupleTranslator<IFull
 
         recordBuilder.write(tupleBuilder.getDataOutput(), true);
         tupleBuilder.addFieldEndOffset();
+
+        tuple.reset(tupleBuilder.getFieldEndOffsets(), tupleBuilder.getByteArray());
+        return tuple;
+    }
+
+    public ITupleReference createTupleAsIndex(IFulltextEntity.FulltextEntityCategory category, String entityName)
+            throws HyracksDataException {
+        tupleBuilder.reset();
+        writeIndex(category, entityName);
 
         tuple.reset(tupleBuilder.getFieldEndOffsets(), tupleBuilder.getByteArray());
         return tuple;
