@@ -268,6 +268,9 @@ public class FullTextContainsParameterCheckRule implements IAlgebraicRewriteRule
                         case FullTextContainsDescriptor.SEARCH_MODE_OPTION:
                             checkSearchModeOption(optionTypeStringVal, functionName, optionExprVal.getSourceLocation());
                             break;
+                        case FullTextContainsDescriptor.FULLTEXT_CONFIG_OPTION:
+                            // in progress... check if the fulltext config exists
+                            break;
                         default:
                             throw CompilationException.create(ErrorCode.TYPE_UNSUPPORTED,
                                     optionExprVal.getSourceLocation(), functionName, option);
