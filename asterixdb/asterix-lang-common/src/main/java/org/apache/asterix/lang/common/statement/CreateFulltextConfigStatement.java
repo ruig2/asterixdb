@@ -21,15 +21,16 @@ package org.apache.asterix.lang.common.statement;
 import org.apache.asterix.common.exceptions.CompilationException;
 import org.apache.asterix.lang.common.base.AbstractStatement;
 import org.apache.asterix.lang.common.base.Expression;
+import org.apache.asterix.lang.common.expression.RecordConstructor;
 import org.apache.asterix.lang.common.visitor.base.ILangVisitor;
 
 public class CreateFulltextConfigStatement extends AbstractStatement {
 
     private String configName;
     private boolean ifNotExists;
-    private Expression expr;
+    private RecordConstructor expr;
 
-    public CreateFulltextConfigStatement(String configName, boolean ifNotExists, Expression expr) {
+    public CreateFulltextConfigStatement(String configName, boolean ifNotExists, RecordConstructor expr) {
         this.configName = configName;
         this.ifNotExists = ifNotExists;
         this.expr = expr;

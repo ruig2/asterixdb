@@ -68,7 +68,8 @@ public class FulltextEntityTupleTranslator extends AbstractTupleTranslator<IFull
         }
     }
 
-    @Override protected IFulltextEntity createMetadataEntityFromARecord(ARecord aRecord)
+    @Override
+    protected IFulltextEntity createMetadataEntityFromARecord(ARecord aRecord)
             throws HyracksDataException, AlgebricksException {
         AInt8 categoryIdAInt8 =
                 (AInt8) aRecord.getValueByPos(FULLTEXT_ENTITY_ARECORD_FULLTEXT_ENTITY_CATEGORY_FIELD_INDEX);
@@ -159,7 +160,8 @@ public class FulltextEntityTupleTranslator extends AbstractTupleTranslator<IFull
         tupleBuilder.addFieldEndOffset();
     }
 
-    @Override public ITupleReference getTupleFromMetadataEntity(IFulltextEntity fulltextEntity)
+    @Override
+    public ITupleReference getTupleFromMetadataEntity(IFulltextEntity fulltextEntity)
             throws AlgebricksException, HyracksDataException {
         tupleBuilder.reset();
 

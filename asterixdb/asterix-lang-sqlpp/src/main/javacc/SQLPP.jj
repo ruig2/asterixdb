@@ -1108,15 +1108,13 @@ CreateFulltextFilterStatement CreateFulltextFilterSpec(Token startStmtToken) thr
   CreateFulltextFilterStatement stmt = null;
   String filterName = null;
   boolean ifNotExists = false;
-  // Use a more general expression and decode fields (e.g. filter type and stopword list) later from it
-  // The decoding pharse is postponed to the handleCreateFulltextFilterStatement() pharse to minimize the logic in the SQLPP parser
-  Expression expr = null;
+  RecordConstructor expr = null;
 }
 {
   (
     filterName = Identifier() ifNotExists = IfNotExists()
     <AS>
-    expr = Expression()
+    expr = RecordConstructor()
   )
   {
     System.out.println("!!! Get  Create Fulltext Filter command");
@@ -1133,13 +1131,13 @@ CreateFulltextConfigStatement CreateFulltextConfigSpec(Token startStmtToken) thr
   CreateFulltextConfigStatement stmt = null;
   String configName = null;
   boolean ifNotExists = false;
-  Expression expr = null;
+  RecordConstructor expr = null;
 }
 {
   (
     configName = Identifier() ifNotExists = IfNotExists()
     <AS>
-    expr = Expression()
+    expr = RecordConstructor()
   )
   {
     System.out.println("Get Create Fulltext Config statement");
