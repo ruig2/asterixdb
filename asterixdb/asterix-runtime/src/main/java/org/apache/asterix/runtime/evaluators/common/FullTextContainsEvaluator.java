@@ -49,6 +49,7 @@ import org.apache.hyracks.data.std.util.BinaryHashSet;
 import org.apache.hyracks.dataflow.common.data.accessors.IFrameTupleReference;
 import org.apache.hyracks.storage.am.lsm.invertedindex.tokenizers.DelimitedUTF8StringBinaryTokenizer;
 import org.apache.hyracks.storage.am.lsm.invertedindex.tokenizers.IBinaryTokenizer;
+import org.apache.hyracks.storage.am.lsm.invertedindex.tokenizers.IToken;
 import org.apache.hyracks.util.string.UTF8StringUtil;
 
 public class FullTextContainsEvaluator implements IScalarEvaluator {
@@ -181,6 +182,8 @@ public class FullTextContainsEvaluator implements IScalarEvaluator {
 
         try {
             ABoolean b = fullTextContainsWithArg(typeTag2, argLeft, argRight) ? ABoolean.TRUE : ABoolean.FALSE;
+            // Why need to serialize the result?
+            // If false then discard the result, if true then serialize it in the upper lever?
             serde.serialize(b, out);
         } catch (HyracksDataException e1) {
             throw HyracksDataException.create(e1);
@@ -198,6 +201,8 @@ public class FullTextContainsEvaluator implements IScalarEvaluator {
      */
     private boolean fullTextContainsWithArg(ATypeTag typeTag2, IPointable arg1, IPointable arg2)
             throws HyracksDataException {
+        // The main logic
+
         // Since a fulltext search form is "ftcontains(X,Y,options)",
         // X (document) is the left side and Y (query predicate) is the right side.
 
@@ -320,8 +325,15 @@ public class FullTextContainsEvaluator implements IScalarEvaluator {
             // Thus, when we find the current token (we don't increase the count in this case),
             // it should not exist.
             if (rightHashSet.find(keyEntry, queryArray, false) == -1) {
-                rightHashSet.put(keyEntry);
-                uniqueQueryTokenCount++;
+                String keyStr = new String(queryArray, keyEntry.getOffset(), keyEntry.getLength());
+                System.out.println("get key " + keyStr);
+                if ((keyStr.equalsIgnoreCase("a") ||
+                        keyStr.equalsIgnoreCase("an") ||
+                        keyStr.equalsIgnoreCase("the"))
+                 == false) {
+                    rightHashSet.put(keyEntry);
+                    uniqueQueryTokenCount++;
+                }
             }
 
         }
@@ -394,11 +406,22 @@ public class FullTextContainsEvaluator implements IScalarEvaluator {
         int startOffset = arg1.getStartOffset() + numBytesToStoreLength;
         int length = arg1.getLength() - numBytesToStoreLength;
 
+        // Is the fulltext index used here ???
         tokenizerForLeftArray.reset(arg1.getByteArray(), startOffset, length);
 
         // Creates tokens from a field in the left side (document)
         while (tokenizerForLeftArray.hasNext()) {
             tokenizerForLeftArray.next();
+
+            IToken t = tokenizerForLeftArray.getToken();
+            String tokenStr = new String(t.getData(), t.getStartOffset(), t.getTokenLength());
+            System.out.println(tokenStr);
+
+            if (tokenStr.equalsIgnoreCase("a")
+                    || tokenStr.equalsIgnoreCase("an")
+                    || tokenStr.equalsIgnoreCase("the")) {
+                System.out.println("!!! token is in stopword list");
+            }
 
             // Records the starting position and the length of the current token.
             keyEntry.set(tokenizerForLeftArray.getToken().getStartOffset(),
