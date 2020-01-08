@@ -491,7 +491,7 @@ public final class MetadataRecordTypes {
             //IsOpen?
             true);
 
-    //-------------------------------------- Fulltext Config ---------------------------------------//
+    //-------------------------------------- FullText Config ---------------------------------------//
 
     // TTTTTTTTTTTTTTTTTTT TO will polish later
     // Ordered List or Unordered List?
@@ -512,6 +512,7 @@ public final class MetadataRecordTypes {
             // Other specific fields in FulltextFilter and FulltextConfig are OPEN
             new String[] { FIELD_NAME_FULLTEXT_CATEGORY, FIELD_NAME_FULLTEXT_ENTITY_NAME },
             new IAType[] { ASTRING, ASTRING }, true);
+
 
     // private members
     private MetadataRecordTypes() {
