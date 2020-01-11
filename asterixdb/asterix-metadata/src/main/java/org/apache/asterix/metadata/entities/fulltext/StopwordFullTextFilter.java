@@ -36,7 +36,7 @@ public class StopwordFullTextFilter extends AbstractFullTextFilter {
     ImmutableList<String> stopwordList;
 
     public StopwordFullTextFilter(String name, ImmutableList<String> stopwordList) {
-        super(name, FulltextFilterKind.STOPWORD);
+        super(name, FullTextFilterType.STOPWORD);
         this.stopwordList = stopwordList;
     }
 

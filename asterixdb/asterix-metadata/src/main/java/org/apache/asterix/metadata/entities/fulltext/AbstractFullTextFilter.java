@@ -26,10 +26,10 @@ import org.apache.asterix.metadata.api.IFullTextFilter;
 
 public abstract class AbstractFullTextFilter implements IFullTextFilter {
     protected final String name;
-    protected FulltextFilterKind type;
+    protected FullTextFilterType type;
     protected List<String> usedByFTConfigs;
 
-    public AbstractFullTextFilter(String name, FulltextFilterKind type) {
+    public AbstractFullTextFilter(String name, FullTextFilterType type) {
         this.name = name;
         this.type = type;
         this.usedByFTConfigs = new ArrayList<>();
@@ -46,7 +46,7 @@ public abstract class AbstractFullTextFilter implements IFullTextFilter {
     }
 
     @Override
-    public FulltextFilterKind getFilterKind() {
+    public FullTextFilterType getFilterKind() {
         return type;
     }
 

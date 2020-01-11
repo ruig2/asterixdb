@@ -21,43 +21,30 @@ package org.apache.asterix.metadata.api;
 
 import java.util.List;
 
-import org.apache.commons.math3.exception.OutOfRangeException;
-
 // in progress...
 
 public interface IFullTextFilter extends IFullTextEntity {
 
-    enum FulltextFilterKind {
-        // Assume the number of filter types are less than 2^8 = 256
-        // When serializing the filter, only 8 bits will be reserved for the filter type
-        // And don't change the existing value of the enums because this may corrupt the programs with older versions
-        STOPWORD((byte) 0),
-        SYNONYM((byte) 1);
+    enum FullTextFilterType {
+        STOPWORD("STOPWORD"),
+        SYNONYM("SYNONYM");
 
-        private final byte id;
+        private final String value;
 
-        FulltextFilterKind(byte id) {
-            this.id = id;
+        FullTextFilterType(String value) {
+            this.value = value;
         }
 
-        // How to improve this part?
-        public static FulltextFilterKind fromId(byte id) {
-            switch (id) {
-                case 0:
-                    return STOPWORD;
-                case 1:
-                    return SYNONYM;
-                default:
-                    throw new OutOfRangeException(id, 0, 1);
-            }
+        public static FullTextFilterType fromValue(String value) {
+            return Enum.valueOf(FullTextFilterType.class, value);
         }
 
-        public byte getId() {
-            return this.id;
+        public String getValue() {
+            return this.value;
         }
     }
 
-    FulltextFilterKind getFilterKind();
+    FullTextFilterType getFilterKind();
 
     List<String> getUsedByFTConfigs();
 

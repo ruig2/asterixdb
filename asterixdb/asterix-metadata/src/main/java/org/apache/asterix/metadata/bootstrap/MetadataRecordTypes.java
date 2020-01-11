@@ -19,7 +19,6 @@
 
 package org.apache.asterix.metadata.bootstrap;
 
-import static org.apache.asterix.om.types.BuiltinType.AINT8;
 import static org.apache.asterix.om.types.BuiltinType.ASTRING;
 
 import org.apache.asterix.om.types.AOrderedListType;
@@ -106,7 +105,7 @@ public final class MetadataRecordTypes {
     public static final String FIELD_NAME_WHERE_CLAUSE = "WhereClause";
     public static final String FIELD_NAME_FULLTEXT_CATEGORY = "FulltextEntityCategory";
     public static final String FIELD_NAME_FULLTEXT_ENTITY_NAME = "FulltextEntityName";
-    public static final String FIELD_NAME_FULLTEXT_FILTER_CATEGORY = "FulltextFilterKind";
+    public static final String FIELD_NAME_FULLTEXT_FILTER_CATEGORY = "FulltextFilterType";
 
     //---------------------------------- Record Types Creation ----------------------------------//
     //--------------------------------------- Properties ----------------------------------------//
@@ -487,7 +486,7 @@ public final class MetadataRecordTypes {
             // Only two fields are in common in both FulltextFilter and FulltextConfig
             // Other specific fields in FulltextFilter and FulltextConfig are OPEN
             new String[] { FIELD_NAME_FULLTEXT_CATEGORY, FIELD_NAME_FULLTEXT_ENTITY_NAME },
-            new IAType[] { AINT8, ASTRING }, true);
+            new IAType[] { ASTRING, ASTRING }, true);
 
     // private members
     private MetadataRecordTypes() {

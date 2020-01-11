@@ -144,7 +144,7 @@ public class MetadataPrimaryIndexes {
     // Or it is the number of primary keys plus 1? (the MetadataRecordTypes.FULLTEXT_CONFIG_RECORDTYPE type)
     // If so, then why do we need it? The number of primary keys can be inferred directly.
     public static final IMetadataIndex FULLTEXT_CONFIG_DATASET =
-            new MetadataIndex(PROPERTIES_FULLTEXT_CONFIG, 3, new IAType[] { BuiltinType.AINT8, BuiltinType.ASTRING },
+            new MetadataIndex(PROPERTIES_FULLTEXT_CONFIG, 3, new IAType[] { BuiltinType.ASTRING, BuiltinType.ASTRING },
                     Arrays.asList(Arrays.asList(MetadataRecordTypes.FIELD_NAME_FULLTEXT_CATEGORY),
                             Arrays.asList(MetadataRecordTypes.FIELD_NAME_FULLTEXT_ENTITY_NAME)),
                     0, MetadataRecordTypes.FULLTEXT_CONFIG_RECORDTYPE, true, new int[] { 0, 1 });
