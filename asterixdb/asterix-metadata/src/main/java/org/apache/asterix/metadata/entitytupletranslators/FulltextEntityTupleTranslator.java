@@ -29,13 +29,14 @@ import org.apache.asterix.builders.OrderedListBuilder;
 import org.apache.asterix.formats.nontagged.SerializerDeserializerProvider;
 import org.apache.asterix.metadata.api.IFullTextConfig;
 import org.apache.asterix.metadata.api.IFullTextEntity;
-import org.apache.asterix.metadata.api.IFullTextEntity.FulltextEntityCategory;
+import org.apache.asterix.metadata.api.IFullTextEntity.FullTextEntityCategory;
 import org.apache.asterix.metadata.api.IFullTextFilter;
 import org.apache.asterix.metadata.bootstrap.MetadataPrimaryIndexes;
 import org.apache.asterix.metadata.bootstrap.MetadataRecordTypes;
 import org.apache.asterix.metadata.entities.fulltext.StopwordFullTextFilter;
 import org.apache.asterix.om.base.AInt8;
 import org.apache.asterix.om.base.ARecord;
+import org.apache.asterix.om.base.AString;
 import org.apache.asterix.om.types.AOrderedListType;
 import org.apache.asterix.om.types.BuiltinType;
 import org.apache.hyracks.algebricks.common.exceptions.AlgebricksException;
@@ -55,7 +56,6 @@ public class FulltextEntityTupleTranslator extends AbstractTupleTranslator<IFull
     protected final ArrayTupleReference tuple;
     protected final ISerializerDeserializer<AInt8> int8Serde =
             SerializerDeserializerProvider.INSTANCE.getSerializerDeserializer(BuiltinType.AINT8);
-    protected AInt8 categoryIdAInt8 = null;
 
     protected FulltextEntityTupleTranslator(boolean getTuple) {
         super(getTuple, MetadataPrimaryIndexes.FULLTEXT_CONFIG_DATASET, FULLTEXT_FILTER_PAYLOAD_TUPLE_FIELD_INDEX);
@@ -70,12 +70,11 @@ public class FulltextEntityTupleTranslator extends AbstractTupleTranslator<IFull
     @Override
     protected IFullTextEntity createMetadataEntityFromARecord(ARecord aRecord)
             throws HyracksDataException, AlgebricksException {
-        AInt8 categoryIdAInt8 =
-                (AInt8) aRecord.getValueByPos(FULLTEXT_ENTITY_ARECORD_FULLTEXT_ENTITY_CATEGORY_FIELD_INDEX);
+        AString categoryAString = (AString) aRecord.getValueByPos(FULLTEXT_ENTITY_ARECORD_FULLTEXT_ENTITY_CATEGORY_FIELD_INDEX);
 
-        FulltextEntityCategory category = FulltextEntityCategory.fromId(categoryIdAInt8.getByteValue());
+        FullTextEntityCategory category = FullTextEntityCategory.fromValue(categoryAString.getStringValue());
         switch (category) {
-            case FULLTEXT_FILTER:
+            case FILTER:
                 AInt8 kindAInt8 =
                         (AInt8) aRecord.getValueByPos(FULLTEXT_ENTITY_ARECORD_FULLTEXT_FILTER_KIND_FIELD_INDEX);
                 IFullTextFilter.FulltextFilterKind kind =
@@ -85,7 +84,7 @@ public class FulltextEntityTupleTranslator extends AbstractTupleTranslator<IFull
                         return StopwordFullTextFilter.createFilterFromARecord(aRecord);
                     case SYNONYM:
                 }
-            case FULLTEXT_CONFIG:
+            case CONFIG:
                 break;
         }
 
@@ -148,12 +147,12 @@ public class FulltextEntityTupleTranslator extends AbstractTupleTranslator<IFull
     private void getTupleForFulltextConfig(IFullTextConfig config) {
     }
 
-    private void writeIndex(IFullTextEntity.FulltextEntityCategory category, String entityName,
+    private void writeIndex(FullTextEntityCategory category, String entityName,
             ArrayTupleBuilder tupleBuilder) throws HyracksDataException {
         // Write the 2 primary-index key fields
-        byte categoryId = category.getId();
-        categoryIdAInt8 = new AInt8(categoryId);
-        int8Serde.serialize(categoryIdAInt8, tupleBuilder.getDataOutput());
+        String categoryStr = category.getValue();
+        aString.setValue(categoryStr);
+        stringSerde.serialize(aString, tupleBuilder.getDataOutput());
         tupleBuilder.addFieldEndOffset();
 
         aString.setValue(entityName);
@@ -173,7 +172,8 @@ public class FulltextEntityTupleTranslator extends AbstractTupleTranslator<IFull
         recordBuilder.reset(MetadataRecordTypes.FULLTEXT_CONFIG_RECORDTYPE);
 
         fieldValue.reset();
-        int8Serde.serialize(categoryIdAInt8, fieldValue.getDataOutput());
+        aString.setValue(fullTextEntity.getCategory().getValue());
+        stringSerde.serialize(aString, fieldValue.getDataOutput());
         recordBuilder.addField(FULLTEXT_ENTITY_ARECORD_FULLTEXT_ENTITY_CATEGORY_FIELD_INDEX, fieldValue);
 
         fieldValue.reset();
@@ -182,10 +182,10 @@ public class FulltextEntityTupleTranslator extends AbstractTupleTranslator<IFull
         recordBuilder.addField(FULLTEXT_ENTITY_ARECORD_FULLTEXT_ENTITY_NAME_FIELD_INDEX, fieldValue);
 
         switch (fullTextEntity.getCategory()) {
-            case FULLTEXT_FILTER:
+            case FILTER:
                 writeFulltextFilter((IFullTextFilter) fullTextEntity);
                 break;
-            case FULLTEXT_CONFIG:
+            case CONFIG:
                 getTupleForFulltextConfig((IFullTextConfig) fullTextEntity);
                 break;
             default:
@@ -199,7 +199,7 @@ public class FulltextEntityTupleTranslator extends AbstractTupleTranslator<IFull
         return tuple;
     }
 
-    public ITupleReference createTupleAsIndex(IFullTextEntity.FulltextEntityCategory category, String entityName)
+    public ITupleReference createTupleAsIndex(FullTextEntityCategory category, String entityName)
             throws HyracksDataException {
         // -1 to get the number of fields in index only
         ArrayTupleBuilder tupleBuilder =

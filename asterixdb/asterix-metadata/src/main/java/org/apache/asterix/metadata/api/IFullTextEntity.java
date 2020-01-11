@@ -19,40 +19,27 @@
 
 package org.apache.asterix.metadata.api;
 
-import org.apache.commons.math3.exception.OutOfRangeException;
-
 public interface IFullTextEntity {
-    enum FulltextEntityCategory {
-        // in progress...
-        // How to show the enum name as a string in the result of a SQLPP query?
-        // Current it is showned as a byte in the SQLPP terminal
-        FULLTEXT_FILTER((byte) 0),
-        FULLTEXT_CONFIG((byte) 1);
+    enum FullTextEntityCategory {
+        FILTER("FILTER"),
+        CONFIG("CONFIG");
 
-        private byte id;
+        private final String value;
 
-        FulltextEntityCategory(byte id) {
-            this.id = id;
+        FullTextEntityCategory(String value) {
+            this.value = value;
         }
 
-        // How to improve this part?
-        public static FulltextEntityCategory fromId(byte id) {
-            switch (id) {
-                case 0:
-                    return FULLTEXT_FILTER;
-                case 1:
-                    return FULLTEXT_CONFIG;
-                default:
-                    throw new OutOfRangeException(id, 0, 1);
-            }
+        public String getValue() {
+            return this.value;
         }
 
-        public byte getId() {
-            return this.id;
+        public static FullTextEntityCategory fromValue(String value) {
+            return Enum.valueOf(FullTextEntityCategory.class, value);
         }
     }
 
-    FulltextEntityCategory getCategory();
+    FullTextEntityCategory getCategory();
 
     String getName();
 }

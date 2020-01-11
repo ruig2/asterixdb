@@ -473,7 +473,7 @@ public class MetadataNode implements IMetadataNode {
             FulltextEntityTupleTranslator translator = tupleTranslatorProvider.getFulltextEntityTupleTranslator(true);
 
             ITupleReference searchKey =
-                    translator.createTupleAsIndex(IFullTextEntity.FulltextEntityCategory.FULLTEXT_FILTER, filterName);
+                    translator.createTupleAsIndex(IFullTextEntity.FullTextEntityCategory.FILTER, filterName);
             IValueExtractor<IFullTextEntity> valueExtractor = new MetadataEntityValueExtractor<>(translator);
             List<IFullTextEntity> results = new ArrayList<>();
             searchIndex(txnId, MetadataPrimaryIndexes.FULLTEXT_CONFIG_DATASET, searchKey, valueExtractor, results);

@@ -36,8 +36,8 @@ public abstract class AbstractFullTextFilter implements IFullTextFilter {
     }
 
     @Override
-    public FulltextEntityCategory getCategory() {
-        return FulltextEntityCategory.FULLTEXT_FILTER;
+    public FullTextEntityCategory getCategory() {
+        return FullTextEntityCategory.FILTER;
     }
 
     @Override
