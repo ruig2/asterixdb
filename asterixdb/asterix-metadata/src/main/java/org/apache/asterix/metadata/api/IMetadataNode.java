@@ -434,9 +434,9 @@ public interface IMetadataNode extends Remote, Serializable {
      */
     void addFunction(TxnId txnId, Function function) throws AlgebricksException, RemoteException;
 
-    void addFulltextFilter(TxnId txnId, IFulltextFilter filter) throws AlgebricksException, RemoteException;
+    void addFulltextFilter(TxnId txnId, IFullTextFilter filter) throws AlgebricksException, RemoteException;
 
-    IFulltextFilter getFulltextFilter(TxnId txnId, String filterName) throws RemoteException, AlgebricksException;
+    IFullTextFilter getFulltextFilter(TxnId txnId, String filterName) throws RemoteException, AlgebricksException;
     /*
     void dropFulltextFilter(TxnId txnId);
     

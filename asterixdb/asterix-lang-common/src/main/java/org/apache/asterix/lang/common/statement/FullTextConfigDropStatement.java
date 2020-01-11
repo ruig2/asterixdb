@@ -20,43 +20,29 @@ package org.apache.asterix.lang.common.statement;
 
 import org.apache.asterix.common.exceptions.CompilationException;
 import org.apache.asterix.lang.common.base.AbstractStatement;
-import org.apache.asterix.lang.common.base.Expression;
-import org.apache.asterix.lang.common.base.Statement;
-import org.apache.asterix.lang.common.expression.RecordConstructor;
 import org.apache.asterix.lang.common.visitor.base.ILangVisitor;
 
-public class CreateFulltextFilterStatement extends AbstractStatement {
+public class FullTextConfigDropStatement extends AbstractStatement {
 
-    private String filterName;
-    // ToDo: use a more specific RECORD_CONSTRUCTOR_EXPRESSION
-    private RecordConstructor expr;
-    private boolean ifNotExists;
+    private String configName;
+    private boolean ifExists;
 
-    public CreateFulltextFilterStatement(String filterName, boolean ifNotExists, RecordConstructor expr) {
-        this.filterName = filterName;
-        this.ifNotExists = ifNotExists;
-        this.expr = expr;
-    }
-
-    public String getFilterName() {
-        return filterName;
-    }
-
-    public Expression getExpression() {
-        return expr;
-    }
-
-    public void setIfNotExists(boolean ifNotExists) {
-        this.ifNotExists = ifNotExists;
-    }
-
-    public boolean getIfNotExists() {
-        return this.ifNotExists;
+    public FullTextConfigDropStatement(String configName, boolean ifExists) {
+        this.configName = configName;
+        this.ifExists = ifExists;
     }
 
     @Override
     public Kind getKind() {
-        return Kind.CREATE_FULLTEXT_FILTER;
+        return Kind.FULLTEXT_FILTER_DROP;
+    }
+
+    public String getConfigName() {
+        return configName;
+    }
+
+    public boolean getIfExists() {
+        return ifExists;
     }
 
     @Override
@@ -67,10 +53,5 @@ public class CreateFulltextFilterStatement extends AbstractStatement {
     @Override
     public byte getCategory() {
         return Category.DDL;
-    }
-
-    public static boolean checkExpression(Statement stmt) {
-        // in progress...
-        return true;
     }
 }

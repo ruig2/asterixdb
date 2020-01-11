@@ -26,7 +26,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.google.common.collect.ImmutableList;
 import org.apache.asterix.common.api.IDatasetLifecycleManager;
 import org.apache.asterix.common.api.INcApplicationContext;
 import org.apache.asterix.common.config.DatasetConfig.DatasetType;
@@ -49,8 +48,8 @@ import org.apache.asterix.metadata.api.ExtensionMetadataDataset;
 import org.apache.asterix.metadata.api.ExtensionMetadataDatasetId;
 import org.apache.asterix.metadata.api.IExtensionMetadataEntity;
 import org.apache.asterix.metadata.api.IExtensionMetadataSearchKey;
-import org.apache.asterix.metadata.api.IFulltextEntity;
-import org.apache.asterix.metadata.api.IFulltextFilter;
+import org.apache.asterix.metadata.api.IFullTextEntity;
+import org.apache.asterix.metadata.api.IFullTextFilter;
 import org.apache.asterix.metadata.api.IMetadataEntityTupleTranslator;
 import org.apache.asterix.metadata.api.IMetadataExtension;
 import org.apache.asterix.metadata.api.IMetadataIndex;
@@ -71,7 +70,6 @@ import org.apache.asterix.metadata.entities.InternalDatasetDetails;
 import org.apache.asterix.metadata.entities.Library;
 import org.apache.asterix.metadata.entities.Node;
 import org.apache.asterix.metadata.entities.NodeGroup;
-import org.apache.asterix.metadata.entities.fulltext.StopwordFulltextFilter;
 import org.apache.asterix.metadata.entitytupletranslators.CompactionPolicyTupleTranslator;
 import org.apache.asterix.metadata.entitytupletranslators.DatasetTupleTranslator;
 import org.apache.asterix.metadata.entitytupletranslators.DatasourceAdapterTupleTranslator;
@@ -451,7 +449,7 @@ public class MetadataNode implements IMetadataNode {
     }
 
     @Override
-    public void addFulltextFilter(TxnId txnId, IFulltextFilter filter) throws AlgebricksException {
+    public void addFulltextFilter(TxnId txnId, IFullTextFilter filter) throws AlgebricksException {
         // Insert into the 'FulltextConfig' dataset.
         System.out.println("in MetadataNode...");
 
@@ -469,20 +467,20 @@ public class MetadataNode implements IMetadataNode {
     }
 
     @Override
-    public IFulltextFilter getFulltextFilter(TxnId txnId, String filterName) throws RemoteException,
-            AlgebricksException {
+    public IFullTextFilter getFulltextFilter(TxnId txnId, String filterName)
+            throws RemoteException, AlgebricksException {
         try {
             FulltextEntityTupleTranslator translator = tupleTranslatorProvider.getFulltextEntityTupleTranslator(true);
 
             ITupleReference searchKey =
-                    translator.createTupleAsIndex(IFulltextEntity.FulltextEntityCategory.FULLTEXT_FILTER, filterName);
-            IValueExtractor<IFulltextEntity> valueExtractor = new MetadataEntityValueExtractor<>(translator);
-            List<IFulltextEntity> results = new ArrayList<>();
+                    translator.createTupleAsIndex(IFullTextEntity.FulltextEntityCategory.FULLTEXT_FILTER, filterName);
+            IValueExtractor<IFullTextEntity> valueExtractor = new MetadataEntityValueExtractor<>(translator);
+            List<IFullTextEntity> results = new ArrayList<>();
             searchIndex(txnId, MetadataPrimaryIndexes.FULLTEXT_CONFIG_DATASET, searchKey, valueExtractor, results);
             if (results.isEmpty()) {
                 return null;
             }
-            return (IFulltextFilter) results.get(0);
+            return (IFullTextFilter) results.get(0);
             //return new StopwordFulltextFilter("temp", ImmutableList.of("abc", "def"));
         } catch (HyracksDataException e) {
             throw new AlgebricksException(e);

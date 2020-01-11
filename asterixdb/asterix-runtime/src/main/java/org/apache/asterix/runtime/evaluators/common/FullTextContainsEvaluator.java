@@ -327,10 +327,8 @@ public class FullTextContainsEvaluator implements IScalarEvaluator {
             if (rightHashSet.find(keyEntry, queryArray, false) == -1) {
                 String keyStr = new String(queryArray, keyEntry.getOffset(), keyEntry.getLength());
                 System.out.println("get key " + keyStr);
-                if ((keyStr.equalsIgnoreCase("a") ||
-                        keyStr.equalsIgnoreCase("an") ||
-                        keyStr.equalsIgnoreCase("the"))
-                 == false) {
+                if ((keyStr.equalsIgnoreCase("a") || keyStr.equalsIgnoreCase("an")
+                        || keyStr.equalsIgnoreCase("the")) == false) {
                     rightHashSet.put(keyEntry);
                     uniqueQueryTokenCount++;
                 }
@@ -417,9 +415,7 @@ public class FullTextContainsEvaluator implements IScalarEvaluator {
             String tokenStr = new String(t.getData(), t.getStartOffset(), t.getTokenLength());
             System.out.println(tokenStr);
 
-            if (tokenStr.equalsIgnoreCase("a")
-                    || tokenStr.equalsIgnoreCase("an")
-                    || tokenStr.equalsIgnoreCase("the")) {
+            if (tokenStr.equalsIgnoreCase("a") || tokenStr.equalsIgnoreCase("an") || tokenStr.equalsIgnoreCase("the")) {
                 System.out.println("!!! token is in stopword list");
             }
 

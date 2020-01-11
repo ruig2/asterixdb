@@ -103,7 +103,7 @@ import org.apache.asterix.lang.common.statement.ConnectFeedStatement;
 import org.apache.asterix.lang.common.statement.CreateDataverseStatement;
 import org.apache.asterix.lang.common.statement.CreateFeedPolicyStatement;
 import org.apache.asterix.lang.common.statement.CreateFeedStatement;
-import org.apache.asterix.lang.common.statement.CreateFulltextFilterStatement;
+import org.apache.asterix.lang.common.statement.CreateFullTextFilterStatement;
 import org.apache.asterix.lang.common.statement.CreateFunctionStatement;
 import org.apache.asterix.lang.common.statement.CreateIndexStatement;
 import org.apache.asterix.lang.common.statement.DatasetDecl;
@@ -137,7 +137,7 @@ import org.apache.asterix.lang.common.util.FunctionUtil;
 import org.apache.asterix.metadata.IDatasetDetails;
 import org.apache.asterix.metadata.MetadataManager;
 import org.apache.asterix.metadata.MetadataTransactionContext;
-import org.apache.asterix.metadata.api.IFulltextFilter;
+import org.apache.asterix.metadata.api.IFullTextFilter;
 import org.apache.asterix.metadata.bootstrap.MetadataBuiltinEntities;
 import org.apache.asterix.metadata.dataset.hints.DatasetHints;
 import org.apache.asterix.metadata.dataset.hints.DatasetHints.DatasetNodegroupCardinalityHint;
@@ -155,7 +155,7 @@ import org.apache.asterix.metadata.entities.Function;
 import org.apache.asterix.metadata.entities.Index;
 import org.apache.asterix.metadata.entities.InternalDatasetDetails;
 import org.apache.asterix.metadata.entities.NodeGroup;
-import org.apache.asterix.metadata.entities.fulltext.StopwordFulltextFilter;
+import org.apache.asterix.metadata.entities.fulltext.StopwordFullTextFilter;
 import org.apache.asterix.metadata.feeds.FeedMetadataUtil;
 import org.apache.asterix.metadata.lock.ExternalDatasetsRegistry;
 import org.apache.asterix.metadata.utils.DatasetUtil;
@@ -334,10 +334,10 @@ public class QueryTranslator extends AbstractLangTranslator implements IStatemen
                         handleCreateIndexStatement(metadataProvider, stmt, hcc, requestParameters);
                         break;
                     case CREATE_FULLTEXT_FILTER:
-                        handleCreateFulltextFilterStatement(metadataProvider, stmt);
+                        handleCreateFullTextFilterStatement(metadataProvider, stmt);
                         break;
                     case CREATE_FULLTEXT_CONFIG:
-                        handleCreateFulltextConfigStatement();
+                        handleCreateFullTextConfigStatement();
                         break;
                     case TYPE_DECL:
                         handleCreateTypeStatement(metadataProvider, stmt);
@@ -355,10 +355,10 @@ public class QueryTranslator extends AbstractLangTranslator implements IStatemen
                         handleIndexDropStatement(metadataProvider, stmt, hcc, requestParameters);
                         break;
                     case FULLTEXT_FILTER_DROP:
-                        handleFulltextFilterDrop();
+                        handleFullTextFilterDrop();
                         break;
                     case FULLTEXT_CONFIG_DROP:
-                        handleFulltextConfigDrop();
+                        handleFullTextConfigDrop();
                         break;
                     case TYPE_DROP:
                         handleTypeDropStatement(metadataProvider, stmt);
@@ -990,11 +990,11 @@ public class QueryTranslator extends AbstractLangTranslator implements IStatemen
         }
     }
 
-    public void handleCreateFulltextFilterStatement(MetadataProvider metadataProvider, Statement stmt)
+    public void handleCreateFullTextFilterStatement(MetadataProvider metadataProvider, Statement stmt)
             throws Exception {
-        CreateFulltextFilterStatement.checkExpression(stmt);
+        CreateFullTextFilterStatement.checkExpression(stmt);
 
-        CreateFulltextFilterStatement stmtCreateFilter = (CreateFulltextFilterStatement) stmt;
+        CreateFullTextFilterStatement stmtCreateFilter = (CreateFullTextFilterStatement) stmt;
         RecordConstructor rc = (RecordConstructor) stmtCreateFilter.getExpression();
 
         // In progress...
@@ -1024,7 +1024,7 @@ public class QueryTranslator extends AbstractLangTranslator implements IStatemen
             MetadataManager.INSTANCE.addFulltextFilter(mdTxnCtx,
                     // In progress...
                     // Get the parameters from stmt
-                    new StopwordFulltextFilter(stmtCreateFilter.getFilterName(), stopwordsBuilder.build()));
+                    new StopwordFullTextFilter(stmtCreateFilter.getFilterName(), stopwordsBuilder.build()));
         } catch (AlgebricksException e) {
             e.printStackTrace();
         } catch (RemoteException e) {
@@ -1034,12 +1034,12 @@ public class QueryTranslator extends AbstractLangTranslator implements IStatemen
         }
 
         // Debug
-        IFulltextFilter filter = MetadataManager.INSTANCE.getFulltextFilter(mdTxnCtx, "first_StopWordFilter");
+        IFullTextFilter filter = MetadataManager.INSTANCE.getFulltextFilter(mdTxnCtx, "first_StopWordFilter");
 
         return;
     }
 
-    public void handleCreateFulltextConfigStatement() {
+    public void handleCreateFullTextConfigStatement() {
         return;
     }
 
@@ -1762,11 +1762,11 @@ public class QueryTranslator extends AbstractLangTranslator implements IStatemen
         }
     }
 
-    protected void handleFulltextFilterDrop() {
+    protected void handleFullTextFilterDrop() {
         return;
     }
 
-    protected void handleFulltextConfigDrop() {
+    protected void handleFullTextConfigDrop() {
         return;
     }
 

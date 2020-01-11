@@ -21,5 +21,5 @@ package org.apache.asterix.metadata.api;
 
 // in progress...
 
-public interface IFulltextConfig extends IFulltextEntity {
+public interface IFullTextConfig extends IFullTextEntity {
 }

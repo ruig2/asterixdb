@@ -127,8 +127,8 @@ import org.apache.asterix.lang.common.statement.CreateFeedPolicyStatement;
 import org.apache.asterix.lang.common.statement.CreateFeedStatement;
 import org.apache.asterix.lang.common.statement.CreateFunctionStatement;
 import org.apache.asterix.lang.common.statement.CreateIndexStatement;
-import org.apache.asterix.lang.common.statement.CreateFulltextFilterStatement;
-import org.apache.asterix.lang.common.statement.CreateFulltextConfigStatement;
+import org.apache.asterix.lang.common.statement.CreateFullTextFilterStatement;
+import org.apache.asterix.lang.common.statement.CreateFullTextConfigStatement;
 import org.apache.asterix.lang.common.statement.DatasetDecl;
 import org.apache.asterix.lang.common.statement.DataverseDecl;
 import org.apache.asterix.lang.common.statement.DataverseDropStatement;
@@ -141,8 +141,8 @@ import org.apache.asterix.lang.common.statement.FeedPolicyDropStatement;
 import org.apache.asterix.lang.common.statement.FunctionDecl;
 import org.apache.asterix.lang.common.statement.FunctionDropStatement;
 import org.apache.asterix.lang.common.statement.IndexDropStatement;
-import org.apache.asterix.lang.common.statement.FulltextFilterDropStatement;
-import org.apache.asterix.lang.common.statement.FulltextConfigDropStatement;
+import org.apache.asterix.lang.common.statement.FullTextFilterDropStatement;
+import org.apache.asterix.lang.common.statement.FullTextConfigDropStatement;
 import org.apache.asterix.lang.common.statement.InsertStatement;
 import org.apache.asterix.lang.common.statement.InternalDetailsDecl;
 import org.apache.asterix.lang.common.statement.LoadStatement;
@@ -591,7 +591,7 @@ Statement CreateStatement() throws ParseException:
     | stmt = CreateFunctionStatement(startToken)
     | stmt = CreateFeedStatement(startToken)
     | stmt = CreateFeedPolicyStatement(startToken)
-    | stmt = CreateFulltextStatement(startToken)
+    | stmt = CreateFullTextStatement(startToken)
   )
   {
     return stmt;
@@ -1086,7 +1086,7 @@ CreateFeedPolicyStatement FeedPolicySpecification(Token startStmtToken) throws P
   }
 }
 
-Statement CreateFulltextStatement(Token startStmtToken) throws ParseException:
+Statement CreateFullTextStatement(Token startStmtToken) throws ParseException:
 {
   Statement stmt = null;
 }
@@ -1094,8 +1094,8 @@ Statement CreateFulltextStatement(Token startStmtToken) throws ParseException:
   (
     <FULLTEXT>
     (
-      <FILTER> stmt = CreateFulltextFilterSpec(startStmtToken)
-      | (<IDENTIFIER> { expectToken(FULLTEXT_CONFIG); } stmt = CreateFulltextConfigSpec(startStmtToken))
+      <FILTER> stmt = CreateFullTextFilterSpec(startStmtToken)
+      | (<IDENTIFIER> { expectToken(FULLTEXT_CONFIG); } stmt = CreateFullTextConfigSpec(startStmtToken))
     )
   )
   {
@@ -1103,9 +1103,9 @@ Statement CreateFulltextStatement(Token startStmtToken) throws ParseException:
   }
 }
 
-CreateFulltextFilterStatement CreateFulltextFilterSpec(Token startStmtToken) throws ParseException:
+CreateFullTextFilterStatement CreateFullTextFilterSpec(Token startStmtToken) throws ParseException:
 {
-  CreateFulltextFilterStatement stmt = null;
+  CreateFullTextFilterStatement stmt = null;
   String filterName = null;
   boolean ifNotExists = false;
   RecordConstructor expr = null;
@@ -1117,18 +1117,18 @@ CreateFulltextFilterStatement CreateFulltextFilterSpec(Token startStmtToken) thr
     expr = RecordConstructor()
   )
   {
-    System.out.println("!!! Get  Create Fulltext Filter command");
-    System.out.println("!!! Filter name " + filterName);
-    System.out.println("!!! expr " + expr.toString());
+  System.out.println("!!! Get  Create Fulltext Filter command");
+  System.out.println("!!! Filter name " + filterName);
+  System.out.println("!!! expr " + expr.toString());
 
-    stmt = new CreateFulltextFilterStatement(filterName, ifNotExists, expr);
-    return stmt;
-  }
+  stmt = new org.apache.asterix.lang.common.statement.CreateFullTextFilterStatement(filterName, ifNotExists, expr);
+  return stmt;
+}
 }
 
-CreateFulltextConfigStatement CreateFulltextConfigSpec(Token startStmtToken) throws ParseException:
+CreateFullTextConfigStatement CreateFullTextConfigSpec(Token startStmtToken) throws ParseException:
 {
-  CreateFulltextConfigStatement stmt = null;
+  org.apache.asterix.lang.common.statement.CreateFullTextConfigStatement stmt = null;
   String configName = null;
   boolean ifNotExists = false;
   RecordConstructor expr = null;
@@ -1144,7 +1144,7 @@ CreateFulltextConfigStatement CreateFulltextConfigSpec(Token startStmtToken) thr
     System.out.println("configName " + configName);
     System.out.println("expr " + expr);
 
-    stmt = new CreateFulltextConfigStatement(configName, ifNotExists, expr);
+    stmt = new CreateFullTextConfigStatement(configName, ifNotExists, expr);
 
     return stmt;
   }
@@ -1275,7 +1275,7 @@ Statement DropStatement() throws ParseException:
     | stmt = DropFunctionStatement(startToken)
     | stmt = DropFeedStatement(startToken)
     | stmt = DropFeedPolicyStatement(startToken)
-    | stmt = DropFulltextStatement(startToken)
+    | stmt = DropFullTextStatement(startToken)
   )
   {
     return stmt;
@@ -1332,22 +1332,22 @@ IndexDropStatement DropIndexSpecification(Token startStmtToken) throws ParseExce
 }
 
 // DROP FULLTEXT Filter myStopwordFilter;
-Statement DropFulltextStatement(Token startStmtToken) throws ParseException:
+Statement DropFullTextStatement(Token startStmtToken) throws ParseException:
 {
   Statement stmt = null;
 }
 {
   <FULLTEXT>
   (
-    <FILTER> stmt = DropFulltextFilterSpecification(startStmtToken)
-     | (<IDENTIFIER> { expectToken(FULLTEXT_CONFIG); } stmt = DropFulltextConfigSpecification(startStmtToken))
+    <FILTER> stmt = DropFullTextFilterSpecification(startStmtToken)
+     | (<IDENTIFIER> { expectToken(FULLTEXT_CONFIG); } stmt = DropFullTextConfigSpecification(startStmtToken))
   )
   {
     return stmt;
   }
 }
 
-FulltextFilterDropStatement DropFulltextFilterSpecification(Token startStmtToken) throws ParseException:
+FullTextFilterDropStatement DropFullTextFilterSpecification(Token startStmtToken) throws ParseException:
 {
   String filterName = null;
   boolean ifExists = false;
@@ -1355,14 +1355,14 @@ FulltextFilterDropStatement DropFulltextFilterSpecification(Token startStmtToken
 {
   filterName = Identifier() ifExists = IfExists()
   {
-    System.out.println("Get a Drop Fulltext Filter Statement!!!");
-    System.out.println("Identifier " + filterName);
-    System.out.println("ifExists " + ifExists);
-    return new FulltextFilterDropStatement(filterName, ifExists);
-  }
+  System.out.println("Get a Drop Fulltext Filter Statement!!!");
+  System.out.println("Identifier " + filterName);
+  System.out.println("ifExists " + ifExists);
+  return new org.apache.asterix.lang.common.statement.FullTextFilterDropStatement(filterName, ifExists);
+}
 }
 
-FulltextConfigDropStatement DropFulltextConfigSpecification(Token startStmtToken) throws ParseException:
+FullTextConfigDropStatement DropFullTextConfigSpecification(Token startStmtToken) throws ParseException:
 {
   String configName = null;
   boolean ifExists = false;
@@ -1370,11 +1370,11 @@ FulltextConfigDropStatement DropFulltextConfigSpecification(Token startStmtToken
 {
   configName = Identifier() ifExists = IfExists()
   {
-    System.out.println("Get a Drop Fulltext Config Statement!!!");
-    System.out.println("Identifier " + configName);
-    System.out.println("ifExists " + ifExists);
-    return new FulltextConfigDropStatement(configName, ifExists);
-  }
+  System.out.println("Get a Drop Fulltext Config Statement!!!");
+  System.out.println("Identifier " + configName);
+  System.out.println("ifExists " + ifExists);
+  return new org.apache.asterix.lang.common.statement.FullTextConfigDropStatement(configName, ifExists);
+}
 }
 
 

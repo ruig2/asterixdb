@@ -21,7 +21,7 @@ package org.apache.asterix.metadata.api;
 
 import org.apache.commons.math3.exception.OutOfRangeException;
 
-public interface IFulltextEntity {
+public interface IFullTextEntity {
     enum FulltextEntityCategory {
         // in progress...
         // How to show the enum name as a string in the result of a SQLPP query?
@@ -46,7 +46,6 @@ public interface IFulltextEntity {
                     throw new OutOfRangeException(id, 0, 1);
             }
         }
-
 
         public byte getId() {
             return this.id;

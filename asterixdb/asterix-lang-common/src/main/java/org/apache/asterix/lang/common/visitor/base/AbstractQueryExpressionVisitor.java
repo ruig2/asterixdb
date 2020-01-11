@@ -29,8 +29,8 @@ import org.apache.asterix.lang.common.statement.ConnectFeedStatement;
 import org.apache.asterix.lang.common.statement.CreateDataverseStatement;
 import org.apache.asterix.lang.common.statement.CreateFeedPolicyStatement;
 import org.apache.asterix.lang.common.statement.CreateFeedStatement;
-import org.apache.asterix.lang.common.statement.CreateFulltextConfigStatement;
-import org.apache.asterix.lang.common.statement.CreateFulltextFilterStatement;
+import org.apache.asterix.lang.common.statement.CreateFullTextConfigStatement;
+import org.apache.asterix.lang.common.statement.CreateFullTextFilterStatement;
 import org.apache.asterix.lang.common.statement.CreateFunctionStatement;
 import org.apache.asterix.lang.common.statement.CreateIndexStatement;
 import org.apache.asterix.lang.common.statement.DatasetDecl;
@@ -41,8 +41,8 @@ import org.apache.asterix.lang.common.statement.DisconnectFeedStatement;
 import org.apache.asterix.lang.common.statement.DropDatasetStatement;
 import org.apache.asterix.lang.common.statement.FeedDropStatement;
 import org.apache.asterix.lang.common.statement.FeedPolicyDropStatement;
-import org.apache.asterix.lang.common.statement.FulltextConfigDropStatement;
-import org.apache.asterix.lang.common.statement.FulltextFilterDropStatement;
+import org.apache.asterix.lang.common.statement.FullTextConfigDropStatement;
+import org.apache.asterix.lang.common.statement.FullTextFilterDropStatement;
 import org.apache.asterix.lang.common.statement.FunctionDecl;
 import org.apache.asterix.lang.common.statement.FunctionDropStatement;
 import org.apache.asterix.lang.common.statement.IndexDropStatement;
@@ -182,22 +182,22 @@ public abstract class AbstractQueryExpressionVisitor<R, T> implements ILangVisit
     }
 
     @Override
-    public R visit(CreateFulltextFilterStatement del, T arg) throws CompilationException {
+    public R visit(CreateFullTextFilterStatement del, T arg) throws CompilationException {
         return null;
     }
 
     @Override
-    public R visit(FulltextFilterDropStatement del, T arg) throws CompilationException {
+    public R visit(FullTextFilterDropStatement del, T arg) throws CompilationException {
         return null;
     }
 
     @Override
-    public R visit(CreateFulltextConfigStatement del, T arg) throws CompilationException {
+    public R visit(CreateFullTextConfigStatement del, T arg) throws CompilationException {
         return null;
     }
 
     @Override
-    public R visit(FulltextConfigDropStatement del, T arg) throws CompilationException {
+    public R visit(FullTextConfigDropStatement del, T arg) throws CompilationException {
         return null;
     }
 

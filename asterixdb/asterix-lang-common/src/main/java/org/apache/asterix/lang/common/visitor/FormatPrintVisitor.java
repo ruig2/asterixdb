@@ -68,8 +68,8 @@ import org.apache.asterix.lang.common.statement.ConnectFeedStatement;
 import org.apache.asterix.lang.common.statement.CreateDataverseStatement;
 import org.apache.asterix.lang.common.statement.CreateFeedPolicyStatement;
 import org.apache.asterix.lang.common.statement.CreateFeedStatement;
-import org.apache.asterix.lang.common.statement.CreateFulltextConfigStatement;
-import org.apache.asterix.lang.common.statement.CreateFulltextFilterStatement;
+import org.apache.asterix.lang.common.statement.CreateFullTextConfigStatement;
+import org.apache.asterix.lang.common.statement.CreateFullTextFilterStatement;
 import org.apache.asterix.lang.common.statement.CreateFunctionStatement;
 import org.apache.asterix.lang.common.statement.CreateIndexStatement;
 import org.apache.asterix.lang.common.statement.DatasetDecl;
@@ -81,8 +81,8 @@ import org.apache.asterix.lang.common.statement.DropDatasetStatement;
 import org.apache.asterix.lang.common.statement.ExternalDetailsDecl;
 import org.apache.asterix.lang.common.statement.FeedDropStatement;
 import org.apache.asterix.lang.common.statement.FeedPolicyDropStatement;
-import org.apache.asterix.lang.common.statement.FulltextConfigDropStatement;
-import org.apache.asterix.lang.common.statement.FulltextFilterDropStatement;
+import org.apache.asterix.lang.common.statement.FullTextConfigDropStatement;
+import org.apache.asterix.lang.common.statement.FullTextFilterDropStatement;
 import org.apache.asterix.lang.common.statement.FunctionDecl;
 import org.apache.asterix.lang.common.statement.FunctionDropStatement;
 import org.apache.asterix.lang.common.statement.IndexDropStatement;
@@ -697,13 +697,13 @@ public class FormatPrintVisitor implements ILangVisitor<Void, Integer> {
     }
 
     @Override
-    public Void visit(CreateFulltextFilterStatement cis, Integer step) throws CompilationException {
+    public Void visit(CreateFullTextFilterStatement cis, Integer step) throws CompilationException {
         out.print(skip(step) + "create fulltext filter ");
         return null;
     }
 
     @Override
-    public Void visit(CreateFulltextConfigStatement cis, Integer step) throws CompilationException {
+    public Void visit(CreateFullTextConfigStatement cis, Integer step) throws CompilationException {
         out.print(skip(step) + "create fulltext config ");
         return null;
     }
@@ -742,14 +742,14 @@ public class FormatPrintVisitor implements ILangVisitor<Void, Integer> {
     }
 
     @Override
-    public Void visit(FulltextFilterDropStatement del, Integer step) throws CompilationException {
+    public Void visit(FullTextFilterDropStatement del, Integer step) throws CompilationException {
         out.print(skip(step) + "drop fulltext filter ");
         out.println(generateIfExists(del.getIfExists()) + SEMICOLON);
         return null;
     }
 
     @Override
-    public Void visit(FulltextConfigDropStatement del, Integer step) throws CompilationException {
+    public Void visit(FullTextConfigDropStatement del, Integer step) throws CompilationException {
         out.print(skip(step) + "drop fulltext config ");
         out.println(generateIfExists(del.getIfExists()) + SEMICOLON);
         return null;

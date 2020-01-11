@@ -19,13 +19,13 @@
 
 package org.apache.asterix.metadata.api;
 
-import org.apache.commons.math3.exception.OutOfRangeException;
-
 import java.util.List;
+
+import org.apache.commons.math3.exception.OutOfRangeException;
 
 // in progress...
 
-public interface IFulltextFilter extends IFulltextEntity {
+public interface IFullTextFilter extends IFullTextEntity {
 
     enum FulltextFilterKind {
         // Assume the number of filter types are less than 2^8 = 256

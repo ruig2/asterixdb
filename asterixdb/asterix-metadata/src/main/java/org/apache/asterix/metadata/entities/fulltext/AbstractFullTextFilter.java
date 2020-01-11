@@ -22,14 +22,14 @@ package org.apache.asterix.metadata.entities.fulltext;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.asterix.metadata.api.IFulltextFilter;
+import org.apache.asterix.metadata.api.IFullTextFilter;
 
-public abstract class AbstractFulltextFilter implements IFulltextFilter {
+public abstract class AbstractFullTextFilter implements IFullTextFilter {
     protected final String name;
     protected FulltextFilterKind type;
     protected List<String> usedByFTConfigs;
 
-    public AbstractFulltextFilter(String name, FulltextFilterKind type) {
+    public AbstractFullTextFilter(String name, FulltextFilterKind type) {
         this.name = name;
         this.type = type;
         this.usedByFTConfigs = new ArrayList<>();

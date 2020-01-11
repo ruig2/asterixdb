@@ -22,13 +22,13 @@ import org.apache.asterix.common.exceptions.CompilationException;
 import org.apache.asterix.lang.common.base.AbstractStatement;
 import org.apache.asterix.lang.common.visitor.base.ILangVisitor;
 
-public class FulltextConfigDropStatement extends AbstractStatement {
+public class FullTextFilterDropStatement extends AbstractStatement {
 
-    private String configName;
+    private String filterName;
     private boolean ifExists;
 
-    public FulltextConfigDropStatement(String configName, boolean ifExists) {
-        this.configName = configName;
+    public FullTextFilterDropStatement(String filterName, boolean ifExists) {
+        this.filterName = filterName;
         this.ifExists = ifExists;
     }
 
@@ -37,12 +37,12 @@ public class FulltextConfigDropStatement extends AbstractStatement {
         return Kind.FULLTEXT_FILTER_DROP;
     }
 
-    public String getConfigName() {
-        return configName;
-    }
-
     public boolean getIfExists() {
         return ifExists;
+    }
+
+    public String getFilterName() {
+        return filterName;
     }
 
     @Override

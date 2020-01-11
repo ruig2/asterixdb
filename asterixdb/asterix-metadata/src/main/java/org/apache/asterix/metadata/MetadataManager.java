@@ -39,7 +39,7 @@ import org.apache.asterix.external.indexing.ExternalFile;
 import org.apache.asterix.metadata.api.IAsterixStateProxy;
 import org.apache.asterix.metadata.api.IExtensionMetadataEntity;
 import org.apache.asterix.metadata.api.IExtensionMetadataSearchKey;
-import org.apache.asterix.metadata.api.IFulltextFilter;
+import org.apache.asterix.metadata.api.IFullTextFilter;
 import org.apache.asterix.metadata.api.IMetadataManager;
 import org.apache.asterix.metadata.api.IMetadataNode;
 import org.apache.asterix.metadata.entities.CompactionPolicy;
@@ -55,7 +55,7 @@ import org.apache.asterix.metadata.entities.Index;
 import org.apache.asterix.metadata.entities.Library;
 import org.apache.asterix.metadata.entities.Node;
 import org.apache.asterix.metadata.entities.NodeGroup;
-import org.apache.asterix.metadata.entities.fulltext.StopwordFulltextFilter;
+import org.apache.asterix.metadata.entities.fulltext.StopwordFullTextFilter;
 import org.apache.asterix.om.types.ARecordType;
 import org.apache.asterix.transaction.management.opcallbacks.AbstractIndexModificationOperationCallback.Operation;
 import org.apache.hyracks.algebricks.common.exceptions.AlgebricksException;
@@ -621,7 +621,7 @@ public abstract class MetadataManager implements IMetadataManager {
     }
 
     @Override
-    public void addFulltextFilter(MetadataTransactionContext mdTxnCtx, IFulltextFilter filter)
+    public void addFulltextFilter(MetadataTransactionContext mdTxnCtx, IFullTextFilter filter)
             throws AlgebricksException {
         try {
             System.out.println("in MetadataManager...");
@@ -635,7 +635,8 @@ public abstract class MetadataManager implements IMetadataManager {
     }
 
     @Override
-    public IFulltextFilter getFulltextFilter(MetadataTransactionContext mdTxnCtx, String filterName) throws RemoteException {
+    public IFullTextFilter getFulltextFilter(MetadataTransactionContext mdTxnCtx, String filterName)
+            throws RemoteException {
         // in progress...
         // Support ctx.getFulltextFilter() and cache.getFulltextFilter() similar to the following getIndex() logic later
         /*
@@ -659,7 +660,7 @@ public abstract class MetadataManager implements IMetadataManager {
             // Index is already in the cache, don't add it again.
             return index;
         }
-
+        
         try {
             index = metadataNode.getIndex(ctx.getTxnId(), dataverseName, datasetName, indexName);
         } catch (RemoteException e) {
@@ -680,7 +681,7 @@ public abstract class MetadataManager implements IMetadataManager {
             e.printStackTrace();
         }
 
-        return new StopwordFulltextFilter("Failed to get filter", null);
+        return new StopwordFullTextFilter("Failed to get filter", null);
     }
 
     /*
