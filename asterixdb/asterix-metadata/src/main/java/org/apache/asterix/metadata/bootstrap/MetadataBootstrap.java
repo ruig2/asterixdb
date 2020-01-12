@@ -114,7 +114,7 @@ public class MetadataBootstrap {
     private static List<String> nodeNames;
     private static boolean isNewUniverse;
     private static final IMetadataIndex[] PRIMARY_INDEXES =
-            new IMetadataIndex[] { MetadataPrimaryIndexes.FULLTEXT_CONFIG_DATASET,
+            new IMetadataIndex[] { MetadataPrimaryIndexes.FULLTEXT_ENTITY_DATASET,
                     MetadataPrimaryIndexes.DATAVERSE_DATASET, MetadataPrimaryIndexes.DATASET_DATASET,
                     MetadataPrimaryIndexes.DATATYPE_DATASET, MetadataPrimaryIndexes.INDEX_DATASET,
                     MetadataPrimaryIndexes.NODE_DATASET, MetadataPrimaryIndexes.NODEGROUP_DATASET,

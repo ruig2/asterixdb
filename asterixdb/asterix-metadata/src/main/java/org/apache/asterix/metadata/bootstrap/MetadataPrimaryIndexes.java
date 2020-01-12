@@ -59,7 +59,7 @@ public class MetadataPrimaryIndexes {
             new MetadataIndexImmutableProperties(MetadataConstants.COMPACTION_POLICY_DATASET_NAME, 13, 13);
     public static final MetadataIndexImmutableProperties PROPERTIES_EXTERNAL_FILE =
             new MetadataIndexImmutableProperties(MetadataConstants.EXTERNAL_FILE_DATASET_NAME, 14, 14);
-    public static final MetadataIndexImmutableProperties PROPERTIES_FULLTEXT_CONFIG =
+    public static final MetadataIndexImmutableProperties PROPERTIES_FULLTEXT_ENTITY =
             new MetadataIndexImmutableProperties(MetadataConstants.FULLTEXT_CONFIG_DATASET_NAME, 15, 15);
 
     public static final IMetadataIndex DATAVERSE_DATASET =
@@ -143,11 +143,11 @@ public class MetadataPrimaryIndexes {
     // If so, does it include the number of OPEN fields which is different for different rows in the dataset?
     // Or it is the number of primary keys plus 1? (the MetadataRecordTypes.FULLTEXT_CONFIG_RECORDTYPE type)
     // If so, then why do we need it? The number of primary keys can be inferred directly.
-    public static final IMetadataIndex FULLTEXT_CONFIG_DATASET =
-            new MetadataIndex(PROPERTIES_FULLTEXT_CONFIG, 3, new IAType[] { BuiltinType.ASTRING, BuiltinType.ASTRING },
+    public static final IMetadataIndex FULLTEXT_ENTITY_DATASET =
+            new MetadataIndex(PROPERTIES_FULLTEXT_ENTITY, 3, new IAType[] { BuiltinType.ASTRING, BuiltinType.ASTRING },
                     Arrays.asList(Arrays.asList(MetadataRecordTypes.FIELD_NAME_FULLTEXT_CATEGORY),
                             Arrays.asList(MetadataRecordTypes.FIELD_NAME_FULLTEXT_ENTITY_NAME)),
-                    0, MetadataRecordTypes.FULLTEXT_CONFIG_RECORDTYPE, true, new int[] { 0, 1 });
+                    0, MetadataRecordTypes.FULLTEXT_ENTITY_RECORDTYPE, true, new int[] { 0, 1 });
 
     private MetadataPrimaryIndexes() {
     }

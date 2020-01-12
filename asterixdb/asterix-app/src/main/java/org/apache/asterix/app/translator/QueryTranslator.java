@@ -21,6 +21,7 @@ package org.apache.asterix.app.translator;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
+import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -115,6 +116,7 @@ import org.apache.asterix.lang.common.statement.DropDatasetStatement;
 import org.apache.asterix.lang.common.statement.ExternalDetailsDecl;
 import org.apache.asterix.lang.common.statement.FeedDropStatement;
 import org.apache.asterix.lang.common.statement.FeedPolicyDropStatement;
+import org.apache.asterix.lang.common.statement.FullTextFilterDropStatement;
 import org.apache.asterix.lang.common.statement.FunctionDecl;
 import org.apache.asterix.lang.common.statement.FunctionDropStatement;
 import org.apache.asterix.lang.common.statement.IndexDropStatement;
@@ -355,7 +357,7 @@ public class QueryTranslator extends AbstractLangTranslator implements IStatemen
                         handleIndexDropStatement(metadataProvider, stmt, hcc, requestParameters);
                         break;
                     case FULLTEXT_FILTER_DROP:
-                        handleFullTextFilterDrop();
+                        handleFullTextFilterDrop(metadataProvider, stmt, hcc, requestParameters);
                         break;
                     case FULLTEXT_CONFIG_DROP:
                         handleFullTextConfigDrop();
@@ -1005,8 +1007,6 @@ public class QueryTranslator extends AbstractLangTranslator implements IStatemen
         String typeStr = ((LiteralExpr) (fb.get(0).getRightExpr())).getValue().getStringValue().toLowerCase();
         ImmutableList.Builder stopwordsBuilder = ImmutableList.<String> builder();
 
-        ImmutableList.<String> builder().add("Geeks", "For", "Geeks").build();
-
         switch (typeStr) {
             case "stopwords":
                 for (Expression l : ((ListConstructor) (fb.get(1).getRightExpr())).getExprList()) {
@@ -1021,20 +1021,20 @@ public class QueryTranslator extends AbstractLangTranslator implements IStatemen
         try {
             mdTxnCtx = MetadataManager.INSTANCE.beginTransaction();
             metadataProvider.setMetadataTxnContext(mdTxnCtx);
-            MetadataManager.INSTANCE.addFulltextFilter(mdTxnCtx,
+            MetadataManager.INSTANCE.addFullTextFilter(mdTxnCtx,
                     // In progress...
                     // Get the parameters from stmt
                     new StopwordFullTextFilter(stmtCreateFilter.getFilterName(), stopwordsBuilder.build()));
-        } catch (AlgebricksException e) {
+        } catch (AlgebricksException | RemoteException e) {
             e.printStackTrace();
-        } catch (RemoteException e) {
-            e.printStackTrace();
+            //abort(e, e, mdTxnCtx);
+            throw e;
         } finally {
             MetadataManager.INSTANCE.commitTransaction(mdTxnCtx);
         }
 
         // Debug
-        IFullTextFilter filter = MetadataManager.INSTANCE.getFulltextFilter(mdTxnCtx, "first_StopWordFilter");
+        IFullTextFilter filter = MetadataManager.INSTANCE.getFullTextFilter(mdTxnCtx, "first_StopWordFilter");
 
         return;
     }
@@ -1762,7 +1762,21 @@ public class QueryTranslator extends AbstractLangTranslator implements IStatemen
         }
     }
 
-    protected void handleFullTextFilterDrop() {
+    protected void handleFullTextFilterDrop(MetadataProvider metadataProvider, Statement stmt,
+            IHyracksClientConnection hcc, IRequestParameters requestParameters) throws RemoteException {
+
+        MetadataTransactionContext mdTxnCtx = null;
+        try {
+            mdTxnCtx = MetadataManager.INSTANCE.beginTransaction();
+            metadataProvider.setMetadataTxnContext(mdTxnCtx);
+            MetadataManager.INSTANCE.dropFullTextFilter(mdTxnCtx, ((FullTextFilterDropStatement)stmt).getFilterName());
+        } catch (RemoteException e) {
+            e.printStackTrace();
+        } catch (AlgebricksException e) {
+            e.printStackTrace();
+        } finally {
+            MetadataManager.INSTANCE.commitTransaction(mdTxnCtx);
+        }
         return;
     }
 

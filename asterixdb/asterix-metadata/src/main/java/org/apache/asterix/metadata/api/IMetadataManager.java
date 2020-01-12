@@ -406,9 +406,11 @@ public interface IMetadataManager extends IMetadataBootstrap {
     List<Function> getDataverseFunctions(MetadataTransactionContext ctx, DataverseName dataverseName)
             throws AlgebricksException;
 
-    void addFulltextFilter(MetadataTransactionContext mdTxnCtx, IFullTextFilter filter) throws AlgebricksException;
+    void addFullTextFilter(MetadataTransactionContext mdTxnCtx, IFullTextFilter filter) throws AlgebricksException;
 
-    IFullTextFilter getFulltextFilter(MetadataTransactionContext mdTxnCtx, String name) throws RemoteException;
+    void dropFullTextFilter(MetadataTransactionContext mdTxnCtx, String filterName) throws AlgebricksException;
+
+    IFullTextFilter getFullTextFilter(MetadataTransactionContext mdTxnCtx, String name) throws RemoteException;
     /*
     void dropFulltextFilter();
     

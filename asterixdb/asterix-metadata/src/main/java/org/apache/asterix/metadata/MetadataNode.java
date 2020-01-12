@@ -449,7 +449,8 @@ public class MetadataNode implements IMetadataNode {
     }
 
     @Override
-    public void addFulltextFilter(TxnId txnId, IFullTextFilter filter) throws AlgebricksException {
+    public void addFulltextFilter(TxnId txnId, IFullTextFilter filter) throws AlgebricksException,
+            HyracksDataException {
         // Insert into the 'FulltextConfig' dataset.
         System.out.println("in MetadataNode...");
 
@@ -457,10 +458,11 @@ public class MetadataNode implements IMetadataNode {
             FulltextEntityTupleTranslator tupleReaderWriter =
                     tupleTranslatorProvider.getFulltextEntityTupleTranslator(true);
             ITupleReference filterTuple = tupleReaderWriter.getTupleFromMetadataEntity(filter);
-            insertTupleIntoIndex(txnId, MetadataPrimaryIndexes.FULLTEXT_CONFIG_DATASET, filterTuple);
+            insertTupleIntoIndex(txnId, MetadataPrimaryIndexes.FULLTEXT_ENTITY_DATASET, filterTuple);
         } catch (HyracksDataException e) {
             // ToDo: Handle duplicated key error
             e.printStackTrace();
+            throw e;
         }
 
         return;
@@ -476,7 +478,7 @@ public class MetadataNode implements IMetadataNode {
                     translator.createTupleAsIndex(IFullTextEntity.FullTextEntityCategory.FILTER, filterName);
             IValueExtractor<IFullTextEntity> valueExtractor = new MetadataEntityValueExtractor<>(translator);
             List<IFullTextEntity> results = new ArrayList<>();
-            searchIndex(txnId, MetadataPrimaryIndexes.FULLTEXT_CONFIG_DATASET, searchKey, valueExtractor, results);
+            searchIndex(txnId, MetadataPrimaryIndexes.FULLTEXT_ENTITY_DATASET, searchKey, valueExtractor, results);
             if (results.isEmpty()) {
                 return null;
             }
@@ -487,11 +489,20 @@ public class MetadataNode implements IMetadataNode {
         }
     }
 
-    /*
-    @Override public void dropFulltextFilter(TxnId txnId) {
-    
+    @Override public void dropFullTextFilter(TxnId txnId, String filterName) {
+        try {
+            FulltextEntityTupleTranslator translator = tupleTranslatorProvider.getFulltextEntityTupleTranslator(true);
+
+            ITupleReference key =
+                    translator.createTupleAsIndex(IFullTextEntity.FullTextEntityCategory.FILTER, filterName);
+            deleteTupleFromIndex(txnId, MetadataPrimaryIndexes.FULLTEXT_ENTITY_DATASET, key);
+        } catch (HyracksDataException e) {
+            e.printStackTrace();
+        }
+        return;
     }
     
+    /*
     @Override public void addFulltextConfig(TxnId txnId, IFulltextConfig config) {
     
     }

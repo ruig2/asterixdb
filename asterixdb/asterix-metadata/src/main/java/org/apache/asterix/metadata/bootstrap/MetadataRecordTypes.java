@@ -482,7 +482,7 @@ public final class MetadataRecordTypes {
     public static final int FULLTEXT_ENTITY_ARECORD_STOPWORD_LIST_FIELD_INDEX = 4;
 
     public static final String RECORD_NAME_FULLTEXT_ENTITY = "FulltextEntityRecordType";
-    public static final ARecordType FULLTEXT_CONFIG_RECORDTYPE = createRecordType(RECORD_NAME_FULLTEXT_ENTITY,
+    public static final ARecordType FULLTEXT_ENTITY_RECORDTYPE = createRecordType(RECORD_NAME_FULLTEXT_ENTITY,
             // Only two fields are in common in both FulltextFilter and FulltextConfig
             // Other specific fields in FulltextFilter and FulltextConfig are OPEN
             new String[] { FIELD_NAME_FULLTEXT_CATEGORY, FIELD_NAME_FULLTEXT_ENTITY_NAME },

@@ -621,21 +621,31 @@ public abstract class MetadataManager implements IMetadataManager {
     }
 
     @Override
-    public void addFulltextFilter(MetadataTransactionContext mdTxnCtx, IFullTextFilter filter)
+    public void addFullTextFilter(MetadataTransactionContext mdTxnCtx, IFullTextFilter filter)
             throws AlgebricksException {
         try {
             System.out.println("in MetadataManager...");
             metadataNode.addFulltextFilter(mdTxnCtx.getTxnId(), filter);
-        } catch (RemoteException e) {
-            e.printStackTrace();
+        } catch (RemoteException | HyracksDataException e) {
+            throw new MetadataException(ErrorCode.REMOTE_EXCEPTION_WHEN_CALLING_METADATA_NODE, e);
         }
 
         // in progress...
         //mdTxnCtx.addFilter(filter);
     }
 
+    @Override public void dropFullTextFilter(MetadataTransactionContext mdTxnCtx, String filterName) {
+        try {
+            System.out.println("in MetadataManager...");
+            metadataNode.dropFullTextFilter(mdTxnCtx.getTxnId(), filterName);
+        } catch (RemoteException e) {
+            e.printStackTrace();
+        }
+
+    }
+
     @Override
-    public IFullTextFilter getFulltextFilter(MetadataTransactionContext mdTxnCtx, String filterName)
+    public IFullTextFilter getFullTextFilter(MetadataTransactionContext mdTxnCtx, String filterName)
             throws RemoteException {
         // in progress...
         // Support ctx.getFulltextFilter() and cache.getFulltextFilter() similar to the following getIndex() logic later

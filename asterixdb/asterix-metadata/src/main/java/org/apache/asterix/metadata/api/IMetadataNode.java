@@ -43,6 +43,7 @@ import org.apache.asterix.metadata.entities.Node;
 import org.apache.asterix.metadata.entities.NodeGroup;
 import org.apache.asterix.transaction.management.opcallbacks.AbstractIndexModificationOperationCallback;
 import org.apache.hyracks.algebricks.common.exceptions.AlgebricksException;
+import org.apache.hyracks.api.exceptions.HyracksDataException;
 
 /**
  * A metadata node stores metadata in its local storage structures (currently
@@ -434,12 +435,13 @@ public interface IMetadataNode extends Remote, Serializable {
      */
     void addFunction(TxnId txnId, Function function) throws AlgebricksException, RemoteException;
 
-    void addFulltextFilter(TxnId txnId, IFullTextFilter filter) throws AlgebricksException, RemoteException;
+    void addFulltextFilter(TxnId txnId, IFullTextFilter filter)
+            throws AlgebricksException, RemoteException, HyracksDataException;
 
     IFullTextFilter getFulltextFilter(TxnId txnId, String filterName) throws RemoteException, AlgebricksException;
-    /*
-    void dropFulltextFilter(TxnId txnId);
+    void dropFullTextFilter(TxnId txnId, String filterName) throws RemoteException;
     
+    /*
     void addFulltextConfig(TxnId txnId, IFulltextConfig config);
     IFulltextConfig getFulltextConfig(TxnId txnId, String name);
     void dropFulltextConfig(TxnId txnId);

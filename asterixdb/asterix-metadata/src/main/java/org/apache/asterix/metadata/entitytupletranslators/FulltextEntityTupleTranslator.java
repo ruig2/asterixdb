@@ -58,7 +58,7 @@ public class FulltextEntityTupleTranslator extends AbstractTupleTranslator<IFull
             SerializerDeserializerProvider.INSTANCE.getSerializerDeserializer(BuiltinType.AINT8);
 
     protected FulltextEntityTupleTranslator(boolean getTuple) {
-        super(getTuple, MetadataPrimaryIndexes.FULLTEXT_CONFIG_DATASET, FULLTEXT_FILTER_PAYLOAD_TUPLE_FIELD_INDEX);
+        super(getTuple, MetadataPrimaryIndexes.FULLTEXT_ENTITY_DATASET, FULLTEXT_FILTER_PAYLOAD_TUPLE_FIELD_INDEX);
         if (getTuple) {
             // in progress...
             tuple = new ArrayTupleReference();
@@ -168,7 +168,7 @@ public class FulltextEntityTupleTranslator extends AbstractTupleTranslator<IFull
 
         /////////////////////////////////////////////////////////
         // Write the record
-        recordBuilder.reset(MetadataRecordTypes.FULLTEXT_CONFIG_RECORDTYPE);
+        recordBuilder.reset(MetadataRecordTypes.FULLTEXT_ENTITY_RECORDTYPE);
 
         fieldValue.reset();
         aString.setValue(fullTextEntity.getCategory().getValue());
@@ -202,7 +202,7 @@ public class FulltextEntityTupleTranslator extends AbstractTupleTranslator<IFull
             throws HyracksDataException {
         // -1 to get the number of fields in index only
         ArrayTupleBuilder tupleBuilder =
-                new ArrayTupleBuilder(MetadataPrimaryIndexes.FULLTEXT_CONFIG_DATASET.getFieldCount() - 1);
+                new ArrayTupleBuilder(MetadataPrimaryIndexes.FULLTEXT_ENTITY_DATASET.getFieldCount() - 1);
         writeIndex(category, entityName, tupleBuilder);
 
         tuple.reset(tupleBuilder.getFieldEndOffsets(), tupleBuilder.getByteArray());
