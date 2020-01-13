@@ -157,13 +157,6 @@ public class FulltextEntityTupleTranslator extends AbstractTupleTranslator<IFull
         return;
     }
 
-    private void writeFilterPipeline(IFullTextConfig config) {
-
-    }
-
-    private void writeUsedByIndices(IFullTextConfig config) {
-    }
-
     private void writeFulltextConfig(IFullTextConfig config) throws HyracksDataException {
         writeKeyAndValue2FieldVariables(FIELD_NAME_FULLTEXT_TOKENIZER, config.getTokenizer().getCategory().name());
         recordBuilder.addField(fieldName, fieldValue);

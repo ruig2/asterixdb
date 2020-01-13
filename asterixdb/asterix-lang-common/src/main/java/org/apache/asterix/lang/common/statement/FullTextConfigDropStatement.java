@@ -34,7 +34,7 @@ public class FullTextConfigDropStatement extends AbstractStatement {
 
     @Override
     public Kind getKind() {
-        return Kind.FULLTEXT_FILTER_DROP;
+        return Kind.FULLTEXT_CONFIG_DROP;
     }
 
     public String getConfigName() {
