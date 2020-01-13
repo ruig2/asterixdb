@@ -21,5 +21,13 @@ package org.apache.asterix.metadata.api;
 
 // in progress...
 
+import org.apache.asterix.fuzzyjoin.tokenizer.Tokenizer;
+import org.apache.asterix.metadata.entities.Index;
+
+import java.util.List;
+
 public interface IFullTextConfig extends IFullTextEntity {
+    Tokenizer getTokenizer();
+    List<IFullTextFilter> getFilters();
+    List<Index> getUsedByIndices();
 }
