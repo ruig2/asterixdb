@@ -23,6 +23,7 @@ import java.rmi.RemoteException;
 import java.util.List;
 
 import org.apache.asterix.common.exceptions.ACIDException;
+import org.apache.asterix.common.exceptions.MetadataException;
 import org.apache.asterix.common.functions.FunctionSignature;
 import org.apache.asterix.common.metadata.DataverseName;
 import org.apache.asterix.common.metadata.IMetadataBootstrap;
@@ -42,6 +43,7 @@ import org.apache.asterix.metadata.entities.Library;
 import org.apache.asterix.metadata.entities.Node;
 import org.apache.asterix.metadata.entities.NodeGroup;
 import org.apache.hyracks.algebricks.common.exceptions.AlgebricksException;
+import org.apache.hyracks.api.exceptions.HyracksDataException;
 
 /**
  * A metadata manager provides user access to Asterix metadata (e.g., types,
@@ -408,16 +410,16 @@ public interface IMetadataManager extends IMetadataBootstrap {
 
     void addFullTextFilter(MetadataTransactionContext mdTxnCtx, IFullTextFilter filter) throws AlgebricksException;
 
+    IFullTextFilter getFullTextFilter(MetadataTransactionContext mdTxnCtx, String name) throws RemoteException;
+
     void dropFullTextFilter(MetadataTransactionContext mdTxnCtx, String filterName) throws AlgebricksException;
 
-    IFullTextFilter getFullTextFilter(MetadataTransactionContext mdTxnCtx, String name) throws RemoteException;
-    /*
-    void dropFulltextFilter();
-    
-    void addFulltextConfig(IFulltextConfig config);
-    IFulltextConfig getFulltextConfig(String name);
-    void dropFulltextConfig();
-     */
+    void addFulltextConfig(MetadataTransactionContext mdTxnCtx, IFullTextConfig config)
+            throws AlgebricksException, HyracksDataException, RemoteException;
+
+    IFullTextConfig getFullTextConfig(String name);
+
+    void dropFullTextConfig();
 
     /**
      * @param mdTxnCtx

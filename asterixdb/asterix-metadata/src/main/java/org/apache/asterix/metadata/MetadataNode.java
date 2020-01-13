@@ -48,6 +48,7 @@ import org.apache.asterix.metadata.api.ExtensionMetadataDataset;
 import org.apache.asterix.metadata.api.ExtensionMetadataDatasetId;
 import org.apache.asterix.metadata.api.IExtensionMetadataEntity;
 import org.apache.asterix.metadata.api.IExtensionMetadataSearchKey;
+import org.apache.asterix.metadata.api.IFullTextConfig;
 import org.apache.asterix.metadata.api.IFullTextEntity;
 import org.apache.asterix.metadata.api.IFullTextFilter;
 import org.apache.asterix.metadata.api.IMetadataEntityTupleTranslator;
@@ -449,8 +450,8 @@ public class MetadataNode implements IMetadataNode {
     }
 
     @Override
-    public void addFulltextFilter(TxnId txnId, IFullTextFilter filter) throws AlgebricksException,
-            HyracksDataException {
+    public void addFulltextFilter(TxnId txnId, IFullTextFilter filter)
+            throws AlgebricksException, HyracksDataException {
         // Insert into the 'FulltextConfig' dataset.
         System.out.println("in MetadataNode...");
 
@@ -489,7 +490,8 @@ public class MetadataNode implements IMetadataNode {
         }
     }
 
-    @Override public void dropFullTextFilter(TxnId txnId, String filterName) {
+    @Override
+    public void dropFullTextFilter(TxnId txnId, String filterName) {
         try {
             FulltextEntityTupleTranslator translator = tupleTranslatorProvider.getFulltextEntityTupleTranslator(true);
 
@@ -501,21 +503,32 @@ public class MetadataNode implements IMetadataNode {
         }
         return;
     }
-    
-    /*
-    @Override public void addFulltextConfig(TxnId txnId, IFulltextConfig config) {
-    
+
+    @Override public void addFullTextConfig(TxnId txnId, IFullTextConfig config)
+            throws HyracksDataException, AlgebricksException, RemoteException {
+        System.out.println("in MetadataNode...");
+
+        try {
+            FulltextEntityTupleTranslator tupleReaderWriter =
+                    tupleTranslatorProvider.getFulltextEntityTupleTranslator(true);
+            ITupleReference filterTuple = tupleReaderWriter.getTupleFromMetadataEntity(config);
+            insertTupleIntoIndex(txnId, MetadataPrimaryIndexes.FULLTEXT_ENTITY_DATASET, filterTuple);
+        } catch (HyracksDataException | AlgebricksException e) {
+            // ToDo: Handle duplicated key error
+            e.printStackTrace();
+            throw e;
+        }
+
+        return;
     }
-    
-    @Override public IFulltextConfig getFulltextConfig(TxnId txnId, String name) {
+
+    @Override public IFullTextConfig getFullTextConfig(TxnId txnId, String name) {
         return null;
     }
-    
-    @Override public void dropFulltextConfig(TxnId txnId) {
-    
+
+    @Override public void dropFullTextConfig(TxnId txnId) {
+
     }
-    
-     */
 
     private void insertTupleIntoIndex(TxnId txnId, IMetadataIndex metadataIndex, ITupleReference tuple)
             throws HyracksDataException {

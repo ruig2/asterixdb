@@ -39,6 +39,7 @@ import org.apache.asterix.external.indexing.ExternalFile;
 import org.apache.asterix.metadata.api.IAsterixStateProxy;
 import org.apache.asterix.metadata.api.IExtensionMetadataEntity;
 import org.apache.asterix.metadata.api.IExtensionMetadataSearchKey;
+import org.apache.asterix.metadata.api.IFullTextConfig;
 import org.apache.asterix.metadata.api.IFullTextFilter;
 import org.apache.asterix.metadata.api.IMetadataManager;
 import org.apache.asterix.metadata.api.IMetadataNode;
@@ -634,7 +635,8 @@ public abstract class MetadataManager implements IMetadataManager {
         //mdTxnCtx.addFilter(filter);
     }
 
-    @Override public void dropFullTextFilter(MetadataTransactionContext mdTxnCtx, String filterName) {
+    @Override
+    public void dropFullTextFilter(MetadataTransactionContext mdTxnCtx, String filterName) {
         try {
             System.out.println("in MetadataManager...");
             metadataNode.dropFullTextFilter(mdTxnCtx.getTxnId(), filterName);
@@ -642,6 +644,8 @@ public abstract class MetadataManager implements IMetadataManager {
             e.printStackTrace();
         }
 
+        // in progress...
+        //mdTxnCtx.dropFilter(filter);
     }
 
     @Override
@@ -694,23 +698,20 @@ public abstract class MetadataManager implements IMetadataManager {
         return new StopwordFullTextFilter("Failed to get filter", null);
     }
 
-    /*
-    @Override public void dropFulltextFilter() {
-    
+    @Override
+    public void addFulltextConfig(MetadataTransactionContext mdTxnCtx, IFullTextConfig config)
+            throws AlgebricksException, HyracksDataException, RemoteException {
+        System.out.println("in MetadataManager...");
+        metadataNode.addFullTextConfig(mdTxnCtx.getTxnId(), config);
     }
-    
-    @Override public void addFulltextConfig(IFulltextConfig config) {
-    
-    }
-    
-    @Override public IFulltextConfig getFulltextConfig(String name) {
+
+    @Override public IFullTextConfig getFullTextConfig(String name) {
         return null;
     }
-    
-    @Override public void dropFulltextConfig() {
-    
+
+    @Override public void dropFullTextConfig() {
+
     }
-     */
 
     @Override
     public void addFeedPolicy(MetadataTransactionContext mdTxnCtx, FeedPolicyEntity feedPolicy)

@@ -19,29 +19,22 @@
 
 package org.apache.asterix.fuzzyjoin.tokenizer;
 
+import org.apache.commons.lang3.EnumUtils;
+
 public class TokenizerFactory {
     public enum TokenizerCategory {
-        NGram("NGram"),
-        Word("Word");
+        NGRAM,
+        WORD;
 
-        private String value;
-        TokenizerCategory(String value) {
-            this.value = value;
-        }
-
-        public String getValue() {
-            return value;
-        }
-
-        public static TokenizerCategory fromValue(String value) {
-            return Enum.valueOf(TokenizerCategory.class, value);
+        public static TokenizerCategory fromString(String str) {
+            return EnumUtils.getEnumIgnoreCase(TokenizerCategory.class, str);
         }
     }
 
     public static Tokenizer getTokenizer(String tokenizerStr, String wordSeparator, char tokenSeparator) {
-        if (TokenizerCategory.fromValue(tokenizerStr) == TokenizerCategory.NGram) {
+        if (TokenizerCategory.fromString(tokenizerStr) == TokenizerCategory.NGRAM) {
             return new NGramTokenizer();
-        } else if (TokenizerCategory.fromValue(tokenizerStr) == TokenizerCategory.Word) {
+        } else if (TokenizerCategory.fromString(tokenizerStr) == TokenizerCategory.WORD) {
             return new WordTokenizer(wordSeparator, tokenSeparator);
         }
         throw new RuntimeException("Unknown tokenizer \"" + tokenizerStr + "\".");

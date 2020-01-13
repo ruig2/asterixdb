@@ -20,6 +20,8 @@ package org.apache.asterix.lang.common.statement;
 
 import org.apache.asterix.common.exceptions.CompilationException;
 import org.apache.asterix.lang.common.base.AbstractStatement;
+import org.apache.asterix.lang.common.base.Expression;
+import org.apache.asterix.lang.common.base.Statement;
 import org.apache.asterix.lang.common.expression.RecordConstructor;
 import org.apache.asterix.lang.common.visitor.base.ILangVisitor;
 
@@ -33,6 +35,10 @@ public class CreateFullTextConfigStatement extends AbstractStatement {
         this.configName = configName;
         this.ifNotExists = ifNotExists;
         this.expr = expr;
+    }
+
+    public static void checkExpression(Statement stmt) throws Exception {
+        return;
     }
 
     public String getConfigName() {
@@ -58,4 +64,7 @@ public class CreateFullTextConfigStatement extends AbstractStatement {
         return Category.DDL;
     }
 
+    public Expression getExpression() {
+        return expr;
+    }
 }

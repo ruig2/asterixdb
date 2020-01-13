@@ -19,6 +19,8 @@
 
 package org.apache.asterix.metadata.api;
 
+import org.apache.commons.lang3.EnumUtils;
+
 import java.util.List;
 
 // in progress...
@@ -36,7 +38,7 @@ public interface IFullTextFilter extends IFullTextEntity {
         }
 
         public static FullTextFilterType fromValue(String value) {
-            return Enum.valueOf(FullTextFilterType.class, value);
+            return EnumUtils.getEnumIgnoreCase(FullTextFilterType.class, value);
         }
 
         public String getValue() {

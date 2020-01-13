@@ -19,6 +19,8 @@
 
 package org.apache.asterix.metadata.api;
 
+import org.apache.commons.lang3.EnumUtils;
+
 public interface IFullTextEntity {
     enum FullTextEntityCategory {
         FILTER("FILTER"),
@@ -35,7 +37,7 @@ public interface IFullTextEntity {
         }
 
         public static FullTextEntityCategory fromValue(String value) {
-            return Enum.valueOf(FullTextEntityCategory.class, value);
+            return EnumUtils.getEnumIgnoreCase(FullTextEntityCategory.class, value);
         }
     }
 

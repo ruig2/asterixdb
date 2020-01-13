@@ -21,7 +21,6 @@ package org.apache.asterix.app.translator;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
-import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -89,6 +88,7 @@ import org.apache.asterix.external.indexing.IndexingConstants;
 import org.apache.asterix.external.operators.FeedIntakeOperatorNodePushable;
 import org.apache.asterix.external.util.ExternalDataConstants;
 import org.apache.asterix.formats.nontagged.TypeTraitProvider;
+import org.apache.asterix.fuzzyjoin.tokenizer.TokenizerFactory;
 import org.apache.asterix.lang.common.base.Expression;
 import org.apache.asterix.lang.common.base.IReturningStatement;
 import org.apache.asterix.lang.common.base.IRewriterFactory;
@@ -104,6 +104,7 @@ import org.apache.asterix.lang.common.statement.ConnectFeedStatement;
 import org.apache.asterix.lang.common.statement.CreateDataverseStatement;
 import org.apache.asterix.lang.common.statement.CreateFeedPolicyStatement;
 import org.apache.asterix.lang.common.statement.CreateFeedStatement;
+import org.apache.asterix.lang.common.statement.CreateFullTextConfigStatement;
 import org.apache.asterix.lang.common.statement.CreateFullTextFilterStatement;
 import org.apache.asterix.lang.common.statement.CreateFunctionStatement;
 import org.apache.asterix.lang.common.statement.CreateIndexStatement;
@@ -139,6 +140,7 @@ import org.apache.asterix.lang.common.util.FunctionUtil;
 import org.apache.asterix.metadata.IDatasetDetails;
 import org.apache.asterix.metadata.MetadataManager;
 import org.apache.asterix.metadata.MetadataTransactionContext;
+import org.apache.asterix.metadata.api.IFullTextConfig;
 import org.apache.asterix.metadata.api.IFullTextFilter;
 import org.apache.asterix.metadata.bootstrap.MetadataBuiltinEntities;
 import org.apache.asterix.metadata.dataset.hints.DatasetHints;
@@ -157,6 +159,7 @@ import org.apache.asterix.metadata.entities.Function;
 import org.apache.asterix.metadata.entities.Index;
 import org.apache.asterix.metadata.entities.InternalDatasetDetails;
 import org.apache.asterix.metadata.entities.NodeGroup;
+import org.apache.asterix.metadata.entities.fulltext.FullTextConfig;
 import org.apache.asterix.metadata.entities.fulltext.StopwordFullTextFilter;
 import org.apache.asterix.metadata.feeds.FeedMetadataUtil;
 import org.apache.asterix.metadata.lock.ExternalDatasetsRegistry;
@@ -339,7 +342,7 @@ public class QueryTranslator extends AbstractLangTranslator implements IStatemen
                         handleCreateFullTextFilterStatement(metadataProvider, stmt);
                         break;
                     case CREATE_FULLTEXT_CONFIG:
-                        handleCreateFullTextConfigStatement();
+                        handleCreateFullTextConfigStatement(metadataProvider, stmt);
                         break;
                     case TYPE_DECL:
                         handleCreateTypeStatement(metadataProvider, stmt);
@@ -1033,13 +1036,55 @@ public class QueryTranslator extends AbstractLangTranslator implements IStatemen
             MetadataManager.INSTANCE.commitTransaction(mdTxnCtx);
         }
 
-        // Debug
-        IFullTextFilter filter = MetadataManager.INSTANCE.getFullTextFilter(mdTxnCtx, "first_StopWordFilter");
-
         return;
     }
 
-    public void handleCreateFullTextConfigStatement() {
+    public void handleCreateFullTextConfigStatement(MetadataProvider metadataProvider, Statement stmt)
+            throws Exception {
+        CreateFullTextConfigStatement.checkExpression(stmt);
+
+
+        CreateFullTextConfigStatement stmtCreateFilter = (CreateFullTextConfigStatement) stmt;
+        RecordConstructor rc = (RecordConstructor) stmtCreateFilter.getExpression();
+
+        // In progress...
+        // What's the best way to parse the fb?
+        List<FieldBinding> fb = rc.getFbList();
+
+        String tokenizerStr = ((LiteralExpr) (fb.get(0).getRightExpr())).getValue().getStringValue().toLowerCase();
+        TokenizerFactory.TokenizerCategory tokenizerCategory = TokenizerFactory.TokenizerCategory.fromString(tokenizerStr);
+
+        List<String> filterNames = new ArrayList<>();
+        for (Expression l : ((ListConstructor) (fb.get(1).getRightExpr())).getExprList()) {
+            filterNames.add(((LiteralExpr) l).getValue().getStringValue());
+        }
+
+        MetadataTransactionContext mdTxnCtx = null;
+        try {
+            mdTxnCtx = MetadataManager.INSTANCE.beginTransaction();
+            metadataProvider.setMetadataTxnContext(mdTxnCtx);
+
+            ImmutableList.Builder<IFullTextFilter> filtersBuilder = ImmutableList.<IFullTextFilter> builder();
+            for (String name : filterNames) {
+                IFullTextFilter filter = MetadataManager.INSTANCE.getFullTextFilter(mdTxnCtx, name);
+                filtersBuilder.add(filter);
+            }
+
+            IFullTextConfig config = new FullTextConfig(stmtCreateFilter.getConfigName(),
+                    TokenizerFactory.getTokenizer(tokenizerStr, " ", '_'),
+                    filtersBuilder.build());
+
+            MetadataManager.INSTANCE.addFulltextConfig(mdTxnCtx, config);
+            // in progres...
+
+        } catch (RemoteException e) {
+            e.printStackTrace();
+            //abort(e, e, mdTxnCtx);
+            throw e;
+        } finally {
+            MetadataManager.INSTANCE.commitTransaction(mdTxnCtx);
+        }
+
         return;
     }
 
@@ -1769,7 +1814,7 @@ public class QueryTranslator extends AbstractLangTranslator implements IStatemen
         try {
             mdTxnCtx = MetadataManager.INSTANCE.beginTransaction();
             metadataProvider.setMetadataTxnContext(mdTxnCtx);
-            MetadataManager.INSTANCE.dropFullTextFilter(mdTxnCtx, ((FullTextFilterDropStatement)stmt).getFilterName());
+            MetadataManager.INSTANCE.dropFullTextFilter(mdTxnCtx, ((FullTextFilterDropStatement) stmt).getFilterName());
         } catch (RemoteException e) {
             e.printStackTrace();
         } catch (AlgebricksException e) {

@@ -144,7 +144,7 @@ public class FulltextEntityTupleTranslator extends AbstractTupleTranslator<IFull
         return;
     }
 
-    private void getTupleForFulltextConfig(IFullTextConfig config) {
+    private void writeFulltextConfig(IFullTextConfig config) {
     }
 
     private void writeIndex(FullTextEntityCategory category, String entityName, ArrayTupleBuilder tupleBuilder)
@@ -185,7 +185,7 @@ public class FulltextEntityTupleTranslator extends AbstractTupleTranslator<IFull
                 writeFulltextFilter((IFullTextFilter) fullTextEntity);
                 break;
             case CONFIG:
-                getTupleForFulltextConfig((IFullTextConfig) fullTextEntity);
+                writeFulltextConfig((IFullTextConfig) fullTextEntity);
                 break;
             default:
                 break;

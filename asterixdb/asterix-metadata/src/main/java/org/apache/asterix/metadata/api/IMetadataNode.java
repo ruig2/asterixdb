@@ -439,14 +439,14 @@ public interface IMetadataNode extends Remote, Serializable {
             throws AlgebricksException, RemoteException, HyracksDataException;
 
     IFullTextFilter getFulltextFilter(TxnId txnId, String filterName) throws RemoteException, AlgebricksException;
+
     void dropFullTextFilter(TxnId txnId, String filterName) throws RemoteException;
-    
-    /*
-    void addFulltextConfig(TxnId txnId, IFulltextConfig config);
-    IFulltextConfig getFulltextConfig(TxnId txnId, String name);
-    void dropFulltextConfig(TxnId txnId);
-    
-     */
+
+    void addFullTextConfig(TxnId txnId, IFullTextConfig config) throws HyracksDataException, AlgebricksException, RemoteException;
+
+    IFullTextConfig getFullTextConfig(TxnId txnId, String name) throws RemoteException;
+
+    void dropFullTextConfig(TxnId txnId) throws RemoteException;
 
     /**
      * @param txnId
