@@ -87,4 +87,8 @@ public class NGramTokenizer implements Tokenizer {
         }
         return returnVect;
     }
+
+    @Override public TokenizerFactory.TokenizerCategory getCategory() {
+        return TokenizerFactory.TokenizerCategory.NGRAM;
+    }
 }

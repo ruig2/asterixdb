@@ -28,21 +28,11 @@ import java.util.List;
 public interface IFullTextFilter extends IFullTextEntity {
 
     enum FullTextFilterType {
-        STOPWORD("STOPWORD"),
-        SYNONYM("SYNONYM");
+        STOPWORD,
+        SYNONYM;
 
-        private final String value;
-
-        FullTextFilterType(String value) {
-            this.value = value;
-        }
-
-        public static FullTextFilterType fromValue(String value) {
+        public static FullTextFilterType getEnumIgnoreCase(String value) {
             return EnumUtils.getEnumIgnoreCase(FullTextFilterType.class, value);
-        }
-
-        public String getValue() {
-            return this.value;
         }
     }
 

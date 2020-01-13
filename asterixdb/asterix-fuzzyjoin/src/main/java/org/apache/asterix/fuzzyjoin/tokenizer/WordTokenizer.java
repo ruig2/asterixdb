@@ -65,4 +65,8 @@ public class WordTokenizer implements Tokenizer {
         }
         return returnVect;
     }
+
+    @Override public TokenizerFactory.TokenizerCategory getCategory() {
+        return TokenizerFactory.TokenizerCategory.WORD;
+    }
 }

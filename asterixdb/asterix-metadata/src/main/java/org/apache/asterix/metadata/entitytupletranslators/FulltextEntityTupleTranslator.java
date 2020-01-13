@@ -19,10 +19,17 @@
 
 package org.apache.asterix.metadata.entitytupletranslators;
 
+import static org.apache.asterix.metadata.bootstrap.MetadataRecordTypes.FIELD_NAME_FULLTEXT_FILTER_CATEGORY;
+import static org.apache.asterix.metadata.bootstrap.MetadataRecordTypes.FIELD_NAME_FULLTEXT_FILTER_PIPELINE;
+import static org.apache.asterix.metadata.bootstrap.MetadataRecordTypes.FIELD_NAME_FULLTEXT_STOPWORD_LIST;
+import static org.apache.asterix.metadata.bootstrap.MetadataRecordTypes.FIELD_NAME_FULLTEXT_TOKENIZER;
+import static org.apache.asterix.metadata.bootstrap.MetadataRecordTypes.FIELD_NAME_FULLTEXT_USED_BY_CONFIGS;
+import static org.apache.asterix.metadata.bootstrap.MetadataRecordTypes.FIELD_NAME_FULLTEXT_USED_BY_INDICES;
 import static org.apache.asterix.metadata.bootstrap.MetadataRecordTypes.FULLTEXT_ENTITY_ARECORD_FULLTEXT_ENTITY_CATEGORY_FIELD_INDEX;
 import static org.apache.asterix.metadata.bootstrap.MetadataRecordTypes.FULLTEXT_ENTITY_ARECORD_FULLTEXT_ENTITY_NAME_FIELD_INDEX;
 import static org.apache.asterix.metadata.bootstrap.MetadataRecordTypes.FULLTEXT_ENTITY_ARECORD_FULLTEXT_FILTER_KIND_FIELD_INDEX;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.asterix.builders.OrderedListBuilder;
@@ -33,6 +40,7 @@ import org.apache.asterix.metadata.api.IFullTextEntity.FullTextEntityCategory;
 import org.apache.asterix.metadata.api.IFullTextFilter;
 import org.apache.asterix.metadata.bootstrap.MetadataPrimaryIndexes;
 import org.apache.asterix.metadata.bootstrap.MetadataRecordTypes;
+import org.apache.asterix.metadata.entities.Index;
 import org.apache.asterix.metadata.entities.fulltext.StopwordFullTextFilter;
 import org.apache.asterix.om.base.AInt8;
 import org.apache.asterix.om.base.ARecord;
@@ -79,7 +87,7 @@ public class FulltextEntityTupleTranslator extends AbstractTupleTranslator<IFull
                 AString typeAString =
                         (AString) aRecord.getValueByPos(FULLTEXT_ENTITY_ARECORD_FULLTEXT_FILTER_KIND_FIELD_INDEX);
                 IFullTextFilter.FullTextFilterType kind =
-                        IFullTextFilter.FullTextFilterType.fromValue(typeAString.getStringValue());
+                        IFullTextFilter.FullTextFilterType.getEnumIgnoreCase(typeAString.getStringValue());
                 switch (kind) {
                     case STOPWORD:
                         return StopwordFullTextFilter.createFilterFromARecord(aRecord);
@@ -89,17 +97,22 @@ public class FulltextEntityTupleTranslator extends AbstractTupleTranslator<IFull
                 break;
         }
 
+        // debug
         return new StopwordFullTextFilter("decoded_my_stopword_filter", ImmutableList.of("aaa", "bbb", "ccc"));
     }
 
-    private void writeFilterType2RecordBuilder(IFullTextFilter.FullTextFilterType type) throws HyracksDataException {
+    private void writeKeyAndValue2FieldVariables(String key, String value) throws HyracksDataException {
         fieldName.reset();
-        aString.setValue(MetadataRecordTypes.FIELD_NAME_FULLTEXT_FILTER_CATEGORY);
+        aString.setValue(key);
         stringSerde.serialize(aString, fieldName.getDataOutput());
 
         fieldValue.reset();
-        aString.setValue(type.getValue());
+        aString.setValue(value);
         stringSerde.serialize(aString, fieldValue.getDataOutput());
+    }
+
+    private void writeFilterType2RecordBuilder(IFullTextFilter.FullTextFilterType type) throws HyracksDataException {
+        writeKeyAndValue2FieldVariables(FIELD_NAME_FULLTEXT_FILTER_CATEGORY, type.name());
 
         recordBuilder.addField(fieldName, fieldValue);
     }
@@ -127,8 +140,8 @@ public class FulltextEntityTupleTranslator extends AbstractTupleTranslator<IFull
 
     private void writeStopwordFilter(StopwordFullTextFilter stopwordFilter) throws HyracksDataException {
         writeFilterType2RecordBuilder(stopwordFilter.getFilterKind());
-        writeOrderedList2RecordBuilder("UsedByFTConfigs", stopwordFilter.getUsedByFTConfigs());
-        writeOrderedList2RecordBuilder("StopwordList", stopwordFilter.getStopwordList());
+        writeOrderedList2RecordBuilder(FIELD_NAME_FULLTEXT_USED_BY_CONFIGS, stopwordFilter.getUsedByFTConfigs());
+        writeOrderedList2RecordBuilder(FIELD_NAME_FULLTEXT_STOPWORD_LIST, stopwordFilter.getStopwordList());
     }
 
     private void writeFulltextFilter(IFullTextFilter filter) throws HyracksDataException {
@@ -144,7 +157,29 @@ public class FulltextEntityTupleTranslator extends AbstractTupleTranslator<IFull
         return;
     }
 
-    private void writeFulltextConfig(IFullTextConfig config) {
+    private void writeFilterPipeline(IFullTextConfig config) {
+
+    }
+
+    private void writeUsedByIndices(IFullTextConfig config) {
+    }
+
+    private void writeFulltextConfig(IFullTextConfig config) throws HyracksDataException {
+        writeKeyAndValue2FieldVariables(FIELD_NAME_FULLTEXT_TOKENIZER, config.getTokenizer().getCategory().name());
+        recordBuilder.addField(fieldName, fieldValue);
+
+        List<String> filterNames = new ArrayList<>();
+        for (IFullTextFilter f : config.getFilters()) {
+            filterNames.add(f.getName());
+        }
+        writeOrderedList2RecordBuilder(FIELD_NAME_FULLTEXT_FILTER_PIPELINE, filterNames);
+
+        List<String> indexNames = new ArrayList<>();
+        for (Index i : config.getUsedByIndices()) {
+            // include the dataverse and dataset name into the index name?
+            indexNames.add(i.getIndexName());
+        }
+        writeOrderedList2RecordBuilder(FIELD_NAME_FULLTEXT_USED_BY_INDICES, indexNames);
     }
 
     private void writeIndex(FullTextEntityCategory category, String entityName, ArrayTupleBuilder tupleBuilder)

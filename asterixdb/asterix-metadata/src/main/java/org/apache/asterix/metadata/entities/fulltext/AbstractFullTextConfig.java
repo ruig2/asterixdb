@@ -19,6 +19,7 @@
 
 package org.apache.asterix.metadata.entities.fulltext;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.asterix.fuzzyjoin.tokenizer.Tokenizer;
@@ -38,6 +39,7 @@ public abstract class AbstractFullTextConfig implements IFullTextConfig {
         this.name = name;
         this.tokenizer = tokenizer;
         this.filters = filters;
+        this.usedByIndices = new ArrayList<>();
     }
 
     @Override

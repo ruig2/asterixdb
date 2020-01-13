@@ -106,6 +106,11 @@ public final class MetadataRecordTypes {
     public static final String FIELD_NAME_FULLTEXT_CATEGORY = "FulltextEntityCategory";
     public static final String FIELD_NAME_FULLTEXT_ENTITY_NAME = "FulltextEntityName";
     public static final String FIELD_NAME_FULLTEXT_FILTER_CATEGORY = "FulltextFilterType";
+    public static final String FIELD_NAME_FULLTEXT_TOKENIZER = "Tokenizer";
+    public static final String FIELD_NAME_FULLTEXT_FILTER_PIPELINE = "FilterPipeline";
+    public static final String FIELD_NAME_FULLTEXT_USED_BY_CONFIGS = "UsedByConfigs";
+    public static final String FIELD_NAME_FULLTEXT_USED_BY_INDICES = "UsedByIndices";
+    public static final String FIELD_NAME_FULLTEXT_STOPWORD_LIST = "StopwordList";
 
     //---------------------------------- Record Types Creation ----------------------------------//
     //--------------------------------------- Properties ----------------------------------------//
