@@ -20,12 +20,12 @@
 package org.apache.asterix.fuzzyjoin.tokenizer;
 
 public class TokenizerFactory {
-    public enum TokenizerType {
+    public enum TokenizerCategory {
         NGram("NGram"),
         Word("Word");
 
         private String value;
-        TokenizerType(String value) {
+        TokenizerCategory(String value) {
             this.value = value;
         }
 
@@ -33,15 +33,15 @@ public class TokenizerFactory {
             return value;
         }
 
-        public static TokenizerType fromValue(String value) {
-            return Enum.valueOf(TokenizerType.class, value);
+        public static TokenizerCategory fromValue(String value) {
+            return Enum.valueOf(TokenizerCategory.class, value);
         }
     }
 
     public static Tokenizer getTokenizer(String tokenizerStr, String wordSeparator, char tokenSeparator) {
-        if (TokenizerType.fromValue(tokenizerStr) == TokenizerType.NGram) {
+        if (TokenizerCategory.fromValue(tokenizerStr) == TokenizerCategory.NGram) {
             return new NGramTokenizer();
-        } else if (TokenizerType.fromValue(tokenizerStr) == TokenizerType.Word) {
+        } else if (TokenizerCategory.fromValue(tokenizerStr) == TokenizerCategory.Word) {
             return new WordTokenizer(wordSeparator, tokenSeparator);
         }
         throw new RuntimeException("Unknown tokenizer \"" + tokenizerStr + "\".");
