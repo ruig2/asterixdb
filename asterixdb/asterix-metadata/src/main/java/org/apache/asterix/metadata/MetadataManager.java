@@ -636,10 +636,10 @@ public abstract class MetadataManager implements IMetadataManager {
     }
 
     @Override
-    public void dropFullTextFilter(MetadataTransactionContext mdTxnCtx, String filterName) {
+    public void dropFullTextFilter(MetadataTransactionContext mdTxnCtx, String filterName, boolean ifExists)
+            throws AlgebricksException {
         try {
-            System.out.println("in MetadataManager...");
-            metadataNode.dropFullTextFilter(mdTxnCtx.getTxnId(), filterName);
+            metadataNode.dropFullTextFilter(mdTxnCtx.getTxnId(), filterName, ifExists);
         } catch (RemoteException e) {
             e.printStackTrace();
         }
@@ -709,8 +709,13 @@ public abstract class MetadataManager implements IMetadataManager {
         return null;
     }
 
-    @Override public void dropFullTextConfig() {
-
+    @Override public void dropFullTextConfig(MetadataTransactionContext mdTxnCtx, String configName, boolean ifExists)
+            throws AlgebricksException {
+        try {
+            metadataNode.dropFullTextConfig(mdTxnCtx.getTxnId(), configName, ifExists);
+        } catch (RemoteException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override

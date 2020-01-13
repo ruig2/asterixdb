@@ -491,7 +491,7 @@ public class MetadataNode implements IMetadataNode {
     }
 
     @Override
-    public void dropFullTextFilter(TxnId txnId, String filterName) {
+    public void dropFullTextFilter(TxnId txnId, String filterName, boolean ifExists) throws AlgebricksException {
         try {
             FulltextEntityTupleTranslator translator = tupleTranslatorProvider.getFulltextEntityTupleTranslator(true);
 
@@ -500,6 +500,13 @@ public class MetadataNode implements IMetadataNode {
             deleteTupleFromIndex(txnId, MetadataPrimaryIndexes.FULLTEXT_ENTITY_DATASET, key);
         } catch (HyracksDataException e) {
             e.printStackTrace();
+            // debug: UPDATE_OR_DELETE_NON_EXISTENT_KEY never triggered?
+            if (e.getComponent().equals(ErrorCode.HYRACKS)
+                    && e.getErrorCode() == ErrorCode.UPDATE_OR_DELETE_NON_EXISTENT_KEY
+                    && ifExists) {
+                return;
+            }
+            throw new AlgebricksException(e);
         }
         return;
     }
@@ -526,7 +533,25 @@ public class MetadataNode implements IMetadataNode {
         return null;
     }
 
-    @Override public void dropFullTextConfig(TxnId txnId) {
+    @Override public void dropFullTextConfig(TxnId txnId, String configName, boolean ifExists)
+            throws AlgebricksException {
+        try {
+            FulltextEntityTupleTranslator translator = tupleTranslatorProvider.getFulltextEntityTupleTranslator(true);
+
+            ITupleReference key =
+                    translator.createTupleAsIndex(IFullTextEntity.FullTextEntityCategory.CONFIG, configName);
+            deleteTupleFromIndex(txnId, MetadataPrimaryIndexes.FULLTEXT_ENTITY_DATASET, key);
+        } catch (HyracksDataException e) {
+            e.printStackTrace();
+            // debug: UPDATE_OR_DELETE_NON_EXISTENT_KEY never triggered?
+            if (e.getComponent().equals(ErrorCode.HYRACKS)
+                    && e.getErrorCode() == ErrorCode.UPDATE_OR_DELETE_NON_EXISTENT_KEY
+                    && ifExists) {
+                return;
+            }
+            throw new AlgebricksException(e);
+        }
+        return;
 
     }
 

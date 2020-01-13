@@ -117,6 +117,7 @@ import org.apache.asterix.lang.common.statement.DropDatasetStatement;
 import org.apache.asterix.lang.common.statement.ExternalDetailsDecl;
 import org.apache.asterix.lang.common.statement.FeedDropStatement;
 import org.apache.asterix.lang.common.statement.FeedPolicyDropStatement;
+import org.apache.asterix.lang.common.statement.FullTextConfigDropStatement;
 import org.apache.asterix.lang.common.statement.FullTextFilterDropStatement;
 import org.apache.asterix.lang.common.statement.FunctionDecl;
 import org.apache.asterix.lang.common.statement.FunctionDropStatement;
@@ -363,7 +364,7 @@ public class QueryTranslator extends AbstractLangTranslator implements IStatemen
                         handleFullTextFilterDrop(metadataProvider, stmt, hcc, requestParameters);
                         break;
                     case FULLTEXT_CONFIG_DROP:
-                        handleFullTextConfigDrop();
+                        handleFullTextConfigDrop(metadataProvider, stmt, hcc, requestParameters);
                         break;
                     case TYPE_DROP:
                         handleTypeDropStatement(metadataProvider, stmt);
@@ -1809,12 +1810,15 @@ public class QueryTranslator extends AbstractLangTranslator implements IStatemen
 
     protected void handleFullTextFilterDrop(MetadataProvider metadataProvider, Statement stmt,
             IHyracksClientConnection hcc, IRequestParameters requestParameters) throws RemoteException {
+        FullTextFilterDropStatement stmtFilterDrop = (FullTextFilterDropStatement)stmt;
 
         MetadataTransactionContext mdTxnCtx = null;
         try {
             mdTxnCtx = MetadataManager.INSTANCE.beginTransaction();
             metadataProvider.setMetadataTxnContext(mdTxnCtx);
-            MetadataManager.INSTANCE.dropFullTextFilter(mdTxnCtx, ((FullTextFilterDropStatement) stmt).getFilterName());
+            // in progress...
+            // handle "if exists"
+            MetadataManager.INSTANCE.dropFullTextFilter(mdTxnCtx, stmtFilterDrop.getFilterName(), stmtFilterDrop.getIfExists());
         } catch (RemoteException e) {
             e.printStackTrace();
         } catch (AlgebricksException e) {
@@ -1825,7 +1829,24 @@ public class QueryTranslator extends AbstractLangTranslator implements IStatemen
         return;
     }
 
-    protected void handleFullTextConfigDrop() {
+    protected void handleFullTextConfigDrop(MetadataProvider metadataProvider, Statement stmt,
+            IHyracksClientConnection hcc, IRequestParameters requestParameters)
+            throws RemoteException, AlgebricksException {
+        FullTextConfigDropStatement stmtConfigDrop = (FullTextConfigDropStatement) stmt;
+
+        MetadataTransactionContext mdTxnCtx = null;
+        try {
+            mdTxnCtx = MetadataManager.INSTANCE.beginTransaction();
+            metadataProvider.setMetadataTxnContext(mdTxnCtx);
+            // handle "if exists"
+            MetadataManager.INSTANCE.dropFullTextConfig(mdTxnCtx, stmtConfigDrop.getConfigName(), stmtConfigDrop.getIfExists());
+        } catch (RemoteException e) {
+            e.printStackTrace();
+        } finally {
+            MetadataManager.INSTANCE.commitTransaction(mdTxnCtx);
+        }
+
+        // handle "if exists"
         return;
     }
 

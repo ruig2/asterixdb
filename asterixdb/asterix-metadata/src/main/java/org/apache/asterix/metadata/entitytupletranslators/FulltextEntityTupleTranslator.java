@@ -178,7 +178,7 @@ public class FulltextEntityTupleTranslator extends AbstractTupleTranslator<IFull
     private void writeIndex(FullTextEntityCategory category, String entityName, ArrayTupleBuilder tupleBuilder)
             throws HyracksDataException {
         // Write the 2 primary-index key fields
-        aString.setValue(category.getValue());
+        aString.setValue(category.name());
         stringSerde.serialize(aString, tupleBuilder.getDataOutput());
         tupleBuilder.addFieldEndOffset();
 
@@ -199,7 +199,7 @@ public class FulltextEntityTupleTranslator extends AbstractTupleTranslator<IFull
         recordBuilder.reset(MetadataRecordTypes.FULLTEXT_ENTITY_RECORDTYPE);
 
         fieldValue.reset();
-        aString.setValue(fullTextEntity.getCategory().getValue());
+        aString.setValue(fullTextEntity.getCategory().name());
         stringSerde.serialize(aString, fieldValue.getDataOutput());
         recordBuilder.addField(FULLTEXT_ENTITY_ARECORD_FULLTEXT_ENTITY_CATEGORY_FIELD_INDEX, fieldValue);
 

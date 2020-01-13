@@ -23,18 +23,8 @@ import org.apache.commons.lang3.EnumUtils;
 
 public interface IFullTextEntity {
     enum FullTextEntityCategory {
-        FILTER("FILTER"),
-        CONFIG("CONFIG");
-
-        private final String value;
-
-        FullTextEntityCategory(String value) {
-            this.value = value;
-        }
-
-        public String getValue() {
-            return this.value;
-        }
+        FILTER,
+        CONFIG;
 
         public static FullTextEntityCategory fromValue(String value) {
             return EnumUtils.getEnumIgnoreCase(FullTextEntityCategory.class, value);
