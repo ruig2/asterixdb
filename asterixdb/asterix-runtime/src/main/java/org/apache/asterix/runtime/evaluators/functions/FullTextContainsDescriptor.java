@@ -48,13 +48,14 @@ public class FullTextContainsDescriptor extends AbstractScalarFunctionDynamicDes
     public static final String DISJUNCTIVE_SEARCH_MODE_OPTION = "any";
     public static final String CONJUNCTIVE_SEARCH_MODE_OPTION = "all";
 
-    public static final String FULLTEXT_CONFIG_OPTION = "config";
-
     private static final byte[] SEARCH_MODE_OPTION_ARRAY = UTF8StringUtil.writeStringToBytes(SEARCH_MODE_OPTION);
     private static final byte[] DISJUNCTIVE_SEARCH_MODE_OPTION_ARRAY =
             UTF8StringUtil.writeStringToBytes(DISJUNCTIVE_SEARCH_MODE_OPTION);
     private static final byte[] CONJUNCTIVE_SEARCH_MODE_OPTION_ARRAY =
             UTF8StringUtil.writeStringToBytes(CONJUNCTIVE_SEARCH_MODE_OPTION);
+
+    public static final String FULLTEXT_CONFIG_OPTION = "config";
+    private static final byte[] FULLTEXT_CONFIG_OPTION_ARRAY = UTF8StringUtil.writeStringToBytes(FULLTEXT_CONFIG_OPTION);
 
     static {
         paramTypeMap.put(SEARCH_MODE_OPTION, ATypeTag.STRING);
@@ -94,6 +95,10 @@ public class FullTextContainsDescriptor extends AbstractScalarFunctionDynamicDes
 
     public static byte[] getSearchModeOptionArray() {
         return SEARCH_MODE_OPTION_ARRAY;
+    }
+
+    public static byte[] getFulltextConfigOptionArray() {
+        return FULLTEXT_CONFIG_OPTION_ARRAY;
     }
 
     public static byte[] getDisjunctiveFTSearchOptionArray() {

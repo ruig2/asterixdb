@@ -100,6 +100,8 @@ public class FullTextContainsEvaluator implements IScalarEvaluator {
     // Else if it is equal to the number of tokens, then we will do a conjunctive search.
     private int occurrenceThreshold = 1;
 
+    private String fullTextConfig = "";
+
     static final int HASH_SET_SLOT_SIZE = 101;
     static final int HASH_SET_FRAME_SIZE = 32768;
 
@@ -286,6 +288,12 @@ public class FullTextContainsEvaluator implements IScalarEvaluator {
         }
         tokenizerForRightArray.reset(queryArray, queryArrayStartOffset, queryArrayLength);
 
+        // Apply the full-text search option here
+        // Based on the search mode option - "any" or "all", set the occurrence threshold of tokens.
+        setFullTextOption(argOptions, uniqueQueryTokenCount);
+
+        //IFullTextConfig config =
+
         // Create tokens from the given query predicate
         while (tokenizerForRightArray.hasNext()) {
             tokenizerForRightArray.next();
@@ -335,10 +343,6 @@ public class FullTextContainsEvaluator implements IScalarEvaluator {
             }
 
         }
-
-        // Apply the full-text search option here
-        // Based on the search mode option - "any" or "all", set the occurrence threshold of tokens.
-        setFullTextOption(argOptions, uniqueQueryTokenCount);
     }
 
     private void checkWhetherFullTextPredicateIsPhrase(ATypeTag typeTag, byte[] refArray, int tokenOffset,
@@ -372,6 +376,7 @@ public class FullTextContainsEvaluator implements IScalarEvaluator {
     private void setFullTextOption(IPointable[] argOptions, int uniqueQueryTokenCount) throws HyracksDataException {
         // By default, we conduct a conjunctive search.
         occurrenceThreshold = uniqueQueryTokenCount;
+        // in progress... Maybe using a JSON parser here can make things easier?
         for (int i = 0; i < optionArgsLength; i = i + 2) {
             // mode option
             if (compareStrInByteArrayAndPointable(FullTextContainsDescriptor.getSearchModeOptionArray(), argOptions[i],
@@ -385,6 +390,9 @@ public class FullTextContainsEvaluator implements IScalarEvaluator {
                     // ALL
                     occurrenceThreshold = uniqueQueryTokenCount;
                 }
+            } else if (compareStrInByteArrayAndPointable(FullTextContainsDescriptor.getFulltextConfigOptionArray(), argOptions[i],
+                    true) == 0) {
+                    fullTextConfig = String.valueOf(argOptions[i + 1]);
             }
         }
     }
