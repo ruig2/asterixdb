@@ -47,7 +47,7 @@ public class StopwordFullTextFilter extends AbstractFullTextFilter {
         IACursor stopwordsCursor =
                 ((AOrderedList) (aRecord.getValueByPos(FULLTEXT_ENTITY_ARECORD_STOPWORD_LIST_FIELD_INDEX))).getCursor();
         while (stopwordsCursor.next()) {
-            stopwordsBuilder.add(stopwordsCursor.get());
+            stopwordsBuilder.add(((AString)stopwordsCursor.get()).getStringValue());
         }
         StopwordFullTextFilter filter = new StopwordFullTextFilter(name, stopwordsBuilder.build());
 

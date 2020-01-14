@@ -50,7 +50,7 @@ public abstract class AbstractFullTextFilter implements IFullTextFilter {
         return type;
     }
 
-    @Override
+    @Override // in progress... Maybe use List<IFullTextConfig> instead of String?
     public List<String> getUsedByFTConfigs() {
         return usedByFTConfigs;
     }

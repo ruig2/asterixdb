@@ -19,6 +19,7 @@
 
 package org.apache.asterix.metadata.api;
 
+import org.apache.asterix.common.transactions.TxnId;
 import org.apache.commons.lang3.EnumUtils;
 
 public interface IFullTextEntity {

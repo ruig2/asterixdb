@@ -22,12 +22,16 @@ package org.apache.asterix.metadata.entities.fulltext;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.asterix.common.transactions.TxnId;
 import org.apache.asterix.fuzzyjoin.tokenizer.Tokenizer;
 import org.apache.asterix.metadata.api.IFullTextConfig;
 import org.apache.asterix.metadata.api.IFullTextFilter;
+import org.apache.asterix.metadata.bootstrap.MetadataPrimaryIndexes;
 import org.apache.asterix.metadata.entities.Index;
 
 import com.google.common.collect.ImmutableList;
+import org.apache.asterix.metadata.entitytupletranslators.FulltextEntityTupleTranslator;
+import org.apache.hyracks.dataflow.common.data.accessors.ITupleReference;
 
 public abstract class AbstractFullTextConfig implements IFullTextConfig {
     private final String name;

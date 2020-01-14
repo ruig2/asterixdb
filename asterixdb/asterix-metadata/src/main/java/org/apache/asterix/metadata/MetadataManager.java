@@ -56,6 +56,7 @@ import org.apache.asterix.metadata.entities.Index;
 import org.apache.asterix.metadata.entities.Library;
 import org.apache.asterix.metadata.entities.Node;
 import org.apache.asterix.metadata.entities.NodeGroup;
+import org.apache.asterix.metadata.entities.fulltext.FullTextConfig;
 import org.apache.asterix.metadata.entities.fulltext.StopwordFullTextFilter;
 import org.apache.asterix.om.types.ARecordType;
 import org.apache.asterix.transaction.management.opcallbacks.AbstractIndexModificationOperationCallback.Operation;
@@ -705,8 +706,10 @@ public abstract class MetadataManager implements IMetadataManager {
         metadataNode.addFullTextConfig(mdTxnCtx.getTxnId(), config);
     }
 
-    @Override public IFullTextConfig getFullTextConfig(String name) {
-        return null;
+    @Override
+    public IFullTextConfig getFullTextConfig(MetadataTransactionContext mdTxnCtx, String configName)
+            throws RemoteException, AlgebricksException {
+        return metadataNode.getFullTextConfig(mdTxnCtx.getTxnId(), configName);
     }
 
     @Override public void dropFullTextConfig(MetadataTransactionContext mdTxnCtx, String configName, boolean ifExists)

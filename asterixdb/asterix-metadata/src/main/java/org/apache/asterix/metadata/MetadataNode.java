@@ -235,7 +235,7 @@ public class MetadataNode implements IMetadataNode {
             IMetadataIndex index) throws AlgebricksException {
         try {
             ITupleReference tuple = tupleTranslator.getTupleFromMetadataEntity(entity);
-            upsertTupleIntoIndex(txnId, index, tuple);
+            modifyTupleIntoIndex(txnId, index, tuple);
         } catch (HyracksDataException e) {
             throw new AlgebricksException(e);
         }
@@ -456,10 +456,7 @@ public class MetadataNode implements IMetadataNode {
         System.out.println("in MetadataNode...");
 
         try {
-            FulltextEntityTupleTranslator tupleReaderWriter =
-                    tupleTranslatorProvider.getFulltextEntityTupleTranslator(true);
-            ITupleReference filterTuple = tupleReaderWriter.getTupleFromMetadataEntity(filter);
-            insertTupleIntoIndex(txnId, MetadataPrimaryIndexes.FULLTEXT_ENTITY_DATASET, filterTuple);
+            insertFullTextEntityToCatalog(txnId, filter);
         } catch (HyracksDataException e) {
             // ToDo: Handle duplicated key error
             e.printStackTrace();
@@ -511,15 +508,35 @@ public class MetadataNode implements IMetadataNode {
         return;
     }
 
-    @Override public void addFullTextConfig(TxnId txnId, IFullTextConfig config)
+    private void insertFullTextEntityToCatalog(TxnId txnId, IFullTextEntity entity)
+            throws AlgebricksException, HyracksDataException {
+        FulltextEntityTupleTranslator tupleReaderWriter =
+                tupleTranslatorProvider.getFulltextEntityTupleTranslator(true);
+        ITupleReference filterTuple = tupleReaderWriter.getTupleFromMetadataEntity(entity);
+        insertTupleIntoIndex(txnId, MetadataPrimaryIndexes.FULLTEXT_ENTITY_DATASET, filterTuple);
+    }
+
+    private void upsertExistingFullTextEntityToCatalog(TxnId txnId, IFullTextEntity entity)
+            throws AlgebricksException, HyracksDataException {
+        FulltextEntityTupleTranslator tupleReaderWriter =
+                tupleTranslatorProvider.getFulltextEntityTupleTranslator(true);
+        ITupleReference filterTuple = tupleReaderWriter.getTupleFromMetadataEntity(entity);
+        modifyTupleIntoIndex(txnId, MetadataPrimaryIndexes.FULLTEXT_ENTITY_DATASET, filterTuple);
+    }
+
+    @Override
+    public void addFullTextConfig(TxnId txnId, IFullTextConfig config)
             throws HyracksDataException, AlgebricksException, RemoteException {
         System.out.println("in MetadataNode...");
 
         try {
-            FulltextEntityTupleTranslator tupleReaderWriter =
-                    tupleTranslatorProvider.getFulltextEntityTupleTranslator(true);
-            ITupleReference filterTuple = tupleReaderWriter.getTupleFromMetadataEntity(config);
-            insertTupleIntoIndex(txnId, MetadataPrimaryIndexes.FULLTEXT_ENTITY_DATASET, filterTuple);
+            // Make the following a transaction to avoid data corruption, e.g. , config is updated but filters not
+            insertFullTextEntityToCatalog(txnId, config);
+            for (IFullTextFilter f : config.getFilters()) {
+                f.addUsedByFTConfigs(config.getName());
+                upsertExistingFullTextEntityToCatalog(txnId, f);
+            }
+
         } catch (HyracksDataException | AlgebricksException e) {
             // ToDo: Handle duplicated key error
             e.printStackTrace();
@@ -529,8 +546,23 @@ public class MetadataNode implements IMetadataNode {
         return;
     }
 
-    @Override public IFullTextConfig getFullTextConfig(TxnId txnId, String name) {
-        return null;
+    @Override
+    public IFullTextConfig getFullTextConfig(TxnId txnId, String configName) throws AlgebricksException {
+        try {
+            FulltextEntityTupleTranslator translator = tupleTranslatorProvider.getFulltextEntityTupleTranslator(true);
+
+            ITupleReference searchKey =
+                    translator.createTupleAsIndex(IFullTextEntity.FullTextEntityCategory.CONFIG, configName);
+            IValueExtractor<IFullTextEntity> valueExtractor = new MetadataEntityValueExtractor<>(translator);
+            List<IFullTextEntity> results = new ArrayList<>();
+            searchIndex(txnId, MetadataPrimaryIndexes.FULLTEXT_ENTITY_DATASET, searchKey, valueExtractor, results);
+            if (results.isEmpty()) {
+                return null;
+            }
+            return (IFullTextConfig) results.get(0);
+        } catch (HyracksDataException e) {
+            throw new AlgebricksException(e);
+        }
     }
 
     @Override public void dropFullTextConfig(TxnId txnId, String configName, boolean ifExists)
@@ -560,7 +592,7 @@ public class MetadataNode implements IMetadataNode {
         modifyMetadataIndex(Operation.INSERT, txnId, metadataIndex, tuple);
     }
 
-    private void upsertTupleIntoIndex(TxnId txnId, IMetadataIndex metadataIndex, ITupleReference tuple)
+    private void modifyTupleIntoIndex(TxnId txnId, IMetadataIndex metadataIndex, ITupleReference tuple)
             throws HyracksDataException {
         modifyMetadataIndex(Operation.UPSERT, txnId, metadataIndex, tuple);
     }

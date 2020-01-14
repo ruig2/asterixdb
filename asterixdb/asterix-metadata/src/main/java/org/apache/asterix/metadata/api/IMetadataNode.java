@@ -445,7 +445,7 @@ public interface IMetadataNode extends Remote, Serializable {
 
     void addFullTextConfig(TxnId txnId, IFullTextConfig config) throws HyracksDataException, AlgebricksException, RemoteException;
 
-    IFullTextConfig getFullTextConfig(TxnId txnId, String name) throws RemoteException;
+    IFullTextConfig getFullTextConfig(TxnId txnId, String name) throws RemoteException, AlgebricksException;
 
     void dropFullTextConfig(TxnId txnId, String configName, boolean ifExists)
             throws RemoteException, AlgebricksException;
