@@ -325,6 +325,8 @@ public class FullTextContainsEvaluator implements IScalarEvaluator {
             // The same logic should be applied in AbstractTOccurrenceSearcher() class.
             checkWhetherFullTextPredicateIsPhrase(typeTag2, queryArray, tokenOffset, tokenLength, queryTokenCount);
 
+            //IFullTextConfig config = null;
+
             // Count the number of tokens in the given query. We only count the unique tokens.
             // We only care about the first insertion of the token into the hash set
             // since we apply the set semantics.
