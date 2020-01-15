@@ -17,27 +17,21 @@
  * under the License.
  */
 
-package org.apache.asterix.metadata.entities.fulltext;
+package org.apache.asterix.fuzzyjoin.fulltextentity;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.asterix.common.transactions.TxnId;
 import org.apache.asterix.fuzzyjoin.tokenizer.Tokenizer;
-import org.apache.asterix.metadata.api.IFullTextConfig;
-import org.apache.asterix.metadata.api.IFullTextFilter;
-import org.apache.asterix.metadata.bootstrap.MetadataPrimaryIndexes;
-import org.apache.asterix.metadata.entities.Index;
 
 import com.google.common.collect.ImmutableList;
-import org.apache.asterix.metadata.entitytupletranslators.FulltextEntityTupleTranslator;
-import org.apache.hyracks.dataflow.common.data.accessors.ITupleReference;
 
 public abstract class AbstractFullTextConfig implements IFullTextConfig {
     private final String name;
     private final Tokenizer tokenizer;
     private ImmutableList<IFullTextFilter> filters;
-    private List<Index> usedByIndices;
+    // in progress... maybe use Index class instead of String?
+    private List<String> usedByIndices;
 
     protected AbstractFullTextConfig(String name, Tokenizer tokenizer, ImmutableList<IFullTextFilter> filters) {
         this.name = name;
@@ -67,7 +61,7 @@ public abstract class AbstractFullTextConfig implements IFullTextConfig {
     }
 
     @Override
-    public List<Index> getUsedByIndices() {
+    public List<String> getUsedByIndices() {
         return usedByIndices;
     }
 }

@@ -17,28 +17,21 @@
  * under the License.
  */
 
-package org.apache.asterix.metadata.api;
-
-import org.apache.commons.lang3.EnumUtils;
+package org.apache.asterix.fuzzyjoin.fulltextentity;
 
 import java.util.List;
 
-// in progress...
+import com.google.common.collect.ImmutableList;
 
-public interface IFullTextFilter extends IFullTextEntity {
+public class StopwordFullTextFilter extends AbstractFullTextFilter {
+    ImmutableList<String> stopwordList;
 
-    enum FullTextFilterType {
-        STOPWORD,
-        SYNONYM;
-
-        public static FullTextFilterType getEnumIgnoreCase(String value) {
-            return EnumUtils.getEnumIgnoreCase(FullTextFilterType.class, value);
-        }
+    public StopwordFullTextFilter(String name, ImmutableList<String> stopwordList) {
+        super(name, FullTextFilterType.STOPWORD);
+        this.stopwordList = stopwordList;
     }
 
-    FullTextFilterType getFilterKind();
-
-    List<String> getUsedByFTConfigs();
-
-    void addUsedByFTConfigs(String ftConfigName);
+    public List<String> getStopwordList() {
+        return stopwordList;
+    }
 }

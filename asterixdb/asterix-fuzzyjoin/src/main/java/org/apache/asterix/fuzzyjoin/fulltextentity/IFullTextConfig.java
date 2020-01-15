@@ -16,15 +16,19 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.asterix.metadata.entities.fulltext;
 
-import com.google.common.collect.ImmutableMap;
+package org.apache.asterix.fuzzyjoin.fulltextentity;
 
-public class SynonymFullTextFilter extends AbstractFullTextFilter {
-    ImmutableMap<String, String> synonymMap;
+import java.util.List;
 
-    public SynonymFullTextFilter(String name, ImmutableMap<String, String> synonymMap) {
-        super(name, FullTextFilterType.STOPWORD);
-        this.synonymMap = synonymMap;
-    }
+// in progress...
+import org.apache.asterix.fuzzyjoin.tokenizer.Tokenizer;
+
+public interface IFullTextConfig extends IFullTextEntity {
+    Tokenizer getTokenizer();
+
+    List<IFullTextFilter> getFilters();
+
+    // in progress...Maybe use the Index class instead of String?
+    List<String> getUsedByIndices();
 }

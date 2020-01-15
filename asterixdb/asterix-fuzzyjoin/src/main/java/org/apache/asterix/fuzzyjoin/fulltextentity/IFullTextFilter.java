@@ -17,22 +17,28 @@
  * under the License.
  */
 
-package org.apache.asterix.metadata.api;
+package org.apache.asterix.fuzzyjoin.fulltextentity;
 
-import org.apache.asterix.common.transactions.TxnId;
 import org.apache.commons.lang3.EnumUtils;
 
-public interface IFullTextEntity {
-    enum FullTextEntityCategory {
-        FILTER,
-        CONFIG;
+import java.util.List;
 
-        public static FullTextEntityCategory fromValue(String value) {
-            return EnumUtils.getEnumIgnoreCase(FullTextEntityCategory.class, value);
+// in progress...
+
+public interface IFullTextFilter extends IFullTextEntity {
+
+    enum FullTextFilterType {
+        STOPWORD,
+        SYNONYM;
+
+        public static FullTextFilterType getEnumIgnoreCase(String value) {
+            return EnumUtils.getEnumIgnoreCase(FullTextFilterType.class, value);
         }
     }
 
-    FullTextEntityCategory getCategory();
+    FullTextFilterType getFilterKind();
 
-    String getName();
+    List<String> getUsedByFTConfigs();
+
+    void addUsedByFTConfigs(String ftConfigName);
 }

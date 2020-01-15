@@ -17,18 +17,22 @@
  * under the License.
  */
 
-package org.apache.asterix.metadata.api;
+package org.apache.asterix.fuzzyjoin.fulltextentity;
 
-import java.util.List;
+import org.apache.asterix.common.transactions.TxnId;
+import org.apache.commons.lang3.EnumUtils;
 
-// in progress...
-import org.apache.asterix.fuzzyjoin.tokenizer.Tokenizer;
-import org.apache.asterix.metadata.entities.Index;
+public interface IFullTextEntity {
+    enum FullTextEntityCategory {
+        FILTER,
+        CONFIG;
 
-public interface IFullTextConfig extends IFullTextEntity {
-    Tokenizer getTokenizer();
+        public static FullTextEntityCategory fromValue(String value) {
+            return EnumUtils.getEnumIgnoreCase(FullTextEntityCategory.class, value);
+        }
+    }
 
-    List<IFullTextFilter> getFilters();
+    FullTextEntityCategory getCategory();
 
-    List<Index> getUsedByIndices();
+    String getName();
 }

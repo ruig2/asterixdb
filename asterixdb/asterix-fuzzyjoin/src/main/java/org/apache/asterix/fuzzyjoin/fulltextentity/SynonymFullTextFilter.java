@@ -1,4 +1,4 @@
-/**
+/*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -16,17 +16,15 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+package org.apache.asterix.fuzzyjoin.fulltextentity;
 
-package org.apache.asterix.metadata.entities.fulltext;
+import com.google.common.collect.ImmutableMap;
 
-import org.apache.asterix.fuzzyjoin.tokenizer.Tokenizer;
-import org.apache.asterix.metadata.api.IFullTextFilter;
+public class SynonymFullTextFilter extends AbstractFullTextFilter {
+    ImmutableMap<String, String> synonymMap;
 
-import com.google.common.collect.ImmutableList;
-
-public class FullTextConfig extends AbstractFullTextConfig {
-    public FullTextConfig(String name, Tokenizer tokenizer, ImmutableList<IFullTextFilter> filters) {
-        super(name, tokenizer, filters);
+    public SynonymFullTextFilter(String name, ImmutableMap<String, String> synonymMap) {
+        super(name, FullTextFilterType.STOPWORD);
+        this.synonymMap = synonymMap;
     }
-
 }

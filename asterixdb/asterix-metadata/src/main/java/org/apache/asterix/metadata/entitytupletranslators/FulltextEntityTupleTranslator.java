@@ -34,17 +34,18 @@ import java.util.List;
 
 import org.apache.asterix.builders.OrderedListBuilder;
 import org.apache.asterix.formats.nontagged.SerializerDeserializerProvider;
-import org.apache.asterix.metadata.api.IFullTextConfig;
-import org.apache.asterix.metadata.api.IFullTextEntity;
-import org.apache.asterix.metadata.api.IFullTextEntity.FullTextEntityCategory;
-import org.apache.asterix.metadata.api.IFullTextFilter;
+import org.apache.asterix.fuzzyjoin.fulltextentity.IFullTextConfig;
+import org.apache.asterix.fuzzyjoin.fulltextentity.IFullTextEntity;
+import org.apache.asterix.fuzzyjoin.fulltextentity.IFullTextEntity.FullTextEntityCategory;
+import org.apache.asterix.fuzzyjoin.fulltextentity.IFullTextFilter;
 import org.apache.asterix.metadata.bootstrap.MetadataPrimaryIndexes;
 import org.apache.asterix.metadata.bootstrap.MetadataRecordTypes;
-import org.apache.asterix.metadata.entities.Index;
-import org.apache.asterix.metadata.entities.fulltext.StopwordFullTextFilter;
+import org.apache.asterix.fuzzyjoin.fulltextentity.StopwordFullTextFilter;
 import org.apache.asterix.om.base.AInt8;
+import org.apache.asterix.om.base.AOrderedList;
 import org.apache.asterix.om.base.ARecord;
 import org.apache.asterix.om.base.AString;
+import org.apache.asterix.om.base.IACursor;
 import org.apache.asterix.om.types.AOrderedListType;
 import org.apache.asterix.om.types.BuiltinType;
 import org.apache.hyracks.algebricks.common.exceptions.AlgebricksException;
@@ -90,7 +91,7 @@ public class FulltextEntityTupleTranslator extends AbstractTupleTranslator<IFull
                         IFullTextFilter.FullTextFilterType.getEnumIgnoreCase(typeAString.getStringValue());
                 switch (kind) {
                     case STOPWORD:
-                        return StopwordFullTextFilter.createFilterFromARecord(aRecord);
+                        return createStopwordFilterFromARecord(aRecord);
                     case SYNONYM:
                 }
             case CONFIG:
@@ -100,6 +101,31 @@ public class FulltextEntityTupleTranslator extends AbstractTupleTranslator<IFull
         // debug
         return new StopwordFullTextFilter("decoded_my_stopword_filter", ImmutableList.of("aaa", "bbb", "ccc"));
     }
+
+    public StopwordFullTextFilter createStopwordFilterFromARecord(ARecord aRecord) {
+        String name = ((AString) aRecord.getValueByPos(
+                MetadataRecordTypes.FULLTEXT_ENTITY_ARECORD_FULLTEXT_ENTITY_NAME_FIELD_INDEX))
+                .getStringValue();
+        ImmutableList.Builder stopwordsBuilder = ImmutableList.<String> builder();
+        IACursor stopwordsCursor =
+                ((AOrderedList) (aRecord.getValueByPos(
+                        MetadataRecordTypes.FULLTEXT_ENTITY_ARECORD_STOPWORD_LIST_FIELD_INDEX))).getCursor();
+        while (stopwordsCursor.next()) {
+            stopwordsBuilder.add(((AString)stopwordsCursor.get()).getStringValue());
+        }
+        StopwordFullTextFilter filter = new StopwordFullTextFilter(name, stopwordsBuilder.build());
+
+        IACursor usedByConfigsCursor =
+                ((AOrderedList) (aRecord.getValueByPos(
+                        MetadataRecordTypes.FULLTEXT_ENTITY_ARECORD_USED_BY_FT_CONFIGS_FIELD_INDEX)))
+                        .getCursor();
+        while (usedByConfigsCursor.next()) {
+            filter.addUsedByFTConfigs(((AString) usedByConfigsCursor.get()).getStringValue());
+        }
+
+        return filter;
+    }
+
 
     private void writeKeyAndValue2FieldVariables(String key, String value) throws HyracksDataException {
         fieldName.reset();
@@ -168,9 +194,9 @@ public class FulltextEntityTupleTranslator extends AbstractTupleTranslator<IFull
         writeOrderedList2RecordBuilder(FIELD_NAME_FULLTEXT_FILTER_PIPELINE, filterNames);
 
         List<String> indexNames = new ArrayList<>();
-        for (Index i : config.getUsedByIndices()) {
+        for (String s : config.getUsedByIndices()) {
             // include the dataverse and dataset name into the index name?
-            indexNames.add(i.getIndexName());
+            indexNames.add(s);
         }
         writeOrderedList2RecordBuilder(FIELD_NAME_FULLTEXT_USED_BY_INDICES, indexNames);
     }
