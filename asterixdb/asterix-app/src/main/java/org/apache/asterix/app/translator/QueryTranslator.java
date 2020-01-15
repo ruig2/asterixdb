@@ -108,7 +108,6 @@ import org.apache.asterix.lang.common.statement.CreateFullTextConfigStatement;
 import org.apache.asterix.lang.common.statement.CreateFullTextFilterStatement;
 import org.apache.asterix.lang.common.statement.CreateFunctionStatement;
 import org.apache.asterix.lang.common.statement.CreateIndexStatement;
-import org.apache.asterix.lang.common.statement.CreateSynonymStatement;
 import org.apache.asterix.lang.common.statement.DatasetDecl;
 import org.apache.asterix.lang.common.statement.DataverseDecl;
 import org.apache.asterix.lang.common.statement.DataverseDropStatement;
@@ -133,7 +132,6 @@ import org.apache.asterix.lang.common.statement.RefreshExternalDatasetStatement;
 import org.apache.asterix.lang.common.statement.SetStatement;
 import org.apache.asterix.lang.common.statement.StartFeedStatement;
 import org.apache.asterix.lang.common.statement.StopFeedStatement;
-import org.apache.asterix.lang.common.statement.SynonymDropStatement;
 import org.apache.asterix.lang.common.statement.TypeDecl;
 import org.apache.asterix.lang.common.statement.TypeDropStatement;
 import org.apache.asterix.lang.common.statement.WriteStatement;
@@ -162,7 +160,6 @@ import org.apache.asterix.metadata.entities.Function;
 import org.apache.asterix.metadata.entities.Index;
 import org.apache.asterix.metadata.entities.InternalDatasetDetails;
 import org.apache.asterix.metadata.entities.NodeGroup;
-import org.apache.asterix.metadata.entities.Synonym;
 import org.apache.asterix.fuzzyjoin.fulltextentity.FullTextConfig;
 import org.apache.asterix.fuzzyjoin.fulltextentity.StopwordFullTextFilter;
 import org.apache.asterix.metadata.feeds.FeedMetadataUtil;
@@ -295,7 +292,8 @@ public class QueryTranslator extends AbstractLangTranslator implements IStatemen
 
     @Override
     public void compileAndExecute(IHyracksClientConnection hcc, IRequestParameters requestParameters) throws Exception {
-        validateStatements(requestParameters);
+        validateStatements(statements, requestParameters.isMultiStatement(),
+                requestParameters.getStatementCategoryRestrictionMask());
         trackRequest(requestParameters);
         int resultSetIdCounter = 0;
         FileSplit outputFile = null;
@@ -379,12 +377,6 @@ public class QueryTranslator extends AbstractLangTranslator implements IStatemen
                         break;
                     case FUNCTION_DROP:
                         handleFunctionDropStatement(metadataProvider, stmt);
-                        break;
-                    case CREATE_SYNONYM:
-                        handleCreateSynonymStatement(metadataProvider, stmt);
-                        break;
-                    case SYNONYM_DROP:
-                        handleDropSynonymStatement(metadataProvider, stmt);
                         break;
                     case LOAD:
                         handleLoadStatement(metadataProvider, stmt, hcc);
@@ -1488,10 +1480,6 @@ public class QueryTranslator extends AbstractLangTranslator implements IStatemen
                 }
             }
             jobsToExecute.add(DataverseUtil.dropDataverseJobSpec(dv, metadataProvider));
-
-            // #. gather all synonyms in this dataverse
-            List<Synonym> synonyms = MetadataManager.INSTANCE.getDataverseSynonyms(mdTxnCtx, dataverseName);
-
             // #. mark PendingDropOp on the dataverse record by
             // first, deleting the dataverse record from the DATAVERSE_DATASET
             // second, inserting the dataverse record with the PendingDropOp value into the
@@ -1511,11 +1499,6 @@ public class QueryTranslator extends AbstractLangTranslator implements IStatemen
             mdTxnCtx = MetadataManager.INSTANCE.beginTransaction();
             bActiveTxn = true;
             metadataProvider.setMetadataTxnContext(mdTxnCtx);
-
-            // #. delete synonyms in this dataverse
-            for (Synonym synonym : synonyms) {
-                MetadataManager.INSTANCE.dropSynonym(mdTxnCtx, synonym.getDataverseName(), synonym.getSynonymName());
-            }
 
             // #. finally, delete the dataverse.
             MetadataManager.INSTANCE.dropDataverse(mdTxnCtx, dataverseName);
@@ -2029,90 +2012,19 @@ public class QueryTranslator extends AbstractLangTranslator implements IStatemen
         }
     }
 
-    protected void handleCreateSynonymStatement(MetadataProvider metadataProvider, Statement stmt) throws Exception {
-        CreateSynonymStatement css = (CreateSynonymStatement) stmt;
-        DataverseName dataverseName = getActiveDataverseName(css.getDataverseName());
-        String synonymName = css.getSynonymName();
-        DataverseName objectDataverseName = getActiveDataverseName(css.getObjectDataverseName());
-        String objectName = css.getObjectName();
-        lockUtil.createSynonymBegin(lockManager, metadataProvider.getLocks(), dataverseName, synonymName);
-        try {
-            doCreateSynonym(metadataProvider, css, dataverseName, synonymName, objectDataverseName, objectName);
-        } finally {
-            metadataProvider.getLocks().unlock();
-        }
-    }
-
-    protected void doCreateSynonym(MetadataProvider metadataProvider, CreateSynonymStatement css,
-            DataverseName dataverseName, String synonymName, DataverseName objectDataverseName, String objectName)
-            throws Exception {
-        MetadataTransactionContext mdTxnCtx = MetadataManager.INSTANCE.beginTransaction();
-        metadataProvider.setMetadataTxnContext(mdTxnCtx);
-        try {
-            Synonym synonym = MetadataManager.INSTANCE.getSynonym(metadataProvider.getMetadataTxnContext(),
-                    dataverseName, synonymName);
-            if (synonym != null) {
-                if (css.getIfNotExists()) {
-                    MetadataManager.INSTANCE.commitTransaction(mdTxnCtx);
-                    return;
-                }
-                throw new CompilationException(ErrorCode.SYNONYM_EXISTS, css.getSourceLocation(), synonymName);
-            }
-            synonym = new Synonym(dataverseName, synonymName, objectDataverseName, objectName);
-            MetadataManager.INSTANCE.addSynonym(metadataProvider.getMetadataTxnContext(), synonym);
-            MetadataManager.INSTANCE.commitTransaction(mdTxnCtx);
-        } catch (Exception e) {
-            abort(e, e, mdTxnCtx);
-            throw e;
-        }
-    }
-
-    protected void handleDropSynonymStatement(MetadataProvider metadataProvider, Statement stmt) throws Exception {
-        SynonymDropStatement stmtSynDrop = (SynonymDropStatement) stmt;
-        DataverseName dataverseName = getActiveDataverseName(stmtSynDrop.getDataverseName());
-        String synonymName = stmtSynDrop.getSynonymName();
-        lockUtil.dropSynonymBegin(lockManager, metadataProvider.getLocks(), dataverseName, synonymName);
-        try {
-            doDropSynonym(metadataProvider, stmtSynDrop, dataverseName, synonymName);
-        } finally {
-            metadataProvider.getLocks().unlock();
-        }
-    }
-
-    protected void doDropSynonym(MetadataProvider metadataProvider, SynonymDropStatement stmtSynDrop,
-            DataverseName dataverseName, String synonymName) throws Exception {
-        MetadataTransactionContext mdTxnCtx = MetadataManager.INSTANCE.beginTransaction();
-        metadataProvider.setMetadataTxnContext(mdTxnCtx);
-        try {
-            Synonym synonym = MetadataManager.INSTANCE.getSynonym(mdTxnCtx, dataverseName, synonymName);
-            if (synonym == null) {
-                if (stmtSynDrop.getIfExists()) {
-                    MetadataManager.INSTANCE.commitTransaction(mdTxnCtx);
-                    return;
-                }
-                throw new CompilationException(ErrorCode.UNKNOWN_SYNONYM, stmtSynDrop.getSourceLocation(), synonymName);
-            }
-            MetadataManager.INSTANCE.dropSynonym(mdTxnCtx, dataverseName, synonymName);
-            MetadataManager.INSTANCE.commitTransaction(mdTxnCtx);
-        } catch (Exception e) {
-            abort(e, e, mdTxnCtx);
-            throw e;
-        }
-    }
-
     protected void handleLoadStatement(MetadataProvider metadataProvider, Statement stmt, IHyracksClientConnection hcc)
             throws Exception {
         LoadStatement loadStmt = (LoadStatement) stmt;
         DataverseName dataverseName = getActiveDataverseName(loadStmt.getDataverseName());
-        String datasetName = loadStmt.getDatasetName();
+        String datasetName = loadStmt.getDatasetName().getValue();
         MetadataTransactionContext mdTxnCtx = MetadataManager.INSTANCE.beginTransaction();
         boolean bActiveTxn = true;
         metadataProvider.setMetadataTxnContext(mdTxnCtx);
         lockUtil.modifyDatasetBegin(lockManager, metadataProvider.getLocks(), dataverseName, datasetName);
         try {
             CompiledLoadFromFileStatement cls =
-                    new CompiledLoadFromFileStatement(dataverseName, loadStmt.getDatasetName(), loadStmt.getAdapter(),
-                            loadStmt.getProperties(), loadStmt.dataIsAlreadySorted());
+                    new CompiledLoadFromFileStatement(dataverseName, loadStmt.getDatasetName().getValue(),
+                            loadStmt.getAdapter(), loadStmt.getProperties(), loadStmt.dataIsAlreadySorted());
             cls.setSourceLocation(stmt.getSourceLocation());
             JobSpecification spec = apiFramework.compileQuery(hcc, metadataProvider, null, 0, null, sessionOutput, cls,
                     null, responsePrinter, warningCollector);
@@ -3216,19 +3128,8 @@ public class QueryTranslator extends AbstractLangTranslator implements IStatemen
     }
 
     protected void rewriteStatement(Statement stmt, IStatementRewriter rewriter, MetadataProvider metadataProvider)
-            throws CompilationException, RemoteException {
-        if (!rewriter.isRewritable(stmt.getKind())) {
-            return;
-        }
-        MetadataTransactionContext mdTxnCtx = MetadataManager.INSTANCE.beginTransaction();
-        metadataProvider.setMetadataTxnContext(mdTxnCtx);
-        try {
-            rewriter.rewrite(stmt, metadataProvider);
-            MetadataManager.INSTANCE.commitTransaction(mdTxnCtx);
-        } catch (Exception e) {
-            abort(e, e, mdTxnCtx);
-            throw e;
-        }
+            throws CompilationException {
+        rewriter.rewrite(stmt, metadataProvider);
     }
 
     private void ensureNonPrimaryIndexDrop(Index index, SourceLocation sourceLoc) throws AlgebricksException {
@@ -3247,11 +3148,6 @@ public class QueryTranslator extends AbstractLangTranslator implements IStatemen
     protected void trackRequest(IRequestParameters requestParameters) throws HyracksDataException {
         final IClientRequest clientRequest = appCtx.getReceptionist().requestReceived(requestParameters);
         appCtx.getRequestTracker().track(clientRequest);
-    }
-
-    protected void validateStatements(IRequestParameters requestParameters) throws CompilationException {
-        validateStatements(statements, requestParameters.isMultiStatement(),
-                requestParameters.getStatementCategoryRestrictionMask());
     }
 
     public static void validateStatements(List<Statement> statements, boolean allowMultiStatement,
