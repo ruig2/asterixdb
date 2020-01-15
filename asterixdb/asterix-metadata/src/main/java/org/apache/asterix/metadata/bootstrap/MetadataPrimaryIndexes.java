@@ -59,6 +59,8 @@ public class MetadataPrimaryIndexes {
             new MetadataIndexImmutableProperties(MetadataConstants.COMPACTION_POLICY_DATASET_NAME, 13, 13);
     public static final MetadataIndexImmutableProperties PROPERTIES_EXTERNAL_FILE =
             new MetadataIndexImmutableProperties(MetadataConstants.EXTERNAL_FILE_DATASET_NAME, 14, 14);
+    public static final MetadataIndexImmutableProperties PROPERTIES_SYNONYM =
+            new MetadataIndexImmutableProperties(MetadataConstants.SYNONYM_DATASET_NAME, 15, 15);
     public static final MetadataIndexImmutableProperties PROPERTIES_FULLTEXT_ENTITY =
             new MetadataIndexImmutableProperties(MetadataConstants.FULLTEXT_CONFIG_DATASET_NAME, 15, 15);
 
@@ -135,6 +137,12 @@ public class MetadataPrimaryIndexes {
                     Arrays.asList(MetadataRecordTypes.FIELD_NAME_FEED_NAME),
                     Arrays.asList(MetadataRecordTypes.FIELD_NAME_DATASET_NAME)),
             0, MetadataRecordTypes.FEED_CONNECTION_RECORDTYPE, true, new int[] { 0, 1, 2 });
+
+    public static final IMetadataIndex SYNONYM_DATASET =
+            new MetadataIndex(PROPERTIES_SYNONYM, 3, new IAType[] { BuiltinType.ASTRING, BuiltinType.ASTRING },
+                    Arrays.asList(Arrays.asList(MetadataRecordTypes.FIELD_NAME_DATAVERSE_NAME),
+                            Arrays.asList(MetadataRecordTypes.FIELD_NAME_SYNONYM_NAME)),
+                    0, MetadataRecordTypes.SYNONYM_RECORDTYPE, true, new int[] { 0, 1 });
 
     // ToDo: create a dedicated class for the metadata index field to avoid unmatched information
     // (e.g. numbers of field names and types) and get rid of numFields in MetadataIndex.

@@ -56,6 +56,7 @@ import org.apache.asterix.metadata.entities.Index;
 import org.apache.asterix.metadata.entities.Library;
 import org.apache.asterix.metadata.entities.Node;
 import org.apache.asterix.metadata.entities.NodeGroup;
+import org.apache.asterix.metadata.entities.Synonym;
 import org.apache.asterix.fuzzyjoin.fulltextentity.StopwordFullTextFilter;
 import org.apache.asterix.om.types.ARecordType;
 import org.apache.asterix.transaction.management.opcallbacks.AbstractIndexModificationOperationCallback.Operation;
@@ -1006,6 +1007,45 @@ public abstract class MetadataManager implements IMetadataManager {
             throw new MetadataException(ErrorCode.REMOTE_EXCEPTION_WHEN_CALLING_METADATA_NODE, e);
         }
         return file;
+    }
+
+    @Override
+    public void addSynonym(MetadataTransactionContext ctx, Synonym synonym) throws AlgebricksException {
+        try {
+            metadataNode.addSynonym(ctx.getTxnId(), synonym);
+        } catch (RemoteException e) {
+            throw new MetadataException(ErrorCode.REMOTE_EXCEPTION_WHEN_CALLING_METADATA_NODE, e);
+        }
+    }
+
+    @Override
+    public void dropSynonym(MetadataTransactionContext ctx, DataverseName dataverseName, String synonymName)
+            throws AlgebricksException {
+        try {
+            metadataNode.dropSynonym(ctx.getTxnId(), dataverseName, synonymName);
+        } catch (RemoteException e) {
+            throw new MetadataException(ErrorCode.REMOTE_EXCEPTION_WHEN_CALLING_METADATA_NODE, e);
+        }
+    }
+
+    @Override
+    public Synonym getSynonym(MetadataTransactionContext ctx, DataverseName dataverseName, String synonymName)
+            throws AlgebricksException {
+        try {
+            return metadataNode.getSynonym(ctx.getTxnId(), dataverseName, synonymName);
+        } catch (RemoteException e) {
+            throw new MetadataException(ErrorCode.REMOTE_EXCEPTION_WHEN_CALLING_METADATA_NODE, e);
+        }
+    }
+
+    @Override
+    public List<Synonym> getDataverseSynonyms(MetadataTransactionContext ctx, DataverseName dataverseName)
+            throws AlgebricksException {
+        try {
+            return metadataNode.getDataverseSynonyms(ctx.getTxnId(), dataverseName);
+        } catch (RemoteException e) {
+            throw new MetadataException(ErrorCode.REMOTE_EXCEPTION_WHEN_CALLING_METADATA_NODE, e);
+        }
     }
 
     // TODO: Optimize <-- use keys instead of object -->
