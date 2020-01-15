@@ -55,7 +55,8 @@ public class FullTextContainsDescriptor extends AbstractScalarFunctionDynamicDes
             UTF8StringUtil.writeStringToBytes(CONJUNCTIVE_SEARCH_MODE_OPTION);
 
     public static final String FULLTEXT_CONFIG_OPTION = "config";
-    private static final byte[] FULLTEXT_CONFIG_OPTION_ARRAY = UTF8StringUtil.writeStringToBytes(FULLTEXT_CONFIG_OPTION);
+    private static final byte[] FULLTEXT_CONFIG_OPTION_ARRAY =
+            UTF8StringUtil.writeStringToBytes(FULLTEXT_CONFIG_OPTION);
 
     static {
         paramTypeMap.put(SEARCH_MODE_OPTION, ATypeTag.STRING);

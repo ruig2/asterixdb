@@ -38,9 +38,9 @@ import org.apache.asterix.fuzzyjoin.fulltextentity.IFullTextConfig;
 import org.apache.asterix.fuzzyjoin.fulltextentity.IFullTextEntity;
 import org.apache.asterix.fuzzyjoin.fulltextentity.IFullTextEntity.FullTextEntityCategory;
 import org.apache.asterix.fuzzyjoin.fulltextentity.IFullTextFilter;
+import org.apache.asterix.fuzzyjoin.fulltextentity.StopwordFullTextFilter;
 import org.apache.asterix.metadata.bootstrap.MetadataPrimaryIndexes;
 import org.apache.asterix.metadata.bootstrap.MetadataRecordTypes;
-import org.apache.asterix.fuzzyjoin.fulltextentity.StopwordFullTextFilter;
 import org.apache.asterix.om.base.AInt8;
 import org.apache.asterix.om.base.AOrderedList;
 import org.apache.asterix.om.base.ARecord;
@@ -103,21 +103,19 @@ public class FulltextEntityTupleTranslator extends AbstractTupleTranslator<IFull
     }
 
     public StopwordFullTextFilter createStopwordFilterFromARecord(ARecord aRecord) {
-        String name = ((AString) aRecord.getValueByPos(
-                MetadataRecordTypes.FULLTEXT_ENTITY_ARECORD_FULLTEXT_ENTITY_NAME_FIELD_INDEX))
-                .getStringValue();
+        String name = ((AString) aRecord
+                .getValueByPos(MetadataRecordTypes.FULLTEXT_ENTITY_ARECORD_FULLTEXT_ENTITY_NAME_FIELD_INDEX))
+                        .getStringValue();
         ImmutableList.Builder stopwordsBuilder = ImmutableList.<String> builder();
-        IACursor stopwordsCursor =
-                ((AOrderedList) (aRecord.getValueByPos(
-                        MetadataRecordTypes.FULLTEXT_ENTITY_ARECORD_STOPWORD_LIST_FIELD_INDEX))).getCursor();
+        IACursor stopwordsCursor = ((AOrderedList) (aRecord
+                .getValueByPos(MetadataRecordTypes.FULLTEXT_ENTITY_ARECORD_STOPWORD_LIST_FIELD_INDEX))).getCursor();
         while (stopwordsCursor.next()) {
-            stopwordsBuilder.add(((AString)stopwordsCursor.get()).getStringValue());
+            stopwordsBuilder.add(((AString) stopwordsCursor.get()).getStringValue());
         }
         StopwordFullTextFilter filter = new StopwordFullTextFilter(name, stopwordsBuilder.build());
 
-        IACursor usedByConfigsCursor =
-                ((AOrderedList) (aRecord.getValueByPos(
-                        MetadataRecordTypes.FULLTEXT_ENTITY_ARECORD_USED_BY_FT_CONFIGS_FIELD_INDEX)))
+        IACursor usedByConfigsCursor = ((AOrderedList) (aRecord
+                .getValueByPos(MetadataRecordTypes.FULLTEXT_ENTITY_ARECORD_USED_BY_FT_CONFIGS_FIELD_INDEX)))
                         .getCursor();
         while (usedByConfigsCursor.next()) {
             filter.addUsedByFTConfigs(((AString) usedByConfigsCursor.get()).getStringValue());
@@ -125,7 +123,6 @@ public class FulltextEntityTupleTranslator extends AbstractTupleTranslator<IFull
 
         return filter;
     }
-
 
     private void writeKeyAndValue2FieldVariables(String key, String value) throws HyracksDataException {
         fieldName.reset();

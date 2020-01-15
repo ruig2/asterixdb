@@ -19,7 +19,6 @@
 
 package org.apache.asterix.fuzzyjoin.fulltextentity;
 
-import org.apache.asterix.common.transactions.TxnId;
 import org.apache.commons.lang3.EnumUtils;
 
 public interface IFullTextEntity {

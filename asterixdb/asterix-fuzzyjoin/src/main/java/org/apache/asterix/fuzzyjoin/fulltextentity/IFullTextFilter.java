@@ -19,9 +19,9 @@
 
 package org.apache.asterix.fuzzyjoin.fulltextentity;
 
-import org.apache.commons.lang3.EnumUtils;
-
 import java.util.List;
+
+import org.apache.commons.lang3.EnumUtils;
 
 // in progress...
 

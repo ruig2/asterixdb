@@ -22,8 +22,6 @@ package org.apache.asterix.fuzzyjoin.fulltextentity;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.asterix.fuzzyjoin.fulltextentity.IFullTextFilter;
-
 public abstract class AbstractFullTextFilter implements IFullTextFilter {
     protected final String name;
     protected FullTextFilterType type;

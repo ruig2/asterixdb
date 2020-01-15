@@ -44,13 +44,13 @@ import org.apache.asterix.common.transactions.TxnId;
 import org.apache.asterix.common.utils.StoragePathUtil;
 import org.apache.asterix.external.indexing.ExternalFile;
 import org.apache.asterix.formats.nontagged.SerializerDeserializerProvider;
+import org.apache.asterix.fuzzyjoin.fulltextentity.IFullTextConfig;
+import org.apache.asterix.fuzzyjoin.fulltextentity.IFullTextEntity;
+import org.apache.asterix.fuzzyjoin.fulltextentity.IFullTextFilter;
 import org.apache.asterix.metadata.api.ExtensionMetadataDataset;
 import org.apache.asterix.metadata.api.ExtensionMetadataDatasetId;
 import org.apache.asterix.metadata.api.IExtensionMetadataEntity;
 import org.apache.asterix.metadata.api.IExtensionMetadataSearchKey;
-import org.apache.asterix.fuzzyjoin.fulltextentity.IFullTextConfig;
-import org.apache.asterix.fuzzyjoin.fulltextentity.IFullTextEntity;
-import org.apache.asterix.fuzzyjoin.fulltextentity.IFullTextFilter;
 import org.apache.asterix.metadata.api.IMetadataEntityTupleTranslator;
 import org.apache.asterix.metadata.api.IMetadataExtension;
 import org.apache.asterix.metadata.api.IMetadataIndex;
@@ -501,8 +501,7 @@ public class MetadataNode implements IMetadataNode {
             e.printStackTrace();
             // debug: UPDATE_OR_DELETE_NON_EXISTENT_KEY never triggered?
             if (e.getComponent().equals(ErrorCode.HYRACKS)
-                    && e.getErrorCode() == ErrorCode.UPDATE_OR_DELETE_NON_EXISTENT_KEY
-                    && ifExists) {
+                    && e.getErrorCode() == ErrorCode.UPDATE_OR_DELETE_NON_EXISTENT_KEY && ifExists) {
                 return;
             }
             throw new AlgebricksException(e);
@@ -567,8 +566,8 @@ public class MetadataNode implements IMetadataNode {
         }
     }
 
-    @Override public void dropFullTextConfig(TxnId txnId, String configName, boolean ifExists)
-            throws AlgebricksException {
+    @Override
+    public void dropFullTextConfig(TxnId txnId, String configName, boolean ifExists) throws AlgebricksException {
         try {
             FulltextEntityTupleTranslator translator = tupleTranslatorProvider.getFulltextEntityTupleTranslator(true);
 
@@ -579,8 +578,7 @@ public class MetadataNode implements IMetadataNode {
             e.printStackTrace();
             // debug: UPDATE_OR_DELETE_NON_EXISTENT_KEY never triggered?
             if (e.getComponent().equals(ErrorCode.HYRACKS)
-                    && e.getErrorCode() == ErrorCode.UPDATE_OR_DELETE_NON_EXISTENT_KEY
-                    && ifExists) {
+                    && e.getErrorCode() == ErrorCode.UPDATE_OR_DELETE_NON_EXISTENT_KEY && ifExists) {
                 return;
             }
             throw new AlgebricksException(e);

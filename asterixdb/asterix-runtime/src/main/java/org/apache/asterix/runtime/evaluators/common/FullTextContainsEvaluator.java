@@ -390,9 +390,9 @@ public class FullTextContainsEvaluator implements IScalarEvaluator {
                     // ALL
                     occurrenceThreshold = uniqueQueryTokenCount;
                 }
-            } else if (compareStrInByteArrayAndPointable(FullTextContainsDescriptor.getFulltextConfigOptionArray(), argOptions[i],
-                    true) == 0) {
-                    fullTextConfig = String.valueOf(argOptions[i + 1]);
+            } else if (compareStrInByteArrayAndPointable(FullTextContainsDescriptor.getFulltextConfigOptionArray(),
+                    argOptions[i], true) == 0) {
+                fullTextConfig = String.valueOf(argOptions[i + 1]);
             }
         }
     }

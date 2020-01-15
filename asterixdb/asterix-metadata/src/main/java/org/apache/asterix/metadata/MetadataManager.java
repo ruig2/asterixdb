@@ -36,11 +36,12 @@ import org.apache.asterix.common.metadata.DataverseName;
 import org.apache.asterix.common.transactions.ITxnIdFactory;
 import org.apache.asterix.common.transactions.TxnId;
 import org.apache.asterix.external.indexing.ExternalFile;
+import org.apache.asterix.fuzzyjoin.fulltextentity.IFullTextConfig;
+import org.apache.asterix.fuzzyjoin.fulltextentity.IFullTextFilter;
+import org.apache.asterix.fuzzyjoin.fulltextentity.StopwordFullTextFilter;
 import org.apache.asterix.metadata.api.IAsterixStateProxy;
 import org.apache.asterix.metadata.api.IExtensionMetadataEntity;
 import org.apache.asterix.metadata.api.IExtensionMetadataSearchKey;
-import org.apache.asterix.fuzzyjoin.fulltextentity.IFullTextConfig;
-import org.apache.asterix.fuzzyjoin.fulltextentity.IFullTextFilter;
 import org.apache.asterix.metadata.api.IMetadataManager;
 import org.apache.asterix.metadata.api.IMetadataNode;
 import org.apache.asterix.metadata.entities.CompactionPolicy;
@@ -57,7 +58,6 @@ import org.apache.asterix.metadata.entities.Library;
 import org.apache.asterix.metadata.entities.Node;
 import org.apache.asterix.metadata.entities.NodeGroup;
 import org.apache.asterix.metadata.entities.Synonym;
-import org.apache.asterix.fuzzyjoin.fulltextentity.StopwordFullTextFilter;
 import org.apache.asterix.om.types.ARecordType;
 import org.apache.asterix.transaction.management.opcallbacks.AbstractIndexModificationOperationCallback.Operation;
 import org.apache.hyracks.algebricks.common.exceptions.AlgebricksException;
@@ -712,7 +712,8 @@ public abstract class MetadataManager implements IMetadataManager {
         return metadataNode.getFullTextConfig(mdTxnCtx.getTxnId(), configName);
     }
 
-    @Override public void dropFullTextConfig(MetadataTransactionContext mdTxnCtx, String configName, boolean ifExists)
+    @Override
+    public void dropFullTextConfig(MetadataTransactionContext mdTxnCtx, String configName, boolean ifExists)
             throws AlgebricksException {
         try {
             metadataNode.dropFullTextConfig(mdTxnCtx.getTxnId(), configName, ifExists);
