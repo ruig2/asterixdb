@@ -513,7 +513,6 @@ public final class MetadataRecordTypes {
             new String[] { FIELD_NAME_FULLTEXT_CATEGORY, FIELD_NAME_FULLTEXT_ENTITY_NAME },
             new IAType[] { ASTRING, ASTRING }, true);
 
-
     // private members
     private MetadataRecordTypes() {
     }
