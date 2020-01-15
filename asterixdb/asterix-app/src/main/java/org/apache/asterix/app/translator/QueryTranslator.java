@@ -88,6 +88,10 @@ import org.apache.asterix.external.indexing.IndexingConstants;
 import org.apache.asterix.external.operators.FeedIntakeOperatorNodePushable;
 import org.apache.asterix.external.util.ExternalDataConstants;
 import org.apache.asterix.formats.nontagged.TypeTraitProvider;
+import org.apache.asterix.fuzzyjoin.fulltextentity.FullTextConfig;
+import org.apache.asterix.fuzzyjoin.fulltextentity.IFullTextConfig;
+import org.apache.asterix.fuzzyjoin.fulltextentity.IFullTextFilter;
+import org.apache.asterix.fuzzyjoin.fulltextentity.StopwordFullTextFilter;
 import org.apache.asterix.fuzzyjoin.tokenizer.TokenizerFactory;
 import org.apache.asterix.lang.common.base.Expression;
 import org.apache.asterix.lang.common.base.IReturningStatement;
@@ -141,8 +145,6 @@ import org.apache.asterix.lang.common.util.FunctionUtil;
 import org.apache.asterix.metadata.IDatasetDetails;
 import org.apache.asterix.metadata.MetadataManager;
 import org.apache.asterix.metadata.MetadataTransactionContext;
-import org.apache.asterix.fuzzyjoin.fulltextentity.IFullTextConfig;
-import org.apache.asterix.fuzzyjoin.fulltextentity.IFullTextFilter;
 import org.apache.asterix.metadata.bootstrap.MetadataBuiltinEntities;
 import org.apache.asterix.metadata.dataset.hints.DatasetHints;
 import org.apache.asterix.metadata.dataset.hints.DatasetHints.DatasetNodegroupCardinalityHint;
@@ -160,8 +162,6 @@ import org.apache.asterix.metadata.entities.Function;
 import org.apache.asterix.metadata.entities.Index;
 import org.apache.asterix.metadata.entities.InternalDatasetDetails;
 import org.apache.asterix.metadata.entities.NodeGroup;
-import org.apache.asterix.fuzzyjoin.fulltextentity.FullTextConfig;
-import org.apache.asterix.fuzzyjoin.fulltextentity.StopwordFullTextFilter;
 import org.apache.asterix.metadata.feeds.FeedMetadataUtil;
 import org.apache.asterix.metadata.lock.ExternalDatasetsRegistry;
 import org.apache.asterix.metadata.utils.DatasetUtil;
@@ -1044,7 +1044,6 @@ public class QueryTranslator extends AbstractLangTranslator implements IStatemen
             throws Exception {
         CreateFullTextConfigStatement.checkExpression(stmt);
 
-
         CreateFullTextConfigStatement stmtCreateFilter = (CreateFullTextConfigStatement) stmt;
         RecordConstructor rc = (RecordConstructor) stmtCreateFilter.getExpression();
 
@@ -1053,7 +1052,8 @@ public class QueryTranslator extends AbstractLangTranslator implements IStatemen
         List<FieldBinding> fb = rc.getFbList();
 
         String tokenizerStr = ((LiteralExpr) (fb.get(0).getRightExpr())).getValue().getStringValue().toLowerCase();
-        TokenizerFactory.TokenizerCategory tokenizerCategory = TokenizerFactory.TokenizerCategory.fromString(tokenizerStr);
+        TokenizerFactory.TokenizerCategory tokenizerCategory =
+                TokenizerFactory.TokenizerCategory.fromString(tokenizerStr);
 
         List<String> filterNames = new ArrayList<>();
         for (Expression l : ((ListConstructor) (fb.get(1).getRightExpr())).getExprList()) {
@@ -1072,8 +1072,7 @@ public class QueryTranslator extends AbstractLangTranslator implements IStatemen
             }
 
             IFullTextConfig config = new FullTextConfig(stmtCreateFilter.getConfigName(),
-                    TokenizerFactory.getTokenizer(tokenizerStr, " ", '_'),
-                    filtersBuilder.build());
+                    TokenizerFactory.getTokenizer(tokenizerStr, " ", '_'), filtersBuilder.build());
 
             MetadataManager.INSTANCE.addFulltextConfig(mdTxnCtx, config);
             // in progres...
@@ -1810,7 +1809,7 @@ public class QueryTranslator extends AbstractLangTranslator implements IStatemen
 
     protected void handleFullTextFilterDrop(MetadataProvider metadataProvider, Statement stmt,
             IHyracksClientConnection hcc, IRequestParameters requestParameters) throws RemoteException {
-        FullTextFilterDropStatement stmtFilterDrop = (FullTextFilterDropStatement)stmt;
+        FullTextFilterDropStatement stmtFilterDrop = (FullTextFilterDropStatement) stmt;
 
         MetadataTransactionContext mdTxnCtx = null;
         try {
@@ -1818,7 +1817,8 @@ public class QueryTranslator extends AbstractLangTranslator implements IStatemen
             metadataProvider.setMetadataTxnContext(mdTxnCtx);
             // in progress...
             // handle "if exists"
-            MetadataManager.INSTANCE.dropFullTextFilter(mdTxnCtx, stmtFilterDrop.getFilterName(), stmtFilterDrop.getIfExists());
+            MetadataManager.INSTANCE.dropFullTextFilter(mdTxnCtx, stmtFilterDrop.getFilterName(),
+                    stmtFilterDrop.getIfExists());
         } catch (RemoteException e) {
             e.printStackTrace();
         } catch (AlgebricksException e) {
@@ -1839,7 +1839,8 @@ public class QueryTranslator extends AbstractLangTranslator implements IStatemen
             mdTxnCtx = MetadataManager.INSTANCE.beginTransaction();
             metadataProvider.setMetadataTxnContext(mdTxnCtx);
             // handle "if exists"
-            MetadataManager.INSTANCE.dropFullTextConfig(mdTxnCtx, stmtConfigDrop.getConfigName(), stmtConfigDrop.getIfExists());
+            MetadataManager.INSTANCE.dropFullTextConfig(mdTxnCtx, stmtConfigDrop.getConfigName(),
+                    stmtConfigDrop.getIfExists());
         } catch (RemoteException e) {
             e.printStackTrace();
         } finally {
@@ -2016,15 +2017,15 @@ public class QueryTranslator extends AbstractLangTranslator implements IStatemen
             throws Exception {
         LoadStatement loadStmt = (LoadStatement) stmt;
         DataverseName dataverseName = getActiveDataverseName(loadStmt.getDataverseName());
-        String datasetName = loadStmt.getDatasetName().getValue();
+        String datasetName = loadStmt.getDatasetName();
         MetadataTransactionContext mdTxnCtx = MetadataManager.INSTANCE.beginTransaction();
         boolean bActiveTxn = true;
         metadataProvider.setMetadataTxnContext(mdTxnCtx);
         lockUtil.modifyDatasetBegin(lockManager, metadataProvider.getLocks(), dataverseName, datasetName);
         try {
             CompiledLoadFromFileStatement cls =
-                    new CompiledLoadFromFileStatement(dataverseName, loadStmt.getDatasetName().getValue(),
-                            loadStmt.getAdapter(), loadStmt.getProperties(), loadStmt.dataIsAlreadySorted());
+                    new CompiledLoadFromFileStatement(dataverseName, loadStmt.getDatasetName(), loadStmt.getAdapter(),
+                            loadStmt.getProperties(), loadStmt.dataIsAlreadySorted());
             cls.setSourceLocation(stmt.getSourceLocation());
             JobSpecification spec = apiFramework.compileQuery(hcc, metadataProvider, null, 0, null, sessionOutput, cls,
                     null, responsePrinter, warningCollector);
