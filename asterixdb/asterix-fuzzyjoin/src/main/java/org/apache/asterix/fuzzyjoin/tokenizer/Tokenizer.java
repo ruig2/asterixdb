@@ -24,5 +24,6 @@ import java.util.List;
 
 public interface Tokenizer extends Serializable {
     public List<String> tokenize(String text);
+
     TokenizerFactory.TokenizerCategory getCategory();
 }
