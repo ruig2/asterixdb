@@ -333,8 +333,6 @@ import org.apache.asterix.runtime.evaluators.functions.CreateRectangleDescriptor
 import org.apache.asterix.runtime.evaluators.functions.CreateUUIDDescriptor;
 import org.apache.asterix.runtime.evaluators.functions.DecodeDataverseNameDescriptor;
 import org.apache.asterix.runtime.evaluators.functions.DeepEqualityDescriptor;
-import org.apache.asterix.runtime.evaluators.functions.FullTextContainsDescriptor;
-import org.apache.asterix.runtime.evaluators.functions.FullTextContainsWithoutOptionDescriptor;
 import org.apache.asterix.runtime.evaluators.functions.GetItemDescriptor;
 import org.apache.asterix.runtime.evaluators.functions.GetJobParameterByNameDescriptor;
 import org.apache.asterix.runtime.evaluators.functions.IfInfDescriptor;
@@ -1062,10 +1060,6 @@ public final class FunctionCollection implements IFunctionCollection {
         fc.add(CircleRadiusAccessor.FACTORY);
         fc.add(CircleCenterAccessor.FACTORY);
         fc.add(LineRectanglePolygonAccessor.FACTORY);
-
-        // full-text function
-        fc.add(FullTextContainsDescriptor.FACTORY);
-        fc.add(FullTextContainsWithoutOptionDescriptor.FACTORY);
 
         // Record functions.
         fc.add(GetRecordFieldsDescriptor.FACTORY);

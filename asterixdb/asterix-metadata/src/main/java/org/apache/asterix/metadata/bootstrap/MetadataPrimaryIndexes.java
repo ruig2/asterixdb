@@ -62,7 +62,7 @@ public class MetadataPrimaryIndexes {
     public static final MetadataIndexImmutableProperties PROPERTIES_SYNONYM =
             new MetadataIndexImmutableProperties(MetadataConstants.SYNONYM_DATASET_NAME, 15, 15);
     public static final MetadataIndexImmutableProperties PROPERTIES_FULLTEXT_ENTITY =
-            new MetadataIndexImmutableProperties(MetadataConstants.FULLTEXT_CONFIG_DATASET_NAME, 15, 15);
+            new MetadataIndexImmutableProperties(MetadataConstants.FULLTEXT_CONFIG_DATASET_NAME, 16, 16);
 
     public static final IMetadataIndex DATAVERSE_DATASET =
             new MetadataIndex(PROPERTIES_DATAVERSE, 2, new IAType[] { BuiltinType.ASTRING },

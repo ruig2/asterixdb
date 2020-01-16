@@ -51,7 +51,7 @@ import org.apache.asterix.om.types.AUnionType;
 import org.apache.asterix.om.types.IAType;
 import org.apache.asterix.om.types.hierachy.ATypeHierarchy;
 import org.apache.asterix.om.utils.ConstantExpressionUtil;
-import org.apache.asterix.runtime.evaluators.functions.FullTextContainsDescriptor;
+import org.apache.asterix.runtime.evaluators.common.FullTextContainsDescriptor;
 import org.apache.commons.lang3.mutable.Mutable;
 import org.apache.commons.lang3.mutable.MutableObject;
 import org.apache.hyracks.algebricks.common.exceptions.AlgebricksException;

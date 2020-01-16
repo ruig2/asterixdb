@@ -20,6 +20,8 @@ package org.apache.asterix.runtime;
 
 import org.apache.asterix.om.functions.IFunctionCollection;
 import org.apache.asterix.om.functions.IFunctionRegistrant;
+import org.apache.asterix.runtime.evaluators.common.FullTextContainsDescriptor;
+import org.apache.asterix.runtime.evaluators.common.FullTextContainsWithoutOptionDescriptor;
 import org.apache.asterix.runtime.evaluators.functions.CountHashedGramTokensDescriptor;
 import org.apache.asterix.runtime.evaluators.functions.CountHashedWordTokensDescriptor;
 import org.apache.asterix.runtime.evaluators.functions.EditDistanceCheckDescriptor;
@@ -50,6 +52,10 @@ public class FuzzyJoinFunctionRegistrant implements IFunctionRegistrant {
 
         // Spatial
         fc.add(SpatialIntersectDescriptor.FACTORY);
+
+        // full-text function
+        fc.add(FullTextContainsDescriptor.FACTORY);
+        fc.add(FullTextContainsWithoutOptionDescriptor.FACTORY);
 
         // fuzzyjoin function
         fc.add(PrefixLenJaccardDescriptor.FACTORY);
