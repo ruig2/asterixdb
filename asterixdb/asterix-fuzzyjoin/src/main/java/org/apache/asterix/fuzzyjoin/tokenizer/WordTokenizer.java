@@ -19,6 +19,8 @@
 
 package org.apache.asterix.fuzzyjoin.tokenizer;
 
+import org.apache.asterix.fuzzyjoin.fulltextentity.TokenizerCategory;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -67,7 +69,7 @@ public class WordTokenizer implements Tokenizer {
     }
 
     @Override
-    public TokenizerFactory.TokenizerCategory getCategory() {
-        return TokenizerFactory.TokenizerCategory.WORD;
+    public TokenizerCategory getCategory() {
+        return TokenizerCategory.WORD;
     }
 }

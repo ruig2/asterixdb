@@ -19,18 +19,10 @@
 
 package org.apache.asterix.fuzzyjoin.tokenizer;
 
+import org.apache.asterix.fuzzyjoin.fulltextentity.TokenizerCategory;
 import org.apache.commons.lang3.EnumUtils;
 
 public class TokenizerFactory {
-    public enum TokenizerCategory {
-        NGRAM,
-        WORD;
-
-        public static TokenizerCategory fromString(String str) {
-            return EnumUtils.getEnumIgnoreCase(TokenizerCategory.class, str);
-        }
-    }
-
     public static Tokenizer getTokenizer(String tokenizerStr) {
         if (TokenizerCategory.fromString(tokenizerStr) == TokenizerCategory.NGRAM) {
             return new NGramTokenizer();
@@ -40,6 +32,9 @@ public class TokenizerFactory {
         throw new RuntimeException("Unknown tokenizer \"" + tokenizerStr + "\".");
     }
 
+    // Disable customized wordSeparator and tokenSeparator to make things easier
+    // when creating FullTextConfig via SQLPP DDL
+    // We can support customized ones with DDL later
     public static Tokenizer getTokenizer(String tokenizerStr, String wordSeparator, char tokenSeparator) {
         if (TokenizerCategory.fromString(tokenizerStr) == TokenizerCategory.NGRAM) {
             return new NGramTokenizer();

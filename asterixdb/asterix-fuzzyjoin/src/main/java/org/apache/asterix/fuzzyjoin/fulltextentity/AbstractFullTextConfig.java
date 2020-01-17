@@ -28,14 +28,14 @@ import com.google.common.collect.ImmutableList;
 
 public abstract class AbstractFullTextConfig implements IFullTextConfig {
     private final String name;
-    private final Tokenizer tokenizer;
+    private final TokenizerCategory tokenizerCategory;
     private ImmutableList<IFullTextFilter> filters;
     // in progress... maybe use Index class instead of String?
     private List<String> usedByIndices;
 
-    protected AbstractFullTextConfig(String name, Tokenizer tokenizer, ImmutableList<IFullTextFilter> filters) {
+    protected AbstractFullTextConfig(String name, TokenizerCategory tokenizerCategory, ImmutableList<IFullTextFilter> filters) {
         this.name = name;
-        this.tokenizer = tokenizer;
+        this.tokenizerCategory = tokenizerCategory;
         this.filters = filters;
         this.usedByIndices = new ArrayList<>();
     }
@@ -51,8 +51,8 @@ public abstract class AbstractFullTextConfig implements IFullTextConfig {
     }
 
     @Override
-    public Tokenizer getTokenizer() {
-        return tokenizer;
+    public TokenizerCategory getTokenizerCategory() {
+        return tokenizerCategory;
     }
 
     @Override

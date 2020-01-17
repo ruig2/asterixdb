@@ -19,6 +19,8 @@
 
 package org.apache.asterix.fuzzyjoin.tokenizer;
 
+import org.apache.asterix.fuzzyjoin.fulltextentity.TokenizerCategory;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -89,7 +91,7 @@ public class NGramTokenizer implements Tokenizer {
     }
 
     @Override
-    public TokenizerFactory.TokenizerCategory getCategory() {
-        return TokenizerFactory.TokenizerCategory.NGRAM;
+    public TokenizerCategory getCategory() {
+        return TokenizerCategory.NGRAM;
     }
 }

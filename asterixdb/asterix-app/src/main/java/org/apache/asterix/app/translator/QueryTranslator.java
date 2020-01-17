@@ -92,6 +92,7 @@ import org.apache.asterix.fuzzyjoin.fulltextentity.FullTextConfig;
 import org.apache.asterix.fuzzyjoin.fulltextentity.IFullTextConfig;
 import org.apache.asterix.fuzzyjoin.fulltextentity.IFullTextFilter;
 import org.apache.asterix.fuzzyjoin.fulltextentity.StopwordFullTextFilter;
+import org.apache.asterix.fuzzyjoin.fulltextentity.TokenizerCategory;
 import org.apache.asterix.fuzzyjoin.tokenizer.TokenizerFactory;
 import org.apache.asterix.lang.common.base.Expression;
 import org.apache.asterix.lang.common.base.IReturningStatement;
@@ -198,6 +199,7 @@ import org.apache.asterix.translator.util.ValidateUtil;
 import org.apache.asterix.utils.DataverseUtil;
 import org.apache.asterix.utils.FeedOperations;
 import org.apache.asterix.utils.FlushDatasetUtil;
+import org.apache.commons.lang3.EnumUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.mutable.Mutable;
 import org.apache.commons.lang3.mutable.MutableBoolean;
@@ -1061,8 +1063,8 @@ public class QueryTranslator extends AbstractLangTranslator implements IStatemen
         List<FieldBinding> fb = rc.getFbList();
 
         String tokenizerStr = ((LiteralExpr) (fb.get(0).getRightExpr())).getValue().getStringValue().toLowerCase();
-        TokenizerFactory.TokenizerCategory tokenizerCategory =
-                TokenizerFactory.TokenizerCategory.fromString(tokenizerStr);
+        TokenizerCategory tokenizerCategory =
+                TokenizerCategory.fromString(tokenizerStr);
 
         List<String> filterNames = new ArrayList<>();
         for (Expression l : ((ListConstructor) (fb.get(1).getRightExpr())).getExprList()) {
@@ -1081,7 +1083,7 @@ public class QueryTranslator extends AbstractLangTranslator implements IStatemen
             }
 
             IFullTextConfig config = new FullTextConfig(stmtCreateFilter.getConfigName(),
-                    TokenizerFactory.getTokenizer(tokenizerStr), filtersBuilder.build());
+                    EnumUtils.getEnumIgnoreCase(TokenizerCategory.class, tokenizerStr), filtersBuilder.build());
 
             MetadataManager.INSTANCE.addFulltextConfig(mdTxnCtx, config);
             // in progres...

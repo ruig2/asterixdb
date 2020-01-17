@@ -19,11 +19,13 @@
 
 package org.apache.asterix.fuzzyjoin.tokenizer;
 
+import org.apache.asterix.fuzzyjoin.fulltextentity.TokenizerCategory;
+
 import java.io.Serializable;
 import java.util.List;
 
 public interface Tokenizer extends Serializable {
     public List<String> tokenize(String text);
 
-    TokenizerFactory.TokenizerCategory getCategory();
+    TokenizerCategory getCategory();
 }

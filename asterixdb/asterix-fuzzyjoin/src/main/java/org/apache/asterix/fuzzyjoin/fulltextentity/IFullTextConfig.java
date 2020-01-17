@@ -23,9 +23,10 @@ import java.util.List;
 
 // in progress...
 import org.apache.asterix.fuzzyjoin.tokenizer.Tokenizer;
+import org.apache.asterix.fuzzyjoin.tokenizer.TokenizerFactory;
 
 public interface IFullTextConfig extends IFullTextEntity {
-    Tokenizer getTokenizer();
+    TokenizerCategory getTokenizerCategory();
 
     List<IFullTextFilter> getFilters();
 

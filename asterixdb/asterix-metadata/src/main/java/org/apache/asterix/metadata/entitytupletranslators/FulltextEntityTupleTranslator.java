@@ -181,7 +181,7 @@ public class FulltextEntityTupleTranslator extends AbstractTupleTranslator<IFull
     }
 
     private void writeFulltextConfig(IFullTextConfig config) throws HyracksDataException {
-        writeKeyAndValue2FieldVariables(FIELD_NAME_FULLTEXT_TOKENIZER, config.getTokenizer().getCategory().name());
+        writeKeyAndValue2FieldVariables(FIELD_NAME_FULLTEXT_TOKENIZER, config.getTokenizerCategory().name());
         recordBuilder.addField(fieldName, fieldValue);
 
         List<String> filterNames = new ArrayList<>();

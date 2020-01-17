@@ -24,8 +24,8 @@ import org.apache.asterix.fuzzyjoin.tokenizer.Tokenizer;
 import com.google.common.collect.ImmutableList;
 
 public class FullTextConfig extends AbstractFullTextConfig {
-    public FullTextConfig(String name, Tokenizer tokenizer, ImmutableList<IFullTextFilter> filters) {
-        super(name, tokenizer, filters);
+    public FullTextConfig(String name, TokenizerCategory tokenizerCategory, ImmutableList<IFullTextFilter> filters) {
+        super(name, tokenizerCategory, filters);
     }
 
 }
