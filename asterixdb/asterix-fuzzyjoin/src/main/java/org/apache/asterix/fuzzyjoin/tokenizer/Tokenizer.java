@@ -19,7 +19,7 @@
 
 package org.apache.asterix.fuzzyjoin.tokenizer;
 
-import org.apache.asterix.fuzzyjoin.fulltextentity.TokenizerCategory;
+import org.apache.asterix.metadata.entities.fulltextentity.TokenizerCategory;
 
 import java.io.Serializable;
 import java.util.List;

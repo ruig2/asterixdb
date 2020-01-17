@@ -17,19 +17,28 @@
  * under the License.
  */
 
-package org.apache.asterix.fuzzyjoin.fulltextentity;
+package org.apache.asterix.metadata.api;
 
 import java.util.List;
 
+import org.apache.commons.lang3.EnumUtils;
+
 // in progress...
-import org.apache.asterix.fuzzyjoin.tokenizer.Tokenizer;
-import org.apache.asterix.fuzzyjoin.tokenizer.TokenizerFactory;
 
-public interface IFullTextConfig extends IFullTextEntity {
-    TokenizerCategory getTokenizerCategory();
+public interface IFullTextFilter extends IFullTextEntity {
 
-    List<IFullTextFilter> getFilters();
+    enum FullTextFilterType {
+        STOPWORD,
+        SYNONYM;
 
-    // in progress...Maybe use the Index class instead of String?
-    List<String> getUsedByIndices();
+        public static FullTextFilterType getEnumIgnoreCase(String value) {
+            return EnumUtils.getEnumIgnoreCase(FullTextFilterType.class, value);
+        }
+    }
+
+    FullTextFilterType getFilterKind();
+
+    List<String> getUsedByFTConfigs();
+
+    void addUsedByFTConfigs(String ftConfigName);
 }

@@ -34,11 +34,11 @@ import java.util.List;
 
 import org.apache.asterix.builders.OrderedListBuilder;
 import org.apache.asterix.formats.nontagged.SerializerDeserializerProvider;
-import org.apache.asterix.fuzzyjoin.fulltextentity.IFullTextConfig;
-import org.apache.asterix.fuzzyjoin.fulltextentity.IFullTextEntity;
-import org.apache.asterix.fuzzyjoin.fulltextentity.IFullTextEntity.FullTextEntityCategory;
-import org.apache.asterix.fuzzyjoin.fulltextentity.IFullTextFilter;
-import org.apache.asterix.fuzzyjoin.fulltextentity.StopwordFullTextFilter;
+import org.apache.asterix.metadata.api.IFullTextConfig;
+import org.apache.asterix.metadata.api.IFullTextEntity;
+import org.apache.asterix.metadata.api.IFullTextEntity.FullTextEntityCategory;
+import org.apache.asterix.metadata.api.IFullTextFilter;
+import org.apache.asterix.metadata.entities.fulltextentity.StopwordFullTextFilter;
 import org.apache.asterix.metadata.bootstrap.MetadataPrimaryIndexes;
 import org.apache.asterix.metadata.bootstrap.MetadataRecordTypes;
 import org.apache.asterix.om.base.AInt8;

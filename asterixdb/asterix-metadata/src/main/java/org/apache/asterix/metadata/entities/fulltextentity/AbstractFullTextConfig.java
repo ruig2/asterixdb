@@ -17,14 +17,14 @@
  * under the License.
  */
 
-package org.apache.asterix.fuzzyjoin.fulltextentity;
+package org.apache.asterix.metadata.entities.fulltextentity;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.asterix.fuzzyjoin.tokenizer.Tokenizer;
-
 import com.google.common.collect.ImmutableList;
+import org.apache.asterix.metadata.api.IFullTextConfig;
+import org.apache.asterix.metadata.api.IFullTextFilter;
 
 public abstract class AbstractFullTextConfig implements IFullTextConfig {
     private final String name;

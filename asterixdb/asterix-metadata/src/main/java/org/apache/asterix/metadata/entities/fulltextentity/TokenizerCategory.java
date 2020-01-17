@@ -1,4 +1,4 @@
-package org.apache.asterix.fuzzyjoin.fulltextentity;
+package org.apache.asterix.metadata.entities.fulltextentity;
 
 import org.apache.commons.lang3.EnumUtils;
 

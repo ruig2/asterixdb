@@ -19,8 +19,7 @@
 
 package org.apache.asterix.fuzzyjoin.tokenizer;
 
-import org.apache.asterix.fuzzyjoin.fulltextentity.TokenizerCategory;
-import org.apache.commons.lang3.EnumUtils;
+import org.apache.asterix.metadata.entities.fulltextentity.TokenizerCategory;
 
 public class TokenizerFactory {
     public static Tokenizer getTokenizer(String tokenizerStr) {

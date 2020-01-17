@@ -1,4 +1,4 @@
-/**
+/*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -17,15 +17,22 @@
  * under the License.
  */
 
-package org.apache.asterix.fuzzyjoin.fulltextentity;
+package org.apache.asterix.metadata.entities.fulltextentity;
 
-import org.apache.asterix.fuzzyjoin.tokenizer.Tokenizer;
+import java.util.List;
 
 import com.google.common.collect.ImmutableList;
+import org.apache.asterix.metadata.api.IFullTextFilter;
 
-public class FullTextConfig extends AbstractFullTextConfig {
-    public FullTextConfig(String name, TokenizerCategory tokenizerCategory, ImmutableList<IFullTextFilter> filters) {
-        super(name, tokenizerCategory, filters);
+public class StopwordFullTextFilter extends AbstractFullTextFilter {
+    ImmutableList<String> stopwordList;
+
+    public StopwordFullTextFilter(String name, ImmutableList<String> stopwordList) {
+        super(name, IFullTextFilter.FullTextFilterType.STOPWORD);
+        this.stopwordList = stopwordList;
     }
 
+    public List<String> getStopwordList() {
+        return stopwordList;
+    }
 }

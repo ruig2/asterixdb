@@ -1,4 +1,4 @@
-/*
+/**
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -17,21 +17,14 @@
  * under the License.
  */
 
-package org.apache.asterix.fuzzyjoin.fulltextentity;
+package org.apache.asterix.metadata.entities.fulltextentity;
 
-import org.apache.commons.lang3.EnumUtils;
+import com.google.common.collect.ImmutableList;
+import org.apache.asterix.metadata.api.IFullTextFilter;
 
-public interface IFullTextEntity {
-    enum FullTextEntityCategory {
-        FILTER,
-        CONFIG;
-
-        public static FullTextEntityCategory fromValue(String value) {
-            return EnumUtils.getEnumIgnoreCase(FullTextEntityCategory.class, value);
-        }
+public class FullTextConfig extends AbstractFullTextConfig {
+    public FullTextConfig(String name, TokenizerCategory tokenizerCategory, ImmutableList<IFullTextFilter> filters) {
+        super(name, tokenizerCategory, filters);
     }
 
-    FullTextEntityCategory getCategory();
-
-    String getName();
 }

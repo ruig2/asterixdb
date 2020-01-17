@@ -28,8 +28,6 @@ import org.apache.asterix.common.functions.FunctionSignature;
 import org.apache.asterix.common.metadata.DataverseName;
 import org.apache.asterix.common.transactions.TxnId;
 import org.apache.asterix.external.indexing.ExternalFile;
-import org.apache.asterix.fuzzyjoin.fulltextentity.IFullTextConfig;
-import org.apache.asterix.fuzzyjoin.fulltextentity.IFullTextFilter;
 import org.apache.asterix.metadata.entities.CompactionPolicy;
 import org.apache.asterix.metadata.entities.Dataset;
 import org.apache.asterix.metadata.entities.DatasourceAdapter;

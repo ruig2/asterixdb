@@ -16,22 +16,15 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+package org.apache.asterix.metadata.entities.fulltextentity;
 
-package org.apache.asterix.fuzzyjoin.fulltextentity;
+import com.google.common.collect.ImmutableMap;
 
-import java.util.List;
+public class SynonymFullTextFilter extends AbstractFullTextFilter {
+    ImmutableMap<String, String> synonymMap;
 
-import com.google.common.collect.ImmutableList;
-
-public class StopwordFullTextFilter extends AbstractFullTextFilter {
-    ImmutableList<String> stopwordList;
-
-    public StopwordFullTextFilter(String name, ImmutableList<String> stopwordList) {
+    public SynonymFullTextFilter(String name, ImmutableMap<String, String> synonymMap) {
         super(name, FullTextFilterType.STOPWORD);
-        this.stopwordList = stopwordList;
-    }
-
-    public List<String> getStopwordList() {
-        return stopwordList;
+        this.synonymMap = synonymMap;
     }
 }

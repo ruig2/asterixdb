@@ -17,7 +17,9 @@
  * under the License.
  */
 
-package org.apache.asterix.fuzzyjoin.fulltextentity;
+package org.apache.asterix.metadata.entities.fulltextentity;
+
+import org.apache.asterix.metadata.api.IFullTextFilter;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,7 +29,7 @@ public abstract class AbstractFullTextFilter implements IFullTextFilter {
     protected FullTextFilterType type;
     protected List<String> usedByFTConfigs;
 
-    public AbstractFullTextFilter(String name, FullTextFilterType type) {
+    public AbstractFullTextFilter(String name, IFullTextFilter.FullTextFilterType type) {
         this.name = name;
         this.type = type;
         this.usedByFTConfigs = new ArrayList<>();
