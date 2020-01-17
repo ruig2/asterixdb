@@ -31,6 +31,15 @@ public class TokenizerFactory {
         }
     }
 
+    public static Tokenizer getTokenizer(String tokenizerStr) {
+        if (TokenizerCategory.fromString(tokenizerStr) == TokenizerCategory.NGRAM) {
+            return new NGramTokenizer();
+        } else if (TokenizerCategory.fromString(tokenizerStr) == TokenizerCategory.WORD) {
+            return new WordTokenizer();
+        }
+        throw new RuntimeException("Unknown tokenizer \"" + tokenizerStr + "\".");
+    }
+
     public static Tokenizer getTokenizer(String tokenizerStr, String wordSeparator, char tokenSeparator) {
         if (TokenizerCategory.fromString(tokenizerStr) == TokenizerCategory.NGRAM) {
             return new NGramTokenizer();

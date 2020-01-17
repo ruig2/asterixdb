@@ -70,8 +70,9 @@ public class FuzzyJoinTokenize {
 
         BufferedReader input = new BufferedReader(new FileReader(inputFileName));
 
-        Tokenizer tokenizer = TokenizerFactory.getTokenizer(FuzzyJoinConfig.TOKENIZER_VALUE,
-                FuzzyJoinConfig.WORD_SEPARATOR_REGEX, FuzzyJoinConfig.TOKEN_SEPARATOR);
+        Tokenizer tokenizer = TokenizerFactory.getTokenizer(FuzzyJoinConfig.TOKENIZER_VALUE);
+        // Tokenizer tokenizer = TokenizerFactory.getTokenizer(FuzzyJoinConfig.TOKENIZER_VALUE,
+        //         FuzzyJoinConfig.WORD_SEPARATOR_REGEX, FuzzyJoinConfig.TOKEN_SEPARATOR);
 
         int[] dataColumns = FuzzyJoinUtil.getDataColumns("2,3");
 

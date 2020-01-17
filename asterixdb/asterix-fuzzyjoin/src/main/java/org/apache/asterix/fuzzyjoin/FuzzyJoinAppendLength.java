@@ -37,8 +37,11 @@ public class FuzzyJoinAppendLength {
         BufferedReader input = new BufferedReader(new FileReader(inputFileName));
         BufferedWriter output = new BufferedWriter(new FileWriter(outputFileName));
 
+        Tokenizer tokenizer = TokenizerFactory.getTokenizer(FuzzyJoinConfig.TOKENIZER_VALUE);
+        /*
         Tokenizer tokenizer = TokenizerFactory.getTokenizer(FuzzyJoinConfig.TOKENIZER_VALUE,
                 FuzzyJoinConfig.WORD_SEPARATOR_REGEX, FuzzyJoinConfig.TOKEN_SEPARATOR);
+         */
 
         int[] dataColumns = FuzzyJoinUtil.getDataColumns("2,3");
 

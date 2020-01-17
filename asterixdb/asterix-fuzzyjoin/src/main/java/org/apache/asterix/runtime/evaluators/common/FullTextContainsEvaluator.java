@@ -23,6 +23,7 @@ import java.io.DataOutput;
 import org.apache.asterix.formats.nontagged.BinaryComparatorFactoryProvider;
 import org.apache.asterix.formats.nontagged.BinaryTokenizerFactoryProvider;
 import org.apache.asterix.formats.nontagged.SerializerDeserializerProvider;
+import org.apache.asterix.fuzzyjoin.fulltextentity.IFullTextConfig;
 import org.apache.asterix.om.base.ABoolean;
 import org.apache.asterix.om.base.ANull;
 import org.apache.asterix.om.types.ATypeTag;
@@ -324,7 +325,7 @@ public class FullTextContainsEvaluator implements IScalarEvaluator {
             // The same logic should be applied in AbstractTOccurrenceSearcher() class.
             checkWhetherFullTextPredicateIsPhrase(typeTag2, queryArray, tokenOffset, tokenLength, queryTokenCount);
 
-            //IFullTextConfig config = null;
+            //IFullTextConfig config = MetadataManager.Instance;
 
             // Count the number of tokens in the given query. We only count the unique tokens.
             // We only care about the first insertion of the token into the hash set

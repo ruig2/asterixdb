@@ -1081,7 +1081,7 @@ public class QueryTranslator extends AbstractLangTranslator implements IStatemen
             }
 
             IFullTextConfig config = new FullTextConfig(stmtCreateFilter.getConfigName(),
-                    TokenizerFactory.getTokenizer(tokenizerStr, " ", '_'), filtersBuilder.build());
+                    TokenizerFactory.getTokenizer(tokenizerStr), filtersBuilder.build());
 
             MetadataManager.INSTANCE.addFulltextConfig(mdTxnCtx, config);
             // in progres...
