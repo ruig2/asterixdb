@@ -22,9 +22,20 @@ package org.apache.asterix.metadata.entities.fulltextentity;
 import com.google.common.collect.ImmutableList;
 import org.apache.asterix.metadata.api.IFullTextFilter;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class FullTextConfig extends AbstractFullTextConfig {
     public FullTextConfig(String name, TokenizerCategory tokenizerCategory, ImmutableList<IFullTextFilter> filters) {
         super(name, tokenizerCategory, filters);
     }
 
+    @Override public List<String> proceedTokens(List<String> tokens) {
+        List<String> results = new ArrayList<>(tokens);
+        for (IFullTextFilter filter : filters) {
+            results = filter.proceedTokens(results);
+        }
+
+        return results;
+    }
 }

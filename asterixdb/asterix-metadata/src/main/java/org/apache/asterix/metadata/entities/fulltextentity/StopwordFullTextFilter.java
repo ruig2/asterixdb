@@ -19,6 +19,7 @@
 
 package org.apache.asterix.metadata.entities.fulltextentity;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import com.google.common.collect.ImmutableList;
@@ -34,5 +35,16 @@ public class StopwordFullTextFilter extends AbstractFullTextFilter {
 
     public List<String> getStopwordList() {
         return stopwordList;
+    }
+
+    @Override public List<String> proceedTokens(List<String> tokens) {
+        List<String> result = new ArrayList<>();
+
+        for (String s : tokens) {
+            if (stopwordList.contains(s) == false) {
+                result.add(s);
+            }
+        }
+        return result;
     }
 }

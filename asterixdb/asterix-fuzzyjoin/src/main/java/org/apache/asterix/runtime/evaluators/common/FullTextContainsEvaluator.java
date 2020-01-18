@@ -20,6 +20,9 @@ package org.apache.asterix.runtime.evaluators.common;
 
 import java.io.DataOutput;
 import java.rmi.RemoteException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 
 import org.apache.asterix.formats.nontagged.BinaryComparatorFactoryProvider;
 import org.apache.asterix.formats.nontagged.BinaryTokenizerFactoryProvider;
@@ -293,6 +296,8 @@ public class FullTextContainsEvaluator implements IScalarEvaluator {
         int queryTokenCount = 0;
         int uniqueQueryTokenCount = 0;
 
+        fullTextConfigStr = "";
+
         int numBytesToStoreLength;
 
         // Reset the tokenizer for the given keywords in the given query
@@ -308,6 +313,8 @@ public class FullTextContainsEvaluator implements IScalarEvaluator {
         // Apply the full-text search option here
         // Based on the search mode option - "any" or "all", set the occurrence threshold of tokens.
         setFullTextOption(argOptions, uniqueQueryTokenCount);
+
+        IFullTextConfig config = MetadataManager.INSTANCE.getFullTextConfig(mdTxnCtx, fullTextConfigStr);
 
         //IFullTextConfig config =
 
@@ -342,8 +349,6 @@ public class FullTextContainsEvaluator implements IScalarEvaluator {
             // The same logic should be applied in AbstractTOccurrenceSearcher() class.
             checkWhetherFullTextPredicateIsPhrase(typeTag2, queryArray, tokenOffset, tokenLength, queryTokenCount);
 
-            IFullTextConfig config = MetadataManager.INSTANCE.getFullTextConfig(mdTxnCtx, fullTextConfigStr);
-
             // Count the number of tokens in the given query. We only count the unique tokens.
             // We only care about the first insertion of the token into the hash set
             // since we apply the set semantics.
@@ -354,8 +359,7 @@ public class FullTextContainsEvaluator implements IScalarEvaluator {
             if (rightHashSet.find(keyEntry, queryArray, false) == -1) {
                 String keyStr = new String(queryArray, keyEntry.getOffset(), keyEntry.getLength());
                 System.out.println("get key " + keyStr);
-                if ((keyStr.equalsIgnoreCase("a") || keyStr.equalsIgnoreCase("an")
-                        || keyStr.equalsIgnoreCase("the")) == false) {
+                if (config == null || config.proceedTokens(Arrays.asList(keyStr)).size() > 0) {
                     rightHashSet.put(keyEntry);
                     uniqueQueryTokenCount++;
                 }
@@ -442,10 +446,10 @@ public class FullTextContainsEvaluator implements IScalarEvaluator {
 
             IToken t = tokenizerForLeftArray.getToken();
             String tokenStr = new String(t.getData(), t.getStartOffset(), t.getTokenLength());
-            System.out.println(tokenStr);
+            System.out.println("proceeding " + tokenStr);
 
             if (tokenStr.equalsIgnoreCase("a") || tokenStr.equalsIgnoreCase("an") || tokenStr.equalsIgnoreCase("the")) {
-                System.out.println("!!! token is in stopword list");
+                // System.out.println("!!! token is in stopword list " + tokenStr);
             }
 
             // Records the starting position and the length of the current token.

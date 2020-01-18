@@ -27,11 +27,11 @@ import org.apache.asterix.metadata.api.IFullTextConfig;
 import org.apache.asterix.metadata.api.IFullTextFilter;
 
 public abstract class AbstractFullTextConfig implements IFullTextConfig {
-    private final String name;
-    private final TokenizerCategory tokenizerCategory;
-    private ImmutableList<IFullTextFilter> filters;
+    protected final String name;
+    protected final TokenizerCategory tokenizerCategory;
+    protected ImmutableList<IFullTextFilter> filters;
     // in progress... maybe use Index class instead of String?
-    private List<String> usedByIndices;
+    protected List<String> usedByIndices;
 
     protected AbstractFullTextConfig(String name, TokenizerCategory tokenizerCategory, ImmutableList<IFullTextFilter> filters) {
         this.name = name;

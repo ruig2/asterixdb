@@ -41,4 +41,6 @@ public interface IFullTextFilter extends IFullTextEntity {
     List<String> getUsedByFTConfigs();
 
     void addUsedByFTConfigs(String ftConfigName);
+
+    List<String> proceedTokens(List<String> tokens);
 }

@@ -20,11 +20,17 @@ package org.apache.asterix.metadata.entities.fulltextentity;
 
 import com.google.common.collect.ImmutableMap;
 
+import java.util.List;
+
 public class SynonymFullTextFilter extends AbstractFullTextFilter {
     ImmutableMap<String, String> synonymMap;
 
     public SynonymFullTextFilter(String name, ImmutableMap<String, String> synonymMap) {
         super(name, FullTextFilterType.STOPWORD);
         this.synonymMap = synonymMap;
+    }
+
+    @Override public List<String> proceedTokens(List<String> tokens) {
+        return null;
     }
 }
