@@ -77,6 +77,8 @@ public class FullTextContainsEvaluator implements IScalarEvaluator {
     protected IPointable outRight = VoidPointable.FACTORY.createPointable();
     protected IPointable[] outOptions;
     protected int optionArgsLength;
+    // By default, we conduct a conjunctive search.
+    protected FullTextContainsDescriptor.SEARCH_MODE mode = FullTextContainsDescriptor.SEARCH_MODE.ALL;
 
     // To conduct a full-text search, we convert all strings to the lower case.
     // In addition, since each token does not include the length information (2 bytes) in the beginning,
@@ -109,6 +111,7 @@ public class FullTextContainsEvaluator implements IScalarEvaluator {
     private int occurrenceThreshold = 1;
 
     private String fullTextConfigStr = "";
+    private IFullTextConfig config = null;
 
     static final int HASH_SET_SLOT_SIZE = 101;
     static final int HASH_SET_FRAME_SIZE = 32768;
@@ -311,12 +314,8 @@ public class FullTextContainsEvaluator implements IScalarEvaluator {
         tokenizerForRightArray.reset(queryArray, queryArrayStartOffset, queryArrayLength);
 
         // Apply the full-text search option here
-        // Based on the search mode option - "any" or "all", set the occurrence threshold of tokens.
-        setFullTextOption(argOptions, uniqueQueryTokenCount);
-
-        IFullTextConfig config = MetadataManager.INSTANCE.getFullTextConfig(mdTxnCtx, fullTextConfigStr);
-
-        //IFullTextConfig config =
+        setFullTextOption(argOptions);
+        config = MetadataManager.INSTANCE.getFullTextConfig(mdTxnCtx, fullTextConfigStr);
 
         // Create tokens from the given query predicate
         while (tokenizerForRightArray.hasNext()) {
@@ -364,7 +363,13 @@ public class FullTextContainsEvaluator implements IScalarEvaluator {
                     uniqueQueryTokenCount++;
                 }
             }
+        }
 
+        // Based on the search mode option - "any" or "all", set the occurrence threshold of tokens.
+        if (mode == FullTextContainsDescriptor.SEARCH_MODE.ANY) {
+            occurrenceThreshold = 1;
+        } else {
+            occurrenceThreshold = uniqueQueryTokenCount;
         }
     }
 
@@ -396,9 +401,7 @@ public class FullTextContainsEvaluator implements IScalarEvaluator {
      * Sets the full-text options. The odd element is an option name and the even element is the argument
      * for that option. (e.g., argOptions[0] = "mode", argOptions[1] = "all")
      */
-    private void setFullTextOption(IPointable[] argOptions, int uniqueQueryTokenCount) throws HyracksDataException {
-        // By default, we conduct a conjunctive search.
-        occurrenceThreshold = uniqueQueryTokenCount;
+    private void setFullTextOption(IPointable[] argOptions) throws HyracksDataException {
         // in progress... Maybe using a JSON parser here can make things easier?
         for (int i = 0; i < optionArgsLength; i = i + 2) {
             // mode option
@@ -407,11 +410,11 @@ public class FullTextContainsEvaluator implements IScalarEvaluator {
                 if (compareStrInByteArrayAndPointable(FullTextContainsDescriptor.getDisjunctiveFTSearchOptionArray(),
                         argOptions[i + 1], true) == 0) {
                     // ANY
-                    occurrenceThreshold = 1;
+                    mode = FullTextContainsDescriptor.SEARCH_MODE.ANY;
                 } else if (compareStrInByteArrayAndPointable(
                         FullTextContainsDescriptor.getConjunctiveFTSearchOptionArray(), argOptions[i + 1], true) == 0) {
                     // ALL
-                    occurrenceThreshold = uniqueQueryTokenCount;
+                    mode = FullTextContainsDescriptor.SEARCH_MODE.ALL;
                 }
             } else if (compareStrInByteArrayAndPointable(FullTextContainsDescriptor.getFulltextConfigOptionArray(),
                     argOptions[i], true) == 0) {
@@ -448,8 +451,9 @@ public class FullTextContainsEvaluator implements IScalarEvaluator {
             String tokenStr = new String(t.getData(), t.getStartOffset(), t.getTokenLength());
             System.out.println("proceeding " + tokenStr);
 
-            if (tokenStr.equalsIgnoreCase("a") || tokenStr.equalsIgnoreCase("an") || tokenStr.equalsIgnoreCase("the")) {
-                // System.out.println("!!! token is in stopword list " + tokenStr);
+            if (config != null && config.proceedTokens(Arrays.asList(tokenStr)).size() == 0) {
+                System.out.println("!!! Left token is in stopword list " + tokenStr);
+                continue;
             }
 
             // Records the starting position and the length of the current token.
