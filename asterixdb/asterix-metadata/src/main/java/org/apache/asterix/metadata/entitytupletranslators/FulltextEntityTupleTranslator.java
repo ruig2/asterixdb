@@ -38,9 +38,11 @@ import org.apache.asterix.metadata.api.IFullTextConfig;
 import org.apache.asterix.metadata.api.IFullTextEntity;
 import org.apache.asterix.metadata.api.IFullTextEntity.FullTextEntityCategory;
 import org.apache.asterix.metadata.api.IFullTextFilter;
+import org.apache.asterix.metadata.entities.fulltextentity.FullTextConfig;
 import org.apache.asterix.metadata.entities.fulltextentity.StopwordFullTextFilter;
 import org.apache.asterix.metadata.bootstrap.MetadataPrimaryIndexes;
 import org.apache.asterix.metadata.bootstrap.MetadataRecordTypes;
+import org.apache.asterix.metadata.entities.fulltextentity.TokenizerCategory;
 import org.apache.asterix.om.base.AInt8;
 import org.apache.asterix.om.base.AOrderedList;
 import org.apache.asterix.om.base.ARecord;
@@ -99,7 +101,7 @@ public class FulltextEntityTupleTranslator extends AbstractTupleTranslator<IFull
         }
 
         // debug
-        return new StopwordFullTextFilter("decoded_my_stopword_filter", ImmutableList.of("aaa", "bbb", "ccc"));
+        return new FullTextConfig("my_config", TokenizerCategory.WORD,  ImmutableList.of());
     }
 
     public StopwordFullTextFilter createStopwordFilterFromARecord(ARecord aRecord) {

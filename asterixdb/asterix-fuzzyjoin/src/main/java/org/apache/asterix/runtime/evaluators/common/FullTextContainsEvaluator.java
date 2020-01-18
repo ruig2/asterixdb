@@ -19,10 +19,14 @@
 package org.apache.asterix.runtime.evaluators.common;
 
 import java.io.DataOutput;
+import java.rmi.RemoteException;
 
 import org.apache.asterix.formats.nontagged.BinaryComparatorFactoryProvider;
 import org.apache.asterix.formats.nontagged.BinaryTokenizerFactoryProvider;
 import org.apache.asterix.formats.nontagged.SerializerDeserializerProvider;
+import org.apache.asterix.metadata.MetadataManager;
+import org.apache.asterix.metadata.MetadataTransactionContext;
+import org.apache.asterix.metadata.api.IFullTextConfig;
 import org.apache.asterix.om.base.ABoolean;
 import org.apache.asterix.om.base.ANull;
 import org.apache.asterix.om.types.ATypeTag;
@@ -30,6 +34,8 @@ import org.apache.asterix.om.types.BuiltinType;
 import org.apache.asterix.om.types.EnumDeserializer;
 import org.apache.asterix.om.types.hierachy.ATypeHierarchy;
 import org.apache.asterix.runtime.evaluators.functions.PointableHelper;
+import org.apache.commons.lang.StringEscapeUtils;
+import org.apache.hyracks.algebricks.common.exceptions.AlgebricksException;
 import org.apache.hyracks.algebricks.runtime.base.IEvaluatorContext;
 import org.apache.hyracks.algebricks.runtime.base.IScalarEvaluator;
 import org.apache.hyracks.algebricks.runtime.base.IScalarEvaluatorFactory;
@@ -99,7 +105,7 @@ public class FullTextContainsEvaluator implements IScalarEvaluator {
     // Else if it is equal to the number of tokens, then we will do a conjunctive search.
     private int occurrenceThreshold = 1;
 
-    private String fullTextConfig = "";
+    private String fullTextConfigStr = "";
 
     static final int HASH_SET_SLOT_SIZE = 101;
     static final int HASH_SET_FRAME_SIZE = 32768;
@@ -181,13 +187,24 @@ public class FullTextContainsEvaluator implements IScalarEvaluator {
             return;
         }
 
+
+        MetadataTransactionContext mdTxnCtx = null;
         try {
-            ABoolean b = fullTextContainsWithArg(typeTag2, argLeft, argRight) ? ABoolean.TRUE : ABoolean.FALSE;
-            // Why need to serialize the result?
-            // If false then discard the result, if true then serialize it in the upper lever?
+            mdTxnCtx = MetadataManager.INSTANCE.beginTransaction();
+            ABoolean b = fullTextContainsWithArg(mdTxnCtx, typeTag2, argLeft, argRight) ? ABoolean.TRUE : ABoolean.FALSE;
             serde.serialize(b, out);
         } catch (HyracksDataException e1) {
             throw HyracksDataException.create(e1);
+        } catch (AlgebricksException e) {
+            e.printStackTrace();
+        } catch (RemoteException e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                MetadataManager.INSTANCE.commitTransaction(mdTxnCtx);
+            } catch (RemoteException e) {
+                e.printStackTrace();
+            }
         }
         result.set(resultStorage);
     }
@@ -200,8 +217,8 @@ public class FullTextContainsEvaluator implements IScalarEvaluator {
      * 3) As soon as the foundCount becomes the given threshold, stops the search and returns true.
      * After traversing all tokens and still the foundCount is less than the given threshold, then returns false.
      */
-    private boolean fullTextContainsWithArg(ATypeTag typeTag2, IPointable arg1, IPointable arg2)
-            throws HyracksDataException {
+    private boolean fullTextContainsWithArg(MetadataTransactionContext mdTxnCtx, ATypeTag typeTag2, IPointable arg1, IPointable arg2)
+            throws HyracksDataException, AlgebricksException, RemoteException {
         // The main logic
 
         // Since a fulltext search form is "ftcontains(X,Y,options)",
@@ -221,7 +238,7 @@ public class FullTextContainsEvaluator implements IScalarEvaluator {
         // If not, we can re-use the query predicate array we have already created.
         if (!partOfArrayEquals(queryArray, queryArrayStartOffset, queryArrayLength, arg2Array, arg2.getStartOffset(),
                 arg2.getLength())) {
-            resetQueryArrayAndRight(arg2Array, typeTag2, arg2);
+            resetQueryArrayAndRight(mdTxnCtx, arg2Array, typeTag2, arg2);
         } else {
             // The query predicate remains the same. However, the count of each token should be reset to zero.
             // Here, we visit all elements to clear the count.
@@ -244,7 +261,8 @@ public class FullTextContainsEvaluator implements IScalarEvaluator {
                 .getWordTokenizerFactory(ATypeTag.STRING, false, true).createTokenizer();
     }
 
-    void resetQueryArrayAndRight(byte[] arg2Array, ATypeTag typeTag2, IPointable arg2) throws HyracksDataException {
+    void resetQueryArrayAndRight(MetadataTransactionContext mdTxnCtx, byte[] arg2Array, ATypeTag typeTag2, IPointable arg2)
+            throws HyracksDataException, AlgebricksException, RemoteException {
         // If the right side is an (un)ordered list, we need to apply the (un)ordered list tokenizer.
         switch (typeTag2) {
             case ARRAY:
@@ -324,7 +342,7 @@ public class FullTextContainsEvaluator implements IScalarEvaluator {
             // The same logic should be applied in AbstractTOccurrenceSearcher() class.
             checkWhetherFullTextPredicateIsPhrase(typeTag2, queryArray, tokenOffset, tokenLength, queryTokenCount);
 
-            //IFullTextConfig config = MetadataManager.Instance;
+            IFullTextConfig config = MetadataManager.INSTANCE.getFullTextConfig(mdTxnCtx, fullTextConfigStr);
 
             // Count the number of tokens in the given query. We only count the unique tokens.
             // We only care about the first insertion of the token into the hash set
@@ -393,7 +411,9 @@ public class FullTextContainsEvaluator implements IScalarEvaluator {
                 }
             } else if (compareStrInByteArrayAndPointable(FullTextContainsDescriptor.getFulltextConfigOptionArray(),
                     argOptions[i], true) == 0) {
-                fullTextConfig = String.valueOf(argOptions[i + 1]);
+                // ToDo: \r is added in front of the arg, how to solve this gracefully?
+                fullTextConfigStr = UTF8StringUtil.toString(argOptions[i + 1].getByteArray(), 1);
+                System.out.println(fullTextConfigStr);
             }
         }
     }
