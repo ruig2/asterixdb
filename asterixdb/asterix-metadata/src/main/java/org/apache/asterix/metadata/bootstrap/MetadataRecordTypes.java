@@ -499,12 +499,16 @@ public final class MetadataRecordTypes {
     public static final int FULLTEXT_ENTITY_ARECORD_FULLTEXT_ENTITY_CATEGORY_FIELD_INDEX = 0;
     public static final int FULLTEXT_ENTITY_ARECORD_FULLTEXT_ENTITY_NAME_FIELD_INDEX = 1;
 
-    // Fulltext Filter
+    // FullText Filter
     public static final int FULLTEXT_ENTITY_ARECORD_FULLTEXT_FILTER_KIND_FIELD_INDEX = 2;
     public static final int FULLTEXT_ENTITY_ARECORD_USED_BY_FT_CONFIGS_FIELD_INDEX = 3;
 
     // Stopword Filter
     public static final int FULLTEXT_ENTITY_ARECORD_STOPWORD_LIST_FIELD_INDEX = 4;
+
+    // FullText Config
+    public static final int FULLTEXT_ENTITY_ARECORD_FULLTEXT_CONFIG_TOKENIZER_FIELD_INDEX = 2;
+    public static final int FULLTEXT_ENTITY_ARECORD_FULLTEXT_CONFIG_FILTERS_LIST_FIELD_INDEX = 3;
 
     public static final String RECORD_NAME_FULLTEXT_ENTITY = "FulltextEntityRecordType";
     public static final ARecordType FULLTEXT_ENTITY_RECORDTYPE = createRecordType(RECORD_NAME_FULLTEXT_ENTITY,

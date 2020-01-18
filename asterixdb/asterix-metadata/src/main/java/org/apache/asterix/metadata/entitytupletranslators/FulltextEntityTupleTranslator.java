@@ -19,6 +19,8 @@
 
 package org.apache.asterix.metadata.entitytupletranslators;
 
+import org.apache.asterix.metadata.MetadataManager;
+import org.apache.asterix.metadata.MetadataTransactionContext;
 import static org.apache.asterix.metadata.bootstrap.MetadataRecordTypes.FIELD_NAME_FULLTEXT_FILTER_CATEGORY;
 import static org.apache.asterix.metadata.bootstrap.MetadataRecordTypes.FIELD_NAME_FULLTEXT_FILTER_PIPELINE;
 import static org.apache.asterix.metadata.bootstrap.MetadataRecordTypes.FIELD_NAME_FULLTEXT_STOPWORD_LIST;
@@ -29,6 +31,7 @@ import static org.apache.asterix.metadata.bootstrap.MetadataRecordTypes.FULLTEXT
 import static org.apache.asterix.metadata.bootstrap.MetadataRecordTypes.FULLTEXT_ENTITY_ARECORD_FULLTEXT_ENTITY_NAME_FIELD_INDEX;
 import static org.apache.asterix.metadata.bootstrap.MetadataRecordTypes.FULLTEXT_ENTITY_ARECORD_FULLTEXT_FILTER_KIND_FIELD_INDEX;
 
+import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -50,6 +53,7 @@ import org.apache.asterix.om.base.AString;
 import org.apache.asterix.om.base.IACursor;
 import org.apache.asterix.om.types.AOrderedListType;
 import org.apache.asterix.om.types.BuiltinType;
+import org.apache.commons.lang3.EnumUtils;
 import org.apache.hyracks.algebricks.common.exceptions.AlgebricksException;
 import org.apache.hyracks.algebricks.common.exceptions.NotImplementedException;
 import org.apache.hyracks.api.dataflow.value.ISerializerDeserializer;
@@ -60,6 +64,7 @@ import org.apache.hyracks.dataflow.common.comm.io.ArrayTupleReference;
 import org.apache.hyracks.dataflow.common.data.accessors.ITupleReference;
 
 import com.google.common.collect.ImmutableList;
+import sun.tools.jstat.Token;
 
 public class FulltextEntityTupleTranslator extends AbstractTupleTranslator<IFullTextEntity> {
 
@@ -97,11 +102,10 @@ public class FulltextEntityTupleTranslator extends AbstractTupleTranslator<IFull
                     case SYNONYM:
                 }
             case CONFIG:
-                break;
+                return createConfigFromARecord(aRecord);
         }
 
-        // debug
-        return new FullTextConfig("my_config", TokenizerCategory.WORD,  ImmutableList.of());
+        return null;
     }
 
     public StopwordFullTextFilter createStopwordFilterFromARecord(ARecord aRecord) {
@@ -124,6 +128,45 @@ public class FulltextEntityTupleTranslator extends AbstractTupleTranslator<IFull
         }
 
         return filter;
+    }
+
+    public FullTextConfig createConfigFromARecord(ARecord aRecord) {
+        String name = ((AString) aRecord
+                .getValueByPos(MetadataRecordTypes.FULLTEXT_ENTITY_ARECORD_FULLTEXT_ENTITY_NAME_FIELD_INDEX))
+                .getStringValue();
+
+        TokenizerCategory tokenizerCategory = EnumUtils.getEnumIgnoreCase(TokenizerCategory.class, ((AString) aRecord
+                .getValueByPos(MetadataRecordTypes. FULLTEXT_ENTITY_ARECORD_FULLTEXT_CONFIG_TOKENIZER_FIELD_INDEX))
+                .getStringValue());
+
+        List<String> filterNames = new ArrayList<>();
+        IACursor filterNamesCursor = ((AOrderedList) (aRecord
+                .getValueByPos(MetadataRecordTypes.FULLTEXT_ENTITY_ARECORD_FULLTEXT_CONFIG_FILTERS_LIST_FIELD_INDEX))).getCursor();
+        while (filterNamesCursor.next()) {
+            filterNames.add(((AString) filterNamesCursor.get()).getStringValue());
+        }
+
+        MetadataTransactionContext mdTxnCtx = null;
+        ImmutableList.Builder<IFullTextFilter> filtersBuilder = ImmutableList.<IFullTextFilter> builder();
+        try {
+            mdTxnCtx = MetadataManager.INSTANCE.beginTransaction();
+            for (String filterName : filterNames) {
+                IFullTextFilter filter = MetadataManager.INSTANCE.getFullTextFilter(mdTxnCtx, filterName);
+                filtersBuilder.add(filter);
+            }
+        } catch (RemoteException e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                // in progress... how to handle the exception gracefully?
+                MetadataManager.INSTANCE.commitTransaction(mdTxnCtx);
+            } catch (RemoteException e) {
+                e.printStackTrace();
+            }
+        }
+
+        FullTextConfig config = new FullTextConfig(name, tokenizerCategory, filtersBuilder.build());
+        return config;
     }
 
     private void writeKeyAndValue2FieldVariables(String key, String value) throws HyracksDataException {
