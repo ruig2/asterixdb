@@ -40,6 +40,7 @@ import org.apache.asterix.om.base.AFloat;
 import org.apache.asterix.om.base.AInt32;
 import org.apache.asterix.om.base.AMissing;
 import org.apache.asterix.om.base.ANull;
+import org.apache.asterix.om.base.AOrderedList;
 import org.apache.asterix.om.base.AString;
 import org.apache.asterix.om.base.IACollection;
 import org.apache.asterix.om.base.IAObject;
@@ -429,6 +430,7 @@ public class InvertedIndexAccessMethod implements IAccessMethod {
             // List of expressions for the assign.
             ArrayList<Mutable<ILogicalExpression>> keyExprList = new ArrayList<Mutable<ILogicalExpression>>();
             // Add key vars and exprs to argument list.
+            // ????? Should we add the ft config as a parameter here?
             addKeyVarsAndExprs(optFuncExpr, keyVarList, keyExprList, context);
             // Assign operator that sets the secondary-index search-key fields.
             inputOp = new AssignOperator(keyVarList, keyExprList);
@@ -929,6 +931,7 @@ public class InvertedIndexAccessMethod implements IAccessMethod {
 
     private static SearchModifierType getFullTextOption(AbstractFunctionCallExpression funcExpr) {
         if (funcExpr.getArguments().size() < 3 || funcExpr.getArguments().size() % 2 != 0) {
+            // Should it return an error here?
             // If no parameters or incorrect number of parameters are given, the default search type is returned.
             return SearchModifierType.CONJUNCTIVE;
         }
@@ -954,7 +957,18 @@ public class InvertedIndexAccessMethod implements IAccessMethod {
         // Add a variable and its expr to the lists which will be passed into an assign op.
         LogicalVariable keyVar = context.newVar();
         keyVarList.add(keyVar);
-        keyExprList.add(new MutableObject<ILogicalExpression>(optFuncExpr.getConstantExpr(0)));
+        // The stopword list is the optFuncExpr.getConstantExpr(0)
+        // The fulltext config is at optFuncExpr.getFuncExpr(5) if the ft config is the last parameter
+
+        // The current implementation is a hack; how to proceed the query with the ft config gracefully?
+        MutableObject<ILogicalExpression> fullTextWordList =
+                new MutableObject<ILogicalExpression>(optFuncExpr.getConstantExpr(0));
+        //keyExprList.add(fullTextWordList);
+        AOrderedList aList = new AOrderedList(Arrays.asList("smart", "black"));
+        AsterixConstantValue cValue = new AsterixConstantValue(aList);
+        ConstantExpression e = new ConstantExpression(cValue);
+        Mutable<ILogicalExpression> m = new MutableObject<>(e);
+        keyExprList.add(m);
         return;
     }
 

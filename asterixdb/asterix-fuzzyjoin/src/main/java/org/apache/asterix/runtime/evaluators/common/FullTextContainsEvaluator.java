@@ -357,8 +357,9 @@ public class FullTextContainsEvaluator implements IScalarEvaluator {
             // it should not exist.
             if (rightHashSet.find(keyEntry, queryArray, false) == -1) {
                 String keyStr = new String(queryArray, keyEntry.getOffset(), keyEntry.getLength());
-                System.out.println("get key " + keyStr);
+                System.out.println("Right: get key " + keyStr);
                 if (config == null || config.proceedTokens(Arrays.asList(keyStr)).size() > 0) {
+                    System.out.println("\tnon-stopword key " + keyStr);
                     rightHashSet.put(keyEntry);
                     uniqueQueryTokenCount++;
                 }
@@ -439,6 +440,9 @@ public class FullTextContainsEvaluator implements IScalarEvaluator {
                 .getNumBytesToStoreLength(UTF8StringUtil.getUTFLength(arg1.getByteArray(), arg1.getStartOffset()));
         int startOffset = arg1.getStartOffset() + numBytesToStoreLength;
         int length = arg1.getLength() - numBytesToStoreLength;
+
+        String tstr = new String(arg1.getByteArray(), startOffset, length);
+        System.out.println("\nLeft: " + tstr);
 
         // Is the fulltext index used here ???
         tokenizerForLeftArray.reset(arg1.getByteArray(), startOffset, length);
