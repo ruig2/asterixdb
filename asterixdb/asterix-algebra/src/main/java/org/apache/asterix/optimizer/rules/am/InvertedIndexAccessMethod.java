@@ -18,6 +18,7 @@
  */
 package org.apache.asterix.optimizer.rules.am;
 
+import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -27,6 +28,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.google.common.base.Strings;
 import org.apache.asterix.common.annotations.SkipSecondaryIndexSearchExpressionAnnotation;
 import org.apache.asterix.common.config.DatasetConfig.IndexType;
 import org.apache.asterix.common.exceptions.CompilationException;
@@ -34,8 +36,12 @@ import org.apache.asterix.common.exceptions.ErrorCode;
 import org.apache.asterix.dataflow.data.common.ExpressionTypeComputer;
 import org.apache.asterix.formats.nontagged.BinaryTokenizerFactoryProvider;
 import org.apache.asterix.lang.common.util.FunctionUtil;
+import org.apache.asterix.metadata.MetadataManager;
+import org.apache.asterix.metadata.MetadataTransactionContext;
+import org.apache.asterix.metadata.api.IFullTextConfig;
 import org.apache.asterix.metadata.entities.Dataset;
 import org.apache.asterix.metadata.entities.Index;
+import org.apache.asterix.om.base.ABoolean;
 import org.apache.asterix.om.base.AFloat;
 import org.apache.asterix.om.base.AInt32;
 import org.apache.asterix.om.base.AMissing;
@@ -43,6 +49,7 @@ import org.apache.asterix.om.base.ANull;
 import org.apache.asterix.om.base.AOrderedList;
 import org.apache.asterix.om.base.AString;
 import org.apache.asterix.om.base.IACollection;
+import org.apache.asterix.om.base.IACursor;
 import org.apache.asterix.om.base.IAObject;
 import org.apache.asterix.om.constants.AsterixConstantValue;
 import org.apache.asterix.om.functions.BuiltinFunctions;
@@ -957,19 +964,60 @@ public class InvertedIndexAccessMethod implements IAccessMethod {
         // Add a variable and its expr to the lists which will be passed into an assign op.
         LogicalVariable keyVar = context.newVar();
         keyVarList.add(keyVar);
-        // The stopword list is the optFuncExpr.getConstantExpr(0)
-        // The fulltext config is at optFuncExpr.getFuncExpr(5) if the ft config is the last parameter
 
-        // The current implementation is a hack; how to proceed the query with the ft config gracefully?
-        MutableObject<ILogicalExpression> fullTextWordList =
-                new MutableObject<ILogicalExpression>(optFuncExpr.getConstantExpr(0));
-        //keyExprList.add(fullTextWordList);
-        AOrderedList aList = new AOrderedList(Arrays.asList("smart", "black"));
-        AsterixConstantValue cValue = new AsterixConstantValue(aList);
-        ConstantExpression e = new ConstantExpression(cValue);
-        Mutable<ILogicalExpression> m = new MutableObject<>(e);
-        keyExprList.add(m);
-        return;
+        // in progress...This is a hack and should be replaced with a better way to parse the arguments
+        String ftConfigName = "";
+        IFullTextConfig ftConfig = null;
+        if (optFuncExpr.getFuncExpr().getArguments().size() > 4) {
+            ConstantExpression ce = (ConstantExpression) optFuncExpr.getFuncExpr().getArguments().get(5).getValue();
+            AsterixConstantValue acv = (AsterixConstantValue) ce.getValue();
+            AString aString = (AString) acv.getObject();
+            ftConfigName = aString.getStringValue();
+        }
+
+        if (!Strings.isNullOrEmpty(ftConfigName)) {
+            // in progress: the transaction should be moved to a upper level
+            // to guarantee the ft config is not changed during the entire query lifecycle
+            MetadataTransactionContext mdTxnCtx = null;
+            try {
+                mdTxnCtx = MetadataManager.INSTANCE.beginTransaction();
+                ftConfig = MetadataManager.INSTANCE.getFullTextConfig(mdTxnCtx, ftConfigName);
+            } catch (RemoteException ex) {
+                ex.printStackTrace();
+            } finally {
+                try {
+                    MetadataManager.INSTANCE.commitTransaction(mdTxnCtx);
+                } catch (RemoteException ex) {
+                    ex.printStackTrace();
+                }
+            }
+        }
+
+        if (ftConfig != null) {
+            // in progress...Unwrapping, proceed tokens and wrap again to expressions is not a good way
+            // Maybe the following logic can be moved in a later phase
+            //   where expressions are converted to Java built-in Strings
+            ILogicalExpression le = optFuncExpr.getConstantExpr(0);
+            ConstantExpression ce = (ConstantExpression) le;
+            AsterixConstantValue acv = (AsterixConstantValue) ce.getValue();
+            AOrderedList aList = (AOrderedList) acv.getObject();
+
+            List<String> result = new ArrayList<>();
+            IACursor cursor = aList.getCursor();
+            while (cursor.next()) {
+                AString s = (AString) cursor.get();
+                result.addAll(ftConfig.proceedTokens(Arrays.asList(s.getStringValue())));
+            }
+
+            AOrderedList aList2 = new AOrderedList(result);
+            AsterixConstantValue cValue = new AsterixConstantValue(aList2);
+            ConstantExpression e = new ConstantExpression(cValue);
+            Mutable<ILogicalExpression> m = new MutableObject<>(e);
+            keyExprList.add(m);
+        } else {
+            MutableObject<ILogicalExpression> fullTextWordList = new MutableObject<ILogicalExpression>(optFuncExpr.getConstantExpr(0));
+            keyExprList.add(fullTextWordList);
+        }
     }
 
     @Override
