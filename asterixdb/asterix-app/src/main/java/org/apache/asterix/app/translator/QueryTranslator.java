@@ -88,11 +88,6 @@ import org.apache.asterix.external.indexing.IndexingConstants;
 import org.apache.asterix.external.operators.FeedIntakeOperatorNodePushable;
 import org.apache.asterix.external.util.ExternalDataConstants;
 import org.apache.asterix.formats.nontagged.TypeTraitProvider;
-import org.apache.asterix.metadata.entities.fulltextentity.FullTextConfig;
-import org.apache.asterix.metadata.api.IFullTextConfig;
-import org.apache.asterix.metadata.api.IFullTextFilter;
-import org.apache.asterix.metadata.entities.fulltextentity.StopwordFullTextFilter;
-import org.apache.asterix.metadata.entities.fulltextentity.TokenizerCategory;
 import org.apache.asterix.lang.common.base.Expression;
 import org.apache.asterix.lang.common.base.IReturningStatement;
 import org.apache.asterix.lang.common.base.IRewriterFactory;
@@ -147,6 +142,8 @@ import org.apache.asterix.lang.common.util.FunctionUtil;
 import org.apache.asterix.metadata.IDatasetDetails;
 import org.apache.asterix.metadata.MetadataManager;
 import org.apache.asterix.metadata.MetadataTransactionContext;
+import org.apache.asterix.metadata.api.IFullTextConfig;
+import org.apache.asterix.metadata.api.IFullTextFilter;
 import org.apache.asterix.metadata.bootstrap.MetadataBuiltinEntities;
 import org.apache.asterix.metadata.dataset.hints.DatasetHints;
 import org.apache.asterix.metadata.dataset.hints.DatasetHints.DatasetNodegroupCardinalityHint;
@@ -165,6 +162,9 @@ import org.apache.asterix.metadata.entities.Index;
 import org.apache.asterix.metadata.entities.InternalDatasetDetails;
 import org.apache.asterix.metadata.entities.NodeGroup;
 import org.apache.asterix.metadata.entities.Synonym;
+import org.apache.asterix.metadata.entities.fulltextentity.FullTextConfig;
+import org.apache.asterix.metadata.entities.fulltextentity.StopwordFullTextFilter;
+import org.apache.asterix.metadata.entities.fulltextentity.TokenizerCategory;
 import org.apache.asterix.metadata.feeds.FeedMetadataUtil;
 import org.apache.asterix.metadata.lock.ExternalDatasetsRegistry;
 import org.apache.asterix.metadata.utils.DatasetUtil;
@@ -999,7 +999,8 @@ public class QueryTranslator extends AbstractLangTranslator implements IStatemen
 
             Index newIndex = new Index(dataverseName, datasetName, indexName, stmtCreateIndex.getIndexType(),
                     indexFields, keySourceIndicators, indexFieldTypes, stmtCreateIndex.getGramLength(),
-                    overridesFieldTypes, stmtCreateIndex.isEnforced(), false, MetadataUtil.PENDING_ADD_OP);
+                    stmtCreateIndex.getFullTextConfig(), overridesFieldTypes, stmtCreateIndex.isEnforced(), false,
+                    MetadataUtil.PENDING_ADD_OP);
             doCreateIndex(hcc, metadataProvider, ds, newIndex, jobFlags, sourceLoc);
         } finally {
             metadataProvider.getLocks().unlock();
@@ -1062,8 +1063,7 @@ public class QueryTranslator extends AbstractLangTranslator implements IStatemen
         List<FieldBinding> fb = rc.getFbList();
 
         String tokenizerStr = ((LiteralExpr) (fb.get(0).getRightExpr())).getValue().getStringValue().toLowerCase();
-        TokenizerCategory tokenizerCategory =
-                TokenizerCategory.fromString(tokenizerStr);
+        TokenizerCategory tokenizerCategory = TokenizerCategory.fromString(tokenizerStr);
 
         List<String> filterNames = new ArrayList<>();
         for (Expression l : ((ListConstructor) (fb.get(1).getRightExpr())).getExprList()) {

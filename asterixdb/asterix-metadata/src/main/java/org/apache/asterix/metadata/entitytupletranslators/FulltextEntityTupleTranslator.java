@@ -19,8 +19,6 @@
 
 package org.apache.asterix.metadata.entitytupletranslators;
 
-import org.apache.asterix.metadata.MetadataManager;
-import org.apache.asterix.metadata.MetadataTransactionContext;
 import static org.apache.asterix.metadata.bootstrap.MetadataRecordTypes.FIELD_NAME_FULLTEXT_FILTER_CATEGORY;
 import static org.apache.asterix.metadata.bootstrap.MetadataRecordTypes.FIELD_NAME_FULLTEXT_FILTER_PIPELINE;
 import static org.apache.asterix.metadata.bootstrap.MetadataRecordTypes.FIELD_NAME_FULLTEXT_STOPWORD_LIST;
@@ -37,14 +35,16 @@ import java.util.List;
 
 import org.apache.asterix.builders.OrderedListBuilder;
 import org.apache.asterix.formats.nontagged.SerializerDeserializerProvider;
+import org.apache.asterix.metadata.MetadataManager;
+import org.apache.asterix.metadata.MetadataTransactionContext;
 import org.apache.asterix.metadata.api.IFullTextConfig;
 import org.apache.asterix.metadata.api.IFullTextEntity;
 import org.apache.asterix.metadata.api.IFullTextEntity.FullTextEntityCategory;
 import org.apache.asterix.metadata.api.IFullTextFilter;
-import org.apache.asterix.metadata.entities.fulltextentity.FullTextConfig;
-import org.apache.asterix.metadata.entities.fulltextentity.StopwordFullTextFilter;
 import org.apache.asterix.metadata.bootstrap.MetadataPrimaryIndexes;
 import org.apache.asterix.metadata.bootstrap.MetadataRecordTypes;
+import org.apache.asterix.metadata.entities.fulltextentity.FullTextConfig;
+import org.apache.asterix.metadata.entities.fulltextentity.StopwordFullTextFilter;
 import org.apache.asterix.metadata.entities.fulltextentity.TokenizerCategory;
 import org.apache.asterix.om.base.AInt8;
 import org.apache.asterix.om.base.AOrderedList;
@@ -64,7 +64,6 @@ import org.apache.hyracks.dataflow.common.comm.io.ArrayTupleReference;
 import org.apache.hyracks.dataflow.common.data.accessors.ITupleReference;
 
 import com.google.common.collect.ImmutableList;
-import sun.tools.jstat.Token;
 
 public class FulltextEntityTupleTranslator extends AbstractTupleTranslator<IFullTextEntity> {
 
@@ -133,15 +132,17 @@ public class FulltextEntityTupleTranslator extends AbstractTupleTranslator<IFull
     public FullTextConfig createConfigFromARecord(ARecord aRecord) {
         String name = ((AString) aRecord
                 .getValueByPos(MetadataRecordTypes.FULLTEXT_ENTITY_ARECORD_FULLTEXT_ENTITY_NAME_FIELD_INDEX))
-                .getStringValue();
+                        .getStringValue();
 
-        TokenizerCategory tokenizerCategory = EnumUtils.getEnumIgnoreCase(TokenizerCategory.class, ((AString) aRecord
-                .getValueByPos(MetadataRecordTypes. FULLTEXT_ENTITY_ARECORD_FULLTEXT_CONFIG_TOKENIZER_FIELD_INDEX))
-                .getStringValue());
+        TokenizerCategory tokenizerCategory = EnumUtils.getEnumIgnoreCase(TokenizerCategory.class,
+                ((AString) aRecord.getValueByPos(
+                        MetadataRecordTypes.FULLTEXT_ENTITY_ARECORD_FULLTEXT_CONFIG_TOKENIZER_FIELD_INDEX))
+                                .getStringValue());
 
         List<String> filterNames = new ArrayList<>();
         IACursor filterNamesCursor = ((AOrderedList) (aRecord
-                .getValueByPos(MetadataRecordTypes.FULLTEXT_ENTITY_ARECORD_FULLTEXT_CONFIG_FILTERS_LIST_FIELD_INDEX))).getCursor();
+                .getValueByPos(MetadataRecordTypes.FULLTEXT_ENTITY_ARECORD_FULLTEXT_CONFIG_FILTERS_LIST_FIELD_INDEX)))
+                        .getCursor();
         while (filterNamesCursor.next()) {
             filterNames.add(((AString) filterNamesCursor.get()).getStringValue());
         }

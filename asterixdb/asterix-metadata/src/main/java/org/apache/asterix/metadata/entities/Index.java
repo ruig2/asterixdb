@@ -58,12 +58,15 @@ public class Index implements IMetadataEntity<Index>, Comparable<Index> {
     private final boolean isPrimaryIndex;
     // Specific to NGRAM indexes.
     private final int gramLength;
+    // Specific to FullText indexes.
+    private final String fullTextConfig;
     // Type of pending operations with respect to atomic DDL operation
     private int pendingOp;
 
     public Index(DataverseName dataverseName, String datasetName, String indexName, IndexType indexType,
             List<List<String>> keyFieldNames, List<Integer> keyFieldSourceIndicators, List<IAType> keyFieldTypes,
-            int gramLength, boolean overrideKeyFieldTypes, boolean isEnforced, boolean isPrimaryIndex, int pendingOp) {
+            int gramLength, String fullTextConfig, boolean overrideKeyFieldTypes, boolean isEnforced,
+            boolean isPrimaryIndex, int pendingOp) {
         this.dataverseName = dataverseName;
         this.datasetName = datasetName;
         this.indexName = indexName;
@@ -72,6 +75,7 @@ public class Index implements IMetadataEntity<Index>, Comparable<Index> {
         this.keyFieldSourceIndicators = keyFieldSourceIndicators;
         this.keyFieldTypes = keyFieldTypes;
         this.gramLength = gramLength;
+        this.fullTextConfig = fullTextConfig;
         this.overrideKeyFieldTypes = overrideKeyFieldTypes;
         this.isEnforced = isEnforced;
         this.isPrimaryIndex = isPrimaryIndex;
@@ -82,7 +86,7 @@ public class Index implements IMetadataEntity<Index>, Comparable<Index> {
             List<List<String>> keyFieldNames, List<Integer> keyFieldSourceIndicators, List<IAType> keyFieldTypes,
             boolean overrideKeyFieldTypes, boolean isEnforced, boolean isPrimaryIndex, int pendingOp) {
         this(dataverseName, datasetName, indexName, indexType, keyFieldNames, keyFieldSourceIndicators, keyFieldTypes,
-                -1, overrideKeyFieldTypes, isEnforced, isPrimaryIndex, pendingOp);
+                -1, "", overrideKeyFieldTypes, isEnforced, isPrimaryIndex, pendingOp);
     }
 
     public DataverseName getDataverseName() {
@@ -111,6 +115,10 @@ public class Index implements IMetadataEntity<Index>, Comparable<Index> {
 
     public int getGramLength() {
         return gramLength;
+    }
+
+    public String getFullTextConfig() {
+        return fullTextConfig;
     }
 
     public IndexType getIndexType() {

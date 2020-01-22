@@ -19,10 +19,10 @@
 
 package org.apache.asterix.fuzzyjoin.tokenizer;
 
-import org.apache.asterix.metadata.entities.fulltextentity.TokenizerCategory;
-
 import java.io.Serializable;
 import java.util.List;
+
+import org.apache.asterix.metadata.entities.fulltextentity.TokenizerCategory;
 
 public interface Tokenizer extends Serializable {
     public List<String> tokenize(String text);

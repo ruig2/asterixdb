@@ -19,10 +19,10 @@
 
 package org.apache.asterix.metadata.entities.fulltextentity;
 
-import org.apache.asterix.metadata.api.IFullTextFilter;
-
 import java.util.ArrayList;
 import java.util.List;
+
+import org.apache.asterix.metadata.api.IFullTextFilter;
 
 public abstract class AbstractFullTextFilter implements IFullTextFilter {
     protected final String name;

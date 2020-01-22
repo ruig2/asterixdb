@@ -242,10 +242,12 @@ class SQLPPParser extends ScopeChecker implements IParser {
     private static class IndexParams {
       public IndexType type;
       public int gramLength;
+      public String fullTextConfig;
 
-      public IndexParams(IndexType type, int gramLength) {
+      public IndexParams(IndexType type, int gramLength, String fullTextConfig) {
         this.type = type;
         this.gramLength = gramLength;
+        this.fullTextConfig = fullTextConfig;
       }
     };
 
@@ -851,17 +853,18 @@ CreateIndexStatement IndexSpecification(Token startStmtToken) throws ParseExcept
     )* <RIGHTPAREN> ( <TYPE> indexType = IndexType() )? ( <ENFORCED> { enforced = true; } )?
   )
   {
-    stmt.setIndexName(new Identifier(indexName));
-    stmt.setIfNotExists(ifNotExists);
-    stmt.setDataverseName(nameComponents.first);
-    stmt.setDatasetName(nameComponents.second);
-    if (indexType != null) {
-      stmt.setIndexType(indexType.type);
-      stmt.setGramLength(indexType.gramLength);
-    }
-    stmt.setEnforced(enforced);
-    return addSourceLocation(stmt, startStmtToken);
+  stmt.setIndexName(new Identifier(indexName));
+  stmt.setIfNotExists(ifNotExists);
+  stmt.setDataverseName(nameComponents.first);
+  stmt.setDatasetName(nameComponents.second);
+  if (indexType != null) {
+    stmt.setIndexType(indexType.type);
+    stmt.setGramLength(indexType.gramLength);
+    stmt.setFullTextConfig(indexType.fullTextConfig);
   }
+  stmt.setEnforced(enforced);
+  return addSourceLocation(stmt, startStmtToken);
+}
 }
 
 CreateIndexStatement PrimaryIndexSpecification(Token startStmtToken) throws ParseException:
@@ -912,6 +915,7 @@ IndexParams IndexType() throws ParseException:
 {
   IndexType type = null;
   int gramLength = 0;
+  String fullTextConfig = "";
 }
 {
   (<BTREE>
@@ -930,6 +934,11 @@ IndexParams IndexType() throws ParseException:
     {
       type = IndexType.SINGLE_PARTITION_WORD_INVIX;
     }
+    ( LOOKAHEAD(1) <USING> <IDENTIFIER>
+      {
+        fullTextConfig = token.image;
+      }
+    )?
   | <NGRAM> <LEFTPAREN> <INTEGER_LITERAL>
     {
       type = IndexType.LENGTH_PARTITIONED_NGRAM_INVIX;
@@ -937,7 +946,7 @@ IndexParams IndexType() throws ParseException:
     }
   <RIGHTPAREN>)
     {
-      return new IndexParams(type, gramLength);
+      return new IndexParams(type, gramLength, fullTextConfig);
     }
 }
 

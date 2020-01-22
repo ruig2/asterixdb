@@ -22,9 +22,10 @@ package org.apache.asterix.metadata.entities.fulltextentity;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.google.common.collect.ImmutableList;
 import org.apache.asterix.metadata.api.IFullTextConfig;
 import org.apache.asterix.metadata.api.IFullTextFilter;
+
+import com.google.common.collect.ImmutableList;
 
 public abstract class AbstractFullTextConfig implements IFullTextConfig {
     protected final String name;
@@ -33,7 +34,8 @@ public abstract class AbstractFullTextConfig implements IFullTextConfig {
     // in progress... maybe use Index class instead of String?
     protected List<String> usedByIndices;
 
-    protected AbstractFullTextConfig(String name, TokenizerCategory tokenizerCategory, ImmutableList<IFullTextFilter> filters) {
+    protected AbstractFullTextConfig(String name, TokenizerCategory tokenizerCategory,
+            ImmutableList<IFullTextFilter> filters) {
         this.name = name;
         this.tokenizerCategory = tokenizerCategory;
         this.filters = filters;

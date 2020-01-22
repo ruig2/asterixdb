@@ -651,11 +651,6 @@
     </dependency>
     <dependency>
       <groupId>org.apache.asterix</groupId>
-      <artifactId>asterix-fuzzyjoin</artifactId>
-      <version>${project.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.asterix</groupId>
       <artifactId>asterix-geo</artifactId>
       <version>${project.version}</version>
       <scope>test</scope>

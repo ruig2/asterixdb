@@ -18,9 +18,9 @@
  */
 package org.apache.asterix.metadata.entities.fulltextentity;
 
-import com.google.common.collect.ImmutableMap;
-
 import java.util.List;
+
+import com.google.common.collect.ImmutableMap;
 
 public class SynonymFullTextFilter extends AbstractFullTextFilter {
     ImmutableMap<String, String> synonymMap;
@@ -30,7 +30,8 @@ public class SynonymFullTextFilter extends AbstractFullTextFilter {
         this.synonymMap = synonymMap;
     }
 
-    @Override public List<String> proceedTokens(List<String> tokens) {
+    @Override
+    public List<String> proceedTokens(List<String> tokens) {
         return null;
     }
 }

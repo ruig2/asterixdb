@@ -20,9 +20,7 @@ package org.apache.asterix.runtime.evaluators.common;
 
 import java.io.DataOutput;
 import java.rmi.RemoteException;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 
 import org.apache.asterix.formats.nontagged.BinaryComparatorFactoryProvider;
 import org.apache.asterix.formats.nontagged.BinaryTokenizerFactoryProvider;
@@ -37,7 +35,6 @@ import org.apache.asterix.om.types.BuiltinType;
 import org.apache.asterix.om.types.EnumDeserializer;
 import org.apache.asterix.om.types.hierachy.ATypeHierarchy;
 import org.apache.asterix.runtime.evaluators.functions.PointableHelper;
-import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.hyracks.algebricks.common.exceptions.AlgebricksException;
 import org.apache.hyracks.algebricks.runtime.base.IEvaluatorContext;
 import org.apache.hyracks.algebricks.runtime.base.IScalarEvaluator;
@@ -193,11 +190,11 @@ public class FullTextContainsEvaluator implements IScalarEvaluator {
             return;
         }
 
-
         MetadataTransactionContext mdTxnCtx = null;
         try {
             mdTxnCtx = MetadataManager.INSTANCE.beginTransaction();
-            ABoolean b = fullTextContainsWithArg(mdTxnCtx, typeTag2, argLeft, argRight) ? ABoolean.TRUE : ABoolean.FALSE;
+            ABoolean b =
+                    fullTextContainsWithArg(mdTxnCtx, typeTag2, argLeft, argRight) ? ABoolean.TRUE : ABoolean.FALSE;
             serde.serialize(b, out);
         } catch (HyracksDataException e1) {
             throw HyracksDataException.create(e1);
@@ -223,8 +220,8 @@ public class FullTextContainsEvaluator implements IScalarEvaluator {
      * 3) As soon as the foundCount becomes the given threshold, stops the search and returns true.
      * After traversing all tokens and still the foundCount is less than the given threshold, then returns false.
      */
-    private boolean fullTextContainsWithArg(MetadataTransactionContext mdTxnCtx, ATypeTag typeTag2, IPointable arg1, IPointable arg2)
-            throws HyracksDataException, AlgebricksException, RemoteException {
+    private boolean fullTextContainsWithArg(MetadataTransactionContext mdTxnCtx, ATypeTag typeTag2, IPointable arg1,
+            IPointable arg2) throws HyracksDataException, AlgebricksException, RemoteException {
         // The main logic
 
         // Since a fulltext search form is "ftcontains(X,Y,options)",
@@ -267,8 +264,8 @@ public class FullTextContainsEvaluator implements IScalarEvaluator {
                 .getWordTokenizerFactory(ATypeTag.STRING, false, true).createTokenizer();
     }
 
-    void resetQueryArrayAndRight(MetadataTransactionContext mdTxnCtx, byte[] arg2Array, ATypeTag typeTag2, IPointable arg2)
-            throws HyracksDataException, AlgebricksException, RemoteException {
+    void resetQueryArrayAndRight(MetadataTransactionContext mdTxnCtx, byte[] arg2Array, ATypeTag typeTag2,
+            IPointable arg2) throws HyracksDataException, AlgebricksException, RemoteException {
         // If the right side is an (un)ordered list, we need to apply the (un)ordered list tokenizer.
         switch (typeTag2) {
             case ARRAY:

@@ -48,7 +48,8 @@ public class FullTextContainsDescriptor extends AbstractScalarFunctionDynamicDes
     public static final String CONJUNCTIVE_SEARCH_MODE_OPTION = "all";
 
     public enum SEARCH_MODE {
-        ANY, ALL;
+        ANY,
+        ALL;
     }
 
     private static final byte[] SEARCH_MODE_OPTION_ARRAY = UTF8StringUtil.writeStringToBytes(SEARCH_MODE_OPTION);

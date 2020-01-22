@@ -19,11 +19,11 @@
 
 package org.apache.asterix.fuzzyjoin.tokenizer;
 
-import org.apache.asterix.metadata.entities.fulltextentity.TokenizerCategory;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+
+import org.apache.asterix.metadata.entities.fulltextentity.TokenizerCategory;
 
 public class NGramTokenizer implements Tokenizer {
 
