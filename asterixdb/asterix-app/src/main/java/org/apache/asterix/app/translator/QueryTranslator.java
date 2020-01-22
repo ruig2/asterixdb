@@ -847,10 +847,12 @@ public class QueryTranslator extends AbstractLangTranslator implements IStatemen
         DataverseName dataverseName = getActiveDataverseName(stmtCreateIndex.getDataverseName());
         String datasetName = stmtCreateIndex.getDatasetName().getValue();
         String indexName = stmtCreateIndex.getIndexName().getValue();
+        String fullTextConfigName = stmtCreateIndex.getFullTextConfigName();
         List<Integer> keySourceIndicators = stmtCreateIndex.getFieldSourceIndicators();
         MetadataTransactionContext mdTxnCtx = MetadataManager.INSTANCE.beginTransaction();
         metadataProvider.setMetadataTxnContext(mdTxnCtx);
         boolean isSecondaryPrimary = stmtCreateIndex.getFieldExprs().isEmpty();
+
         lockUtil.createIndexBegin(lockManager, metadataProvider.getLocks(), dataverseName, datasetName);
         try {
             Dataset ds = metadataProvider.findDataset(dataverseName, datasetName);
@@ -999,7 +1001,7 @@ public class QueryTranslator extends AbstractLangTranslator implements IStatemen
 
             Index newIndex = new Index(dataverseName, datasetName, indexName, stmtCreateIndex.getIndexType(),
                     indexFields, keySourceIndicators, indexFieldTypes, stmtCreateIndex.getGramLength(),
-                    stmtCreateIndex.getFullTextConfig(), overridesFieldTypes, stmtCreateIndex.isEnforced(), false,
+                    fullTextConfigName, overridesFieldTypes, stmtCreateIndex.isEnforced(), false,
                     MetadataUtil.PENDING_ADD_OP);
             doCreateIndex(hcc, metadataProvider, ds, newIndex, jobFlags, sourceLoc);
         } finally {
