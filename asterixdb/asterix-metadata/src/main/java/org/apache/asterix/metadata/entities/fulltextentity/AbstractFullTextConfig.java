@@ -66,4 +66,8 @@ public abstract class AbstractFullTextConfig implements IFullTextConfig {
     public List<String> getUsedByIndices() {
         return usedByIndices;
     }
+
+    @Override public void addUsedByIndices(String indexName) {
+        this.usedByIndices.add(indexName);
+    }
 }

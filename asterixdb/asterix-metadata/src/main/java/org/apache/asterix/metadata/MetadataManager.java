@@ -712,6 +712,11 @@ public abstract class MetadataManager implements IMetadataManager {
         return metadataNode.getFullTextConfig(mdTxnCtx.getTxnId(), configName);
     }
 
+    @Override public void updateFulltextConfig(MetadataTransactionContext mdTxnCtx, IFullTextConfig config)
+            throws AlgebricksException, HyracksDataException, RemoteException {
+        metadataNode.updateFullTextConfig(mdTxnCtx.getTxnId(), config);
+    }
+
     @Override
     public void dropFullTextConfig(MetadataTransactionContext mdTxnCtx, String configName, boolean ifExists)
             throws AlgebricksException {

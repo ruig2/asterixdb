@@ -418,6 +418,9 @@ public interface IMetadataManager extends IMetadataBootstrap {
     void addFulltextConfig(MetadataTransactionContext mdTxnCtx, IFullTextConfig config)
             throws AlgebricksException, HyracksDataException, RemoteException;
 
+    void updateFulltextConfig(MetadataTransactionContext mdTxnCtx, IFullTextConfig config)
+            throws AlgebricksException, HyracksDataException, RemoteException;
+
     IFullTextConfig getFullTextConfig(MetadataTransactionContext mdTxnCtx, String name)
             throws RemoteException, AlgebricksException;
 

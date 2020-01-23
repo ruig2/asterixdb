@@ -38,6 +38,7 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 
+import com.google.common.base.Strings;
 import org.apache.asterix.active.ActivityState;
 import org.apache.asterix.active.EntityId;
 import org.apache.asterix.active.IActiveEntityEventsListener;
@@ -1003,6 +1004,21 @@ public class QueryTranslator extends AbstractLangTranslator implements IStatemen
                     indexFields, keySourceIndicators, indexFieldTypes, stmtCreateIndex.getGramLength(),
                     fullTextConfigName, overridesFieldTypes, stmtCreateIndex.isEnforced(), false,
                     MetadataUtil.PENDING_ADD_OP);
+
+            if (Strings.isNullOrEmpty(fullTextConfigName) == false) {
+                try {
+                    IFullTextConfig config = MetadataManager.INSTANCE.getFullTextConfig(mdTxnCtx, fullTextConfigName);
+                    config.addUsedByIndices(indexName);
+                    MetadataManager.INSTANCE.updateFulltextConfig(mdTxnCtx, config);
+                } catch (RemoteException e) {
+                    e.printStackTrace();
+                    //abort(e, e, mdTxnCtx);
+                    throw e;
+                } finally {
+                    //MetadataManager.INSTANCE.commitTransaction(mdTxnCtx);
+                }
+            }
+
             doCreateIndex(hcc, metadataProvider, ds, newIndex, jobFlags, sourceLoc);
         } finally {
             metadataProvider.getLocks().unlock();

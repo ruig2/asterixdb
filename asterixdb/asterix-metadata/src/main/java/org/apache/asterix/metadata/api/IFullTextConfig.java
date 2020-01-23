@@ -32,6 +32,8 @@ public interface IFullTextConfig extends IFullTextEntity {
     // in progress...Maybe use the Index class instead of String?
     List<String> getUsedByIndices();
 
+    void addUsedByIndices(String indexName);
+
     List<String> proceedTokens(List<String> tokens);
 
     // Stream proceedStream(Stream streamIn);

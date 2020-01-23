@@ -517,7 +517,7 @@ public class MetadataNode implements IMetadataNode {
         insertTupleIntoIndex(txnId, MetadataPrimaryIndexes.FULLTEXT_ENTITY_DATASET, filterTuple);
     }
 
-    private void upsertExistingFullTextEntityToCatalog(TxnId txnId, IFullTextEntity entity)
+    private void modifyExistingFullTextEntityToCatalog(TxnId txnId, IFullTextEntity entity)
             throws AlgebricksException, HyracksDataException {
         FulltextEntityTupleTranslator tupleReaderWriter =
                 tupleTranslatorProvider.getFulltextEntityTupleTranslator(true);
@@ -535,7 +535,7 @@ public class MetadataNode implements IMetadataNode {
             insertFullTextEntityToCatalog(txnId, config);
             for (IFullTextFilter f : config.getFilters()) {
                 f.addUsedByFTConfigs(config.getName());
-                upsertExistingFullTextEntityToCatalog(txnId, f);
+                modifyExistingFullTextEntityToCatalog(txnId, f);
             }
 
         } catch (HyracksDataException | AlgebricksException e) {
@@ -564,6 +564,11 @@ public class MetadataNode implements IMetadataNode {
         } catch (HyracksDataException e) {
             throw new AlgebricksException(e);
         }
+    }
+
+    @Override public void updateFullTextConfig(TxnId txnId, IFullTextConfig config)
+            throws HyracksDataException, AlgebricksException, RemoteException {
+        modifyExistingFullTextEntityToCatalog(txnId, config);
     }
 
     @Override
