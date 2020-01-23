@@ -245,6 +245,21 @@ public abstract class AbstractIntroduceAccessMethodRule implements IAlgebraicRew
                 if ((chosenAccessMethod == BTreeAccessMethod.INSTANCE && indexType == IndexType.BTREE)
                         || (chosenAccessMethod == RTreeAccessMethod.INSTANCE && indexType == IndexType.RTREE)
                         || (chosenAccessMethod == InvertedIndexAccessMethod.INSTANCE && isKeywordOrNgramIndexChosen)) {
+
+                    try {
+                        // in progress...Unwrap to get the internal string value is ugly, where to put the logic?
+                        String expectedFTConfig = ((AString) ((AsterixConstantValue) (((ConstantExpression) analysisCtx.getMatchedFuncExprs().get(0).getFuncExpr().
+                                getArguments().get(5).getValue()).getValue())).getObject()).getStringValue();
+                        System.out.println("expected ft config: \t\t" + expectedFTConfig);
+                        System.out.println("chosen index ft config: \t" + chosenIndex.getFullTextConfig());
+
+                        if (!chosenIndex.getFullTextConfig().equals(expectedFTConfig)) {
+                            continue;
+                        }
+                    } catch (Exception e) {
+                        //e.printStackTrace();
+                    }
+
                     if (resultVarsToIndexTypesMap.containsKey(indexEntry.getValue())) {
                         List<IndexType> appliedIndexTypes = resultVarsToIndexTypesMap.get(indexEntry.getValue());
                         if (!appliedIndexTypes.contains(indexType)) {
