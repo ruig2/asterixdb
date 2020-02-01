@@ -435,7 +435,8 @@ public class MetadataNode implements IMetadataNode {
     public void addFunction(TxnId txnId, Function function) throws AlgebricksException {
         try {
             // Insert into the 'function' dataset.
-            FunctionTupleTranslator tupleReaderWriter = tupleTranslatorProvider.getFunctionTupleTranslator(true);
+            FunctionTupleTranslator tupleReaderWriter =
+                    tupleTranslatorProvider.getFunctionTupleTranslator(txnId, this, true);
 
             ITupleReference functionTuple = tupleReaderWriter.getTupleFromMetadataEntity(function);
             insertTupleIntoIndex(txnId, MetadataPrimaryIndexes.FUNCTION_DATASET, functionTuple);
@@ -662,6 +663,12 @@ public class MetadataNode implements IMetadataNode {
     public void dropDataverse(TxnId txnId, DataverseName dataverseName) throws AlgebricksException {
         try {
             confirmDataverseCanBeDeleted(txnId, dataverseName);
+
+            // Drop all synonyms in this dataverse.
+            List<Synonym> dataverseSynonyms = getDataverseSynonyms(txnId, dataverseName);
+            for (Synonym synonym : dataverseSynonyms) {
+                dropSynonym(txnId, dataverseName, synonym.getSynonymName());
+            }
 
             // As a side effect, acquires an S lock on the 'Function' dataset
             // on behalf of txnId.
@@ -1020,7 +1027,8 @@ public class MetadataNode implements IMetadataNode {
 
     public List<Function> getAllFunctions(TxnId txnId) throws AlgebricksException {
         try {
-            FunctionTupleTranslator tupleReaderWriter = tupleTranslatorProvider.getFunctionTupleTranslator(false);
+            FunctionTupleTranslator tupleReaderWriter =
+                    tupleTranslatorProvider.getFunctionTupleTranslator(txnId, this, false);
             IValueExtractor<Function> valueExtractor = new MetadataEntityValueExtractor<>(tupleReaderWriter);
             List<Function> results = new ArrayList<>();
             searchIndex(txnId, MetadataPrimaryIndexes.FUNCTION_DATASET, null, valueExtractor, results);
@@ -1082,6 +1090,13 @@ public class MetadataNode implements IMetadataNode {
                                     + "." + functionDependency.second + "@" + functionDependency.third);
                 }
             }
+            for (Triple<DataverseName, String, String> type : function.getDependencies().get(2)) {
+                if (type.first.equals(dataverseName)) {
+                    throw new AlgebricksException(
+                            "Cannot drop dataverse. Function " + function.getDataverseName() + "." + function.getName()
+                                    + "@" + function.getArity() + " depends on type " + type.first + "." + type.second);
+                }
+            }
         }
     }
 
@@ -1120,6 +1135,7 @@ public class MetadataNode implements IMetadataNode {
             throws AlgebricksException {
         confirmDatatypeIsUnusedByDatatypes(txnId, dataverseName, datatypeName);
         confirmDatatypeIsUnusedByDatasets(txnId, dataverseName, datatypeName);
+        confirmDatatypeIsUnusedByFunctions(txnId, dataverseName, datatypeName);
     }
 
     private void confirmDatatypeIsUnusedByDatasets(TxnId txnId, DataverseName dataverseName, String datatypeName)
@@ -1153,6 +1169,21 @@ public class MetadataNode implements IMetadataNode {
             if (recType.containsType(typeToBeDropped)) {
                 throw new AlgebricksException("Cannot drop type " + dataverseName + "." + datatypeName
                         + " being used by type " + dataverseName + "." + recType.getTypeName());
+            }
+        }
+    }
+
+    private void confirmDatatypeIsUnusedByFunctions(TxnId txnId, DataverseName dataverseName, String dataTypeName)
+            throws AlgebricksException {
+        // If any function uses this type, throw an error
+        List<Function> functions = getAllFunctions(txnId);
+        for (Function function : functions) {
+            for (Triple<DataverseName, String, String> datasetDependency : function.getDependencies().get(2)) {
+                if (datasetDependency.first.equals(dataverseName) && datasetDependency.second.equals(dataTypeName)) {
+                    throw new AlgebricksException("Cannot drop type " + dataverseName + "." + dataTypeName
+                            + " is being used by function " + function.getDataverseName() + "." + function.getName()
+                            + "@" + function.getArity());
+                }
             }
         }
     }
@@ -1273,7 +1304,8 @@ public class MetadataNode implements IMetadataNode {
         try {
             ITupleReference searchKey = createTuple(functionSignature.getDataverseName(), functionSignature.getName(),
                     Integer.toString(functionSignature.getArity()));
-            FunctionTupleTranslator tupleReaderWriter = tupleTranslatorProvider.getFunctionTupleTranslator(false);
+            FunctionTupleTranslator tupleReaderWriter =
+                    tupleTranslatorProvider.getFunctionTupleTranslator(txnId, this, false);
             List<Function> results = new ArrayList<>();
             IValueExtractor<Function> valueExtractor = new MetadataEntityValueExtractor<>(tupleReaderWriter);
             searchIndex(txnId, MetadataPrimaryIndexes.FUNCTION_DATASET, searchKey, valueExtractor, results);
@@ -1290,7 +1322,8 @@ public class MetadataNode implements IMetadataNode {
     public List<Function> getDataverseFunctions(TxnId txnId, DataverseName dataverseName) throws AlgebricksException {
         try {
             ITupleReference searchKey = createTuple(dataverseName);
-            FunctionTupleTranslator tupleReaderWriter = tupleTranslatorProvider.getFunctionTupleTranslator(false);
+            FunctionTupleTranslator tupleReaderWriter =
+                    tupleTranslatorProvider.getFunctionTupleTranslator(txnId, this, false);
             List<Function> results = new ArrayList<>();
             IValueExtractor<Function> valueExtractor = new MetadataEntityValueExtractor<>(tupleReaderWriter);
             searchIndex(txnId, MetadataPrimaryIndexes.FUNCTION_DATASET, searchKey, valueExtractor, results);
