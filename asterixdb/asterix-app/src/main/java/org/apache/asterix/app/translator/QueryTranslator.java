@@ -1880,21 +1880,22 @@ public class QueryTranslator extends AbstractLangTranslator implements IStatemen
             IHyracksClientConnection hcc, IRequestParameters requestParameters)
             throws RemoteException, AlgebricksException {
         FullTextConfigDropStatement stmtConfigDrop = (FullTextConfigDropStatement) stmt;
+        if (stmtConfigDrop.getConfigName().equalsIgnoreCase(FullTextConfig.DefaultFullTextConfig.getName())) {
+            throw new AlgebricksException("Not allowed to drop the default full-text config");
+        }
 
         MetadataTransactionContext mdTxnCtx = null;
         try {
             mdTxnCtx = MetadataManager.INSTANCE.beginTransaction();
             metadataProvider.setMetadataTxnContext(mdTxnCtx);
-            // handle "if exists"
             MetadataManager.INSTANCE.dropFullTextConfig(mdTxnCtx, stmtConfigDrop.getConfigName(),
                     stmtConfigDrop.getIfExists());
         } catch (RemoteException e) {
-            e.printStackTrace();
+            throw new AlgebricksException(e);
         } finally {
             MetadataManager.INSTANCE.commitTransaction(mdTxnCtx);
         }
 
-        // handle "if exists"
         return;
     }
 
