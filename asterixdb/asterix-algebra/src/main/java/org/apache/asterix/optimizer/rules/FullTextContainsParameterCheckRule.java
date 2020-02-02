@@ -21,6 +21,7 @@ package org.apache.asterix.optimizer.rules;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.google.common.base.Strings;
 import org.apache.asterix.common.exceptions.CompilationException;
 import org.apache.asterix.common.exceptions.ErrorCode;
 import org.apache.asterix.om.base.AString;
@@ -245,6 +246,7 @@ public class FullTextContainsParameterCheckRule implements IAlgebraicRewriteRule
                 }
 
                 String optionTypeStringVal = null;
+                String fullTextConfigStringVal = null;
 
                 // If the option value is a constant, then we can check here.
                 if (optionExprVal.getExpressionTag() == LogicalExpressionTag.CONSTANT) {
@@ -269,7 +271,7 @@ public class FullTextContainsParameterCheckRule implements IAlgebraicRewriteRule
                             checkSearchModeOption(optionTypeStringVal, functionName, optionExprVal.getSourceLocation());
                             break;
                         case FullTextContainsDescriptor.FULLTEXT_CONFIG_OPTION:
-                            // in progress... check if the fulltext config exists
+                            checkFullTextConfigOption(optionTypeStringVal, functionName, optionExprVal.getSourceLocation());
                             break;
                         default:
                             throw CompilationException.create(ErrorCode.TYPE_UNSUPPORTED,
@@ -287,6 +289,17 @@ public class FullTextContainsParameterCheckRule implements IAlgebraicRewriteRule
                 throws AlgebricksException {
             if (optionVal.equals(FullTextContainsDescriptor.CONJUNCTIVE_SEARCH_MODE_OPTION)
                     || optionVal.equals(FullTextContainsDescriptor.DISJUNCTIVE_SEARCH_MODE_OPTION)) {
+                return;
+            } else {
+                throw CompilationException.create(ErrorCode.TYPE_UNSUPPORTED, sourceLoc, functionName, optionVal);
+            }
+        }
+
+        private void checkFullTextConfigOption(String optionVal, String functionName, SourceLocation sourceLoc)
+                throws AlgebricksException {
+            // Currently, here we only check if the full-text config is null or empty string
+            // We will check if the full-text config exists at run time
+            if (Strings.isNullOrEmpty(optionVal) == false) {
                 return;
             } else {
                 throw CompilationException.create(ErrorCode.TYPE_UNSUPPORTED, sourceLoc, functionName, optionVal);
