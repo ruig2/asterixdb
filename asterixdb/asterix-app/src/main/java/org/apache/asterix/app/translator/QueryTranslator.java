@@ -862,11 +862,15 @@ public class QueryTranslator extends AbstractLangTranslator implements IStatemen
         DataverseName dataverseName = getActiveDataverseName(stmtCreateIndex.getDataverseName());
         String datasetName = stmtCreateIndex.getDatasetName().getValue();
         String indexName = stmtCreateIndex.getIndexName().getValue();
-        String fullTextConfigName = stmtCreateIndex.getFullTextConfigName();
         List<Integer> keySourceIndicators = stmtCreateIndex.getFieldSourceIndicators();
         MetadataTransactionContext mdTxnCtx = MetadataManager.INSTANCE.beginTransaction();
         metadataProvider.setMetadataTxnContext(mdTxnCtx);
         boolean isSecondaryPrimary = stmtCreateIndex.getFieldExprs().isEmpty();
+
+        String fullTextConfigName = stmtCreateIndex.getFullTextConfigName();
+        if (Strings.isNullOrEmpty(fullTextConfigName)) {
+            fullTextConfigName = FullTextConfig.DefaultFullTextConfig.getName();
+        }
 
         lockUtil.createIndexBegin(lockManager, metadataProvider.getLocks(), dataverseName, datasetName);
         try {
