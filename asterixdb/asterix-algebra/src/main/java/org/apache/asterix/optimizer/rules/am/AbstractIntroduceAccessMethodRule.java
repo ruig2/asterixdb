@@ -286,6 +286,8 @@ public abstract class AbstractIntroduceAccessMethodRule implements IAlgebraicRew
             if (funcId == BuiltinFunctions.FULLTEXT_CONTAINS || funcId == BuiltinFunctions.FULLTEXT_CONTAINS_WO_OPTION) {
                 AbstractFunctionCallExpression funcExpr = expr.getFuncExpr();
 
+                // ToDo: wrap the expressions in a ftcontains() function into a dedicated Java object
+                // so that we don't cast the types many times
                 String expectedConfig = FullTextConfig.DefaultFullTextConfig.getName();
                 List<Mutable<ILogicalExpression>> arguments = funcExpr.getArguments();
                 for (int i = 3; i < arguments.size()-1; i++) {

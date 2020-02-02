@@ -437,7 +437,6 @@ public class InvertedIndexAccessMethod implements IAccessMethod {
             // List of expressions for the assign.
             ArrayList<Mutable<ILogicalExpression>> keyExprList = new ArrayList<Mutable<ILogicalExpression>>();
             // Add key vars and exprs to argument list.
-            // ????? Should we add the ft config as a parameter here?
             addKeyVarsAndExprs(optFuncExpr, keyVarList, keyExprList, context);
             // Assign operator that sets the secondary-index search-key fields.
             inputOp = new AssignOperator(keyVarList, keyExprList);
