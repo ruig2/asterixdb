@@ -258,7 +258,7 @@ public class FulltextEntityTupleTranslator extends AbstractTupleTranslator<IFull
 
     @Override
     public ITupleReference getTupleFromMetadataEntity(IFullTextEntity fullTextEntity)
-            throws AlgebricksException, HyracksDataException {
+            throws HyracksDataException {
         tupleBuilder.reset();
 
         writeIndex(fullTextEntity.getCategory(), fullTextEntity.getName(), tupleBuilder);

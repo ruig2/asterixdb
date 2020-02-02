@@ -454,18 +454,8 @@ public class MetadataNode implements IMetadataNode {
 
     @Override
     public void addFulltextFilter(TxnId txnId, IFullTextFilter filter)
-            throws AlgebricksException, HyracksDataException {
-        // Insert into the 'FulltextConfig' dataset.
-        System.out.println("in MetadataNode...");
-
-        try {
-            insertFullTextEntityToCatalog(txnId, filter);
-        } catch (HyracksDataException e) {
-            // ToDo: Handle duplicated key error
-            e.printStackTrace();
-            throw e;
-        }
-
+            throws AlgebricksException {
+        insertFullTextEntityToCatalog(txnId, filter);
         return;
     }
 
@@ -511,11 +501,14 @@ public class MetadataNode implements IMetadataNode {
     }
 
     private void insertFullTextEntityToCatalog(TxnId txnId, IFullTextEntity entity)
-            throws AlgebricksException, HyracksDataException {
-        FulltextEntityTupleTranslator tupleReaderWriter =
-                tupleTranslatorProvider.getFulltextEntityTupleTranslator(true);
-        ITupleReference filterTuple = tupleReaderWriter.getTupleFromMetadataEntity(entity);
-        insertTupleIntoIndex(txnId, MetadataPrimaryIndexes.FULLTEXT_ENTITY_DATASET, filterTuple);
+            throws AlgebricksException {
+        try {
+            FulltextEntityTupleTranslator tupleReaderWriter = tupleTranslatorProvider.getFulltextEntityTupleTranslator(true);
+            ITupleReference filterTuple = tupleReaderWriter.getTupleFromMetadataEntity(entity);
+            insertTupleIntoIndex(txnId, MetadataPrimaryIndexes.FULLTEXT_ENTITY_DATASET, filterTuple);
+        } catch (HyracksDataException e) {
+            throw new AlgebricksException(e);
+        }
     }
 
     private void modifyExistingFullTextEntityToCatalog(TxnId txnId, IFullTextEntity entity)
@@ -528,9 +521,7 @@ public class MetadataNode implements IMetadataNode {
 
     @Override
     public void addFullTextConfig(TxnId txnId, IFullTextConfig config)
-            throws HyracksDataException, AlgebricksException, RemoteException {
-        System.out.println("in MetadataNode...");
-
+            throws AlgebricksException, RemoteException {
         try {
             // Make the following a transaction to avoid data corruption, e.g. , config is updated but filters not
             insertFullTextEntityToCatalog(txnId, config);
@@ -538,11 +529,10 @@ public class MetadataNode implements IMetadataNode {
                 f.addUsedByFTConfigs(config.getName());
                 modifyExistingFullTextEntityToCatalog(txnId, f);
             }
-
-        } catch (HyracksDataException | AlgebricksException e) {
+        } catch (AlgebricksException | HyracksDataException e) {
             // ToDo: Handle duplicated key error
             e.printStackTrace();
-            throw e;
+            throw new AlgebricksException(e);
         }
 
         return;

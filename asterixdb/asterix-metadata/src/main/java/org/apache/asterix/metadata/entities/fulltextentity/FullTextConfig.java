@@ -40,4 +40,8 @@ public class FullTextConfig extends AbstractFullTextConfig {
 
         return results;
     }
+
+    // This built-in default one will be used when no full-text config is specified by the user
+    public static FullTextConfig DefaultFullTextConfig =
+            new FullTextConfig("DEFAULT_FULL_TEXT_CONFIG", TokenizerCategory.WORD, ImmutableList.of());
 }

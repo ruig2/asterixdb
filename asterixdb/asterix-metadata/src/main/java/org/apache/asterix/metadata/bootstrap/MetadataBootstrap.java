@@ -61,6 +61,7 @@ import org.apache.asterix.metadata.entities.InternalDatasetDetails.FileStructure
 import org.apache.asterix.metadata.entities.InternalDatasetDetails.PartitioningStrategy;
 import org.apache.asterix.metadata.entities.Node;
 import org.apache.asterix.metadata.entities.NodeGroup;
+import org.apache.asterix.metadata.entities.fulltextentity.FullTextConfig;
 import org.apache.asterix.metadata.feeds.BuiltinFeedPolicies;
 import org.apache.asterix.metadata.utils.MetadataConstants;
 import org.apache.asterix.metadata.utils.MetadataUtil;
@@ -163,6 +164,7 @@ public class MetadataBootstrap {
                 insertNodes(mdTxnCtx);
                 insertInitialGroups(mdTxnCtx);
                 insertInitialAdapters(mdTxnCtx);
+                insertInitialFullTextConfig(mdTxnCtx);
                 BuiltinFeedPolicies.insertInitialFeedPolicies(mdTxnCtx);
                 insertInitialCompactionPolicies(mdTxnCtx);
                 if (LOGGER.isInfoEnabled()) {
@@ -264,6 +266,14 @@ public class MetadataBootstrap {
         }
         if (LOGGER.isInfoEnabled()) {
             LOGGER.info("Finished inserting built-in adapters.");
+        }
+    }
+
+    private static void insertInitialFullTextConfig(MetadataTransactionContext mdTxnCtx)
+            throws AlgebricksException, HyracksDataException, RemoteException {
+        MetadataManager.INSTANCE.addFulltextConfig(mdTxnCtx, FullTextConfig.DefaultFullTextConfig);
+        if (LOGGER.isInfoEnabled()) {
+            LOGGER.info("Finished inserting built-in full-text config.");
         }
     }
 
