@@ -18,6 +18,8 @@
  */
 package org.apache.asterix.app.translator;
 
+import static org.apache.asterix.common.functions.FunctionConstants.ASTERIX_DV;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
@@ -38,7 +40,6 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 
-import com.google.common.base.Strings;
 import org.apache.asterix.active.ActivityState;
 import org.apache.asterix.active.EntityId;
 import org.apache.asterix.active.IActiveEntityEventsListener;
@@ -84,6 +85,8 @@ import org.apache.asterix.common.utils.JobUtils;
 import org.apache.asterix.common.utils.JobUtils.ProgressState;
 import org.apache.asterix.common.utils.StorageConstants;
 import org.apache.asterix.compiler.provider.ILangCompilationProvider;
+import org.apache.asterix.external.api.IDataSourceAdapter;
+import org.apache.asterix.external.dataset.adapter.AdapterIdentifier;
 import org.apache.asterix.external.indexing.ExternalFile;
 import org.apache.asterix.external.indexing.IndexingConstants;
 import org.apache.asterix.external.operators.FeedIntakeOperatorNodePushable;
@@ -98,9 +101,14 @@ import org.apache.asterix.lang.common.expression.FieldBinding;
 import org.apache.asterix.lang.common.expression.IndexedTypeExpression;
 import org.apache.asterix.lang.common.expression.ListConstructor;
 import org.apache.asterix.lang.common.expression.LiteralExpr;
+import org.apache.asterix.lang.common.expression.OrderedListTypeDefinition;
 import org.apache.asterix.lang.common.expression.RecordConstructor;
+import org.apache.asterix.lang.common.expression.TypeExpression;
+import org.apache.asterix.lang.common.expression.TypeReferenceExpression;
+import org.apache.asterix.lang.common.expression.UnorderedListTypeDefinition;
 import org.apache.asterix.lang.common.statement.CompactStatement;
 import org.apache.asterix.lang.common.statement.ConnectFeedStatement;
+import org.apache.asterix.lang.common.statement.CreateAdapterStatement;
 import org.apache.asterix.lang.common.statement.CreateDataverseStatement;
 import org.apache.asterix.lang.common.statement.CreateFeedPolicyStatement;
 import org.apache.asterix.lang.common.statement.CreateFeedStatement;
@@ -152,6 +160,7 @@ import org.apache.asterix.metadata.declared.MetadataProvider;
 import org.apache.asterix.metadata.entities.BuiltinTypeMap;
 import org.apache.asterix.metadata.entities.CompactionPolicy;
 import org.apache.asterix.metadata.entities.Dataset;
+import org.apache.asterix.metadata.entities.DatasourceAdapter;
 import org.apache.asterix.metadata.entities.Datatype;
 import org.apache.asterix.metadata.entities.Dataverse;
 import org.apache.asterix.metadata.entities.ExternalDatasetDetails;
@@ -161,6 +170,7 @@ import org.apache.asterix.metadata.entities.FeedPolicyEntity;
 import org.apache.asterix.metadata.entities.Function;
 import org.apache.asterix.metadata.entities.Index;
 import org.apache.asterix.metadata.entities.InternalDatasetDetails;
+import org.apache.asterix.metadata.entities.Library;
 import org.apache.asterix.metadata.entities.NodeGroup;
 import org.apache.asterix.metadata.entities.Synonym;
 import org.apache.asterix.metadata.entities.fulltextentity.FullTextConfig;
@@ -177,6 +187,7 @@ import org.apache.asterix.metadata.utils.MetadataUtil;
 import org.apache.asterix.om.base.IAObject;
 import org.apache.asterix.om.types.ARecordType;
 import org.apache.asterix.om.types.ATypeTag;
+import org.apache.asterix.om.types.BuiltinType;
 import org.apache.asterix.om.types.IAType;
 import org.apache.asterix.om.types.TypeSignature;
 import org.apache.asterix.transaction.management.service.transaction.DatasetIdFactory;
@@ -204,9 +215,9 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.mutable.Mutable;
 import org.apache.commons.lang3.mutable.MutableBoolean;
 import org.apache.commons.lang3.mutable.MutableObject;
-import org.apache.commons.lang3.tuple.Triple;
 import org.apache.hyracks.algebricks.common.exceptions.AlgebricksException;
 import org.apache.hyracks.algebricks.common.utils.Pair;
+import org.apache.hyracks.algebricks.common.utils.Triple;
 import org.apache.hyracks.algebricks.core.algebra.expressions.AbstractFunctionCallExpression.FunctionKind;
 import org.apache.hyracks.algebricks.data.IAWriterFactory;
 import org.apache.hyracks.algebricks.data.IResultSerializerFactoryProvider;
@@ -232,6 +243,7 @@ import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
 
 /*
@@ -297,8 +309,7 @@ public class QueryTranslator extends AbstractLangTranslator implements IStatemen
 
     @Override
     public void compileAndExecute(IHyracksClientConnection hcc, IRequestParameters requestParameters) throws Exception {
-        validateStatements(statements, requestParameters.isMultiStatement(),
-                requestParameters.getStatementCategoryRestrictionMask());
+        validateStatements(requestParameters);
         trackRequest(requestParameters);
         int resultSetIdCounter = 0;
         FileSplit outputFile = null;
@@ -379,6 +390,9 @@ public class QueryTranslator extends AbstractLangTranslator implements IStatemen
                         break;
                     case CREATE_FUNCTION:
                         handleCreateFunctionStatement(metadataProvider, stmt);
+                        break;
+                    case CREATE_ADAPTER:
+                        handleCreateAdapterStatement(metadataProvider, stmt);
                         break;
                     case FUNCTION_DROP:
                         handleFunctionDropStatement(metadataProvider, stmt);
@@ -1000,10 +1014,10 @@ public class QueryTranslator extends AbstractLangTranslator implements IStatemen
                 }
             }
 
-            Index newIndex = new Index(dataverseName, datasetName, indexName, stmtCreateIndex.getIndexType(),
-                    indexFields, keySourceIndicators, indexFieldTypes, stmtCreateIndex.getGramLength(),
-                    fullTextConfigName, overridesFieldTypes, stmtCreateIndex.isEnforced(), false,
-                    MetadataUtil.PENDING_ADD_OP);
+            Index newIndex =
+                    new Index(dataverseName, datasetName, indexName, stmtCreateIndex.getIndexType(), indexFields,
+                            keySourceIndicators, indexFieldTypes, stmtCreateIndex.getGramLength(), fullTextConfigName,
+                            overridesFieldTypes, stmtCreateIndex.isEnforced(), false, MetadataUtil.PENDING_ADD_OP);
 
             if (Strings.isNullOrEmpty(fullTextConfigName) == false) {
                 try {
@@ -1508,9 +1522,6 @@ public class QueryTranslator extends AbstractLangTranslator implements IStatemen
             }
             jobsToExecute.add(DataverseUtil.dropDataverseJobSpec(dv, metadataProvider));
 
-            // #. gather all synonyms in this dataverse
-            List<Synonym> synonyms = MetadataManager.INSTANCE.getDataverseSynonyms(mdTxnCtx, dataverseName);
-
             // #. mark PendingDropOp on the dataverse record by
             // first, deleting the dataverse record from the DATAVERSE_DATASET
             // second, inserting the dataverse record with the PendingDropOp value into the
@@ -1530,11 +1541,6 @@ public class QueryTranslator extends AbstractLangTranslator implements IStatemen
             mdTxnCtx = MetadataManager.INSTANCE.beginTransaction();
             bActiveTxn = true;
             metadataProvider.setMetadataTxnContext(mdTxnCtx);
-
-            // #. delete synonyms in this dataverse
-            for (Synonym synonym : synonyms) {
-                MetadataManager.INSTANCE.dropSynonym(mdTxnCtx, synonym.getDataverseName(), synonym.getSynonymName());
-            }
 
             // #. finally, delete the dataverse.
             MetadataManager.INSTANCE.dropDataverse(mdTxnCtx, dataverseName);
@@ -1941,6 +1947,29 @@ public class QueryTranslator extends AbstractLangTranslator implements IStatemen
         }
     }
 
+    private static Pair<DataverseName, String> extractTypeName(TypeExpression typ, DataverseName activeDataverse) {
+        String typeName;
+        DataverseName typeDv = ASTERIX_DV;
+        switch (typ.getTypeKind()) {
+            case ORDEREDLIST:
+                return extractTypeName(((OrderedListTypeDefinition) typ).getItemTypeExpression(), activeDataverse);
+            case UNORDEREDLIST:
+                return extractTypeName(((UnorderedListTypeDefinition) typ).getItemTypeExpression(), activeDataverse);
+            case RECORD:
+                break;
+            case TYPEREFERENCE:
+                TypeReferenceExpression typeRef = ((TypeReferenceExpression) typ);
+                typeName = typeRef.getIdent().getSecond().toString();
+                if (typeRef.getIdent().getFirst() != null) {
+                    typeDv = typeRef.getIdent().getFirst();
+                } else if (BuiltinTypeMap.getBuiltinType(typeName) == null) {
+                    typeDv = activeDataverse;
+                }
+                return new Pair<>(typeDv, typeName);
+        }
+        return null;
+    }
+
     protected void handleCreateFunctionStatement(MetadataProvider metadataProvider, Statement stmt) throws Exception {
         CreateFunctionStatement cfs = (CreateFunctionStatement) stmt;
         SourceLocation sourceLoc = cfs.getSourceLocation();
@@ -1950,41 +1979,141 @@ public class QueryTranslator extends AbstractLangTranslator implements IStatemen
 
         MetadataTransactionContext mdTxnCtx = MetadataManager.INSTANCE.beginTransaction();
         metadataProvider.setMetadataTxnContext(mdTxnCtx);
-        lockUtil.createFunctionBegin(lockManager, metadataProvider.getLocks(), dataverseName, signature.getName());
+        String libraryName = cfs.getLibName();
+        lockUtil.createFunctionBegin(lockManager, metadataProvider.getLocks(), dataverseName, signature.getName(),
+                libraryName);
         try {
             Dataverse dv = MetadataManager.INSTANCE.getDataverse(mdTxnCtx, dataverseName);
             if (dv == null) {
                 throw new CompilationException(ErrorCode.UNKNOWN_DATAVERSE, sourceLoc, dataverseName);
             }
-
-            //Check whether the function is use-able
-            metadataProvider.setDefaultDataverse(dv);
-            Query wrappedQuery = new Query(false);
-            wrappedQuery.setSourceLocation(sourceLoc);
-            wrappedQuery.setBody(cfs.getFunctionBodyExpression());
-            wrappedQuery.setTopLevel(false);
+            List<String> argNames = new ArrayList<>();
+            List<Pair<DataverseName, IAType>> argType = new ArrayList<>();
             List<VarIdentifier> paramVars = new ArrayList<>();
-            for (String v : cfs.getParamList()) {
-                paramVars.add(new VarIdentifier(v));
+            List<Pair<DataverseName, String>> dependentTypes = new ArrayList<>();
+            for (Pair<VarIdentifier, IndexedTypeExpression> var : cfs.getArgs()) {
+                if (var.getSecond() != null) {
+                    Pair<DataverseName, String> baseType = extractTypeName(var.second.getType(), dataverseName);
+                    Map<TypeSignature, IAType> typeMap = TypeTranslator.computeTypes(mdTxnCtx, var.second.getType(),
+                            var.first.getValue(), dataverseName);
+                    IAType t = typeMap.values().iterator().next();
+                    if (typeMap.size() <= 0) {
+                        throw new CompilationException(ErrorCode.UNKNOWN_TYPE, sourceLoc,
+                                var.second.getType().toString());
+                    }
+                    if (!ASTERIX_DV.equals(baseType.getFirst())) {
+                        dependentTypes.add(baseType);
+                    }
+                    argType.add(new Pair<>(baseType.first, t));
+                    paramVars.add(var.getFirst());
+                    argNames.add(var.getFirst().getValue());
+                } else {
+                    paramVars.add(var.getFirst());
+                    argType.add(new Pair<>(ASTERIX_DV, BuiltinType.ANY));
+                    argNames.add(var.getFirst().getValue());
+                }
             }
-            apiFramework.reWriteQuery(declaredFunctions, metadataProvider, wrappedQuery, sessionOutput, false,
-                    paramVars, warningCollector);
 
-            List<List<org.apache.hyracks.algebricks.common.utils.Triple<DataverseName, String, String>>> dependencies =
-                    FunctionUtil.getFunctionDependencies(rewriterFactory.createQueryRewriter(),
-                            cfs.getFunctionBodyExpression(), metadataProvider);
+            IndexedTypeExpression ret = cfs.getReturnType();
+            Pair<DataverseName, IAType> retType;
+            if (ret != null) {
+                Pair<DataverseName, String> baseType = extractTypeName(ret.getType(), dataverseName);
+                Map<TypeSignature, IAType> typeMap =
+                        TypeTranslator.computeTypes(mdTxnCtx, ret.getType(), "return", dataverseName);
+                IAType t = typeMap.values().iterator().next();
+                if (typeMap.size() <= 0) {
+                    throw new CompilationException(ErrorCode.UNKNOWN_TYPE, sourceLoc, ret.getType().toString());
+                }
+                if (!ASTERIX_DV.equals(baseType.getFirst())) {
+                    dependentTypes.add(baseType);
+                }
+                retType = new Pair<>(baseType.first, t);
+            } else {
+                retType = new Pair<>(ASTERIX_DV, BuiltinType.ANY);
+            }
+            if (cfs.isExternal()) {
+                Library libraryInMetadata = MetadataManager.INSTANCE.getLibrary(mdTxnCtx, dataverseName, libraryName);
+                if (libraryInMetadata == null) {
+                    throw new CompilationException(ErrorCode.UNKNOWN_LIBRARY, sourceLoc, libraryName);
+                }
+                // Add functions
+                List<List<Triple<DataverseName, String, String>>> dependencies =
+                        FunctionUtil.getExternalFunctionDependencies(dependentTypes);
+                Function f = new Function(signature, argType, argNames, retType, cfs.getExternalIdent(), cfs.getLang(),
+                        cfs.isUnknownable(), cfs.isNullCall(), cfs.isDeterministic(), libraryName,
+                        FunctionKind.SCALAR.toString(), dependencies, cfs.getResources());
+                MetadataManager.INSTANCE.addFunction(mdTxnCtx, f);
+                if (LOGGER.isInfoEnabled()) {
+                    LOGGER.info("Installed function: " + signature);
+                }
+                MetadataManager.INSTANCE.commitTransaction(mdTxnCtx);
+            } else {
+                //Check whether the function is use-able
+                metadataProvider.setDefaultDataverse(dv);
+                Query wrappedQuery = new Query(false);
+                wrappedQuery.setSourceLocation(sourceLoc);
+                wrappedQuery.setBody(cfs.getFunctionBodyExpression());
+                wrappedQuery.setTopLevel(false);
+                apiFramework.reWriteQuery(declaredFunctions, metadataProvider, wrappedQuery, sessionOutput, false,
+                        paramVars, warningCollector);
+                List<List<Triple<DataverseName, String, String>>> dependencies =
+                        FunctionUtil.getFunctionDependencies(rewriterFactory.createQueryRewriter(),
+                                cfs.getFunctionBodyExpression(), metadataProvider, dependentTypes);
+                Function function = new Function(signature, argType, argNames, retType, cfs.getFunctionBody(),
+                        getFunctionLanguage(), cfs.isUnknownable(), cfs.isNullCall(), cfs.isDeterministic(), null,
+                        FunctionKind.SCALAR.toString(), dependencies, null);
+                MetadataManager.INSTANCE.addFunction(mdTxnCtx, function);
+                if (LOGGER.isInfoEnabled()) {
+                    LOGGER.info("Installed function: " + signature);
+                }
+                MetadataManager.INSTANCE.commitTransaction(mdTxnCtx);
+            }
 
-            Function function = new Function(signature, cfs.getParamList(), Function.RETURNTYPE_VOID,
-                    cfs.getFunctionBody(), getFunctionLanguage(), FunctionKind.SCALAR.toString(), dependencies);
-            MetadataManager.INSTANCE.addFunction(mdTxnCtx, function);
-
-            MetadataManager.INSTANCE.commitTransaction(mdTxnCtx);
         } catch (Exception e) {
             abort(e, e, mdTxnCtx);
             throw e;
         } finally {
             metadataProvider.getLocks().unlock();
             metadataProvider.setDefaultDataverse(activeDataverse);
+        }
+    }
+
+    protected void handleCreateAdapterStatement(MetadataProvider metadataProvider, Statement stmt) throws Exception {
+        CreateAdapterStatement cas = (CreateAdapterStatement) stmt;
+        SourceLocation sourceLoc = cas.getSourceLocation();
+        AdapterIdentifier aid = cas.getAdapterId();
+        DataverseName dataverse = getActiveDataverseName(aid.getDataverseName());
+        if (!dataverse.equals(aid.getDataverseName())) {
+            aid = new AdapterIdentifier(dataverse, aid.getName());
+        }
+        MetadataTransactionContext mdTxnCtx = MetadataManager.INSTANCE.beginTransaction();
+        metadataProvider.setMetadataTxnContext(mdTxnCtx);
+        String libraryName = cas.getLibName();
+        lockUtil.createAdapterBegin(lockManager, metadataProvider.getLocks(), dataverse, aid.getName(), libraryName);
+        try {
+            Dataverse dv = MetadataManager.INSTANCE.getDataverse(mdTxnCtx, dataverse);
+            if (dv == null) {
+                throw new CompilationException(ErrorCode.UNKNOWN_DATAVERSE, sourceLoc, dataverse);
+            }
+            Library libraryInMetadata = MetadataManager.INSTANCE.getLibrary(mdTxnCtx, dataverse, libraryName);
+            if (libraryInMetadata == null) {
+                throw new CompilationException(ErrorCode.UNKNOWN_LIBRARY, sourceLoc, libraryName);
+            }
+            // Add adapters
+            String adapterFactoryClass = cas.getExternalIdent();
+            DatasourceAdapter dsa = new DatasourceAdapter(aid, adapterFactoryClass,
+                    IDataSourceAdapter.AdapterType.EXTERNAL, libraryName);
+            MetadataManager.INSTANCE.addAdapter(mdTxnCtx, dsa);
+            if (LOGGER.isInfoEnabled()) {
+                LOGGER.info("Installed adapter: " + aid.getName());
+            }
+            MetadataManager.INSTANCE.commitTransaction(mdTxnCtx);
+
+        } catch (Exception e) {
+            abort(e, e, mdTxnCtx);
+            throw e;
+        } finally {
+            metadataProvider.getLocks().unlock();
         }
     }
 
@@ -2815,8 +2944,8 @@ public class QueryTranslator extends AbstractLangTranslator implements IStatemen
                             new ResultHandlePrinter(sessionOutput, new ResultHandle(id, resultSetId)));
                     responsePrinter.printResults();
                     if (outMetadata != null) {
-                        outMetadata.getResultSets()
-                                .add(Triple.of(id, resultSetId, metadataProvider.findOutputRecordType()));
+                        outMetadata.getResultSets().add(org.apache.commons.lang3.tuple.Triple.of(id, resultSetId,
+                                metadataProvider.findOutputRecordType()));
                     }
                 }, requestParameters, cancellable, appCtx, metadataProvider);
                 break;
@@ -3268,6 +3397,11 @@ public class QueryTranslator extends AbstractLangTranslator implements IStatemen
     protected void trackRequest(IRequestParameters requestParameters) throws HyracksDataException {
         final IClientRequest clientRequest = appCtx.getReceptionist().requestReceived(requestParameters);
         appCtx.getRequestTracker().track(clientRequest);
+    }
+
+    protected void validateStatements(IRequestParameters requestParameters) throws CompilationException {
+        validateStatements(statements, requestParameters.isMultiStatement(),
+                requestParameters.getStatementCategoryRestrictionMask());
     }
 
     public static void validateStatements(List<Statement> statements, boolean allowMultiStatement,

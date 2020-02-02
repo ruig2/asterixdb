@@ -28,7 +28,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.google.common.base.Strings;
 import org.apache.asterix.common.annotations.SkipSecondaryIndexSearchExpressionAnnotation;
 import org.apache.asterix.common.config.DatasetConfig.IndexType;
 import org.apache.asterix.common.exceptions.CompilationException;
@@ -41,7 +40,6 @@ import org.apache.asterix.metadata.MetadataTransactionContext;
 import org.apache.asterix.metadata.api.IFullTextConfig;
 import org.apache.asterix.metadata.entities.Dataset;
 import org.apache.asterix.metadata.entities.Index;
-import org.apache.asterix.om.base.ABoolean;
 import org.apache.asterix.om.base.AFloat;
 import org.apache.asterix.om.base.AInt32;
 import org.apache.asterix.om.base.AMissing;
@@ -102,6 +100,8 @@ import org.apache.hyracks.storage.am.lsm.invertedindex.search.EditDistanceSearch
 import org.apache.hyracks.storage.am.lsm.invertedindex.search.JaccardSearchModifierFactory;
 import org.apache.hyracks.storage.am.lsm.invertedindex.search.ListEditDistanceSearchModifierFactory;
 import org.apache.hyracks.storage.am.lsm.invertedindex.tokenizers.IBinaryTokenizerFactory;
+
+import com.google.common.base.Strings;
 
 /**
  * Class for helping rewrite rules to choose and apply inverted indexes.
@@ -1015,7 +1015,8 @@ public class InvertedIndexAccessMethod implements IAccessMethod {
             Mutable<ILogicalExpression> m = new MutableObject<>(e);
             keyExprList.add(m);
         } else {
-            MutableObject<ILogicalExpression> fullTextWordList = new MutableObject<ILogicalExpression>(optFuncExpr.getConstantExpr(0));
+            MutableObject<ILogicalExpression> fullTextWordList =
+                    new MutableObject<ILogicalExpression>(optFuncExpr.getConstantExpr(0));
             keyExprList.add(fullTextWordList);
         }
     }
