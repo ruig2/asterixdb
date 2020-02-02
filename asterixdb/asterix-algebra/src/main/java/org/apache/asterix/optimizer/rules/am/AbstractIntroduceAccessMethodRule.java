@@ -28,6 +28,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.sun.media.jfxmedia.logging.Logger;
 import org.apache.asterix.common.config.DatasetConfig.DatasetType;
 import org.apache.asterix.common.config.DatasetConfig.IndexType;
 import org.apache.asterix.common.exceptions.CompilationException;
@@ -37,6 +38,7 @@ import org.apache.asterix.dataflow.data.common.ExpressionTypeComputer;
 import org.apache.asterix.metadata.declared.MetadataProvider;
 import org.apache.asterix.metadata.entities.Dataset;
 import org.apache.asterix.metadata.entities.Index;
+import org.apache.asterix.metadata.entities.fulltextentity.FullTextConfig;
 import org.apache.asterix.metadata.utils.DatasetUtil;
 import org.apache.asterix.metadata.utils.MetadataUtil;
 import org.apache.asterix.om.base.AOrderedList;
@@ -53,8 +55,10 @@ import org.apache.asterix.om.types.hierachy.ATypeHierarchy;
 import org.apache.asterix.om.utils.ConstantExpressionUtil;
 import org.apache.asterix.optimizer.base.AnalysisUtil;
 import org.apache.asterix.optimizer.rules.am.OptimizableOperatorSubTree.DataSourceType;
+import org.apache.asterix.runtime.evaluators.common.FullTextContainsDescriptor;
 import org.apache.commons.lang3.mutable.Mutable;
 import org.apache.commons.lang3.mutable.MutableInt;
+import org.apache.commons.lang3.mutable.MutableObject;
 import org.apache.hyracks.algebricks.common.exceptions.AlgebricksException;
 import org.apache.hyracks.algebricks.common.utils.Pair;
 import org.apache.hyracks.algebricks.core.algebra.base.ILogicalExpression;
@@ -67,6 +71,7 @@ import org.apache.hyracks.algebricks.core.algebra.expressions.AbstractFunctionCa
 import org.apache.hyracks.algebricks.core.algebra.expressions.AbstractLogicalExpression;
 import org.apache.hyracks.algebricks.core.algebra.expressions.ConstantExpression;
 import org.apache.hyracks.algebricks.core.algebra.expressions.IVariableTypeEnvironment;
+import org.apache.hyracks.algebricks.core.algebra.expressions.ScalarFunctionCallExpression;
 import org.apache.hyracks.algebricks.core.algebra.expressions.VariableReferenceExpression;
 import org.apache.hyracks.algebricks.core.algebra.functions.AlgebricksBuiltinFunctions;
 import org.apache.hyracks.algebricks.core.algebra.functions.FunctionIdentifier;
@@ -81,12 +86,15 @@ import org.apache.hyracks.algebricks.core.algebra.typing.ITypingContext;
 import org.apache.hyracks.algebricks.core.rewriter.base.IAlgebraicRewriteRule;
 
 import com.google.common.collect.ImmutableSet;
+import org.apache.logging.log4j.LogManager;
+import sun.util.logging.PlatformLogger;
 
 /**
  * Class that embodies the commonalities between rewrite rules for access
  * methods.
  */
 public abstract class AbstractIntroduceAccessMethodRule implements IAlgebraicRewriteRule {
+    private static final org.apache.logging.log4j.Logger LOGGER = LogManager.getLogger();
     // When this option is set to true before executing a query, we don't apply the index-only plan.
     public final static String NO_INDEX_ONLY_PLAN_OPTION = "noindexonly";
     public final static boolean NO_INDEX_ONLY_PLAN_OPTION_DEFAULT_VALUE = false;
@@ -246,19 +254,10 @@ public abstract class AbstractIntroduceAccessMethodRule implements IAlgebraicRew
                         || (chosenAccessMethod == RTreeAccessMethod.INSTANCE && indexType == IndexType.RTREE)
                         || (chosenAccessMethod == InvertedIndexAccessMethod.INSTANCE && isKeywordOrNgramIndexChosen)) {
 
-                    try {
-                        // in progress...Unwrap to get the internal string value is ugly, where to put the logic?
-                        String expectedFTConfig = ((AString) ((AsterixConstantValue) (((ConstantExpression) analysisCtx
-                                .getMatchedFuncExprs().get(0).getFuncExpr().getArguments().get(5).getValue())
-                                        .getValue())).getObject()).getStringValue();
-                        System.out.println("expected ft config: \t\t" + expectedFTConfig);
-                        System.out.println("chosen index ft config: \t" + chosenIndex.getFullTextConfig());
-
-                        if (!chosenIndex.getFullTextConfig().equals(expectedFTConfig)) {
-                            continue;
-                        }
-                    } catch (Exception e) {
-                        //e.printStackTrace();
+                    // If the function is ftcontains() and the ft config in the function differs from that in the index
+                    // then skip the index
+                    if (isFullTextFuncAndConfigDiffers(analysisCtx, chosenIndex.getFullTextConfig())) {
+                        continue;
                     }
 
                     if (resultVarsToIndexTypesMap.containsKey(indexEntry.getValue())) {
@@ -277,6 +276,45 @@ public abstract class AbstractIntroduceAccessMethodRule implements IAlgebraicRew
             }
         }
         return result;
+    }
+
+    private boolean isFullTextFuncAndConfigDiffers(AccessMethodAnalysisContext analysisCtx, String indexFullTextConfig) {
+        try {
+            // What if more than 1 func expr? Is it possible in ftcontains()?
+            IOptimizableFuncExpr expr = analysisCtx.getMatchedFuncExpr(0);
+            FunctionIdentifier funcId = expr.getFuncExpr().getFunctionIdentifier();
+            if (funcId == BuiltinFunctions.FULLTEXT_CONTAINS || funcId == BuiltinFunctions.FULLTEXT_CONTAINS_WO_OPTION) {
+                AbstractFunctionCallExpression funcExpr = expr.getFuncExpr();
+
+                String expectedConfig = FullTextConfig.DefaultFullTextConfig.getName();
+                List<Mutable<ILogicalExpression>> arguments = funcExpr.getArguments();
+                for (int i = 3; i < arguments.size()-1; i++) {
+                    String optionName = "";
+                    try {
+                        ConstantExpression ce = (ConstantExpression) arguments.get(i).getValue();
+                        optionName = ((AString) ((AsterixConstantValue) (ce.getValue())).getObject()).getStringValue();
+                    } catch (Exception e) {
+                        continue;
+                    }
+
+                    if (optionName.equalsIgnoreCase(FullTextContainsDescriptor.FULLTEXT_CONFIG_OPTION)) {
+                        ConstantExpression nextCe = (ConstantExpression) arguments.get(i + 1).getValue();
+                        expectedConfig =
+                                ((AString) ((AsterixConstantValue) (nextCe.getValue())).getObject()).getStringValue();
+                        break;
+                    }
+                }
+
+                // LOGGER.debug("expectedConfig " + expectedConfig);
+                // LOGGER.debug("index config:  " + indexFullTextConfig);
+                if (expectedConfig.equalsIgnoreCase(indexFullTextConfig) == false) {
+                    return true;
+                }
+            }
+        } catch (Exception e) {
+            LOGGER.info("Unexpected behavior when checking full-text config", e);
+        }
+        return false;
     }
 
     /**
