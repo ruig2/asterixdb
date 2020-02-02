@@ -290,7 +290,7 @@ public abstract class AbstractIntroduceAccessMethodRule implements IAlgebraicRew
                 // so that we don't cast the types many times
                 String expectedConfig = FullTextConfig.DefaultFullTextConfig.getName();
                 List<Mutable<ILogicalExpression>> arguments = funcExpr.getArguments();
-                for (int i = 3; i < arguments.size()-1; i++) {
+                for (int i = 0; i < arguments.size()-1; i++) {
                     String optionName = "";
                     try {
                         ConstantExpression ce = (ConstantExpression) arguments.get(i).getValue();
