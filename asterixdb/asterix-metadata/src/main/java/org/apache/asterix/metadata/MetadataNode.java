@@ -567,7 +567,8 @@ public class MetadataNode implements IMetadataNode {
         }
     }
 
-    @Override public void updateFullTextConfig(TxnId txnId, IFullTextConfig config)
+    @Override
+    public void updateFullTextConfig(TxnId txnId, IFullTextConfig config)
             throws HyracksDataException, AlgebricksException, RemoteException {
         modifyExistingFullTextEntityToCatalog(txnId, config);
     }
