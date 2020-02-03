@@ -31,7 +31,6 @@ public abstract class AbstractFullTextConfig implements IFullTextConfig {
     protected final String name;
     protected final TokenizerCategory tokenizerCategory;
     protected ImmutableList<IFullTextFilter> filters;
-    // in progress... maybe use Index class instead of String?
     protected List<String> usedByIndices;
 
     protected AbstractFullTextConfig(String name, TokenizerCategory tokenizerCategory,

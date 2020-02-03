@@ -75,7 +75,6 @@ public class FulltextEntityTupleTranslator extends AbstractTupleTranslator<IFull
     protected FulltextEntityTupleTranslator(boolean getTuple) {
         super(getTuple, MetadataPrimaryIndexes.FULLTEXT_ENTITY_DATASET, FULLTEXT_FILTER_PAYLOAD_TUPLE_FIELD_INDEX);
         if (getTuple) {
-            // in progress...
             tuple = new ArrayTupleReference();
         } else {
             tuple = null;
@@ -99,6 +98,8 @@ public class FulltextEntityTupleTranslator extends AbstractTupleTranslator<IFull
                     case STOPWORDS:
                         return createStopwordFilterFromARecord(aRecord);
                     case SYNONYM:
+                    default:
+                        throw new AlgebricksException("Not supported yet");
                 }
             case CONFIG:
                 return createConfigFromARecord(aRecord);
@@ -155,15 +156,9 @@ public class FulltextEntityTupleTranslator extends AbstractTupleTranslator<IFull
                 IFullTextFilter filter = MetadataManager.INSTANCE.getFullTextFilter(mdTxnCtx, filterName);
                 filtersBuilder.add(filter);
             }
+            MetadataManager.INSTANCE.commitTransaction(mdTxnCtx);
         } catch (RemoteException e) {
             e.printStackTrace();
-        } finally {
-            try {
-                // in progress... how to handle the exception gracefully?
-                MetadataManager.INSTANCE.commitTransaction(mdTxnCtx);
-            } catch (RemoteException e) {
-                e.printStackTrace();
-            }
         }
 
         FullTextConfig config = new FullTextConfig(name, tokenizerCategory, filtersBuilder.build());
