@@ -96,7 +96,7 @@ public class FulltextEntityTupleTranslator extends AbstractTupleTranslator<IFull
                 IFullTextFilter.FullTextFilterType kind =
                         IFullTextFilter.FullTextFilterType.getEnumIgnoreCase(typeAString.getStringValue());
                 switch (kind) {
-                    case STOPWORD:
+                    case STOPWORDS:
                         return createStopwordFilterFromARecord(aRecord);
                     case SYNONYM:
                 }
@@ -215,7 +215,7 @@ public class FulltextEntityTupleTranslator extends AbstractTupleTranslator<IFull
 
     private void writeFulltextFilter(IFullTextFilter filter) throws HyracksDataException {
         switch (filter.getFilterKind()) {
-            case STOPWORD:
+            case STOPWORDS:
                 writeStopwordFilter((StopwordFullTextFilter) filter);
                 break;
             case SYNONYM:

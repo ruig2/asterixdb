@@ -26,9 +26,13 @@ import org.apache.commons.lang3.EnumUtils;
 // in progress...
 
 public interface IFullTextFilter extends IFullTextEntity {
+    // case-insensitive
+    String FIELD_NAME_TYPE = "type";
+    String FIELD_NAME_STOPWORDS = "stopwords";
+    String FIELD_NAME_STOPWORDS_LIST = "stopwordsList";
 
     enum FullTextFilterType {
-        STOPWORD,
+        STOPWORDS,
         SYNONYM;
 
         public static FullTextFilterType getEnumIgnoreCase(String value) {

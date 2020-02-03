@@ -30,7 +30,7 @@ public class StopwordFullTextFilter extends AbstractFullTextFilter {
     ImmutableList<String> stopwordList;
 
     public StopwordFullTextFilter(String name, ImmutableList<String> stopwordList) {
-        super(name, IFullTextFilter.FullTextFilterType.STOPWORD);
+        super(name, IFullTextFilter.FullTextFilterType.STOPWORDS);
         this.stopwordList = stopwordList;
     }
 

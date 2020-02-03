@@ -25,6 +25,10 @@ import java.util.List;
 import org.apache.asterix.metadata.entities.fulltextentity.TokenizerCategory;
 
 public interface IFullTextConfig extends IFullTextEntity {
+    // case-insensitive
+    String FIELD_NAME_TOKENIZER = "tokenizer";
+    String FIELD_NAME_FILTER_PIPELINE = "filterpipeline";
+
     TokenizerCategory getTokenizerCategory();
 
     List<IFullTextFilter> getFilters();

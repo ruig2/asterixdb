@@ -26,7 +26,7 @@ public class SynonymFullTextFilter extends AbstractFullTextFilter {
     ImmutableMap<String, String> synonymMap;
 
     public SynonymFullTextFilter(String name, ImmutableMap<String, String> synonymMap) {
-        super(name, FullTextFilterType.STOPWORD);
+        super(name, FullTextFilterType.STOPWORDS);
         this.synonymMap = synonymMap;
     }
 
