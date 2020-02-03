@@ -237,7 +237,7 @@ public class MetadataNode implements IMetadataNode {
             IMetadataIndex index) throws AlgebricksException {
         try {
             ITupleReference tuple = tupleTranslator.getTupleFromMetadataEntity(entity);
-            modifyTupleIntoIndex(txnId, index, tuple);
+            upsertTupleIntoIndex(txnId, index, tuple);
         } catch (HyracksDataException e) {
             throw new AlgebricksException(e);
         }
@@ -460,7 +460,7 @@ public class MetadataNode implements IMetadataNode {
 
     @Override
     public IFullTextFilter getFulltextFilter(TxnId txnId, String filterName)
-            throws RemoteException, AlgebricksException {
+            throws AlgebricksException {
         try {
             FulltextEntityTupleTranslator translator = tupleTranslatorProvider.getFulltextEntityTupleTranslator(true);
 
@@ -473,7 +473,6 @@ public class MetadataNode implements IMetadataNode {
                 return null;
             }
             return (IFullTextFilter) results.get(0);
-            //return new StopwordFulltextFilter("temp", ImmutableList.of("abc", "def"));
         } catch (HyracksDataException e) {
             throw new AlgebricksException(e);
         }
@@ -488,7 +487,6 @@ public class MetadataNode implements IMetadataNode {
                     translator.createTupleAsIndex(IFullTextEntity.FullTextEntityCategory.FILTER, filterName);
             deleteTupleFromIndex(txnId, MetadataPrimaryIndexes.FULLTEXT_ENTITY_DATASET, key);
         } catch (HyracksDataException e) {
-            e.printStackTrace();
             // debug: UPDATE_OR_DELETE_NON_EXISTENT_KEY never triggered?
             if (e.getComponent().equals(ErrorCode.HYRACKS)
                     && e.getErrorCode() == ErrorCode.UPDATE_OR_DELETE_NON_EXISTENT_KEY && ifExists) {
@@ -515,7 +513,7 @@ public class MetadataNode implements IMetadataNode {
         FulltextEntityTupleTranslator tupleReaderWriter =
                 tupleTranslatorProvider.getFulltextEntityTupleTranslator(true);
         ITupleReference filterTuple = tupleReaderWriter.getTupleFromMetadataEntity(entity);
-        modifyTupleIntoIndex(txnId, MetadataPrimaryIndexes.FULLTEXT_ENTITY_DATASET, filterTuple);
+        upsertTupleIntoIndex(txnId, MetadataPrimaryIndexes.FULLTEXT_ENTITY_DATASET, filterTuple);
     }
 
     @Override
@@ -575,7 +573,6 @@ public class MetadataNode implements IMetadataNode {
                     translator.createTupleAsIndex(IFullTextEntity.FullTextEntityCategory.CONFIG, configName);
             deleteTupleFromIndex(txnId, MetadataPrimaryIndexes.FULLTEXT_ENTITY_DATASET, key);
         } catch (HyracksDataException e) {
-            e.printStackTrace();
             // debug: UPDATE_OR_DELETE_NON_EXISTENT_KEY never triggered?
             if (e.getComponent().equals(ErrorCode.HYRACKS)
                     && e.getErrorCode() == ErrorCode.UPDATE_OR_DELETE_NON_EXISTENT_KEY && ifExists) {
@@ -592,7 +589,7 @@ public class MetadataNode implements IMetadataNode {
         modifyMetadataIndex(Operation.INSERT, txnId, metadataIndex, tuple);
     }
 
-    private void modifyTupleIntoIndex(TxnId txnId, IMetadataIndex metadataIndex, ITupleReference tuple)
+    private void upsertTupleIntoIndex(TxnId txnId, IMetadataIndex metadataIndex, ITupleReference tuple)
             throws HyracksDataException {
         modifyMetadataIndex(Operation.UPSERT, txnId, metadataIndex, tuple);
     }
