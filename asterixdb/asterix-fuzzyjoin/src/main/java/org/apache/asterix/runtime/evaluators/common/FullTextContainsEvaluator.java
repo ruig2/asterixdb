@@ -43,6 +43,7 @@ import org.apache.hyracks.api.dataflow.value.IBinaryComparator;
 import org.apache.hyracks.api.dataflow.value.IBinaryHashFunction;
 import org.apache.hyracks.api.dataflow.value.ISerializerDeserializer;
 import org.apache.hyracks.api.exceptions.HyracksDataException;
+import org.apache.hyracks.api.exceptions.HyracksException;
 import org.apache.hyracks.data.std.accessors.PointableBinaryHashFunctionFactory;
 import org.apache.hyracks.data.std.api.IPointable;
 import org.apache.hyracks.data.std.primitive.TaggedValuePointable;
@@ -190,25 +191,18 @@ public class FullTextContainsEvaluator implements IScalarEvaluator {
             return;
         }
 
-        MetadataTransactionContext mdTxnCtx = null;
         try {
-            mdTxnCtx = MetadataManager.INSTANCE.beginTransaction();
-            ABoolean b =
-                    fullTextContainsWithArg(mdTxnCtx, typeTag2, argLeft, argRight) ? ABoolean.TRUE : ABoolean.FALSE;
+            MetadataTransactionContext mdTxnCtx = MetadataManager.INSTANCE.beginTransaction();
+            ABoolean b = fullTextContainsWithArg(mdTxnCtx, typeTag2, argLeft, argRight) ? ABoolean.TRUE : ABoolean.FALSE;
             serde.serialize(b, out);
-        } catch (HyracksDataException e1) {
-            throw HyracksDataException.create(e1);
+            MetadataManager.INSTANCE.commitTransaction(mdTxnCtx);
         } catch (AlgebricksException e) {
+            // ToDo: handle the exception gracefully
             e.printStackTrace();
         } catch (RemoteException e) {
             e.printStackTrace();
-        } finally {
-            try {
-                MetadataManager.INSTANCE.commitTransaction(mdTxnCtx);
-            } catch (RemoteException e) {
-                e.printStackTrace();
-            }
         }
+
         result.set(resultStorage);
     }
 
@@ -354,9 +348,7 @@ public class FullTextContainsEvaluator implements IScalarEvaluator {
             // it should not exist.
             if (rightHashSet.find(keyEntry, queryArray, false) == -1) {
                 String keyStr = new String(queryArray, keyEntry.getOffset(), keyEntry.getLength());
-                System.out.println("Right: get key " + keyStr);
                 if (config == null || config.proceedTokens(Arrays.asList(keyStr)).size() > 0) {
-                    System.out.println("\tnon-stopword key " + keyStr);
                     rightHashSet.put(keyEntry);
                     uniqueQueryTokenCount++;
                 }
@@ -400,7 +392,7 @@ public class FullTextContainsEvaluator implements IScalarEvaluator {
      * for that option. (e.g., argOptions[0] = "mode", argOptions[1] = "all")
      */
     private void setFullTextOption(IPointable[] argOptions) throws HyracksDataException {
-        // in progress... Maybe using a JSON parser here can make things easier?
+        // Maybe using a JSON parser here can make things easier?
         for (int i = 0; i < optionArgsLength; i = i + 2) {
             // mode option
             if (compareStrInByteArrayAndPointable(FullTextContainsDescriptor.getSearchModeOptionArray(), argOptions[i],
@@ -418,7 +410,6 @@ public class FullTextContainsEvaluator implements IScalarEvaluator {
                     argOptions[i], true) == 0) {
                 // ToDo: \r is added in front of the arg, how to solve this gracefully?
                 fullTextConfigStr = UTF8StringUtil.toString(argOptions[i + 1].getByteArray(), 1);
-                System.out.println(fullTextConfigStr);
             }
         }
     }
@@ -439,7 +430,6 @@ public class FullTextContainsEvaluator implements IScalarEvaluator {
         int length = arg1.getLength() - numBytesToStoreLength;
 
         String tstr = new String(arg1.getByteArray(), startOffset, length);
-        System.out.println("\nLeft: " + tstr);
 
         // Is the fulltext index used here ???
         tokenizerForLeftArray.reset(arg1.getByteArray(), startOffset, length);
@@ -450,10 +440,8 @@ public class FullTextContainsEvaluator implements IScalarEvaluator {
 
             IToken t = tokenizerForLeftArray.getToken();
             String tokenStr = new String(t.getData(), t.getStartOffset(), t.getTokenLength());
-            System.out.println("proceeding " + tokenStr);
 
             if (config != null && config.proceedTokens(Arrays.asList(tokenStr)).size() == 0) {
-                System.out.println("!!! Left token is in stopword list " + tokenStr);
                 continue;
             }
 
