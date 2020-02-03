@@ -21,7 +21,6 @@ package org.apache.asterix.metadata.api;
 
 import java.util.List;
 
-// in progress...
 import org.apache.asterix.metadata.entities.fulltextentity.TokenizerCategory;
 
 public interface IFullTextConfig extends IFullTextEntity {
@@ -33,12 +32,9 @@ public interface IFullTextConfig extends IFullTextEntity {
 
     List<IFullTextFilter> getFilters();
 
-    // in progress...Maybe use the Index class instead of String?
     List<String> getUsedByIndices();
 
     void addUsedByIndices(String indexName);
 
     List<String> proceedTokens(List<String> tokens);
-
-    // Stream proceedStream(Stream streamIn);
 }
