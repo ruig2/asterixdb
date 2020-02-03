@@ -565,6 +565,11 @@ public class MetadataNode implements IMetadataNode {
 
     @Override
     public void dropFullTextConfig(TxnId txnId, String configName, boolean ifExists) throws AlgebricksException {
+        IFullTextConfig config = getFullTextConfig(txnId, configName);
+        if (config != null && config.getUsedByIndices().size() > 0) {
+            throw new AlgebricksException("Not allowed to delete a full-text config that is used by existing indices");
+        }
+
         try {
             FulltextEntityTupleTranslator translator = tupleTranslatorProvider.getFulltextEntityTupleTranslator(true);
 

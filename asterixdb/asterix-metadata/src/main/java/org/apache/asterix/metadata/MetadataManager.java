@@ -724,7 +724,7 @@ public abstract class MetadataManager implements IMetadataManager {
         try {
             metadataNode.dropFullTextConfig(mdTxnCtx.getTxnId(), configName, ifExists);
         } catch (RemoteException e) {
-            e.printStackTrace();
+            throw new AlgebricksException(e);
         }
     }
 

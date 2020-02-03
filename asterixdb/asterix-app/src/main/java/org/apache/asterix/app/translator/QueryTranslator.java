@@ -1879,23 +1879,20 @@ public class QueryTranslator extends AbstractLangTranslator implements IStatemen
     }
 
     protected void handleFullTextFilterDrop(MetadataProvider metadataProvider, Statement stmt,
-            IHyracksClientConnection hcc, IRequestParameters requestParameters) throws RemoteException {
+            IHyracksClientConnection hcc, IRequestParameters requestParameters) throws Exception {
         FullTextFilterDropStatement stmtFilterDrop = (FullTextFilterDropStatement) stmt;
 
         MetadataTransactionContext mdTxnCtx = null;
         try {
             mdTxnCtx = MetadataManager.INSTANCE.beginTransaction();
             metadataProvider.setMetadataTxnContext(mdTxnCtx);
-            // in progress...
-            // handle "if exists"
             MetadataManager.INSTANCE.dropFullTextFilter(mdTxnCtx, stmtFilterDrop.getFilterName(),
                     stmtFilterDrop.getIfExists());
-        } catch (RemoteException e) {
-            e.printStackTrace();
-        } catch (AlgebricksException e) {
-            e.printStackTrace();
-        } finally {
             MetadataManager.INSTANCE.commitTransaction(mdTxnCtx);
+        } catch (RemoteException e) {
+            throw e;
+        } catch (AlgebricksException e) {
+            throw e;
         }
         return;
     }
@@ -1914,10 +1911,9 @@ public class QueryTranslator extends AbstractLangTranslator implements IStatemen
             metadataProvider.setMetadataTxnContext(mdTxnCtx);
             MetadataManager.INSTANCE.dropFullTextConfig(mdTxnCtx, stmtConfigDrop.getConfigName(),
                     stmtConfigDrop.getIfExists());
+            MetadataManager.INSTANCE.commitTransaction(mdTxnCtx);
         } catch (RemoteException e) {
             throw new AlgebricksException(e);
-        } finally {
-            MetadataManager.INSTANCE.commitTransaction(mdTxnCtx);
         }
 
         return;
