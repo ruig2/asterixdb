@@ -516,10 +516,6 @@ public final class MetadataRecordTypes {
             true);
 
     //-------------------------------------- FullText Config ---------------------------------------//
-
-    // TTTTTTTTTTTTTTTTTTT TO will polish later
-    // Ordered List or Unordered List?
-    // Unordered list is an MULTISET?
     public static final int FULLTEXT_ENTITY_ARECORD_FULLTEXT_ENTITY_CATEGORY_FIELD_INDEX = 0;
     public static final int FULLTEXT_ENTITY_ARECORD_FULLTEXT_ENTITY_NAME_FIELD_INDEX = 1;
 

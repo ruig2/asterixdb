@@ -146,11 +146,6 @@ public class MetadataPrimaryIndexes {
 
     // ToDo: create a dedicated class for the metadata index field to avoid unmatched information
     // (e.g. numbers of field names and types) and get rid of numFields in MetadataIndex.
-    // TTTTTTTTTTTTTT ToDo: in progress
-    // Is the numFields the number of fields in the FULLTEXT_CONFIG_RECORDTYPE?
-    // If so, does it include the number of OPEN fields which is different for different rows in the dataset?
-    // Or it is the number of primary keys plus 1? (the MetadataRecordTypes.FULLTEXT_CONFIG_RECORDTYPE type)
-    // If so, then why do we need it? The number of primary keys can be inferred directly.
     public static final IMetadataIndex FULLTEXT_ENTITY_DATASET =
             new MetadataIndex(PROPERTIES_FULLTEXT_ENTITY, 3, new IAType[] { BuiltinType.ASTRING, BuiltinType.ASTRING },
                     Arrays.asList(Arrays.asList(MetadataRecordTypes.FIELD_NAME_FULLTEXT_CATEGORY),

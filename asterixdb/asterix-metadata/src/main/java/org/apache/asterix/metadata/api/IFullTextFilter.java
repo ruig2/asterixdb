@@ -23,8 +23,6 @@ import java.util.List;
 
 import org.apache.commons.lang3.EnumUtils;
 
-// in progress...
-
 public interface IFullTextFilter extends IFullTextEntity {
     // case-insensitive
     String FIELD_NAME_TYPE = "type";
