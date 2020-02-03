@@ -18,7 +18,6 @@
  */
 package org.apache.asterix.app.translator;
 
-import com.sun.javaws.exceptions.InvalidArgumentException;
 import static org.apache.asterix.common.functions.FunctionConstants.ASTERIX_DV;
 
 import java.io.File;
@@ -212,7 +211,6 @@ import org.apache.asterix.translator.util.ValidateUtil;
 import org.apache.asterix.utils.DataverseUtil;
 import org.apache.asterix.utils.FeedOperations;
 import org.apache.asterix.utils.FlushDatasetUtil;
-import org.apache.commons.lang3.EnumUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.mutable.Mutable;
 import org.apache.commons.lang3.mutable.MutableBoolean;
@@ -1064,7 +1062,8 @@ public class QueryTranslator extends AbstractLangTranslator implements IStatemen
             case IFullTextFilter.FIELD_NAME_STOPWORDS: {
                 ImmutableList.Builder stopwordsBuilder = ImmutableList.<String> builder();
 
-                String leftStopwordListStr = ((LiteralExpr) fbs.get(1).getLeftExpr()).getValue().getStringValue().toLowerCase();
+                String leftStopwordListStr =
+                        ((LiteralExpr) fbs.get(1).getLeftExpr()).getValue().getStringValue().toLowerCase();
                 if (leftStopwordListStr.equalsIgnoreCase(IFullTextFilter.FIELD_NAME_STOPWORDS_LIST) == false) {
                     throw new IllegalStateException("expect StopwordsList in the second row");
                 }
@@ -1116,14 +1115,17 @@ public class QueryTranslator extends AbstractLangTranslator implements IStatemen
             throw new UnexpectedException("number of parameter less than expected");
         }
 
-        String tokenizerTupleKeyStr = ((LiteralExpr) (fb.get(0).getLeftExpr())).getValue().getStringValue().toLowerCase();
+        String tokenizerTupleKeyStr =
+                ((LiteralExpr) (fb.get(0).getLeftExpr())).getValue().getStringValue().toLowerCase();
         if (tokenizerTupleKeyStr.equalsIgnoreCase(IFullTextConfig.FIELD_NAME_TOKENIZER) == false) {
             throw new UnexpectedException("expect tokenizer in the first row");
         }
-        String tokenizerTupleValueStr = ((LiteralExpr) (fb.get(0).getRightExpr())).getValue().getStringValue().toLowerCase();
+        String tokenizerTupleValueStr =
+                ((LiteralExpr) (fb.get(0).getRightExpr())).getValue().getStringValue().toLowerCase();
         TokenizerCategory tokenizerCategory = TokenizerCategory.fromString(tokenizerTupleValueStr);
 
-        String filterPipelineTupleKeyStr = ((LiteralExpr) (fb.get(1).getLeftExpr())).getValue().getStringValue().toLowerCase();
+        String filterPipelineTupleKeyStr =
+                ((LiteralExpr) (fb.get(1).getLeftExpr())).getValue().getStringValue().toLowerCase();
         if (filterPipelineTupleKeyStr.equalsIgnoreCase(IFullTextConfig.FIELD_NAME_FILTER_PIPELINE) == false) {
             throw new UnexpectedException("expect filter pipeline in the second row");
         }
@@ -1143,8 +1145,8 @@ public class QueryTranslator extends AbstractLangTranslator implements IStatemen
                 filtersBuilder.add(filter);
             }
 
-            IFullTextConfig config = new FullTextConfig(stmtCreateFilter.getConfigName(),
-                    tokenizerCategory, filtersBuilder.build());
+            IFullTextConfig config =
+                    new FullTextConfig(stmtCreateFilter.getConfigName(), tokenizerCategory, filtersBuilder.build());
 
             MetadataManager.INSTANCE.addFulltextConfig(mdTxnCtx, config);
 

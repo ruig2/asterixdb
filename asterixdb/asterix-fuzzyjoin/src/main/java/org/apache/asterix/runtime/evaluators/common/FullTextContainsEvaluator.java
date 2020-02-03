@@ -43,7 +43,6 @@ import org.apache.hyracks.api.dataflow.value.IBinaryComparator;
 import org.apache.hyracks.api.dataflow.value.IBinaryHashFunction;
 import org.apache.hyracks.api.dataflow.value.ISerializerDeserializer;
 import org.apache.hyracks.api.exceptions.HyracksDataException;
-import org.apache.hyracks.api.exceptions.HyracksException;
 import org.apache.hyracks.data.std.accessors.PointableBinaryHashFunctionFactory;
 import org.apache.hyracks.data.std.api.IPointable;
 import org.apache.hyracks.data.std.primitive.TaggedValuePointable;
@@ -193,7 +192,8 @@ public class FullTextContainsEvaluator implements IScalarEvaluator {
 
         try {
             MetadataTransactionContext mdTxnCtx = MetadataManager.INSTANCE.beginTransaction();
-            ABoolean b = fullTextContainsWithArg(mdTxnCtx, typeTag2, argLeft, argRight) ? ABoolean.TRUE : ABoolean.FALSE;
+            ABoolean b =
+                    fullTextContainsWithArg(mdTxnCtx, typeTag2, argLeft, argRight) ? ABoolean.TRUE : ABoolean.FALSE;
             serde.serialize(b, out);
             MetadataManager.INSTANCE.commitTransaction(mdTxnCtx);
         } catch (AlgebricksException e) {

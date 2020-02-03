@@ -1255,13 +1255,9 @@ CreateFullTextFilterStatement CreateFullTextFilterSpec(Token startStmtToken) thr
     expr = RecordConstructor()
   )
   {
-  System.out.println("!!! Get  Create Fulltext Filter command");
-  System.out.println("!!! Filter name " + filterName);
-  System.out.println("!!! expr " + expr.toString());
-
-  stmt = new org.apache.asterix.lang.common.statement.CreateFullTextFilterStatement(filterName, ifNotExists, expr);
-  return stmt;
-}
+    stmt = new org.apache.asterix.lang.common.statement.CreateFullTextFilterStatement(filterName, ifNotExists, expr);
+    return stmt;
+  }
 }
 
 CreateFullTextConfigStatement CreateFullTextConfigSpec(Token startStmtToken) throws ParseException:
@@ -1278,12 +1274,7 @@ CreateFullTextConfigStatement CreateFullTextConfigSpec(Token startStmtToken) thr
     expr = RecordConstructor()
   )
   {
-    System.out.println("Get Create Fulltext Config statement");
-    System.out.println("configName " + configName);
-    System.out.println("expr " + expr);
-
     stmt = new CreateFullTextConfigStatement(configName, ifNotExists, expr);
-
     return stmt;
   }
 }
@@ -1451,7 +1442,6 @@ DropDatasetStatement DropDatasetSpecification(Token startStmtToken) throws Parse
   }
 }
 
-// DROP INDEX GleambookMessages.gbSenderLocIndex;
 IndexDropStatement DropIndexStatement(Token startStmtToken) throws ParseException:
 {
   IndexDropStatement stmt = null;
@@ -1500,11 +1490,8 @@ FullTextFilterDropStatement DropFullTextFilterSpecification(Token startStmtToken
 {
   filterName = Identifier() ifExists = IfExists()
   {
-  System.out.println("Get a Drop Fulltext Filter Statement!!!");
-  System.out.println("Identifier " + filterName);
-  System.out.println("ifExists " + ifExists);
-  return new org.apache.asterix.lang.common.statement.FullTextFilterDropStatement(filterName, ifExists);
-}
+    return new org.apache.asterix.lang.common.statement.FullTextFilterDropStatement(filterName, ifExists);
+  }
 }
 
 FullTextConfigDropStatement DropFullTextConfigSpecification(Token startStmtToken) throws ParseException:
@@ -1515,11 +1502,8 @@ FullTextConfigDropStatement DropFullTextConfigSpecification(Token startStmtToken
 {
   configName = Identifier() ifExists = IfExists()
   {
-  System.out.println("Get a Drop Fulltext Config Statement!!!");
-  System.out.println("Identifier " + configName);
-  System.out.println("ifExists " + ifExists);
-  return new org.apache.asterix.lang.common.statement.FullTextConfigDropStatement(configName, ifExists);
-}
+    return new org.apache.asterix.lang.common.statement.FullTextConfigDropStatement(configName, ifExists);
+  }
 }
 
 

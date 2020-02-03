@@ -18,6 +18,8 @@
  */
 package org.apache.asterix.optimizer.rules.util;
 
+import java.util.List;
+
 import org.apache.asterix.metadata.entities.fulltextentity.FullTextConfig;
 import org.apache.asterix.om.base.AString;
 import org.apache.asterix.om.constants.AsterixConstantValue;
@@ -29,8 +31,6 @@ import org.apache.hyracks.algebricks.core.algebra.base.ILogicalExpression;
 import org.apache.hyracks.algebricks.core.algebra.expressions.AbstractFunctionCallExpression;
 import org.apache.hyracks.algebricks.core.algebra.expressions.ConstantExpression;
 import org.apache.hyracks.algebricks.core.algebra.functions.FunctionIdentifier;
-
-import java.util.List;
 
 public class FullTextUtil {
     public static boolean isFullTextFunctionExpr(IOptimizableFuncExpr expr) {
@@ -53,7 +53,7 @@ public class FullTextUtil {
         // so that we don't cast the types many times
         String configName = FullTextConfig.DefaultFullTextConfig.getName();
         List<Mutable<ILogicalExpression>> arguments = funcExpr.getArguments();
-        for (int i = 0; i < arguments.size()-1; i++) {
+        for (int i = 0; i < arguments.size() - 1; i++) {
             String optionName = "";
             try {
                 ConstantExpression ce = (ConstantExpression) arguments.get(i).getValue();

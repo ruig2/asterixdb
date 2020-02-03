@@ -21,7 +21,6 @@ package org.apache.asterix.optimizer.rules;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.google.common.base.Strings;
 import org.apache.asterix.common.exceptions.CompilationException;
 import org.apache.asterix.common.exceptions.ErrorCode;
 import org.apache.asterix.om.base.AString;
@@ -45,6 +44,8 @@ import org.apache.hyracks.algebricks.core.algebra.util.OperatorPropertiesUtil;
 import org.apache.hyracks.algebricks.core.algebra.visitors.ILogicalExpressionReferenceTransform;
 import org.apache.hyracks.algebricks.core.rewriter.base.IAlgebraicRewriteRule;
 import org.apache.hyracks.api.exceptions.SourceLocation;
+
+import com.google.common.base.Strings;
 
 /**
  * Checks whether the given parameters of the ftcontains() function are correct during the compilation.
@@ -271,7 +272,8 @@ public class FullTextContainsParameterCheckRule implements IAlgebraicRewriteRule
                             checkSearchModeOption(optionTypeStringVal, functionName, optionExprVal.getSourceLocation());
                             break;
                         case FullTextContainsDescriptor.FULLTEXT_CONFIG_OPTION:
-                            checkFullTextConfigOption(optionTypeStringVal, functionName, optionExprVal.getSourceLocation());
+                            checkFullTextConfigOption(optionTypeStringVal, functionName,
+                                    optionExprVal.getSourceLocation());
                             break;
                         default:
                             throw CompilationException.create(ErrorCode.TYPE_UNSUPPORTED,

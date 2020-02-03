@@ -80,9 +80,9 @@ import org.apache.hyracks.algebricks.core.algebra.operators.logical.UnnestOperat
 import org.apache.hyracks.algebricks.core.algebra.operators.logical.visitors.VariableUtilities;
 import org.apache.hyracks.algebricks.core.algebra.typing.ITypingContext;
 import org.apache.hyracks.algebricks.core.rewriter.base.IAlgebraicRewriteRule;
+import org.apache.logging.log4j.LogManager;
 
 import com.google.common.collect.ImmutableSet;
-import org.apache.logging.log4j.LogManager;
 
 /**
  * Class that embodies the commonalities between rewrite rules for access
@@ -273,7 +273,8 @@ public abstract class AbstractIntroduceAccessMethodRule implements IAlgebraicRew
         return result;
     }
 
-    private boolean isFullTextFuncAndConfigDiffers(AccessMethodAnalysisContext analysisCtx, String indexFullTextConfig) {
+    private boolean isFullTextFuncAndConfigDiffers(AccessMethodAnalysisContext analysisCtx,
+            String indexFullTextConfig) {
         try {
             // What if more than 1 func expr? Is it possible in ftcontains()?
             IOptimizableFuncExpr expr = analysisCtx.getMatchedFuncExpr(0);

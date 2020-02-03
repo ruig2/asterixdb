@@ -453,8 +453,7 @@ public class MetadataNode implements IMetadataNode {
     }
 
     @Override
-    public void addFulltextFilter(TxnId txnId, IFullTextFilter filter)
-            throws AlgebricksException {
+    public void addFulltextFilter(TxnId txnId, IFullTextFilter filter) throws AlgebricksException {
         insertFullTextEntityToCatalog(txnId, filter);
         return;
     }
@@ -500,10 +499,10 @@ public class MetadataNode implements IMetadataNode {
         return;
     }
 
-    private void insertFullTextEntityToCatalog(TxnId txnId, IFullTextEntity entity)
-            throws AlgebricksException {
+    private void insertFullTextEntityToCatalog(TxnId txnId, IFullTextEntity entity) throws AlgebricksException {
         try {
-            FulltextEntityTupleTranslator tupleReaderWriter = tupleTranslatorProvider.getFulltextEntityTupleTranslator(true);
+            FulltextEntityTupleTranslator tupleReaderWriter =
+                    tupleTranslatorProvider.getFulltextEntityTupleTranslator(true);
             ITupleReference filterTuple = tupleReaderWriter.getTupleFromMetadataEntity(entity);
             insertTupleIntoIndex(txnId, MetadataPrimaryIndexes.FULLTEXT_ENTITY_DATASET, filterTuple);
         } catch (HyracksDataException e) {
@@ -520,8 +519,7 @@ public class MetadataNode implements IMetadataNode {
     }
 
     @Override
-    public void addFullTextConfig(TxnId txnId, IFullTextConfig config)
-            throws AlgebricksException, RemoteException {
+    public void addFullTextConfig(TxnId txnId, IFullTextConfig config) throws AlgebricksException, RemoteException {
         try {
             // Make the following a transaction to avoid data corruption, e.g. , config is updated but filters not
             insertFullTextEntityToCatalog(txnId, config);
