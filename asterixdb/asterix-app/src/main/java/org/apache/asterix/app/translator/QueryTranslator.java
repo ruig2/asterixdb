@@ -25,6 +25,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.rmi.RemoteException;
+import java.rmi.UnexpectedException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -1103,13 +1104,29 @@ public class QueryTranslator extends AbstractLangTranslator implements IStatemen
         CreateFullTextConfigStatement stmtCreateFilter = (CreateFullTextConfigStatement) stmt;
         RecordConstructor rc = (RecordConstructor) stmtCreateFilter.getExpression();
 
-        // In progress...
-        // What's the best way to parse the fb?
+        /* Example of SQLPP DDL to create config:
+        CREATE FULLTEXT CONFIG my_first_stopword_config IF NOT EXISTS AS {
+            "Tokenizer": "Word", // built-in tokenizers: "Word" or "NGram"
+                    "FilterPipeline": ["my_first_stopword_filter"]
+        };
+         */
+
         List<FieldBinding> fb = rc.getFbList();
+        if (fb.size() < 2) {
+            throw new UnexpectedException("number of parameter less than expected");
+        }
 
-        String tokenizerStr = ((LiteralExpr) (fb.get(0).getRightExpr())).getValue().getStringValue().toLowerCase();
-        TokenizerCategory tokenizerCategory = TokenizerCategory.fromString(tokenizerStr);
+        String tokenizerTupleKeyStr = ((LiteralExpr) (fb.get(0).getLeftExpr())).getValue().getStringValue().toLowerCase();
+        if (tokenizerTupleKeyStr.equalsIgnoreCase(IFullTextConfig.FIELD_NAME_TOKENIZER) == false) {
+            throw new UnexpectedException("expect tokenizer in the first row");
+        }
+        String tokenizerTupleValueStr = ((LiteralExpr) (fb.get(0).getRightExpr())).getValue().getStringValue().toLowerCase();
+        TokenizerCategory tokenizerCategory = TokenizerCategory.fromString(tokenizerTupleValueStr);
 
+        String filterPipelineTupleKeyStr = ((LiteralExpr) (fb.get(1).getLeftExpr())).getValue().getStringValue().toLowerCase();
+        if (filterPipelineTupleKeyStr.equalsIgnoreCase(IFullTextConfig.FIELD_NAME_FILTER_PIPELINE) == false) {
+            throw new UnexpectedException("expect filter pipeline in the second row");
+        }
         List<String> filterNames = new ArrayList<>();
         for (Expression l : ((ListConstructor) (fb.get(1).getRightExpr())).getExprList()) {
             filterNames.add(((LiteralExpr) l).getValue().getStringValue());
@@ -1127,17 +1144,15 @@ public class QueryTranslator extends AbstractLangTranslator implements IStatemen
             }
 
             IFullTextConfig config = new FullTextConfig(stmtCreateFilter.getConfigName(),
-                    EnumUtils.getEnumIgnoreCase(TokenizerCategory.class, tokenizerStr), filtersBuilder.build());
+                    tokenizerCategory, filtersBuilder.build());
 
             MetadataManager.INSTANCE.addFulltextConfig(mdTxnCtx, config);
-            // in progres...
 
-        } catch (RemoteException e) {
-            e.printStackTrace();
-            //abort(e, e, mdTxnCtx);
-            throw e;
-        } finally {
             MetadataManager.INSTANCE.commitTransaction(mdTxnCtx);
+        } catch (RemoteException e) {
+            // e.printStackTrace();
+            // abort(e, e, mdTxnCtx);
+            throw e;
         }
 
         return;
