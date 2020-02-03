@@ -626,7 +626,6 @@ public abstract class MetadataManager implements IMetadataManager {
     public void addFullTextFilter(MetadataTransactionContext mdTxnCtx, IFullTextFilter filter)
             throws AlgebricksException {
         try {
-            System.out.println("in MetadataManager...");
             metadataNode.addFulltextFilter(mdTxnCtx.getTxnId(), filter);
         } catch (RemoteException | HyracksDataException e) {
             throw new MetadataException(ErrorCode.REMOTE_EXCEPTION_WHEN_CALLING_METADATA_NODE, e);
@@ -653,56 +652,20 @@ public abstract class MetadataManager implements IMetadataManager {
     public IFullTextFilter getFullTextFilter(MetadataTransactionContext mdTxnCtx, String filterName)
             throws RemoteException {
         // in progress...
-        // Support ctx.getFulltextFilter() and cache.getFulltextFilter() similar to the following getIndex() logic later
-        /*
-        // First look in the context to see if this transaction created the
-        // requested index itself (but the index is still uncommitted).
-        Index index = ctx.getIndex(dataverseName, datasetName, indexName);
-        if (index != null) {
-            // Don't add this index to the cache, since it is still
-            // uncommitted.
-            return index;
-        }
-        
-        if (ctx.indexIsDropped(dataverseName, datasetName, indexName)) {
-            // Index has been dropped by this transaction but could still be
-            // in the cache.
-            return null;
-        }
-        
-        index = cache.getIndex(dataverseName, datasetName, indexName);
-        if (index != null) {
-            // Index is already in the cache, don't add it again.
-            return index;
-        }
-        
-        try {
-            index = metadataNode.getIndex(ctx.getTxnId(), dataverseName, datasetName, indexName);
-        } catch (RemoteException e) {
-            throw new MetadataException(ErrorCode.REMOTE_EXCEPTION_WHEN_CALLING_METADATA_NODE, e);
-        }
-        // We fetched the index from the MetadataNode. Add it to the cache
-        // when this transaction commits.
-        if (index != null) {
-            ctx.addIndex(index);
-        }
-        return index;
-         */
+        // Support ctx.getFulltextFilter() and cache.getFulltextFilter() similar to the getIndex() logic
 
-        System.out.println("in MetadataManager...");
         try {
             return metadataNode.getFulltextFilter(mdTxnCtx.getTxnId(), filterName);
         } catch (AlgebricksException e) {
             e.printStackTrace();
         }
 
-        return new StopwordFullTextFilter("Failed to get filter", null);
+        return null;
     }
 
     @Override
     public void addFulltextConfig(MetadataTransactionContext mdTxnCtx, IFullTextConfig config)
             throws AlgebricksException, HyracksDataException, RemoteException {
-        System.out.println("in MetadataManager...");
         metadataNode.addFullTextConfig(mdTxnCtx.getTxnId(), config);
     }
 
