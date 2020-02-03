@@ -18,6 +18,7 @@
  */
 package org.apache.asterix.app.translator;
 
+import com.sun.javaws.exceptions.InvalidArgumentException;
 import static org.apache.asterix.common.functions.FunctionConstants.ASTERIX_DV;
 
 import java.io.File;
@@ -1024,17 +1025,11 @@ public class QueryTranslator extends AbstractLangTranslator implements IStatemen
                             overridesFieldTypes, stmtCreateIndex.isEnforced(), false, MetadataUtil.PENDING_ADD_OP);
 
             if (Strings.isNullOrEmpty(fullTextConfigName) == false) {
-                try {
-                    IFullTextConfig config = MetadataManager.INSTANCE.getFullTextConfig(mdTxnCtx, fullTextConfigName);
-                    config.addUsedByIndices(indexName);
-                    MetadataManager.INSTANCE.updateFulltextConfig(mdTxnCtx, config);
-                } catch (RemoteException e) {
-                    e.printStackTrace();
-                    //abort(e, e, mdTxnCtx);
-                    throw e;
-                } finally {
-                    //MetadataManager.INSTANCE.commitTransaction(mdTxnCtx);
-                }
+                IFullTextConfig config = MetadataManager.INSTANCE.getFullTextConfig(mdTxnCtx, fullTextConfigName);
+                config.addUsedByIndices(indexName);
+                MetadataManager.INSTANCE.updateFulltextConfig(mdTxnCtx, config);
+                // The transaction should not be committed here, instead, it should be committed after the index created successfully
+                // If the index fails to be created, then the ft config shouldn't be updated
             }
 
             doCreateIndex(hcc, metadataProvider, ds, newIndex, jobFlags, sourceLoc);
@@ -1050,35 +1045,49 @@ public class QueryTranslator extends AbstractLangTranslator implements IStatemen
         CreateFullTextFilterStatement stmtCreateFilter = (CreateFullTextFilterStatement) stmt;
         RecordConstructor rc = (RecordConstructor) stmtCreateFilter.getExpression();
 
-        // In progress...
-        // What's the best way to parse the fb?
-        List<FieldBinding> fb = rc.getFbList();
+        IFullTextFilter filter = null;
+        List<FieldBinding> fbs = rc.getFbList();
 
-        // "Type": "stopwords"
-        String typeStr = ((LiteralExpr) (fb.get(0).getRightExpr())).getValue().getStringValue().toLowerCase();
-        ImmutableList.Builder stopwordsBuilder = ImmutableList.<String> builder();
+        if (fbs.size() < 2) {
+            throw new IllegalStateException("number of parameters for the filter is less than expected");
+        }
 
-        switch (typeStr) {
-            case "stopwords":
-                for (Expression l : ((ListConstructor) (fb.get(1).getRightExpr())).getExprList()) {
+        String leftStr = ((LiteralExpr) fbs.get(0).getLeftExpr()).getValue().getStringValue().toLowerCase();
+        String rightStr = ((LiteralExpr) fbs.get(0).getRightExpr()).getValue().getStringValue().toLowerCase();
+
+        if (leftStr.equalsIgnoreCase(IFullTextFilter.FIELD_NAME_TYPE) == false) {
+            throw new IllegalStateException("expect filter type in the first row");
+        }
+
+        switch (rightStr.toLowerCase()) {
+            case IFullTextFilter.FIELD_NAME_STOPWORDS: {
+                ImmutableList.Builder stopwordsBuilder = ImmutableList.<String> builder();
+
+                String leftStopwordListStr = ((LiteralExpr) fbs.get(1).getLeftExpr()).getValue().getStringValue().toLowerCase();
+                if (leftStopwordListStr.equalsIgnoreCase(IFullTextFilter.FIELD_NAME_STOPWORDS_LIST) == false) {
+                    throw new IllegalStateException("expect StopwordsList in the second row");
+                }
+
+                for (Expression l : ((ListConstructor) (fbs.get(1).getRightExpr())).getExprList()) {
                     stopwordsBuilder.add(((LiteralExpr) l).getValue().getStringValue());
                 }
+
+                filter = new StopwordFullTextFilter(stmtCreateFilter.getFilterName(), stopwordsBuilder.build());
                 break;
+            }
+
             default:
-                throw new Exception("parameter not recognized");
+                throw new IllegalStateException("Unexpected value: " + rightStr.toLowerCase());
         }
 
         MetadataTransactionContext mdTxnCtx = null;
         try {
             mdTxnCtx = MetadataManager.INSTANCE.beginTransaction();
             metadataProvider.setMetadataTxnContext(mdTxnCtx);
-            MetadataManager.INSTANCE.addFullTextFilter(mdTxnCtx,
-                    // In progress...
-                    // Get the parameters from stmt
-                    new StopwordFullTextFilter(stmtCreateFilter.getFilterName(), stopwordsBuilder.build()));
+            MetadataManager.INSTANCE.addFullTextFilter(mdTxnCtx, filter);
         } catch (AlgebricksException | RemoteException e) {
-            e.printStackTrace();
-            //abort(e, e, mdTxnCtx);
+            // e.printStackTrace();
+            // abort(e, e, mdTxnCtx);
             throw e;
         } finally {
             MetadataManager.INSTANCE.commitTransaction(mdTxnCtx);

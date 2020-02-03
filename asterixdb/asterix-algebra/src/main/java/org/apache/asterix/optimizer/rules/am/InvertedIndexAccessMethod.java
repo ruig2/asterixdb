@@ -973,19 +973,19 @@ public class InvertedIndexAccessMethod implements IAccessMethod {
             ftConfigName = FullTextUtil.getFullTextConfigNameFromExpr(optFuncExpr);
         }
         if (!Strings.isNullOrEmpty(ftConfigName)) {
-            // in progress: the transaction should be moved to a upper level
+            // ToDo: the transaction should be moved to a upper level
             // to guarantee the ft config is not changed during the entire query lifecycle
             MetadataTransactionContext mdTxnCtx = null;
             try {
                 mdTxnCtx = MetadataManager.INSTANCE.beginTransaction();
                 ftConfig = MetadataManager.INSTANCE.getFullTextConfig(mdTxnCtx, ftConfigName);
             } catch (RemoteException ex) {
-                ex.printStackTrace();
+                throw new AlgebricksException(ex);
             } finally {
                 try {
                     MetadataManager.INSTANCE.commitTransaction(mdTxnCtx);
                 } catch (RemoteException ex) {
-                    ex.printStackTrace();
+                    throw new AlgebricksException(ex);
                 }
             }
         }
