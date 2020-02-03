@@ -57,6 +57,7 @@ import org.apache.asterix.om.types.AUnionType;
 import org.apache.asterix.om.types.IAType;
 import org.apache.asterix.om.types.hierachy.ATypeHierarchy;
 import org.apache.asterix.om.utils.ConstantExpressionUtil;
+import org.apache.asterix.optimizer.rules.util.FullTextUtil;
 import org.apache.asterix.runtime.evaluators.common.FullTextContainsDescriptor;
 import org.apache.commons.lang3.mutable.Mutable;
 import org.apache.commons.lang3.mutable.MutableObject;
@@ -964,16 +965,13 @@ public class InvertedIndexAccessMethod implements IAccessMethod {
         LogicalVariable keyVar = context.newVar();
         keyVarList.add(keyVar);
 
-        // in progress...This is a hack and should be replaced with a better way to parse the arguments
+        // The query keywords should be proceeded by the full-text config before looking up the index
         String ftConfigName = "";
         IFullTextConfig ftConfig = null;
-        if (optFuncExpr.getFuncExpr().getArguments().size() > 4) {
-            ConstantExpression ce = (ConstantExpression) optFuncExpr.getFuncExpr().getArguments().get(5).getValue();
-            AsterixConstantValue acv = (AsterixConstantValue) ce.getValue();
-            AString aString = (AString) acv.getObject();
-            ftConfigName = aString.getStringValue();
-        }
 
+        if (FullTextUtil.isFullTextFunctionExpr(optFuncExpr)) {
+            ftConfigName = FullTextUtil.getFullTextConfigNameFromExpr(optFuncExpr);
+        }
         if (!Strings.isNullOrEmpty(ftConfigName)) {
             // in progress: the transaction should be moved to a upper level
             // to guarantee the ft config is not changed during the entire query lifecycle
@@ -993,7 +991,7 @@ public class InvertedIndexAccessMethod implements IAccessMethod {
         }
 
         if (ftConfig != null) {
-            // in progress...Unwrapping, proceed tokens and wrap again to expressions is not a good way
+            // ToDo: Unwrapping, proceed tokens and wrap again to expressions is not a good way
             // Maybe the following logic can be moved in a later phase
             //   where expressions are converted to Java built-in Strings
             ILogicalExpression le = optFuncExpr.getConstantExpr(0);

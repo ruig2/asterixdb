@@ -28,7 +28,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import com.sun.media.jfxmedia.logging.Logger;
 import org.apache.asterix.common.config.DatasetConfig.DatasetType;
 import org.apache.asterix.common.config.DatasetConfig.IndexType;
 import org.apache.asterix.common.exceptions.CompilationException;
@@ -38,7 +37,6 @@ import org.apache.asterix.dataflow.data.common.ExpressionTypeComputer;
 import org.apache.asterix.metadata.declared.MetadataProvider;
 import org.apache.asterix.metadata.entities.Dataset;
 import org.apache.asterix.metadata.entities.Index;
-import org.apache.asterix.metadata.entities.fulltextentity.FullTextConfig;
 import org.apache.asterix.metadata.utils.DatasetUtil;
 import org.apache.asterix.metadata.utils.MetadataUtil;
 import org.apache.asterix.om.base.AOrderedList;
@@ -55,10 +53,9 @@ import org.apache.asterix.om.types.hierachy.ATypeHierarchy;
 import org.apache.asterix.om.utils.ConstantExpressionUtil;
 import org.apache.asterix.optimizer.base.AnalysisUtil;
 import org.apache.asterix.optimizer.rules.am.OptimizableOperatorSubTree.DataSourceType;
-import org.apache.asterix.runtime.evaluators.common.FullTextContainsDescriptor;
+import org.apache.asterix.optimizer.rules.util.FullTextUtil;
 import org.apache.commons.lang3.mutable.Mutable;
 import org.apache.commons.lang3.mutable.MutableInt;
-import org.apache.commons.lang3.mutable.MutableObject;
 import org.apache.hyracks.algebricks.common.exceptions.AlgebricksException;
 import org.apache.hyracks.algebricks.common.utils.Pair;
 import org.apache.hyracks.algebricks.core.algebra.base.ILogicalExpression;
@@ -71,7 +68,6 @@ import org.apache.hyracks.algebricks.core.algebra.expressions.AbstractFunctionCa
 import org.apache.hyracks.algebricks.core.algebra.expressions.AbstractLogicalExpression;
 import org.apache.hyracks.algebricks.core.algebra.expressions.ConstantExpression;
 import org.apache.hyracks.algebricks.core.algebra.expressions.IVariableTypeEnvironment;
-import org.apache.hyracks.algebricks.core.algebra.expressions.ScalarFunctionCallExpression;
 import org.apache.hyracks.algebricks.core.algebra.expressions.VariableReferenceExpression;
 import org.apache.hyracks.algebricks.core.algebra.functions.AlgebricksBuiltinFunctions;
 import org.apache.hyracks.algebricks.core.algebra.functions.FunctionIdentifier;
@@ -87,7 +83,6 @@ import org.apache.hyracks.algebricks.core.rewriter.base.IAlgebraicRewriteRule;
 
 import com.google.common.collect.ImmutableSet;
 import org.apache.logging.log4j.LogManager;
-import sun.util.logging.PlatformLogger;
 
 /**
  * Class that embodies the commonalities between rewrite rules for access
@@ -282,33 +277,8 @@ public abstract class AbstractIntroduceAccessMethodRule implements IAlgebraicRew
         try {
             // What if more than 1 func expr? Is it possible in ftcontains()?
             IOptimizableFuncExpr expr = analysisCtx.getMatchedFuncExpr(0);
-            FunctionIdentifier funcId = expr.getFuncExpr().getFunctionIdentifier();
-            if (funcId == BuiltinFunctions.FULLTEXT_CONTAINS || funcId == BuiltinFunctions.FULLTEXT_CONTAINS_WO_OPTION) {
-                AbstractFunctionCallExpression funcExpr = expr.getFuncExpr();
-
-                // ToDo: wrap the expressions in a ftcontains() function into a dedicated Java object
-                // so that we don't cast the types many times
-                String expectedConfig = FullTextConfig.DefaultFullTextConfig.getName();
-                List<Mutable<ILogicalExpression>> arguments = funcExpr.getArguments();
-                for (int i = 0; i < arguments.size()-1; i++) {
-                    String optionName = "";
-                    try {
-                        ConstantExpression ce = (ConstantExpression) arguments.get(i).getValue();
-                        optionName = ((AString) ((AsterixConstantValue) (ce.getValue())).getObject()).getStringValue();
-                    } catch (Exception e) {
-                        continue;
-                    }
-
-                    if (optionName.equalsIgnoreCase(FullTextContainsDescriptor.FULLTEXT_CONFIG_OPTION)) {
-                        ConstantExpression nextCe = (ConstantExpression) arguments.get(i + 1).getValue();
-                        expectedConfig =
-                                ((AString) ((AsterixConstantValue) (nextCe.getValue())).getObject()).getStringValue();
-                        break;
-                    }
-                }
-
-                // LOGGER.debug("expectedConfig " + expectedConfig);
-                // LOGGER.debug("index config:  " + indexFullTextConfig);
+            if (FullTextUtil.isFullTextFunctionExpr(expr)) {
+                String expectedConfig = FullTextUtil.getFullTextConfigNameFromExpr(expr);
                 if (expectedConfig.equalsIgnoreCase(indexFullTextConfig) == false) {
                     return true;
                 }
