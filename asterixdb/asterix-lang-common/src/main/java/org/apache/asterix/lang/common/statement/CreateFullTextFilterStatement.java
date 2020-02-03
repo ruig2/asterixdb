@@ -28,7 +28,6 @@ import org.apache.asterix.lang.common.visitor.base.ILangVisitor;
 public class CreateFullTextFilterStatement extends AbstractStatement {
 
     private String filterName;
-    // ToDo: use a more specific RECORD_CONSTRUCTOR_EXPRESSION
     private RecordConstructor expr;
     private boolean ifNotExists;
 
@@ -70,7 +69,7 @@ public class CreateFullTextFilterStatement extends AbstractStatement {
     }
 
     public static boolean checkExpression(Statement stmt) {
-        // in progress...
+        // todo
         return true;
     }
 }

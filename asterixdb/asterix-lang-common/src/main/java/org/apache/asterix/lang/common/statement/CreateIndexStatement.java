@@ -58,8 +58,9 @@ public class CreateIndexStatement extends AbstractStatement {
         return gramLength;
     }
 
-    public String setFullTextConfig(String fullTextConfig) {
-        return this.fullTextConfigName = fullTextConfig;
+    public void setFullTextConfig(String fullTextConfig) {
+        this.fullTextConfigName = fullTextConfig;
+        return;
     }
 
     public String getFullTextConfigName() {
