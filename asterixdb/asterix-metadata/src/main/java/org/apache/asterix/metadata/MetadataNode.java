@@ -459,8 +459,7 @@ public class MetadataNode implements IMetadataNode {
     }
 
     @Override
-    public IFullTextFilter getFulltextFilter(TxnId txnId, String filterName)
-            throws AlgebricksException {
+    public IFullTextFilter getFulltextFilter(TxnId txnId, String filterName) throws AlgebricksException {
         try {
             FulltextEntityTupleTranslator translator = tupleTranslatorProvider.getFulltextEntityTupleTranslator(true);
 

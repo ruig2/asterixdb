@@ -57,7 +57,6 @@ import org.apache.asterix.metadata.entities.Library;
 import org.apache.asterix.metadata.entities.Node;
 import org.apache.asterix.metadata.entities.NodeGroup;
 import org.apache.asterix.metadata.entities.Synonym;
-import org.apache.asterix.metadata.entities.fulltextentity.StopwordFullTextFilter;
 import org.apache.asterix.om.types.ARecordType;
 import org.apache.asterix.transaction.management.opcallbacks.AbstractIndexModificationOperationCallback.Operation;
 import org.apache.hyracks.algebricks.common.exceptions.AlgebricksException;

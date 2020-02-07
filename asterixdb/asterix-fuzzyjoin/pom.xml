@@ -128,10 +128,8 @@
     <dependency>
       <groupId>org.apache.asterix</groupId>
       <artifactId>asterix-metadata</artifactId>
-      <version>0.9.5-SNAPSHOT</version>
-      <scope>compile</scope>
+      <version>${project.version}</version>
     </dependency>
-
   </dependencies>
 
 </project>
