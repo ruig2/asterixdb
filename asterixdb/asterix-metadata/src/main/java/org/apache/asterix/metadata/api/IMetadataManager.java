@@ -410,7 +410,8 @@ public interface IMetadataManager extends IMetadataBootstrap {
 
     void addFullTextFilter(MetadataTransactionContext mdTxnCtx, IFullTextFilter filter) throws AlgebricksException;
 
-    IFullTextFilter getFullTextFilter(MetadataTransactionContext mdTxnCtx, String name) throws RemoteException;
+    IFullTextFilter getFullTextFilter(MetadataTransactionContext mdTxnCtx, String name) throws RemoteException,
+            AlgebricksException;
 
     void dropFullTextFilter(MetadataTransactionContext mdTxnCtx, String filterName, boolean ifExists)
             throws AlgebricksException;
@@ -422,7 +423,7 @@ public interface IMetadataManager extends IMetadataBootstrap {
             throws AlgebricksException, HyracksDataException, RemoteException;
 
     IFullTextConfig getFullTextConfig(MetadataTransactionContext mdTxnCtx, String name)
-            throws RemoteException, AlgebricksException;
+            throws AlgebricksException;
 
     void dropFullTextConfig(MetadataTransactionContext mdTxnCtx, String configName, boolean ifExists)
             throws AlgebricksException;

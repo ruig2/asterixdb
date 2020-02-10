@@ -19,6 +19,7 @@
 
 package org.apache.asterix.metadata;
 
+import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.util.Collection;
 import java.util.Collections;
@@ -649,17 +650,15 @@ public abstract class MetadataManager implements IMetadataManager {
 
     @Override
     public IFullTextFilter getFullTextFilter(MetadataTransactionContext mdTxnCtx, String filterName)
-            throws RemoteException {
+            throws AlgebricksException {
         // in progress...
         // Support ctx.getFulltextFilter() and cache.getFulltextFilter() similar to the getIndex() logic
 
         try {
             return metadataNode.getFulltextFilter(mdTxnCtx.getTxnId(), filterName);
-        } catch (AlgebricksException e) {
-            e.printStackTrace();
+        } catch (AlgebricksException | RemoteException e) {
+            throw new MetadataException(ErrorCode.REMOTE_EXCEPTION_WHEN_CALLING_METADATA_NODE, e);
         }
-
-        return null;
     }
 
     @Override
@@ -670,8 +669,12 @@ public abstract class MetadataManager implements IMetadataManager {
 
     @Override
     public IFullTextConfig getFullTextConfig(MetadataTransactionContext mdTxnCtx, String configName)
-            throws RemoteException, AlgebricksException {
-        return metadataNode.getFullTextConfig(mdTxnCtx.getTxnId(), configName);
+            throws AlgebricksException {
+        try {
+            return metadataNode.getFullTextConfig(mdTxnCtx.getTxnId(), configName);
+        } catch (AlgebricksException | RemoteException e) {
+            throw new MetadataException(ErrorCode.REMOTE_EXCEPTION_WHEN_CALLING_METADATA_NODE, e);
+        }
     }
 
     @Override

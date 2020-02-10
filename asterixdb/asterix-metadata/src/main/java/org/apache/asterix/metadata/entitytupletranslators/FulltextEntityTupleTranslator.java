@@ -157,7 +157,7 @@ public class FulltextEntityTupleTranslator extends AbstractTupleTranslator<IFull
                 filtersBuilder.add(filter);
             }
             MetadataManager.INSTANCE.commitTransaction(mdTxnCtx);
-        } catch (RemoteException e) {
+        } catch (RemoteException | AlgebricksException e) {
             e.printStackTrace();
         }
 

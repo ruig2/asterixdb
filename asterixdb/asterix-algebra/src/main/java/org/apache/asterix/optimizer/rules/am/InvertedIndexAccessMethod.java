@@ -38,6 +38,7 @@ import org.apache.asterix.lang.common.util.FunctionUtil;
 import org.apache.asterix.metadata.MetadataManager;
 import org.apache.asterix.metadata.MetadataTransactionContext;
 import org.apache.asterix.metadata.api.IFullTextConfig;
+import org.apache.asterix.metadata.declared.MetadataProvider;
 import org.apache.asterix.metadata.entities.Dataset;
 import org.apache.asterix.metadata.entities.Index;
 import org.apache.asterix.om.base.AFloat;
@@ -973,21 +974,7 @@ public class InvertedIndexAccessMethod implements IAccessMethod {
             ftConfigName = FullTextUtil.getFullTextConfigNameFromExpr(optFuncExpr);
         }
         if (!Strings.isNullOrEmpty(ftConfigName)) {
-            // ToDo: the transaction should be moved to a upper level
-            // to guarantee the ft config is not changed during the entire query lifecycle
-            MetadataTransactionContext mdTxnCtx = null;
-            try {
-                mdTxnCtx = MetadataManager.INSTANCE.beginTransaction();
-                ftConfig = MetadataManager.INSTANCE.getFullTextConfig(mdTxnCtx, ftConfigName);
-            } catch (RemoteException ex) {
-                throw new AlgebricksException(ex);
-            } finally {
-                try {
-                    MetadataManager.INSTANCE.commitTransaction(mdTxnCtx);
-                } catch (RemoteException ex) {
-                    throw new AlgebricksException(ex);
-                }
-            }
+            ftConfig = ((MetadataProvider)context.getMetadataProvider()).findFullTextConfig(ftConfigName);
         }
 
         if (ftConfig != null) {

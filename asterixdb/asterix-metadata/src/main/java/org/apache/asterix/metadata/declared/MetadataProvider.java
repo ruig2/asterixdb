@@ -71,6 +71,7 @@ import org.apache.asterix.formats.nontagged.TypeTraitProvider;
 import org.apache.asterix.metadata.MetadataManager;
 import org.apache.asterix.metadata.MetadataTransactionContext;
 import org.apache.asterix.metadata.api.ICCExtensionManager;
+import org.apache.asterix.metadata.api.IFullTextConfig;
 import org.apache.asterix.metadata.bootstrap.MetadataBuiltinEntities;
 import org.apache.asterix.metadata.dataset.hints.DatasetHints.DatasetCardinalityHint;
 import org.apache.asterix.metadata.entities.Dataset;
@@ -432,6 +433,10 @@ public class MetadataProvider implements IMetadataProvider<DataSourceId, String>
 
     public Synonym findSynonym(DataverseName dataverseName, String synonymName) throws AlgebricksException {
         return MetadataManagerUtil.findSynonym(mdTxnCtx, dataverseName, synonymName);
+    }
+
+    public IFullTextConfig findFullTextConfig(String ftConfigName) throws AlgebricksException {
+        return MetadataManagerUtil.findFullTextConfig(mdTxnCtx, ftConfigName);
     }
 
     @Override
