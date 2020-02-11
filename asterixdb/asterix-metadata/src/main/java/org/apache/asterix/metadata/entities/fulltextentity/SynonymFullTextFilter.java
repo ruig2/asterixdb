@@ -23,6 +23,8 @@ import java.util.List;
 import com.google.common.collect.ImmutableMap;
 
 public class SynonymFullTextFilter extends AbstractFullTextFilter {
+    private static final long serialVersionUID = 1L;
+
     ImmutableMap<String, String> synonymMap;
 
     public SynonymFullTextFilter(String name, ImmutableMap<String, String> synonymMap) {

@@ -25,12 +25,15 @@ import org.apache.asterix.common.config.CompilerProperties;
 import org.apache.asterix.common.dataflow.ICcApplicationContext;
 import org.apache.asterix.common.functions.FunctionDescriptorTag;
 import org.apache.asterix.external.library.ExternalFunctionDescriptorProvider;
+import org.apache.asterix.metadata.api.IFullTextConfig;
 import org.apache.asterix.metadata.declared.MetadataProvider;
 import org.apache.asterix.om.functions.BuiltinFunctions;
 import org.apache.asterix.om.functions.IExternalFunctionInfo;
 import org.apache.asterix.om.functions.IFunctionDescriptor;
 import org.apache.asterix.om.functions.IFunctionManager;
 import org.apache.asterix.om.functions.IFunctionTypeInferer;
+import org.apache.asterix.optimizer.rules.util.FullTextUtil;
+import org.apache.asterix.runtime.evaluators.common.FullTextContainsDescriptor;
 import org.apache.asterix.runtime.functions.FunctionTypeInferers;
 import org.apache.commons.lang3.mutable.Mutable;
 import org.apache.hyracks.algebricks.common.exceptions.AlgebricksException;
@@ -141,12 +144,26 @@ public class QueryLogicalExpressionJobGen implements ILogicalExpressionJobGen {
         IScalarEvaluatorFactory[] args = codegenArguments(expr, env, inputSchemas, context);
         IFunctionDescriptor fd = null;
         if (expr.getFunctionInfo() instanceof IExternalFunctionInfo) {
+            // Expr is an external function
             fd = ExternalFunctionDescriptorProvider.getExternalFunctionDescriptor(
                     (IExternalFunctionInfo) expr.getFunctionInfo(), (ICcApplicationContext) context.getAppContext());
             CompilerProperties props = ((IApplicationContext) context.getAppContext()).getCompilerProperties();
             FunctionTypeInferers.SET_ARGUMENTS_TYPE.infer(expr, fd, env, props);
         } else {
-            fd = resolveFunction(expr, env, context);
+            if (FullTextUtil.isFullTextFunctionExpr(expr)) {
+                // Expr is a special internal (built-in) function: ftcontains()
+                // it is different from a general built-in function in two ways:
+                // 1. a full-text config should be loaded from metadata and used to create func descriptor during compile time
+                // 2. the query keywords in the function arguments need to be proceeded by the full-text config
+                //    and then used to lookup full-text index
+                String fullTextConfigName = FullTextUtil.getFullTextConfigNameFromExpr(expr);
+                IFullTextConfig config = ((MetadataProvider)context.getMetadataProvider()).findFullTextConfig(fullTextConfigName);
+                fd = FullTextContainsDescriptor.createFunctionDescriptor(config);
+                fd.setSourceLocation(expr.getSourceLocation());
+            } else {
+                // Expr is an internal (built-in) function
+                fd = resolveFunction(expr, env, context);
+            }
         }
         return fd.createEvaluatorFactory(args);
     }

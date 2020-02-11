@@ -23,6 +23,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.apache.asterix.common.annotations.MissingNullInOutFunction;
+import org.apache.asterix.metadata.api.IFullTextConfig;
 import org.apache.asterix.om.functions.BuiltinFunctions;
 import org.apache.asterix.om.functions.IFunctionDescriptor;
 import org.apache.asterix.om.functions.IFunctionDescriptorFactory;
@@ -61,18 +62,29 @@ public class FullTextContainsDescriptor extends AbstractScalarFunctionDynamicDes
     public static final String FULLTEXT_CONFIG_OPTION = "config";
     private static final byte[] FULLTEXT_CONFIG_OPTION_ARRAY =
             UTF8StringUtil.writeStringToBytes(FULLTEXT_CONFIG_OPTION);
+    private IFullTextConfig config = null;
 
     static {
         paramTypeMap.put(SEARCH_MODE_OPTION, ATypeTag.STRING);
         paramTypeMap.put(FULLTEXT_CONFIG_OPTION, ATypeTag.STRING);
     }
 
+    public FullTextContainsDescriptor(IFullTextConfig config) {
+        this.config = config;
+    }
+
+    public static IFunctionDescriptor createFunctionDescriptor(IFullTextConfig config) {
+        return new FullTextContainsDescriptor(config);
+    }
+
+    /*
     public static final IFunctionDescriptorFactory FACTORY = new IFunctionDescriptorFactory() {
         @Override
         public IFunctionDescriptor createFunctionDescriptor() {
             return new FullTextContainsDescriptor();
         }
     };
+     */
 
     /**
      * Creates full-text search evaluator. There are three arguments:

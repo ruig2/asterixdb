@@ -34,7 +34,11 @@ import org.apache.hyracks.algebricks.core.algebra.functions.FunctionIdentifier;
 
 public class FullTextUtil {
     public static boolean isFullTextFunctionExpr(IOptimizableFuncExpr expr) {
-        FunctionIdentifier funcId = expr.getFuncExpr().getFunctionIdentifier();
+        return isFullTextFunctionExpr(expr.getFuncExpr());
+    }
+
+    public static boolean isFullTextFunctionExpr(AbstractFunctionCallExpression expr) {
+        FunctionIdentifier funcId = expr.getFunctionIdentifier();
         if (funcId == BuiltinFunctions.FULLTEXT_CONTAINS || funcId == BuiltinFunctions.FULLTEXT_CONTAINS_WO_OPTION) {
             return true;
         }
@@ -44,11 +48,14 @@ public class FullTextUtil {
     // If not a full-text function expression, then return null
     // Otherwise, return the full-text config if one exists in the expression, or return the default config
     public static String getFullTextConfigNameFromExpr(IOptimizableFuncExpr expr) {
-        if (isFullTextFunctionExpr(expr) == false) {
+        return getFullTextConfigNameFromExpr(expr.getFuncExpr());
+    }
+
+    public static String getFullTextConfigNameFromExpr(AbstractFunctionCallExpression funcExpr) {
+        if (isFullTextFunctionExpr(funcExpr) == false) {
             return null;
         }
 
-        AbstractFunctionCallExpression funcExpr = expr.getFuncExpr();
         // ToDo: wrap the expressions in a ftcontains() function into a dedicated Java object
         // so that we don't cast the types many times
         String configName = FullTextConfig.DefaultFullTextConfig.getName();

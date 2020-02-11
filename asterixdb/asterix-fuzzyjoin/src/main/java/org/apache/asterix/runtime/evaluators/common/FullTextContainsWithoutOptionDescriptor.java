@@ -35,12 +35,14 @@ import org.apache.hyracks.api.exceptions.HyracksDataException;
 public class FullTextContainsWithoutOptionDescriptor extends AbstractScalarFunctionDynamicDescriptor {
     private static final long serialVersionUID = 1L;
 
+    /*
     public static final IFunctionDescriptorFactory FACTORY = new IFunctionDescriptorFactory() {
         @Override
         public IFunctionDescriptor createFunctionDescriptor() {
             return new FullTextContainsWithoutOptionDescriptor();
         }
     };
+     */
 
     /**
      * Creates full-text search evaluator. There are two arguments:
@@ -62,6 +64,8 @@ public class FullTextContainsWithoutOptionDescriptor extends AbstractScalarFunct
 
     @Override
     public FunctionIdentifier getIdentifier() {
+        // ToDo: having both BuiltinFunctions.FULLTEXT_CONTAINS_WO_OPTION and BuiltinFunctions.FULLTEXT_CONTAINS seems unnecessary
+        // Is it possible to remove BuiltinFunctions.FULLTEXT_CONTAINS_WO_OPTION?
         return BuiltinFunctions.FULLTEXT_CONTAINS_WO_OPTION;
     }
 

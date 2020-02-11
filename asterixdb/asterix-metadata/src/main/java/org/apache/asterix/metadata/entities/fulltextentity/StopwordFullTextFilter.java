@@ -27,6 +27,8 @@ import org.apache.asterix.metadata.api.IFullTextFilter;
 import com.google.common.collect.ImmutableList;
 
 public class StopwordFullTextFilter extends AbstractFullTextFilter {
+    private static final long serialVersionUID = 1L;
+
     ImmutableList<String> stopwordList;
 
     public StopwordFullTextFilter(String name, ImmutableList<String> stopwordList) {

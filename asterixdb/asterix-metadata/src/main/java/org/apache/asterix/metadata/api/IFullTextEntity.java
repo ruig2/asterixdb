@@ -21,7 +21,9 @@ package org.apache.asterix.metadata.api;
 
 import org.apache.commons.lang3.EnumUtils;
 
-public interface IFullTextEntity {
+import java.io.Serializable;
+
+public interface IFullTextEntity extends Serializable {
     enum FullTextEntityCategory {
         FILTER,
         CONFIG;

@@ -27,6 +27,8 @@ import org.apache.asterix.metadata.api.IFullTextFilter;
 import com.google.common.collect.ImmutableList;
 
 public class FullTextConfig extends AbstractFullTextConfig {
+    private static final long serialVersionUID = 1L;
+
     public FullTextConfig(String name, TokenizerCategory tokenizerCategory, ImmutableList<IFullTextFilter> filters) {
         super(name, tokenizerCategory, filters);
     }
