@@ -308,6 +308,7 @@ public class FullTextContainsEvaluator implements IScalarEvaluator {
         setFullTextOption(argOptions);
         config = MetadataManager.INSTANCE.getFullTextConfig(mdTxnCtx, fullTextConfigStr);
 
+        // ToDo: use the tokenizer in config
         // Create tokens from the given query predicate
         while (tokenizerForRightArray.hasNext()) {
             tokenizerForRightArray.next();

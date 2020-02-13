@@ -36,5 +36,7 @@ public interface IFullTextConfig extends IFullTextEntity {
 
     void addUsedByIndices(String indexName);
 
+    // ToDo: proceed in a stream way to avoid copying strings and tokens
+    // A good reference is IBinaryTokenizer
     List<String> proceedTokens(List<String> tokens);
 }
