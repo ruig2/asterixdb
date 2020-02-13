@@ -148,8 +148,8 @@ import org.apache.asterix.lang.common.util.FunctionUtil;
 import org.apache.asterix.metadata.IDatasetDetails;
 import org.apache.asterix.metadata.MetadataManager;
 import org.apache.asterix.metadata.MetadataTransactionContext;
-import org.apache.asterix.metadata.api.IFullTextConfig;
-import org.apache.asterix.metadata.api.IFullTextFilter;
+import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextConfig;
+import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextFilter;
 import org.apache.asterix.metadata.bootstrap.MetadataBuiltinEntities;
 import org.apache.asterix.metadata.dataset.hints.DatasetHints;
 import org.apache.asterix.metadata.dataset.hints.DatasetHints.DatasetNodegroupCardinalityHint;
@@ -170,9 +170,8 @@ import org.apache.asterix.metadata.entities.InternalDatasetDetails;
 import org.apache.asterix.metadata.entities.Library;
 import org.apache.asterix.metadata.entities.NodeGroup;
 import org.apache.asterix.metadata.entities.Synonym;
-import org.apache.asterix.metadata.entities.fulltextentity.FullTextConfig;
-import org.apache.asterix.metadata.entities.fulltextentity.StopwordFullTextFilter;
-import org.apache.asterix.metadata.entities.fulltextentity.TokenizerCategory;
+import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.FullTextConfig;
+import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.StopwordFullTextFilter;
 import org.apache.asterix.metadata.feeds.FeedMetadataUtil;
 import org.apache.asterix.metadata.lock.ExternalDatasetsRegistry;
 import org.apache.asterix.metadata.utils.DatasetUtil;
@@ -1119,7 +1118,7 @@ public class QueryTranslator extends AbstractLangTranslator implements IStatemen
         }
         String tokenizerTupleValueStr =
                 ((LiteralExpr) (fb.get(0).getRightExpr())).getValue().getStringValue().toLowerCase();
-        TokenizerCategory tokenizerCategory = TokenizerCategory.fromString(tokenizerTupleValueStr);
+        IFullTextConfig.TokenizerCategory tokenizerCategory = IFullTextConfig.TokenizerCategory.fromString(tokenizerTupleValueStr);
 
         String filterPipelineTupleKeyStr =
                 ((LiteralExpr) (fb.get(1).getLeftExpr())).getValue().getStringValue().toLowerCase();

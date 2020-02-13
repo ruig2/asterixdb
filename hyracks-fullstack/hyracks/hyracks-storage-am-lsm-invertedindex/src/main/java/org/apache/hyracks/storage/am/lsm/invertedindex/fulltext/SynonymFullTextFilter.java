@@ -16,16 +16,24 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+package org.apache.hyracks.storage.am.lsm.invertedindex.fulltext;
 
-package org.apache.asterix.metadata.entities.fulltextentity;
+import java.util.List;
 
-import org.apache.commons.lang3.EnumUtils;
+import com.google.common.collect.ImmutableMap;
 
-public enum TokenizerCategory {
-    NGRAM,
-    WORD;
+public class SynonymFullTextFilter extends AbstractFullTextFilter {
+    private static final long serialVersionUID = 1L;
 
-    public static TokenizerCategory fromString(String str) {
-        return EnumUtils.getEnumIgnoreCase(TokenizerCategory.class, str);
+    ImmutableMap<String, String> synonymMap;
+
+    public SynonymFullTextFilter(String name, ImmutableMap<String, String> synonymMap) {
+        super(name, FullTextFilterType.STOPWORDS);
+        this.synonymMap = synonymMap;
+    }
+
+    @Override
+    public List<String> proceedTokens(List<String> tokens) {
+        return null;
     }
 }

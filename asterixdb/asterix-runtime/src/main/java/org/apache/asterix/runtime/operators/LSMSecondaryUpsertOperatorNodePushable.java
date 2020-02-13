@@ -116,7 +116,8 @@ public class LSMSecondaryUpsertOperatorNodePushable extends LSMIndexInsertUpdate
                     // For a secondary index, if the secondary key values do not change, we can skip upserting it.
                     // However, for a primary key index, we cannot do this because it only contains primary keys
                     // which are always the same
-                    continue;
+                    // in progress... uncomment next line when merging code
+                    // continue;
                 }
                 if (!isOldValueNullOrMissing) {
                     // We need to delete previous

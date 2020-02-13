@@ -17,32 +17,24 @@
  * under the License.
  */
 
-package org.apache.asterix.metadata.api;
-
-import java.util.List;
+package org.apache.hyracks.storage.am.lsm.invertedindex.fulltext;
 
 import org.apache.commons.lang3.EnumUtils;
+import org.apache.hyracks.api.io.IJsonSerializable;
 
-public interface IFullTextFilter extends IFullTextEntity {
-    // case-insensitive
-    String FIELD_NAME_TYPE = "type";
-    String FIELD_NAME_STOPWORDS = "stopwords";
-    String FIELD_NAME_STOPWORDS_LIST = "stopwordsList";
+import java.io.Serializable;
 
-    enum FullTextFilterType {
-        STOPWORDS,
-        SYNONYM;
+public interface IFullTextEntity extends Serializable, IJsonSerializable {
+    enum FullTextEntityCategory {
+        FILTER,
+        CONFIG;
 
-        public static FullTextFilterType getEnumIgnoreCase(String value) {
-            return EnumUtils.getEnumIgnoreCase(FullTextFilterType.class, value);
+        public static FullTextEntityCategory fromValue(String value) {
+            return EnumUtils.getEnumIgnoreCase(FullTextEntityCategory.class, value);
         }
     }
 
-    FullTextFilterType getFilterKind();
+    FullTextEntityCategory getCategory();
 
-    List<String> getUsedByFTConfigs();
-
-    void addUsedByFTConfigs(String ftConfigName);
-
-    List<String> proceedTokens(List<String> tokens);
+    String getName();
 }

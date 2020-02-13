@@ -29,6 +29,7 @@ import java.util.Collection;
 import org.apache.asterix.fuzzyjoin.tokenizer.Tokenizer;
 import org.apache.asterix.fuzzyjoin.tokenizer.TokenizerFactory;
 
+// ToDo: remove this class because it is not used anymore except in its own main() method
 public class FuzzyJoinAppendLength {
     public static void main(String args[]) throws IOException {
         final String inputFileName = args[0];

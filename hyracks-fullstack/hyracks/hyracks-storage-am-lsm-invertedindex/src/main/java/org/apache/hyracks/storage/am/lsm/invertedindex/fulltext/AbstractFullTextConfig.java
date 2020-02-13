@@ -17,13 +17,13 @@
  * under the License.
  */
 
-package org.apache.asterix.metadata.entities.fulltextentity;
+package org.apache.hyracks.storage.am.lsm.invertedindex.fulltext;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.asterix.metadata.api.IFullTextConfig;
-import org.apache.asterix.metadata.api.IFullTextFilter;
+import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextConfig;
+import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextFilter;
 
 import com.google.common.collect.ImmutableList;
 

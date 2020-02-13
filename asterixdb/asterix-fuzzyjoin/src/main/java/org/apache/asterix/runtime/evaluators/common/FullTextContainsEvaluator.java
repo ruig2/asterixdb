@@ -27,7 +27,7 @@ import org.apache.asterix.formats.nontagged.BinaryTokenizerFactoryProvider;
 import org.apache.asterix.formats.nontagged.SerializerDeserializerProvider;
 import org.apache.asterix.metadata.MetadataManager;
 import org.apache.asterix.metadata.MetadataTransactionContext;
-import org.apache.asterix.metadata.api.IFullTextConfig;
+import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextConfig;
 import org.apache.asterix.om.base.ABoolean;
 import org.apache.asterix.om.base.ANull;
 import org.apache.asterix.om.types.ATypeTag;
@@ -85,6 +85,7 @@ public class FullTextContainsEvaluator implements IScalarEvaluator {
             BinaryComparatorFactoryProvider.UTF8STRING_LOWERCASE_TOKEN_POINTABLE_INSTANCE.createBinaryComparator();
     private final IBinaryComparator strLowerCaseCmp =
             BinaryComparatorFactoryProvider.UTF8STRING_LOWERCASE_POINTABLE_INSTANCE.createBinaryComparator();
+    // ToDo: use the tokenizer in full-text config
     private IBinaryTokenizer tokenizerForLeftArray = null;
     private IBinaryTokenizer tokenizerForRightArray = null;
 

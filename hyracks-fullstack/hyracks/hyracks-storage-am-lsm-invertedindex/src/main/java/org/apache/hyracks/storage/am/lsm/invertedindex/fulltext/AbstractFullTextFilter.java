@@ -17,12 +17,12 @@
  * under the License.
  */
 
-package org.apache.asterix.metadata.entities.fulltextentity;
+package org.apache.hyracks.storage.am.lsm.invertedindex.fulltext;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.asterix.metadata.api.IFullTextFilter;
+import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextFilter;
 
 public abstract class AbstractFullTextFilter implements IFullTextFilter {
     protected final String name;

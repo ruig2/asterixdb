@@ -97,6 +97,7 @@ public class DelimitedUTF8StringBinaryTokenizer extends AbstractUTF8StringBinary
     // TODO Why we bother to get the tokenCount in advance? It seems a caller's problem.
     @Override
     public short getTokensCount() {
+        // ToDo: when will tokenCountCalculated be assigned value of true?
         if (!tokenCountCalculated) {
             tokenCount = 0;
             boolean previousCharIsSeparator = true;

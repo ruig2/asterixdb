@@ -22,10 +22,11 @@ package org.apache.asterix.fuzzyjoin.tokenizer;
 import java.io.Serializable;
 import java.util.List;
 
-import org.apache.asterix.metadata.entities.fulltextentity.TokenizerCategory;
+import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextConfig;
 
+// ToDo: remove this interface which is not used except the main() method of a few classes
 public interface Tokenizer extends Serializable {
     public List<String> tokenize(String text);
 
-    TokenizerCategory getCategory();
+    IFullTextConfig.TokenizerCategory getCategory();
 }

@@ -21,6 +21,7 @@ package org.apache.asterix.fuzzyjoin;
 
 import java.util.regex.Pattern;
 
+// ToDo: remove this method which is used in a main() function of a class
 public class FuzzyJoinUtil {
     private static final Pattern rePunctuation = Pattern.compile("[^\\p{L}\\p{N}]"); // L:Letter, N:Number
     private static final Pattern reSpaceOrAnderscore = Pattern.compile("(_|\\s)+");

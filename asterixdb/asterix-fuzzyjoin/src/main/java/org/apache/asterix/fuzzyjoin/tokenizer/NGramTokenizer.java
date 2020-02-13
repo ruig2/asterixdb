@@ -23,8 +23,10 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-import org.apache.asterix.metadata.entities.fulltextentity.TokenizerCategory;
+import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextConfig;
 
+// ToDo: remove this unused class which is not used anymore in the project (except in the main() method of a few classes)
+// Use IBinaryTokenizer instead
 public class NGramTokenizer implements Tokenizer {
 
     /**
@@ -91,7 +93,7 @@ public class NGramTokenizer implements Tokenizer {
     }
 
     @Override
-    public TokenizerCategory getCategory() {
-        return TokenizerCategory.NGRAM;
+    public IFullTextConfig.TokenizerCategory getCategory() {
+        return IFullTextConfig.TokenizerCategory.NGRAM;
     }
 }

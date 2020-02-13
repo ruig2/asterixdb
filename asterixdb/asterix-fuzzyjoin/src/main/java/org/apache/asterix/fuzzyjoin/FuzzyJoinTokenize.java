@@ -37,6 +37,7 @@ import org.apache.asterix.fuzzyjoin.tokenorder.TokenLoad;
 import org.apache.asterix.fuzzyjoin.tokenorder.TokenRank;
 import org.apache.asterix.fuzzyjoin.tokenorder.TokenRankFrequency;
 
+// ToDo: remove this class because it is not used anymore except in its own main() method
 public class FuzzyJoinTokenize {
     public static class TokenCount implements Comparable<Object> {
         public String token;

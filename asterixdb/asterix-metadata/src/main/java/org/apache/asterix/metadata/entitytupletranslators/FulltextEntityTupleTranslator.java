@@ -37,15 +37,14 @@ import org.apache.asterix.builders.OrderedListBuilder;
 import org.apache.asterix.formats.nontagged.SerializerDeserializerProvider;
 import org.apache.asterix.metadata.MetadataManager;
 import org.apache.asterix.metadata.MetadataTransactionContext;
-import org.apache.asterix.metadata.api.IFullTextConfig;
-import org.apache.asterix.metadata.api.IFullTextEntity;
-import org.apache.asterix.metadata.api.IFullTextEntity.FullTextEntityCategory;
-import org.apache.asterix.metadata.api.IFullTextFilter;
+import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextConfig;
+import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextEntity;
+import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextEntity.FullTextEntityCategory;
+import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextFilter;
 import org.apache.asterix.metadata.bootstrap.MetadataPrimaryIndexes;
 import org.apache.asterix.metadata.bootstrap.MetadataRecordTypes;
-import org.apache.asterix.metadata.entities.fulltextentity.FullTextConfig;
-import org.apache.asterix.metadata.entities.fulltextentity.StopwordFullTextFilter;
-import org.apache.asterix.metadata.entities.fulltextentity.TokenizerCategory;
+import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.FullTextConfig;
+import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.StopwordFullTextFilter;
 import org.apache.asterix.om.base.AInt8;
 import org.apache.asterix.om.base.AOrderedList;
 import org.apache.asterix.om.base.ARecord;
@@ -135,7 +134,8 @@ public class FulltextEntityTupleTranslator extends AbstractTupleTranslator<IFull
                 .getValueByPos(MetadataRecordTypes.FULLTEXT_ENTITY_ARECORD_FULLTEXT_ENTITY_NAME_FIELD_INDEX))
                         .getStringValue();
 
-        TokenizerCategory tokenizerCategory = EnumUtils.getEnumIgnoreCase(TokenizerCategory.class,
+        IFullTextConfig.TokenizerCategory
+                tokenizerCategory = EnumUtils.getEnumIgnoreCase(IFullTextConfig.TokenizerCategory.class,
                 ((AString) aRecord.getValueByPos(
                         MetadataRecordTypes.FULLTEXT_ENTITY_ARECORD_FULLTEXT_CONFIG_TOKENIZER_FIELD_INDEX))
                                 .getStringValue());

@@ -19,13 +19,14 @@
 
 package org.apache.asterix.fuzzyjoin;
 
+// ToDo: check if the parameters are used or not after removing unused Java classes
 public class FuzzyJoinConfig {
     private static final String NAMESPACE = "fuzzyjoin";
     //
     // tokenizer
     //
-    public static final String TOKENIZER_PROPERTY = NAMESPACE + ".tokenizer";
-    public static final String TOKENIZER_VALUE = "Word";
+    public static final String TOKENIZER_PROPERTY = NAMESPACE + ".tokenizer"; // ToDo: remove this unused variable
+    public static final String TOKENIZER_VALUE = "Word"; // ToDo: remove this unused variable
     //
     // similarity
     //

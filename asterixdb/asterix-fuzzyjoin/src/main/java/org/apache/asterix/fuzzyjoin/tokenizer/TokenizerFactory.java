@@ -19,13 +19,14 @@
 
 package org.apache.asterix.fuzzyjoin.tokenizer;
 
-import org.apache.asterix.metadata.entities.fulltextentity.TokenizerCategory;
+import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextConfig;
 
+// ToDo: remove this class because it is not used anymore except in its own main() method
 public class TokenizerFactory {
     public static Tokenizer getTokenizer(String tokenizerStr) {
-        if (TokenizerCategory.fromString(tokenizerStr) == TokenizerCategory.NGRAM) {
+        if (IFullTextConfig.TokenizerCategory.fromString(tokenizerStr) == IFullTextConfig.TokenizerCategory.NGRAM) {
             return new NGramTokenizer();
-        } else if (TokenizerCategory.fromString(tokenizerStr) == TokenizerCategory.WORD) {
+        } else if (IFullTextConfig.TokenizerCategory.fromString(tokenizerStr) == IFullTextConfig.TokenizerCategory.WORD) {
             return new WordTokenizer();
         }
         throw new RuntimeException("Unknown tokenizer \"" + tokenizerStr + "\".");
@@ -35,9 +36,9 @@ public class TokenizerFactory {
     // when creating FullTextConfig via SQLPP DDL
     // We can support customized ones with DDL later
     public static Tokenizer getTokenizer(String tokenizerStr, String wordSeparator, char tokenSeparator) {
-        if (TokenizerCategory.fromString(tokenizerStr) == TokenizerCategory.NGRAM) {
+        if (IFullTextConfig.TokenizerCategory.fromString(tokenizerStr) == IFullTextConfig.TokenizerCategory.NGRAM) {
             return new NGramTokenizer();
-        } else if (TokenizerCategory.fromString(tokenizerStr) == TokenizerCategory.WORD) {
+        } else if (IFullTextConfig.TokenizerCategory.fromString(tokenizerStr) == IFullTextConfig.TokenizerCategory.WORD) {
             return new WordTokenizer(wordSeparator, tokenSeparator);
         }
         throw new RuntimeException("Unknown tokenizer \"" + tokenizerStr + "\".");

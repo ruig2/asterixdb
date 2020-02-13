@@ -17,26 +17,32 @@
  * under the License.
  */
 
-package org.apache.asterix.metadata.api;
+package org.apache.hyracks.storage.am.lsm.invertedindex.fulltext;
 
 import java.util.List;
 
-import org.apache.asterix.metadata.entities.fulltextentity.TokenizerCategory;
+import org.apache.commons.lang3.EnumUtils;
 
-public interface IFullTextConfig extends IFullTextEntity {
+public interface IFullTextFilter extends IFullTextEntity {
     // case-insensitive
-    String FIELD_NAME_TOKENIZER = "tokenizer";
-    String FIELD_NAME_FILTER_PIPELINE = "filterpipeline";
+    String FIELD_NAME_TYPE = "type";
+    String FIELD_NAME_STOPWORDS = "stopwords";
+    String FIELD_NAME_STOPWORDS_LIST = "stopwordsList";
 
-    TokenizerCategory getTokenizerCategory();
+    enum FullTextFilterType {
+        STOPWORDS,
+        SYNONYM;
 
-    List<IFullTextFilter> getFilters();
+        public static FullTextFilterType getEnumIgnoreCase(String value) {
+            return EnumUtils.getEnumIgnoreCase(FullTextFilterType.class, value);
+        }
+    }
 
-    List<String> getUsedByIndices();
+    FullTextFilterType getFilterKind();
 
-    void addUsedByIndices(String indexName);
+    List<String> getUsedByFTConfigs();
 
-    // ToDo: proceed in a stream way to avoid copying strings and tokens
-    // A good reference is IBinaryTokenizer
+    void addUsedByFTConfigs(String ftConfigName);
+
     List<String> proceedTokens(List<String> tokens);
 }

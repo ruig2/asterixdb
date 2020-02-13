@@ -23,8 +23,10 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-import org.apache.asterix.metadata.entities.fulltextentity.TokenizerCategory;
+import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextConfig;
 
+// ToDo: remove this unused class (except usage in the main() method of a few classes)
+// Use IBinaryTokenizer instead
 public class WordTokenizer implements Tokenizer {
 
     /**
@@ -69,7 +71,7 @@ public class WordTokenizer implements Tokenizer {
     }
 
     @Override
-    public TokenizerCategory getCategory() {
-        return TokenizerCategory.WORD;
+    public IFullTextConfig.TokenizerCategory getCategory() {
+        return IFullTextConfig.TokenizerCategory.WORD;
     }
 }

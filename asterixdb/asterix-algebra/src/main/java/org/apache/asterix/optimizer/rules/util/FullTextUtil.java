@@ -20,7 +20,7 @@ package org.apache.asterix.optimizer.rules.util;
 
 import java.util.List;
 
-import org.apache.asterix.metadata.entities.fulltextentity.FullTextConfig;
+import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.FullTextConfig;
 import org.apache.asterix.om.base.AString;
 import org.apache.asterix.om.constants.AsterixConstantValue;
 import org.apache.asterix.om.functions.BuiltinFunctions;
