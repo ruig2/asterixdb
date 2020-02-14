@@ -38,7 +38,15 @@ public abstract class AbstractFullTextConfig implements IFullTextConfig {
         this.name = name;
         this.tokenizerCategory = tokenizerCategory;
         this.filters = filters;
-        this.usedByIndices = new ArrayList<>();
+        this.usedByIndices = new ArrayList<String>();
+    }
+
+    protected AbstractFullTextConfig(String name, TokenizerCategory tokenizerCategory,
+            ImmutableList<IFullTextFilter> filters, List<String> usedByIndices) {
+        this.name = name;
+        this.tokenizerCategory = tokenizerCategory;
+        this.filters = filters;
+        this.usedByIndices = usedByIndices;
     }
 
     @Override
