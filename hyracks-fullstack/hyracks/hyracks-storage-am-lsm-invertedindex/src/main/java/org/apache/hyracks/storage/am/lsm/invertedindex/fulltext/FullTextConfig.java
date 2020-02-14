@@ -37,6 +37,7 @@ public class FullTextConfig extends AbstractFullTextConfig {
     }
 
     @Override
+    // ToDo: use the tokenizer inside
     public List<String> proceedTokens(List<String> tokens) {
         List<String> results = new ArrayList<>(tokens);
         for (IFullTextFilter filter : filters) {
