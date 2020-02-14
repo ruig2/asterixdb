@@ -527,6 +527,7 @@ public final class MetadataRecordTypes {
     // FullText Config
     public static final int FULLTEXT_ENTITY_ARECORD_FULLTEXT_CONFIG_TOKENIZER_FIELD_INDEX = 2;
     public static final int FULLTEXT_ENTITY_ARECORD_FULLTEXT_CONFIG_FILTERS_LIST_FIELD_INDEX = 3;
+    public static final int FULLTEXT_ENTITY_ARECORD_FULLTEXT_CONFIG_USED_BY_INDICES_FIELD_INDEX = 4;
 
     public static final String RECORD_NAME_FULLTEXT_ENTITY = "FulltextEntityRecordType";
     public static final ARecordType FULLTEXT_ENTITY_RECORDTYPE = createRecordType(RECORD_NAME_FULLTEXT_ENTITY,

@@ -31,6 +31,11 @@ public class FullTextConfig extends AbstractFullTextConfig {
         super(name, tokenizerCategory, filters);
     }
 
+    public FullTextConfig(String name, TokenizerCategory tokenizerCategory, ImmutableList<IFullTextFilter> filters,
+            List<String> usedByIndices) {
+        super(name, tokenizerCategory, filters, usedByIndices);
+    }
+
     @Override
     public List<String> proceedTokens(List<String> tokens) {
         List<String> results = new ArrayList<>(tokens);
