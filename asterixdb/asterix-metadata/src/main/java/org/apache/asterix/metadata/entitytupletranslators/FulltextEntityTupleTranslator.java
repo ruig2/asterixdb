@@ -166,7 +166,7 @@ public class FulltextEntityTupleTranslator extends AbstractTupleTranslator<IFull
                 .getValueByPos(MetadataRecordTypes.FULLTEXT_ENTITY_ARECORD_FULLTEXT_CONFIG_USED_BY_INDICES_FIELD_INDEX)))
                 .getCursor();
         while (indexNamesCursor.next()) {
-            usedByIndices.add(((AString) filterNamesCursor.get()).getStringValue());
+            usedByIndices.add(((AString) indexNamesCursor.get()).getStringValue());
         }
 
         FullTextConfig config = new FullTextConfig(name, tokenizerCategory, filtersBuilder.build(), usedByIndices);

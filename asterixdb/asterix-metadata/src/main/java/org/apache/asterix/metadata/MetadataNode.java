@@ -562,7 +562,11 @@ public class MetadataNode implements IMetadataNode {
     public void dropFullTextConfig(TxnId txnId, String configName, boolean ifExists) throws AlgebricksException {
         IFullTextConfig config = getFullTextConfig(txnId, configName);
         if (config != null && config.getUsedByIndices().size() > 0) {
-            throw new AlgebricksException("Not allowed to delete a full-text config that is used by existing indices");
+            String indexNames = "";
+            for (String s : config.getUsedByIndices()) {
+                indexNames += " " + s;
+            }
+            throw new AlgebricksException("Not allowed to delete a full-text config that is used by existing indices:" + indexNames);
         }
 
         try {
