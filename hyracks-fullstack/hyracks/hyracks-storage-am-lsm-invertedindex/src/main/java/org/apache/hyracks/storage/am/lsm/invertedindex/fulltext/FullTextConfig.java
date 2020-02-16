@@ -22,7 +22,15 @@ package org.apache.hyracks.storage.am.lsm.invertedindex.fulltext;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.hyracks.api.exceptions.HyracksDataException;
+import org.apache.hyracks.api.io.IJsonSerializable;
+import org.apache.hyracks.api.io.IPersistedResourceRegistry;
+
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.collect.ImmutableList;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
 public class FullTextConfig extends AbstractFullTextConfig {
     private static final long serialVersionUID = 1L;
@@ -50,4 +58,25 @@ public class FullTextConfig extends AbstractFullTextConfig {
     // This built-in default one will be used when no full-text config is specified by the user
     public static FullTextConfig DefaultFullTextConfig =
             new FullTextConfig("DEFAULT_FULL_TEXT_CONFIG", TokenizerCategory.WORD, ImmutableList.of());
+
+    @Override
+    public JsonNode toJson(IPersistedResourceRegistry registry) throws HyracksDataException {
+        final ObjectNode json = registry.getClassIdentifier(getClass(), serialVersionUID);
+        json.put("name", name);
+        json.put("tokenizerCategory", tokenizerCategory.toString());
+        json.put("filters", new Gson().toJson(filters));
+        return json;
+    }
+
+    public static IJsonSerializable fromJson(IPersistedResourceRegistry registry, JsonNode json)
+            throws HyracksDataException {
+        final String name = json.get("name").asText();
+        final String tokenizerCategoryStr = json.get("tokenizerCategory").asText();
+        TokenizerCategory tc = TokenizerCategory.fromString(tokenizerCategoryStr);
+        ImmutableList<IFullTextFilter> filters =
+                new Gson().fromJson(json.get("filters").asText(), new TypeToken<ImmutableList<IFullTextFilter>>() {
+                }.getType());
+
+        return new FullTextConfig(name, tc, filters);
+    }
 }

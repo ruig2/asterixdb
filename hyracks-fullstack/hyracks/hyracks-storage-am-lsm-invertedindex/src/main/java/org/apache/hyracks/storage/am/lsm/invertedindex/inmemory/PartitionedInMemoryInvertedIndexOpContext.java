@@ -21,6 +21,8 @@ package org.apache.hyracks.storage.am.lsm.invertedindex.inmemory;
 
 import org.apache.hyracks.api.dataflow.value.IBinaryComparatorFactory;
 import org.apache.hyracks.storage.am.btree.impls.BTree;
+import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextConfig;
+import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextConfigFactory;
 import org.apache.hyracks.storage.am.lsm.invertedindex.tokenizers.IBinaryTokenizer;
 import org.apache.hyracks.storage.am.lsm.invertedindex.tokenizers.IBinaryTokenizerFactory;
 import org.apache.hyracks.storage.am.lsm.invertedindex.util.PartitionedInvertedIndexTokenizingTupleIterator;
@@ -28,13 +30,14 @@ import org.apache.hyracks.storage.am.lsm.invertedindex.util.PartitionedInvertedI
 public class PartitionedInMemoryInvertedIndexOpContext extends InMemoryInvertedIndexOpContext {
 
     public PartitionedInMemoryInvertedIndexOpContext(BTree btree, IBinaryComparatorFactory[] tokenCmpFactories,
-            IBinaryTokenizerFactory tokenizerFactory) {
-        super(btree, tokenCmpFactories, tokenizerFactory);
+            IBinaryTokenizerFactory tokenizerFactory, IFullTextConfigFactory fullTextConfigFactory) {
+        super(btree, tokenCmpFactories, tokenizerFactory, fullTextConfigFactory);
     }
 
     protected void setTokenizingTupleIterator() {
         IBinaryTokenizer tokenizer = getTokenizerFactory().createTokenizer();
+        IFullTextConfig fullTextConfig = getFullTextConfigFactory().createFullTextConfig();
         setTupleIter(new PartitionedInvertedIndexTokenizingTupleIterator(tokenCmpFactories.length,
-                btree.getFieldCount() - tokenCmpFactories.length, tokenizer));
+                btree.getFieldCount() - tokenCmpFactories.length, tokenizer, fullTextConfig));
     }
 }

@@ -22,9 +22,6 @@ package org.apache.hyracks.storage.am.lsm.invertedindex.fulltext;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextConfig;
-import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextFilter;
-
 import com.google.common.collect.ImmutableList;
 
 public abstract class AbstractFullTextConfig implements IFullTextConfig {

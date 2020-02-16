@@ -22,6 +22,7 @@ package org.apache.hyracks.storage.am.lsm.invertedindex.search;
 import org.apache.hyracks.dataflow.common.data.accessors.ITupleReference;
 import org.apache.hyracks.storage.am.common.impls.AbstractSearchPredicate;
 import org.apache.hyracks.storage.am.lsm.invertedindex.api.IInvertedIndexSearchModifier;
+import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextConfig;
 import org.apache.hyracks.storage.am.lsm.invertedindex.tokenizers.IBinaryTokenizer;
 import org.apache.hyracks.storage.common.MultiComparator;
 
@@ -31,21 +32,24 @@ public class InvertedIndexSearchPredicate extends AbstractSearchPredicate {
     private ITupleReference queryTuple;
     private int queryFieldIndex;
     private final IBinaryTokenizer queryTokenizer;
+    private final IFullTextConfig fullTextConfig;
     private final IInvertedIndexSearchModifier searchModifier;
     // Keeps the information whether the given query is a full-text search or not.
     // We need to have this information to stop the search process since we don't allow a phrase search yet.
     private boolean isFullTextSearchQuery;
 
-    public InvertedIndexSearchPredicate(IBinaryTokenizer queryTokenizer, IInvertedIndexSearchModifier searchModifier) {
+    public InvertedIndexSearchPredicate(IBinaryTokenizer queryTokenizer, IFullTextConfig fullTextConfig, IInvertedIndexSearchModifier searchModifier) {
         this.queryTokenizer = queryTokenizer;
+        this.fullTextConfig = fullTextConfig;
         this.searchModifier = searchModifier;
         this.isFullTextSearchQuery = false;
     }
 
-    public InvertedIndexSearchPredicate(IBinaryTokenizer queryTokenizer, IInvertedIndexSearchModifier searchModifier,
+    public InvertedIndexSearchPredicate(IBinaryTokenizer queryTokenizer, IFullTextConfig fullTextConfig, IInvertedIndexSearchModifier searchModifier,
             ITupleReference minFilterTuple, ITupleReference maxFilterTuple, boolean isFullTextSearchQuery) {
         super(minFilterTuple, maxFilterTuple);
         this.queryTokenizer = queryTokenizer;
+        this.fullTextConfig = fullTextConfig;
         this.searchModifier = searchModifier;
         this.isFullTextSearchQuery = isFullTextSearchQuery;
     }
@@ -80,6 +84,10 @@ public class InvertedIndexSearchPredicate extends AbstractSearchPredicate {
 
     public IBinaryTokenizer getQueryTokenizer() {
         return queryTokenizer;
+    }
+
+    public IFullTextConfig getFullTextConfig() {
+        return fullTextConfig;
     }
 
     @Override

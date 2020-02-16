@@ -26,7 +26,6 @@ import org.apache.asterix.common.config.DatasetConfig.DatasetType;
 import org.apache.asterix.common.metadata.DataverseName;
 import org.apache.asterix.metadata.MetadataManager;
 import org.apache.asterix.metadata.MetadataTransactionContext;
-import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextConfig;
 import org.apache.asterix.metadata.entities.Dataset;
 import org.apache.asterix.metadata.entities.DatasourceAdapter;
 import org.apache.asterix.metadata.entities.Datatype;
@@ -42,6 +41,7 @@ import org.apache.asterix.om.types.IAType;
 import org.apache.hyracks.algebricks.common.exceptions.AlgebricksException;
 import org.apache.hyracks.algebricks.core.algebra.properties.DefaultNodeGroupDomain;
 import org.apache.hyracks.algebricks.core.algebra.properties.INodeDomain;
+import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextConfig;
 
 public class MetadataManagerUtil {
 
@@ -141,7 +141,8 @@ public class MetadataManagerUtil {
         return MetadataManager.INSTANCE.getSynonym(mdTxnCtx, dataverseName, synonymName);
     }
 
-    public static IFullTextConfig findFullTextConfig(MetadataTransactionContext mdTxnCtx, String ftConfigName) throws AlgebricksException {
+    public static IFullTextConfig findFullTextConfig(MetadataTransactionContext mdTxnCtx, String ftConfigName)
+            throws AlgebricksException {
         return MetadataManager.INSTANCE.getFullTextConfig(mdTxnCtx, ftConfigName);
     }
 

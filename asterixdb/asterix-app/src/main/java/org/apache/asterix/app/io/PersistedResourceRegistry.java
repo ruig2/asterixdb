@@ -109,6 +109,8 @@ import org.apache.hyracks.storage.am.lsm.common.impls.NoMergePolicyFactory;
 import org.apache.hyracks.storage.am.lsm.common.impls.NoOpIOOperationCallbackFactory;
 import org.apache.hyracks.storage.am.lsm.common.impls.PrefixMergePolicyFactory;
 import org.apache.hyracks.storage.am.lsm.invertedindex.dataflow.LSMInvertedIndexLocalResource;
+import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.FullTextConfig;
+import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.FullTextConfigFactory;
 import org.apache.hyracks.storage.am.lsm.invertedindex.tokenizers.DelimitedUTF8StringBinaryTokenizerFactory;
 import org.apache.hyracks.storage.am.lsm.invertedindex.tokenizers.HashedUTF8NGramTokenFactory;
 import org.apache.hyracks.storage.am.lsm.invertedindex.tokenizers.HashedUTF8WordTokenFactory;
@@ -269,6 +271,10 @@ public class PersistedResourceRegistry implements IPersistedResourceRegistry {
         registeredClasses.put("NGramUTF8StringBinaryTokenizerFactory", NGramUTF8StringBinaryTokenizerFactory.class);
         registeredClasses.put("DelimitedUTF8StringBinaryTokenizerFactory",
                 DelimitedUTF8StringBinaryTokenizerFactory.class);
+
+        // IFullTextConfigFactory
+        registeredClasses.put("FullTextConfigFactory", FullTextConfigFactory.class);
+        registeredClasses.put("FullTextConfig", FullTextConfig.class);
 
         // ITokenFactory
         registeredClasses.put("AListElementTokenFactory", AListElementTokenFactory.class);

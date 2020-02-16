@@ -91,16 +91,8 @@ import org.apache.hyracks.storage.am.lsm.invertedindex.common.LSMInvertedIndexTe
 import org.apache.hyracks.storage.am.lsm.invertedindex.impls.LSMInvertedIndexAccessor;
 import org.apache.hyracks.storage.am.lsm.invertedindex.impls.LSMInvertedIndexMergeCursor;
 import org.apache.hyracks.storage.am.lsm.invertedindex.search.InvertedIndexSearchPredicate;
-import org.apache.hyracks.storage.am.lsm.invertedindex.tokenizers.DelimitedUTF8StringBinaryTokenizerFactory;
-import org.apache.hyracks.storage.am.lsm.invertedindex.tokenizers.HashedUTF8NGramTokenFactory;
-import org.apache.hyracks.storage.am.lsm.invertedindex.tokenizers.HashedUTF8WordTokenFactory;
 import org.apache.hyracks.storage.am.lsm.invertedindex.tokenizers.IBinaryTokenizer;
-import org.apache.hyracks.storage.am.lsm.invertedindex.tokenizers.IBinaryTokenizerFactory;
 import org.apache.hyracks.storage.am.lsm.invertedindex.tokenizers.IToken;
-import org.apache.hyracks.storage.am.lsm.invertedindex.tokenizers.ITokenFactory;
-import org.apache.hyracks.storage.am.lsm.invertedindex.tokenizers.NGramUTF8StringBinaryTokenizerFactory;
-import org.apache.hyracks.storage.am.lsm.invertedindex.tokenizers.UTF8NGramTokenFactory;
-import org.apache.hyracks.storage.am.lsm.invertedindex.tokenizers.UTF8WordTokenFactory;
 import org.apache.hyracks.storage.am.lsm.invertedindex.util.LSMInvertedIndexTestContext.InvertedIndexType;
 import org.apache.hyracks.storage.common.IIndexAccessParameters;
 import org.apache.hyracks.storage.common.IIndexBulkLoader;
@@ -112,6 +104,8 @@ import org.apache.hyracks.test.support.TestUtils;
 import org.apache.hyracks.util.IThreadStats;
 import org.apache.hyracks.util.IThreadStatsCollector;
 import org.apache.hyracks.util.ThreadStats;
+
+import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 @SuppressWarnings("rawtypes")
 public class LSMInvertedIndexTestUtils {
@@ -192,6 +186,8 @@ public class LSMInvertedIndexTestUtils {
 
     public static LSMInvertedIndexTestContext createWordInvIndexTestContext(LSMInvertedIndexTestHarness harness,
             InvertedIndexType invIndexType) throws IOException, HyracksDataException {
+        throw new NotImplementedException();
+        /*
         ISerializerDeserializer[] fieldSerdes = getNonHashedIndexFieldSerdes(invIndexType);
         ITokenFactory tokenFactory = new UTF8WordTokenFactory();
         IBinaryTokenizerFactory tokenizerFactory =
@@ -199,10 +195,13 @@ public class LSMInvertedIndexTestUtils {
         LSMInvertedIndexTestContext testCtx = LSMInvertedIndexTestContext.create(harness, fieldSerdes,
                 fieldSerdes.length - 1, tokenizerFactory, invIndexType, null, null, null, null, null, null);
         return testCtx;
+         */
     }
 
     public static LSMInvertedIndexTestContext createHashedWordInvIndexTestContext(LSMInvertedIndexTestHarness harness,
             InvertedIndexType invIndexType) throws IOException, HyracksDataException {
+        throw new NotImplementedException();
+        /*
         ISerializerDeserializer[] fieldSerdes = getHashedIndexFieldSerdes(invIndexType);
         ITokenFactory tokenFactory = new HashedUTF8WordTokenFactory();
         IBinaryTokenizerFactory tokenizerFactory =
@@ -210,10 +209,13 @@ public class LSMInvertedIndexTestUtils {
         LSMInvertedIndexTestContext testCtx = LSMInvertedIndexTestContext.create(harness, fieldSerdes,
                 fieldSerdes.length - 1, tokenizerFactory, invIndexType, null, null, null, null, null, null);
         return testCtx;
+         */
     }
 
     public static LSMInvertedIndexTestContext createNGramInvIndexTestContext(LSMInvertedIndexTestHarness harness,
             InvertedIndexType invIndexType) throws IOException, HyracksDataException {
+        throw new NotImplementedException();
+        /*
         ISerializerDeserializer[] fieldSerdes = getNonHashedIndexFieldSerdes(invIndexType);
         ITokenFactory tokenFactory = new UTF8NGramTokenFactory();
         IBinaryTokenizerFactory tokenizerFactory =
@@ -221,10 +223,13 @@ public class LSMInvertedIndexTestUtils {
         LSMInvertedIndexTestContext testCtx = LSMInvertedIndexTestContext.create(harness, fieldSerdes,
                 fieldSerdes.length - 1, tokenizerFactory, invIndexType, null, null, null, null, null, null);
         return testCtx;
+         */
     }
 
     public static LSMInvertedIndexTestContext createHashedNGramInvIndexTestContext(LSMInvertedIndexTestHarness harness,
             InvertedIndexType invIndexType) throws IOException, HyracksDataException {
+        throw new NotImplementedException();
+        /*
         ISerializerDeserializer[] fieldSerdes = getHashedIndexFieldSerdes(invIndexType);
         ITokenFactory tokenFactory = new HashedUTF8NGramTokenFactory();
         IBinaryTokenizerFactory tokenizerFactory =
@@ -232,6 +237,7 @@ public class LSMInvertedIndexTestUtils {
         LSMInvertedIndexTestContext testCtx = LSMInvertedIndexTestContext.create(harness, fieldSerdes,
                 fieldSerdes.length - 1, tokenizerFactory, invIndexType, null, null, null, null, null, null);
         return testCtx;
+         */
     }
 
     public static void bulkLoadInvIndex(LSMInvertedIndexTestContext testCtx, TupleGenerator tupleGen, int numDocs,

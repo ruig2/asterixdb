@@ -26,7 +26,8 @@ public class TokenizerFactory {
     public static Tokenizer getTokenizer(String tokenizerStr) {
         if (IFullTextConfig.TokenizerCategory.fromString(tokenizerStr) == IFullTextConfig.TokenizerCategory.NGRAM) {
             return new NGramTokenizer();
-        } else if (IFullTextConfig.TokenizerCategory.fromString(tokenizerStr) == IFullTextConfig.TokenizerCategory.WORD) {
+        } else if (IFullTextConfig.TokenizerCategory
+                .fromString(tokenizerStr) == IFullTextConfig.TokenizerCategory.WORD) {
             return new WordTokenizer();
         }
         throw new RuntimeException("Unknown tokenizer \"" + tokenizerStr + "\".");
@@ -38,7 +39,8 @@ public class TokenizerFactory {
     public static Tokenizer getTokenizer(String tokenizerStr, String wordSeparator, char tokenSeparator) {
         if (IFullTextConfig.TokenizerCategory.fromString(tokenizerStr) == IFullTextConfig.TokenizerCategory.NGRAM) {
             return new NGramTokenizer();
-        } else if (IFullTextConfig.TokenizerCategory.fromString(tokenizerStr) == IFullTextConfig.TokenizerCategory.WORD) {
+        } else if (IFullTextConfig.TokenizerCategory
+                .fromString(tokenizerStr) == IFullTextConfig.TokenizerCategory.WORD) {
             return new WordTokenizer(wordSeparator, tokenSeparator);
         }
         throw new RuntimeException("Unknown tokenizer \"" + tokenizerStr + "\".");

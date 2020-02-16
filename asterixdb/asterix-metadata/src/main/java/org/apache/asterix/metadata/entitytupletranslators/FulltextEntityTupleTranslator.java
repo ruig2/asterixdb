@@ -37,14 +37,8 @@ import org.apache.asterix.builders.OrderedListBuilder;
 import org.apache.asterix.formats.nontagged.SerializerDeserializerProvider;
 import org.apache.asterix.metadata.MetadataManager;
 import org.apache.asterix.metadata.MetadataTransactionContext;
-import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextConfig;
-import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextEntity;
-import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextEntity.FullTextEntityCategory;
-import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextFilter;
 import org.apache.asterix.metadata.bootstrap.MetadataPrimaryIndexes;
 import org.apache.asterix.metadata.bootstrap.MetadataRecordTypes;
-import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.FullTextConfig;
-import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.StopwordFullTextFilter;
 import org.apache.asterix.om.base.AInt8;
 import org.apache.asterix.om.base.AOrderedList;
 import org.apache.asterix.om.base.ARecord;
@@ -61,6 +55,12 @@ import org.apache.hyracks.data.std.util.ArrayBackedValueStorage;
 import org.apache.hyracks.dataflow.common.comm.io.ArrayTupleBuilder;
 import org.apache.hyracks.dataflow.common.comm.io.ArrayTupleReference;
 import org.apache.hyracks.dataflow.common.data.accessors.ITupleReference;
+import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.FullTextConfig;
+import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextConfig;
+import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextEntity;
+import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextEntity.FullTextEntityCategory;
+import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextFilter;
+import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.StopwordFullTextFilter;
 
 import com.google.common.collect.ImmutableList;
 
@@ -134,11 +134,11 @@ public class FulltextEntityTupleTranslator extends AbstractTupleTranslator<IFull
                 .getValueByPos(MetadataRecordTypes.FULLTEXT_ENTITY_ARECORD_FULLTEXT_ENTITY_NAME_FIELD_INDEX))
                         .getStringValue();
 
-        IFullTextConfig.TokenizerCategory
-                tokenizerCategory = EnumUtils.getEnumIgnoreCase(IFullTextConfig.TokenizerCategory.class,
-                ((AString) aRecord.getValueByPos(
-                        MetadataRecordTypes.FULLTEXT_ENTITY_ARECORD_FULLTEXT_CONFIG_TOKENIZER_FIELD_INDEX))
-                                .getStringValue());
+        IFullTextConfig.TokenizerCategory tokenizerCategory =
+                EnumUtils.getEnumIgnoreCase(IFullTextConfig.TokenizerCategory.class,
+                        ((AString) aRecord.getValueByPos(
+                                MetadataRecordTypes.FULLTEXT_ENTITY_ARECORD_FULLTEXT_CONFIG_TOKENIZER_FIELD_INDEX))
+                                        .getStringValue());
 
         List<String> filterNames = new ArrayList<>();
         IACursor filterNamesCursor = ((AOrderedList) (aRecord
@@ -162,9 +162,8 @@ public class FulltextEntityTupleTranslator extends AbstractTupleTranslator<IFull
         }
 
         List<String> usedByIndices = new ArrayList<>();
-        IACursor indexNamesCursor = ((AOrderedList) (aRecord
-                .getValueByPos(MetadataRecordTypes.FULLTEXT_ENTITY_ARECORD_FULLTEXT_CONFIG_USED_BY_INDICES_FIELD_INDEX)))
-                .getCursor();
+        IACursor indexNamesCursor = ((AOrderedList) (aRecord.getValueByPos(
+                MetadataRecordTypes.FULLTEXT_ENTITY_ARECORD_FULLTEXT_CONFIG_USED_BY_INDICES_FIELD_INDEX))).getCursor();
         while (indexNamesCursor.next()) {
             usedByIndices.add(((AString) indexNamesCursor.get()).getStringValue());
         }

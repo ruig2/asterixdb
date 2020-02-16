@@ -36,6 +36,7 @@ public interface IFullTextConfig extends IFullTextEntity {
             return EnumUtils.getEnumIgnoreCase(TokenizerCategory.class, str);
         }
     }
+
     TokenizerCategory getTokenizerCategory();
 
     List<IFullTextFilter> getFilters();

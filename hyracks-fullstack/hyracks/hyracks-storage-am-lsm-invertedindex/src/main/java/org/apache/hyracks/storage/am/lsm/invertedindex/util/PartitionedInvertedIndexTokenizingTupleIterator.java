@@ -23,6 +23,7 @@ import java.io.IOException;
 
 import org.apache.hyracks.api.exceptions.HyracksDataException;
 import org.apache.hyracks.dataflow.common.data.accessors.ITupleReference;
+import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextConfig;
 import org.apache.hyracks.storage.am.lsm.invertedindex.tokenizers.IBinaryTokenizer;
 import org.apache.hyracks.storage.am.lsm.invertedindex.tokenizers.IToken;
 
@@ -32,8 +33,8 @@ public class PartitionedInvertedIndexTokenizingTupleIterator extends InvertedInd
     protected short numTokens = 0;
 
     public PartitionedInvertedIndexTokenizingTupleIterator(int tokensFieldCount, int invListFieldCount,
-            IBinaryTokenizer tokenizer) {
-        super(tokensFieldCount, invListFieldCount, tokenizer);
+            IBinaryTokenizer tokenizer, IFullTextConfig fullTextConfig) {
+        super(tokensFieldCount, invListFieldCount, tokenizer, fullTextConfig);
     }
 
     public void reset(ITupleReference inputTuple) {

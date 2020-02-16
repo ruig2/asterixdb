@@ -20,11 +20,13 @@
 package org.apache.hyracks.storage.am.lsm.invertedindex.util;
 
 import java.io.IOException;
+import java.util.Arrays;
 
 import org.apache.hyracks.api.exceptions.HyracksDataException;
 import org.apache.hyracks.dataflow.common.comm.io.ArrayTupleBuilder;
 import org.apache.hyracks.dataflow.common.comm.io.ArrayTupleReference;
 import org.apache.hyracks.dataflow.common.data.accessors.ITupleReference;
+import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextConfig;
 import org.apache.hyracks.storage.am.lsm.invertedindex.tokenizers.IBinaryTokenizer;
 import org.apache.hyracks.storage.am.lsm.invertedindex.tokenizers.IToken;
 
@@ -37,14 +39,16 @@ public class InvertedIndexTokenizingTupleIterator {
     protected final ArrayTupleBuilder tupleBuilder;
     protected final ArrayTupleReference tupleReference;
     protected final IBinaryTokenizer tokenizer;
+    protected final IFullTextConfig fullTextConfig;
     protected ITupleReference inputTuple;
 
-    public InvertedIndexTokenizingTupleIterator(int tokensFieldCount, int invListFieldCount,
-            IBinaryTokenizer tokenizer) {
+    public InvertedIndexTokenizingTupleIterator(int tokensFieldCount, int invListFieldCount, IBinaryTokenizer tokenizer,
+            IFullTextConfig fullTextConfig) {
         this.invListFieldCount = invListFieldCount;
         this.tupleBuilder = new ArrayTupleBuilder(tokensFieldCount + invListFieldCount);
         this.tupleReference = new ArrayTupleReference();
         this.tokenizer = tokenizer;
+        this.fullTextConfig = fullTextConfig;
     }
 
     public void reset(ITupleReference inputTuple) {
@@ -54,12 +58,18 @@ public class InvertedIndexTokenizingTupleIterator {
     }
 
     public boolean hasNext() {
+        // in progress... the next word can be a stopword
         return tokenizer.hasNext();
     }
 
     public void next() throws HyracksDataException {
         tokenizer.next();
         IToken token = tokenizer.getToken();
+        String word = new String(token.getData(), token.getStartOffset(), token.getTokenLength());
+        if (fullTextConfig.proceedTokens(Arrays.asList(word)).size() == 0) {
+            next();
+            return;
+        }
         tupleBuilder.reset();
         // Add token field.
         try {

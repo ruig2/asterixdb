@@ -20,7 +20,6 @@ package org.apache.asterix.optimizer.rules.util;
 
 import java.util.List;
 
-import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.FullTextConfig;
 import org.apache.asterix.om.base.AString;
 import org.apache.asterix.om.constants.AsterixConstantValue;
 import org.apache.asterix.om.functions.BuiltinFunctions;
@@ -31,6 +30,7 @@ import org.apache.hyracks.algebricks.core.algebra.base.ILogicalExpression;
 import org.apache.hyracks.algebricks.core.algebra.expressions.AbstractFunctionCallExpression;
 import org.apache.hyracks.algebricks.core.algebra.expressions.ConstantExpression;
 import org.apache.hyracks.algebricks.core.algebra.functions.FunctionIdentifier;
+import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.FullTextConfig;
 
 public class FullTextUtil {
     public static boolean isFullTextFunctionExpr(IOptimizableFuncExpr expr) {

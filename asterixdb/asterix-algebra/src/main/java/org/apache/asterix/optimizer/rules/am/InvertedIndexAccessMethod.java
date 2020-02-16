@@ -34,7 +34,6 @@ import org.apache.asterix.common.exceptions.ErrorCode;
 import org.apache.asterix.dataflow.data.common.ExpressionTypeComputer;
 import org.apache.asterix.formats.nontagged.BinaryTokenizerFactoryProvider;
 import org.apache.asterix.lang.common.util.FunctionUtil;
-import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextConfig;
 import org.apache.asterix.metadata.declared.MetadataProvider;
 import org.apache.asterix.metadata.entities.Dataset;
 import org.apache.asterix.metadata.entities.Index;
@@ -91,6 +90,7 @@ import org.apache.hyracks.algebricks.core.algebra.util.OperatorManipulationUtil;
 import org.apache.hyracks.api.exceptions.HyracksDataException;
 import org.apache.hyracks.api.exceptions.SourceLocation;
 import org.apache.hyracks.storage.am.lsm.invertedindex.api.IInvertedIndexSearchModifierFactory;
+import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextConfig;
 import org.apache.hyracks.storage.am.lsm.invertedindex.search.ConjunctiveEditDistanceSearchModifierFactory;
 import org.apache.hyracks.storage.am.lsm.invertedindex.search.ConjunctiveListEditDistanceSearchModifierFactory;
 import org.apache.hyracks.storage.am.lsm.invertedindex.search.ConjunctiveSearchModifierFactory;
@@ -971,10 +971,10 @@ public class InvertedIndexAccessMethod implements IAccessMethod {
             ftConfigName = FullTextUtil.getFullTextConfigNameFromExpr(optFuncExpr);
         }
         if (!Strings.isNullOrEmpty(ftConfigName)) {
-            ftConfig = ((MetadataProvider)context.getMetadataProvider()).findFullTextConfig(ftConfigName);
+            ftConfig = ((MetadataProvider) context.getMetadataProvider()).findFullTextConfig(ftConfigName);
         }
 
-        if (ftConfig != null) {
+        if (false && ftConfig != null) {
             // ToDo: Unwrapping, proceed tokens and wrap again to expressions is not a good way
             // Maybe the following logic can be moved in a later phase
             //   where expressions are converted to Java built-in Strings

@@ -19,9 +19,9 @@
 
 package org.apache.hyracks.storage.am.lsm.invertedindex.fulltext;
 
-import org.apache.hyracks.api.io.IJsonSerializable;
-
 import java.io.Serializable;
+
+import org.apache.hyracks.api.io.IJsonSerializable;
 
 public interface IFullTextConfigFactory extends Serializable, IJsonSerializable {
     IFullTextConfig createFullTextConfig();

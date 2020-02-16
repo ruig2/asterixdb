@@ -31,6 +31,7 @@ import org.apache.hyracks.storage.am.common.api.ISearchOperationCallbackFactory;
 import org.apache.hyracks.storage.am.common.dataflow.IIndexDataflowHelperFactory;
 import org.apache.hyracks.storage.am.lsm.invertedindex.api.IInvertedIndexSearchModifier;
 import org.apache.hyracks.storage.am.lsm.invertedindex.api.IInvertedIndexSearchModifierFactory;
+import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextConfigFactory;
 import org.apache.hyracks.storage.am.lsm.invertedindex.tokenizers.IBinaryTokenizerFactory;
 
 public class LSMInvertedIndexSearchOperatorDescriptor extends AbstractSingleActivityOperatorDescriptor {
@@ -44,6 +45,7 @@ public class LSMInvertedIndexSearchOperatorDescriptor extends AbstractSingleActi
     private final boolean isFullTextSearchQuery;
     private final IIndexDataflowHelperFactory indexHelperFactory;
     private final IBinaryTokenizerFactory queryTokenizerFactory;
+    private final IFullTextConfigFactory fullTextConfigFactory;
     private final boolean retainInput;
     private final boolean retainMissing;
     private final IMissingWriterFactory missingWriterFactory;
@@ -54,7 +56,9 @@ public class LSMInvertedIndexSearchOperatorDescriptor extends AbstractSingleActi
 
     public LSMInvertedIndexSearchOperatorDescriptor(IOperatorDescriptorRegistry spec, RecordDescriptor outRecDesc,
             int queryField, IIndexDataflowHelperFactory indexHelperFactory,
-            IBinaryTokenizerFactory queryTokenizerFactory, IInvertedIndexSearchModifierFactory searchModifierFactory,
+            IBinaryTokenizerFactory queryTokenizerFactory,
+            IFullTextConfigFactory fullTextConfigFactory,
+            IInvertedIndexSearchModifierFactory searchModifierFactory,
             boolean retainInput, boolean retainMissing, IMissingWriterFactory missingWriterFactory,
             ISearchOperationCallbackFactory searchCallbackFactory, int[] minFilterFieldIndexes,
             int[] maxFilterFieldIndexes, boolean isFullTextSearchQuery, int numOfFields, boolean appendIndexFilter,
@@ -62,6 +66,7 @@ public class LSMInvertedIndexSearchOperatorDescriptor extends AbstractSingleActi
         super(spec, 1, 1);
         this.indexHelperFactory = indexHelperFactory;
         this.queryTokenizerFactory = queryTokenizerFactory;
+        this.fullTextConfigFactory = fullTextConfigFactory;
         this.queryField = queryField;
         this.retainInput = retainInput;
         this.retainMissing = retainMissing;
@@ -84,7 +89,7 @@ public class LSMInvertedIndexSearchOperatorDescriptor extends AbstractSingleActi
         return new LSMInvertedIndexSearchOperatorNodePushable(ctx,
                 recordDescProvider.getInputRecordDescriptor(getActivityId(), 0), partition, minFilterFieldIndexes,
                 maxFilterFieldIndexes, indexHelperFactory, retainInput, retainMissing, missingWriterFactory,
-                searchCallbackFactory, searchModifier, queryTokenizerFactory, queryField, isFullTextSearchQuery,
+                searchCallbackFactory, searchModifier, queryTokenizerFactory, fullTextConfigFactory, queryField, isFullTextSearchQuery,
                 numOfFields, appendIndexFilter, frameLimit);
     }
 }

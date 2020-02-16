@@ -19,10 +19,10 @@
 
 package org.apache.hyracks.storage.am.lsm.invertedindex.fulltext;
 
+import java.io.Serializable;
+
 import org.apache.commons.lang3.EnumUtils;
 import org.apache.hyracks.api.io.IJsonSerializable;
-
-import java.io.Serializable;
 
 public interface IFullTextEntity extends Serializable, IJsonSerializable {
     enum FullTextEntityCategory {

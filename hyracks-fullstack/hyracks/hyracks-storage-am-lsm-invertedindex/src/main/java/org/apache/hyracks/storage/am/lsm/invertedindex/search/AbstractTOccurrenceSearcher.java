@@ -21,6 +21,7 @@ package org.apache.hyracks.storage.am.lsm.invertedindex.search;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.util.Arrays;
 import java.util.List;
 
 import org.apache.hyracks.api.comm.IFrame;
@@ -44,6 +45,7 @@ import org.apache.hyracks.storage.am.lsm.invertedindex.api.IInPlaceInvertedIndex
 import org.apache.hyracks.storage.am.lsm.invertedindex.api.IInvertedIndexSearcher;
 import org.apache.hyracks.storage.am.lsm.invertedindex.api.IObjectFactory;
 import org.apache.hyracks.storage.am.lsm.invertedindex.api.InvertedListCursor;
+import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextConfig;
 import org.apache.hyracks.storage.am.lsm.invertedindex.ondisk.FixedSizeFrameTupleAccessor;
 import org.apache.hyracks.storage.am.lsm.invertedindex.ondisk.FixedSizeTupleReference;
 import org.apache.hyracks.storage.am.lsm.invertedindex.tokenizers.DelimitedUTF8StringBinaryTokenizer;
@@ -127,6 +129,7 @@ public abstract class AbstractTOccurrenceSearcher implements IInvertedIndexSearc
         ITupleReference queryTuple = searchPred.getQueryTuple();
         int queryFieldIndex = searchPred.getQueryFieldIndex();
         IBinaryTokenizer queryTokenizer = searchPred.getQueryTokenizer();
+        IFullTextConfig fullTextConfig = searchPred.getFullTextConfig();
         // Is this a full-text query?
         // Then, the last argument is conjunctive or disjunctive search option, not a query text.
         // Thus, we need to remove the last argument.
@@ -145,6 +148,12 @@ public abstract class AbstractTOccurrenceSearcher implements IInvertedIndexSearc
             tokenCountInOneField++;
             try {
                 IToken token = queryTokenizer.getToken();
+                // +1 to skip the first empty space
+                // in progress...Converting to string will lead to very fragile result
+                String word = new String(token.getData(), token.getStartOffset()+1, token.getTokenLength()-1);
+                if (fullTextConfig.proceedTokens(Arrays.asList(word)).size() == 0) {
+                    continue;
+                }
                 // For the full-text search, we don't support a phrase search yet.
                 // So, each field should have only one token.
                 // If it's a list, it can have multiple keywords in it. But, each keyword should not be a phrase.
