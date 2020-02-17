@@ -188,8 +188,10 @@ public class LSMInvertedIndexLocalResource extends LsmResource {
                 tokenCmpFactoriesList.toArray(new IBinaryComparatorFactory[0]);
         final IBinaryTokenizerFactory tokenizerFactory =
                 (IBinaryTokenizerFactory) registry.deserialize(json.get("tokenizerFactory"));
+
         final IFullTextConfigFactory fullTextConfigFactory =
                 (IFullTextConfigFactory) registry.deserialize(json.get("fullTextConfigFactory"));
+
         final boolean isPartitioned = json.get("isPartitioned").asBoolean();
         final int[] invertedIndexFields = OBJECT_MAPPER.convertValue(json.get("invertedIndexFields"), int[].class);
         final int[] filterFieldsForNonBulkLoadOps =
