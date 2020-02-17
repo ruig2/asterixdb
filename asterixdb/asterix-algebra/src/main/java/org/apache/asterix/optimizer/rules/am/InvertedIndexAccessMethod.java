@@ -962,44 +962,8 @@ public class InvertedIndexAccessMethod implements IAccessMethod {
         // Add a variable and its expr to the lists which will be passed into an assign op.
         LogicalVariable keyVar = context.newVar();
         keyVarList.add(keyVar);
-
-        // The query keywords should be proceeded by the full-text config before looking up the index
-        String ftConfigName = "";
-        IFullTextConfig ftConfig = null;
-
-        if (FullTextUtil.isFullTextFunctionExpr(optFuncExpr)) {
-            ftConfigName = FullTextUtil.getFullTextConfigNameFromExpr(optFuncExpr);
-        }
-        if (!Strings.isNullOrEmpty(ftConfigName)) {
-            ftConfig = ((MetadataProvider) context.getMetadataProvider()).findFullTextConfig(ftConfigName);
-        }
-
-        if (false && ftConfig != null) {
-            // ToDo: Unwrapping, proceed tokens and wrap again to expressions is not a good way
-            // Maybe the following logic can be moved in a later phase
-            //   where expressions are converted to Java built-in Strings
-            ILogicalExpression le = optFuncExpr.getConstantExpr(0);
-            ConstantExpression ce = (ConstantExpression) le;
-            AsterixConstantValue acv = (AsterixConstantValue) ce.getValue();
-            AOrderedList aList = (AOrderedList) acv.getObject();
-
-            List<String> result = new ArrayList<>();
-            IACursor cursor = aList.getCursor();
-            while (cursor.next()) {
-                AString s = (AString) cursor.get();
-                result.addAll(ftConfig.proceedTokens(Arrays.asList(s.getStringValue())));
-            }
-
-            AOrderedList aList2 = new AOrderedList(result);
-            AsterixConstantValue cValue = new AsterixConstantValue(aList2);
-            ConstantExpression e = new ConstantExpression(cValue);
-            Mutable<ILogicalExpression> m = new MutableObject<>(e);
-            keyExprList.add(m);
-        } else {
-            MutableObject<ILogicalExpression> fullTextWordList =
-                    new MutableObject<ILogicalExpression>(optFuncExpr.getConstantExpr(0));
-            keyExprList.add(fullTextWordList);
-        }
+        keyExprList.add(new MutableObject<ILogicalExpression>(optFuncExpr.getConstantExpr(0)));
+        return;
     }
 
     @Override
