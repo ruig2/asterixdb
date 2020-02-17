@@ -234,7 +234,7 @@ import org.apache.hyracks.storage.am.lsm.common.api.ILSMMergePolicyFactory;
 import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.FullTextConfig;
 import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextConfig;
 import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextFilter;
-import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.StopwordFullTextFilter;
+import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.StopwordsFullTextFilter;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -1068,7 +1068,7 @@ public class QueryTranslator extends AbstractLangTranslator implements IStatemen
                     stopwordsBuilder.add(((LiteralExpr) l).getValue().getStringValue());
                 }
 
-                filter = new StopwordFullTextFilter(stmtCreateFilter.getFilterName(), stopwordsBuilder.build());
+                filter = new StopwordsFullTextFilter(stmtCreateFilter.getFilterName(), stopwordsBuilder.build());
                 break;
             }
 

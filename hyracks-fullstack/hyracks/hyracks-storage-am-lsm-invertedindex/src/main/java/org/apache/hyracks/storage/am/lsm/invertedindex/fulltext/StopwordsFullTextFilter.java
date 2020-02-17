@@ -22,7 +22,11 @@ package org.apache.hyracks.storage.am.lsm.invertedindex.fulltext;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.google.gson.reflect.TypeToken;
+import org.apache.hyracks.api.dataflow.value.IBinaryComparatorFactory;
 import org.apache.hyracks.api.exceptions.HyracksDataException;
+import org.apache.hyracks.api.io.IJsonSerializable;
 import org.apache.hyracks.api.io.IPersistedResourceRegistry;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -30,12 +34,12 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.collect.ImmutableList;
 import com.google.gson.Gson;
 
-public class StopwordFullTextFilter extends AbstractFullTextFilter {
+public class StopwordsFullTextFilter extends AbstractFullTextFilter {
     private static final long serialVersionUID = 1L;
 
     ImmutableList<String> stopwordList;
 
-    public StopwordFullTextFilter(String name, ImmutableList<String> stopwordList) {
+    public StopwordsFullTextFilter(String name, ImmutableList<String> stopwordList) {
         super(name, IFullTextFilter.FullTextFilterType.STOPWORDS);
         this.stopwordList = stopwordList;
     }
@@ -59,7 +63,28 @@ public class StopwordFullTextFilter extends AbstractFullTextFilter {
     @Override
     public JsonNode toJson(IPersistedResourceRegistry registry) throws HyracksDataException {
         final ObjectNode json = registry.getClassIdentifier(getClass(), serialVersionUID);
-        json.put("stopwordsList", new Gson().toJson(stopwordList));
+        json.put("stopwordsFilterName", name);
+
+        ArrayNode stopwordsArrayNode = AbstractFullTextConfig.OBJECT_MAPPER.createArrayNode();
+        for (String s : stopwordList) {
+            stopwordsArrayNode.add(s);
+        }
+        json.set("stopwordsList", stopwordsArrayNode);
+
         return json;
+    }
+
+    public static IJsonSerializable fromJson(IPersistedResourceRegistry registry, JsonNode json)
+            throws HyracksDataException {
+        final String name = json.get("stopwordsFilterName").asText();
+
+        ImmutableList.Builder<String> stopwordsBuilder = ImmutableList.<String>builder();
+        JsonNode stopwordsArrayNode = json.get("stopwordsList");
+        for (int i = 0; i < stopwordsArrayNode.size(); i++) {
+            stopwordsBuilder.add(stopwordsArrayNode.get(i).asText());
+        }
+        ImmutableList stopwords = stopwordsBuilder.build();
+
+        return new StopwordsFullTextFilter(name, stopwords);
     }
 }

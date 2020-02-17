@@ -22,6 +22,7 @@ package org.apache.hyracks.storage.am.lsm.invertedindex.fulltext;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import org.apache.hyracks.api.exceptions.HyracksDataException;
 import org.apache.hyracks.api.io.IJsonSerializable;
 import org.apache.hyracks.api.io.IPersistedResourceRegistry;
@@ -64,7 +65,13 @@ public class FullTextConfig extends AbstractFullTextConfig {
         final ObjectNode json = registry.getClassIdentifier(getClass(), serialVersionUID);
         json.put("name", name);
         json.put("tokenizerCategory", tokenizerCategory.toString());
-        json.put("filters", new Gson().toJson(filters));
+
+        final ArrayNode filterArray = OBJECT_MAPPER.createArrayNode();
+        for (IFullTextFilter filter : filters) {
+            filterArray.add(filter.toJson(registry));
+        }
+        json.set("filters", filterArray);
+
         return json;
     }
 
@@ -73,9 +80,13 @@ public class FullTextConfig extends AbstractFullTextConfig {
         final String name = json.get("name").asText();
         final String tokenizerCategoryStr = json.get("tokenizerCategory").asText();
         TokenizerCategory tc = TokenizerCategory.fromString(tokenizerCategoryStr);
-        ImmutableList<IFullTextFilter> filters =
-                new Gson().fromJson(json.get("filters").asText(), new TypeToken<ImmutableList<IFullTextFilter>>() {
-                }.getType());
+
+        ArrayNode filtersJsonNode = (ArrayNode) json.get("filters");
+        List<IFullTextFilter> filterList = new ArrayList<>();
+        for (int i = 0; i < filtersJsonNode.size(); i++) {
+            filterList.add((IFullTextFilter) registry.deserialize(filtersJsonNode.get(i)));
+        }
+        ImmutableList<IFullTextFilter> filters = ImmutableList.copyOf(filterList);
 
         return new FullTextConfig(name, tc, filters);
     }

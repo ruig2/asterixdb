@@ -22,6 +22,7 @@ package org.apache.hyracks.storage.am.lsm.invertedindex.fulltext;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableList;
 
 public abstract class AbstractFullTextConfig implements IFullTextConfig {
@@ -29,6 +30,7 @@ public abstract class AbstractFullTextConfig implements IFullTextConfig {
     protected final TokenizerCategory tokenizerCategory;
     protected ImmutableList<IFullTextFilter> filters;
     protected List<String> usedByIndices;
+    protected static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
     protected AbstractFullTextConfig(String name, TokenizerCategory tokenizerCategory,
             ImmutableList<IFullTextFilter> filters) {

@@ -45,6 +45,7 @@ public class FullTextConfigFactory implements IFullTextConfigFactory {
     @Override
     public JsonNode toJson(IPersistedResourceRegistry registry) throws HyracksDataException {
         final ObjectNode json = registry.getClassIdentifier(getClass(), serialVersionUID);
+        // in progress... add tokenizerFactory here so a new tokenizer can be generated
         json.set("fullTextConfig", config.toJson(registry));
         return json;
     }

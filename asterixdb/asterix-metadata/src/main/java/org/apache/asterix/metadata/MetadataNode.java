@@ -567,7 +567,7 @@ public class MetadataNode implements IMetadataNode {
                 indexNames += " " + s;
             }
             throw new AlgebricksException(
-                    "Not allowed to delete a full-text config that is used by existing indices:" + indexNames);
+                    "Not allowed to delete the full-text config " + configName + " that is used by existing indices:" + indexNames);
         }
 
         try {

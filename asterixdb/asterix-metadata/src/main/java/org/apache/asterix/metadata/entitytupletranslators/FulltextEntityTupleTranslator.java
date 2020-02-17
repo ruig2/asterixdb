@@ -60,7 +60,7 @@ import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextConfig;
 import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextEntity;
 import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextEntity.FullTextEntityCategory;
 import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextFilter;
-import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.StopwordFullTextFilter;
+import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.StopwordsFullTextFilter;
 
 import com.google.common.collect.ImmutableList;
 
@@ -95,7 +95,7 @@ public class FulltextEntityTupleTranslator extends AbstractTupleTranslator<IFull
                         IFullTextFilter.FullTextFilterType.getEnumIgnoreCase(typeAString.getStringValue());
                 switch (kind) {
                     case STOPWORDS:
-                        return createStopwordFilterFromARecord(aRecord);
+                        return createStopwordsFilterFromARecord(aRecord);
                     case SYNONYM:
                     default:
                         throw new AlgebricksException("Not supported yet");
@@ -107,7 +107,7 @@ public class FulltextEntityTupleTranslator extends AbstractTupleTranslator<IFull
         return null;
     }
 
-    public StopwordFullTextFilter createStopwordFilterFromARecord(ARecord aRecord) {
+    public StopwordsFullTextFilter createStopwordsFilterFromARecord(ARecord aRecord) {
         String name = ((AString) aRecord
                 .getValueByPos(MetadataRecordTypes.FULLTEXT_ENTITY_ARECORD_FULLTEXT_ENTITY_NAME_FIELD_INDEX))
                         .getStringValue();
@@ -117,7 +117,7 @@ public class FulltextEntityTupleTranslator extends AbstractTupleTranslator<IFull
         while (stopwordsCursor.next()) {
             stopwordsBuilder.add(((AString) stopwordsCursor.get()).getStringValue());
         }
-        StopwordFullTextFilter filter = new StopwordFullTextFilter(name, stopwordsBuilder.build());
+        StopwordsFullTextFilter filter = new StopwordsFullTextFilter(name, stopwordsBuilder.build());
 
         IACursor usedByConfigsCursor = ((AOrderedList) (aRecord
                 .getValueByPos(MetadataRecordTypes.FULLTEXT_ENTITY_ARECORD_USED_BY_FT_CONFIGS_FIELD_INDEX)))
@@ -209,7 +209,7 @@ public class FulltextEntityTupleTranslator extends AbstractTupleTranslator<IFull
         recordBuilder.addField(fieldName, fieldValue);
     }
 
-    private void writeStopwordFilter(StopwordFullTextFilter stopwordFilter) throws HyracksDataException {
+    private void writeStopwordFilter(StopwordsFullTextFilter stopwordFilter) throws HyracksDataException {
         writeFilterType2RecordBuilder(stopwordFilter.getFilterKind());
         writeOrderedList2RecordBuilder(FIELD_NAME_FULLTEXT_USED_BY_CONFIGS, stopwordFilter.getUsedByFTConfigs());
         writeOrderedList2RecordBuilder(FIELD_NAME_FULLTEXT_STOPWORD_LIST, stopwordFilter.getStopwordList());
@@ -218,7 +218,7 @@ public class FulltextEntityTupleTranslator extends AbstractTupleTranslator<IFull
     private void writeFulltextFilter(IFullTextFilter filter) throws HyracksDataException {
         switch (filter.getFilterKind()) {
             case STOPWORDS:
-                writeStopwordFilter((StopwordFullTextFilter) filter);
+                writeStopwordFilter((StopwordsFullTextFilter) filter);
                 break;
             case SYNONYM:
             default:
