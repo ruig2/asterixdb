@@ -42,6 +42,8 @@ import org.apache.hyracks.storage.am.lsm.common.api.ILSMPageWriteCallbackFactory
 import org.apache.hyracks.storage.am.lsm.common.api.IVirtualBufferCache;
 import org.apache.hyracks.storage.am.lsm.common.api.IVirtualBufferCacheProvider;
 import org.apache.hyracks.storage.am.lsm.common.dataflow.LsmResource;
+import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.FullTextConfig;
+import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.FullTextConfigFactory;
 import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextConfigFactory;
 import org.apache.hyracks.storage.am.lsm.invertedindex.tokenizers.IBinaryTokenizerFactory;
 import org.apache.hyracks.storage.am.lsm.invertedindex.util.InvertedIndexUtils;
@@ -189,8 +191,13 @@ public class LSMInvertedIndexLocalResource extends LsmResource {
         final IBinaryTokenizerFactory tokenizerFactory =
                 (IBinaryTokenizerFactory) registry.deserialize(json.get("tokenizerFactory"));
 
-        final IFullTextConfigFactory fullTextConfigFactory =
-                (IFullTextConfigFactory) registry.deserialize(json.get("fullTextConfigFactory"));
+        final IFullTextConfigFactory fullTextConfigFactory;
+        // back-compatible: the local resource in an older version may not contain the newly added fullTextConfigFactory
+        if (json.has("fullTextConfigFactory")) {
+            fullTextConfigFactory = (IFullTextConfigFactory) registry.deserialize(json.get("fullTextConfigFactory"));
+        } else {
+            fullTextConfigFactory = new FullTextConfigFactory(FullTextConfig.DEFAULT_FULL_TEXT_CONFIG);
+        }
 
         final boolean isPartitioned = json.get("isPartitioned").asBoolean();
         final int[] invertedIndexFields = OBJECT_MAPPER.convertValue(json.get("invertedIndexFields"), int[].class);

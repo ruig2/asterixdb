@@ -865,7 +865,7 @@ public class QueryTranslator extends AbstractLangTranslator implements IStatemen
 
         String fullTextConfigName = stmtCreateIndex.getFullTextConfigName();
         if (Strings.isNullOrEmpty(fullTextConfigName)) {
-            fullTextConfigName = FullTextConfig.DefaultFullTextConfig.getName();
+            fullTextConfigName = FullTextConfig.DEFAULT_FULL_TEXT_CONFIG.getName();
         }
 
         lockUtil.createIndexBegin(lockManager, metadataProvider.getLocks(), dataverseName, datasetName);
@@ -1900,7 +1900,7 @@ public class QueryTranslator extends AbstractLangTranslator implements IStatemen
             IHyracksClientConnection hcc, IRequestParameters requestParameters)
             throws RemoteException, AlgebricksException {
         FullTextConfigDropStatement stmtConfigDrop = (FullTextConfigDropStatement) stmt;
-        if (stmtConfigDrop.getConfigName().equalsIgnoreCase(FullTextConfig.DefaultFullTextConfig.getName())) {
+        if (stmtConfigDrop.getConfigName().equalsIgnoreCase(FullTextConfig.DEFAULT_FULL_TEXT_CONFIG.getName())) {
             throw new AlgebricksException("Not allowed to drop the default full-text config");
         }
 

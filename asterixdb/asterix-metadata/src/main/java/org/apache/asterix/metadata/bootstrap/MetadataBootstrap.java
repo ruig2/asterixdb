@@ -271,7 +271,7 @@ public class MetadataBootstrap {
 
     private static void insertInitialFullTextConfig(MetadataTransactionContext mdTxnCtx)
             throws AlgebricksException, HyracksDataException, RemoteException {
-        MetadataManager.INSTANCE.addFulltextConfig(mdTxnCtx, FullTextConfig.DefaultFullTextConfig);
+        MetadataManager.INSTANCE.addFulltextConfig(mdTxnCtx, FullTextConfig.DEFAULT_FULL_TEXT_CONFIG);
         if (LOGGER.isInfoEnabled()) {
             LOGGER.info("Finished inserting built-in full-text config.");
         }
