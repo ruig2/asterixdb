@@ -1011,7 +1011,7 @@ public class QueryTranslator extends AbstractLangTranslator implements IStatemen
 
             String fullTextConfigName = stmtCreateIndex.getFullTextConfigName();
             // The index is of TYPE FULLTEXT in SQLPP
-            if (index.getIndexType() == IndexType.SINGLE_PARTITION_WORD_INVIX && Strings.isNullOrEmpty(fullTextConfigName)) {
+            if (stmtCreateIndex.getIndexType() == IndexType.SINGLE_PARTITION_WORD_INVIX && Strings.isNullOrEmpty(fullTextConfigName)) {
                 fullTextConfigName = FullTextConfig.DEFAULT_FULL_TEXT_CONFIG.getName();
             }
 

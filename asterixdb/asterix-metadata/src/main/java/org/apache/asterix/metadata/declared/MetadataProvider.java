@@ -149,7 +149,9 @@ import org.apache.hyracks.storage.am.common.dataflow.IIndexDataflowHelperFactory
 import org.apache.hyracks.storage.am.common.dataflow.IndexDataflowHelperFactory;
 import org.apache.hyracks.storage.am.common.ophelpers.IndexOperation;
 import org.apache.hyracks.storage.am.lsm.invertedindex.dataflow.BinaryTokenizerOperatorDescriptor;
+import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.FullTextConfigFactory;
 import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextConfig;
+import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextConfigFactory;
 import org.apache.hyracks.storage.am.lsm.invertedindex.tokenizers.IBinaryTokenizerFactory;
 import org.apache.hyracks.storage.am.rtree.dataflow.RTreeSearchOperatorDescriptor;
 import org.apache.hyracks.storage.common.IStorageManager;
@@ -1594,6 +1596,7 @@ public class MetadataProvider implements IMetadataProvider<DataSourceId, String>
 
             IBinaryTokenizerFactory tokenizerFactory = NonTaggedFormatUtil.getBinaryTokenizerFactory(
                     secondaryKeyType.getTypeTag(), indexType, secondaryIndex.getGramLength());
+            IFullTextConfigFactory fullTextConfigFactory = new FullTextConfigFactory(findFullTextConfig(secondaryIndex.getFullTextConfig()));
 
             Pair<IFileSplitProvider, AlgebricksPartitionConstraint> splitsAndConstraint =
                     getSplitProviderAndConstraints(dataset, secondaryIndex.getIndexName());
@@ -1635,8 +1638,9 @@ public class MetadataProvider implements IMetadataProvider<DataSourceId, String>
                 keyFields[k] = k;
             }
 
-            tokenizerOp = new BinaryTokenizerOperatorDescriptor(spec, tokenKeyPairRecDesc, tokenizerFactory, docField,
-                    keyFields, isPartitioned, true, false, MissingWriterFactory.INSTANCE);
+            tokenizerOp = new BinaryTokenizerOperatorDescriptor(spec, tokenKeyPairRecDesc, tokenizerFactory,
+                    fullTextConfigFactory,
+                    docField, keyFields, isPartitioned, true, false, MissingWriterFactory.INSTANCE);
             return new Pair<>(tokenizerOp, splitsAndConstraint.second);
         } catch (Exception e) {
             throw new AlgebricksException(e);
