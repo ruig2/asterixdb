@@ -478,6 +478,22 @@ public class MetadataNode implements IMetadataNode {
     }
 
     @Override
+    public void removeUsedByIndicesFromFullTextConfig(TxnId txnId, String indexName) throws RemoteException, AlgebricksException {
+        List<IFullTextEntity> entities = getAllFullTextEntities(txnId);
+        for (IFullTextEntity e : entities) {
+            if (e.getCategory() == IFullTextEntity.FullTextEntityCategory.CONFIG &&
+                    ((IFullTextConfig) e).getUsedByIndices().contains(indexName)) {
+                ((IFullTextConfig) e).getUsedByIndices().remove(indexName);
+                try {
+                    modifyExistingFullTextEntityToCatalog(txnId, e);
+                } catch (HyracksDataException ex) {
+                    throw new AlgebricksException(ex);
+                }
+            }
+        }
+    }
+
+    @Override
     public void dropFullTextFilter(TxnId txnId, String filterName, boolean ifExists) throws AlgebricksException {
         try {
             FulltextEntityTupleTranslator translator = tupleTranslatorProvider.getFulltextEntityTupleTranslator(true);
@@ -1040,6 +1056,19 @@ public class MetadataNode implements IMetadataNode {
             IValueExtractor<Datatype> valueExtractor = new MetadataEntityValueExtractor<>(tupleReaderWriter);
             List<Datatype> results = new ArrayList<>();
             searchIndex(txnId, MetadataPrimaryIndexes.DATATYPE_DATASET, null, valueExtractor, results);
+            return results;
+        } catch (HyracksDataException e) {
+            throw new AlgebricksException(e);
+        }
+    }
+
+    private List<IFullTextEntity> getAllFullTextEntities(TxnId txnId) throws AlgebricksException {
+        try {
+            FulltextEntityTupleTranslator tupleReaderWriter =
+                    tupleTranslatorProvider.getFulltextEntityTupleTranslator(true);
+            IValueExtractor<IFullTextEntity> valueExtractor = new MetadataEntityValueExtractor<>(tupleReaderWriter);
+            List<IFullTextEntity> results = new ArrayList<>();
+            searchIndex(txnId, MetadataPrimaryIndexes.FULLTEXT_ENTITY_DATASET, null, valueExtractor, results);
             return results;
         } catch (HyracksDataException e) {
             throw new AlgebricksException(e);

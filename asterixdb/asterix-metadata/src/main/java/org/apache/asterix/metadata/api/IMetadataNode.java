@@ -443,6 +443,8 @@ public interface IMetadataNode extends Remote, Serializable {
 
     IFullTextFilter getFulltextFilter(TxnId txnId, String filterName) throws RemoteException, AlgebricksException;
 
+    void removeUsedByIndicesFromFullTextConfig(TxnId txnId, String indexName) throws RemoteException, AlgebricksException;
+
     void dropFullTextFilter(TxnId txnId, String filterName, boolean ifExists)
             throws RemoteException, AlgebricksException;
 

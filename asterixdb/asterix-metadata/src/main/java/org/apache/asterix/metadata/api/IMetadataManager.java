@@ -422,7 +422,7 @@ public interface IMetadataManager extends IMetadataBootstrap {
             throws AlgebricksException, HyracksDataException, RemoteException;
 
     void updateFulltextConfig(MetadataTransactionContext mdTxnCtx, IFullTextConfig config)
-            throws AlgebricksException, HyracksDataException, RemoteException;
+            throws AlgebricksException;
 
     IFullTextConfig getFullTextConfig(MetadataTransactionContext mdTxnCtx, String name) throws AlgebricksException;
 

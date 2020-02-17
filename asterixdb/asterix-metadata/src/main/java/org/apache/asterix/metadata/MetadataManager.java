@@ -432,6 +432,7 @@ public abstract class MetadataManager implements IMetadataManager {
             String indexName) throws AlgebricksException {
         try {
             metadataNode.dropIndex(ctx.getTxnId(), dataverseName, datasetName, indexName);
+            removeUsedByIndicesFromFullTextConfig(ctx, indexName);
         } catch (RemoteException e) {
             throw new MetadataException(ErrorCode.REMOTE_EXCEPTION_WHEN_CALLING_METADATA_NODE, e);
         }
@@ -678,8 +679,21 @@ public abstract class MetadataManager implements IMetadataManager {
 
     @Override
     public void updateFulltextConfig(MetadataTransactionContext mdTxnCtx, IFullTextConfig config)
-            throws AlgebricksException, HyracksDataException, RemoteException {
-        metadataNode.updateFullTextConfig(mdTxnCtx.getTxnId(), config);
+            throws AlgebricksException {
+        try {
+            metadataNode.updateFullTextConfig(mdTxnCtx.getTxnId(), config);
+        } catch (HyracksDataException | RemoteException e) {
+            throw new MetadataException(e);
+        }
+    }
+
+    private void removeUsedByIndicesFromFullTextConfig(MetadataTransactionContext mdTxnCtx, String indexName)
+            throws AlgebricksException {
+        try {
+            metadataNode.removeUsedByIndicesFromFullTextConfig(mdTxnCtx.getTxnId(), indexName);
+        } catch (RemoteException e) {
+            throw new AlgebricksException(e);
+        }
     }
 
     @Override
