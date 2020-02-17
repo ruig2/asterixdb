@@ -687,6 +687,11 @@ public abstract class MetadataManager implements IMetadataManager {
         }
     }
 
+    // Since dropIndex() only takes the index name instead of the entire index object as the argument,
+    // we don't know the full text configs that is used by the index
+    // And the call sites of dropIndex() are complex,
+    // it is not practical to pass the related full text config name into dropIndex()
+    // Let's do a full-scan here to remove the index name from related fullTextConfig.usedByIndices
     private void removeUsedByIndicesFromFullTextConfig(MetadataTransactionContext mdTxnCtx, String indexName)
             throws AlgebricksException {
         try {

@@ -863,11 +863,6 @@ public class QueryTranslator extends AbstractLangTranslator implements IStatemen
         metadataProvider.setMetadataTxnContext(mdTxnCtx);
         boolean isSecondaryPrimary = stmtCreateIndex.getFieldExprs().isEmpty();
 
-        String fullTextConfigName = stmtCreateIndex.getFullTextConfigName();
-        if (Strings.isNullOrEmpty(fullTextConfigName)) {
-            fullTextConfigName = FullTextConfig.DEFAULT_FULL_TEXT_CONFIG.getName();
-        }
-
         lockUtil.createIndexBegin(lockManager, metadataProvider.getLocks(), dataverseName, datasetName);
         try {
             Dataset ds = metadataProvider.findDataset(dataverseName, datasetName);
@@ -1012,6 +1007,12 @@ public class QueryTranslator extends AbstractLangTranslator implements IStatemen
                     }
 
                 }
+            }
+
+            String fullTextConfigName = stmtCreateIndex.getFullTextConfigName();
+            // The index is of TYPE FULLTEXT in SQLPP
+            if (index.getIndexType() == IndexType.SINGLE_PARTITION_WORD_INVIX && Strings.isNullOrEmpty(fullTextConfigName)) {
+                fullTextConfigName = FullTextConfig.DEFAULT_FULL_TEXT_CONFIG.getName();
             }
 
             Index newIndex =

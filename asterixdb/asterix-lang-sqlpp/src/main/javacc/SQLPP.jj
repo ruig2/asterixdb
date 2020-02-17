@@ -962,7 +962,7 @@ IndexParams IndexType() throws ParseException:
     {
       type = IndexType.LENGTH_PARTITIONED_WORD_INVIX;
     }
-  |<FULLTEXT>
+  | <FULLTEXT>
     {
       type = IndexType.SINGLE_PARTITION_WORD_INVIX;
     }
