@@ -38,15 +38,17 @@ public class InvertedIndexSearchPredicate extends AbstractSearchPredicate {
     // We need to have this information to stop the search process since we don't allow a phrase search yet.
     private boolean isFullTextSearchQuery;
 
-    public InvertedIndexSearchPredicate(IBinaryTokenizer queryTokenizer, IFullTextConfig fullTextConfig, IInvertedIndexSearchModifier searchModifier) {
+    public InvertedIndexSearchPredicate(IBinaryTokenizer queryTokenizer, IFullTextConfig fullTextConfig,
+            IInvertedIndexSearchModifier searchModifier) {
         this.queryTokenizer = queryTokenizer;
         this.fullTextConfig = fullTextConfig;
         this.searchModifier = searchModifier;
         this.isFullTextSearchQuery = false;
     }
 
-    public InvertedIndexSearchPredicate(IBinaryTokenizer queryTokenizer, IFullTextConfig fullTextConfig, IInvertedIndexSearchModifier searchModifier,
-            ITupleReference minFilterTuple, ITupleReference maxFilterTuple, boolean isFullTextSearchQuery) {
+    public InvertedIndexSearchPredicate(IBinaryTokenizer queryTokenizer, IFullTextConfig fullTextConfig,
+            IInvertedIndexSearchModifier searchModifier, ITupleReference minFilterTuple, ITupleReference maxFilterTuple,
+            boolean isFullTextSearchQuery) {
         super(minFilterTuple, maxFilterTuple);
         this.queryTokenizer = queryTokenizer;
         this.fullTextConfig = fullTextConfig;

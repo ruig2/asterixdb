@@ -150,7 +150,7 @@ public abstract class AbstractTOccurrenceSearcher implements IInvertedIndexSearc
                 IToken token = queryTokenizer.getToken();
                 // +1 to skip the first empty space
                 // in progress...Converting to string will lead to very fragile result
-                String word = new String(token.getData(), token.getStartOffset()+1, token.getTokenLength()-1);
+                String word = new String(token.getData(), token.getStartOffset() + 1, token.getTokenLength() - 1);
                 if (fullTextConfig.proceedTokens(Arrays.asList(word)).size() == 0) {
                     continue;
                 }

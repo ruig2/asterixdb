@@ -22,16 +22,14 @@ package org.apache.hyracks.storage.am.lsm.invertedindex.fulltext;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.fasterxml.jackson.databind.node.ArrayNode;
 import org.apache.hyracks.api.exceptions.HyracksDataException;
 import org.apache.hyracks.api.io.IJsonSerializable;
 import org.apache.hyracks.api.io.IPersistedResourceRegistry;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.collect.ImmutableList;
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
 
 public class FullTextConfig extends AbstractFullTextConfig {
     private static final long serialVersionUID = 1L;

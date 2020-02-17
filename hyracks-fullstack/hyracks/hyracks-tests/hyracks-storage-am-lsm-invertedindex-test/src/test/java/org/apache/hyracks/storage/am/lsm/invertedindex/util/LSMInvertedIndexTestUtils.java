@@ -88,6 +88,8 @@ import org.apache.hyracks.storage.am.lsm.invertedindex.api.IInvertedIndexAccesso
 import org.apache.hyracks.storage.am.lsm.invertedindex.api.IInvertedIndexSearchModifier;
 import org.apache.hyracks.storage.am.lsm.invertedindex.api.InvertedListCursor;
 import org.apache.hyracks.storage.am.lsm.invertedindex.common.LSMInvertedIndexTestHarness;
+import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.FullTextConfig;
+import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextConfig;
 import org.apache.hyracks.storage.am.lsm.invertedindex.impls.LSMInvertedIndexAccessor;
 import org.apache.hyracks.storage.am.lsm.invertedindex.impls.LSMInvertedIndexMergeCursor;
 import org.apache.hyracks.storage.am.lsm.invertedindex.search.InvertedIndexSearchPredicate;
@@ -104,6 +106,8 @@ import org.apache.hyracks.test.support.TestUtils;
 import org.apache.hyracks.util.IThreadStats;
 import org.apache.hyracks.util.IThreadStatsCollector;
 import org.apache.hyracks.util.ThreadStats;
+
+import com.google.common.collect.ImmutableList;
 
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
@@ -567,7 +571,9 @@ public class LSMInvertedIndexTestUtils {
         iap.getParameters().put(HyracksConstants.HYRACKS_TASK_CONTEXT, ctx);
         IInvertedIndexAccessor accessor = (IInvertedIndexAccessor) invIndex.createAccessor(iap);
         IBinaryTokenizer tokenizer = testCtx.getTokenizerFactory().createTokenizer();
-        InvertedIndexSearchPredicate searchPred = new InvertedIndexSearchPredicate(tokenizer, searchModifier);
+        InvertedIndexSearchPredicate searchPred = new InvertedIndexSearchPredicate(tokenizer,
+                new FullTextConfig("test_config", IFullTextConfig.TokenizerCategory.WORD, ImmutableList.of()),
+                searchModifier);
         List<ITupleReference> documentCorpus = testCtx.getDocumentCorpus();
         // Project away the primary-key field.
         int[] fieldPermutation = new int[] { 0 };

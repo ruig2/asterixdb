@@ -22,17 +22,14 @@ package org.apache.hyracks.storage.am.lsm.invertedindex.fulltext;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.google.gson.reflect.TypeToken;
-import org.apache.hyracks.api.dataflow.value.IBinaryComparatorFactory;
 import org.apache.hyracks.api.exceptions.HyracksDataException;
 import org.apache.hyracks.api.io.IJsonSerializable;
 import org.apache.hyracks.api.io.IPersistedResourceRegistry;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.collect.ImmutableList;
-import com.google.gson.Gson;
 
 public class StopwordsFullTextFilter extends AbstractFullTextFilter {
     private static final long serialVersionUID = 1L;
@@ -78,7 +75,7 @@ public class StopwordsFullTextFilter extends AbstractFullTextFilter {
             throws HyracksDataException {
         final String name = json.get("stopwordsFilterName").asText();
 
-        ImmutableList.Builder<String> stopwordsBuilder = ImmutableList.<String>builder();
+        ImmutableList.Builder<String> stopwordsBuilder = ImmutableList.<String> builder();
         JsonNode stopwordsArrayNode = json.get("stopwordsList");
         for (int i = 0; i < stopwordsArrayNode.size(); i++) {
             stopwordsBuilder.add(stopwordsArrayNode.get(i).asText());

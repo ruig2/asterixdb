@@ -566,8 +566,8 @@ public class MetadataNode implements IMetadataNode {
             for (String s : config.getUsedByIndices()) {
                 indexNames += " " + s;
             }
-            throw new AlgebricksException(
-                    "Not allowed to delete the full-text config " + configName + " that is used by existing indices:" + indexNames);
+            throw new AlgebricksException("Not allowed to delete the full-text config " + configName
+                    + " that is used by existing indices:" + indexNames);
         }
 
         try {

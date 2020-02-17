@@ -56,13 +56,11 @@ public class LSMInvertedIndexSearchOperatorDescriptor extends AbstractSingleActi
 
     public LSMInvertedIndexSearchOperatorDescriptor(IOperatorDescriptorRegistry spec, RecordDescriptor outRecDesc,
             int queryField, IIndexDataflowHelperFactory indexHelperFactory,
-            IBinaryTokenizerFactory queryTokenizerFactory,
-            IFullTextConfigFactory fullTextConfigFactory,
-            IInvertedIndexSearchModifierFactory searchModifierFactory,
-            boolean retainInput, boolean retainMissing, IMissingWriterFactory missingWriterFactory,
-            ISearchOperationCallbackFactory searchCallbackFactory, int[] minFilterFieldIndexes,
-            int[] maxFilterFieldIndexes, boolean isFullTextSearchQuery, int numOfFields, boolean appendIndexFilter,
-            int frameLimit) {
+            IBinaryTokenizerFactory queryTokenizerFactory, IFullTextConfigFactory fullTextConfigFactory,
+            IInvertedIndexSearchModifierFactory searchModifierFactory, boolean retainInput, boolean retainMissing,
+            IMissingWriterFactory missingWriterFactory, ISearchOperationCallbackFactory searchCallbackFactory,
+            int[] minFilterFieldIndexes, int[] maxFilterFieldIndexes, boolean isFullTextSearchQuery, int numOfFields,
+            boolean appendIndexFilter, int frameLimit) {
         super(spec, 1, 1);
         this.indexHelperFactory = indexHelperFactory;
         this.queryTokenizerFactory = queryTokenizerFactory;
@@ -89,7 +87,7 @@ public class LSMInvertedIndexSearchOperatorDescriptor extends AbstractSingleActi
         return new LSMInvertedIndexSearchOperatorNodePushable(ctx,
                 recordDescProvider.getInputRecordDescriptor(getActivityId(), 0), partition, minFilterFieldIndexes,
                 maxFilterFieldIndexes, indexHelperFactory, retainInput, retainMissing, missingWriterFactory,
-                searchCallbackFactory, searchModifier, queryTokenizerFactory, fullTextConfigFactory, queryField, isFullTextSearchQuery,
-                numOfFields, appendIndexFilter, frameLimit);
+                searchCallbackFactory, searchModifier, queryTokenizerFactory, fullTextConfigFactory, queryField,
+                isFullTextSearchQuery, numOfFields, appendIndexFilter, frameLimit);
     }
 }
