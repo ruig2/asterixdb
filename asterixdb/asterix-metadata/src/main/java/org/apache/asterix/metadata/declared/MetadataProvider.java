@@ -1596,7 +1596,8 @@ public class MetadataProvider implements IMetadataProvider<DataSourceId, String>
 
             IBinaryTokenizerFactory tokenizerFactory = NonTaggedFormatUtil.getBinaryTokenizerFactory(
                     secondaryKeyType.getTypeTag(), indexType, secondaryIndex.getGramLength());
-            IFullTextConfigFactory fullTextConfigFactory = new FullTextConfigFactory(findFullTextConfig(secondaryIndex.getFullTextConfig()));
+            IFullTextConfigFactory fullTextConfigFactory =
+                    new FullTextConfigFactory(findFullTextConfig(secondaryIndex.getFullTextConfig()));
 
             Pair<IFileSplitProvider, AlgebricksPartitionConstraint> splitsAndConstraint =
                     getSplitProviderAndConstraints(dataset, secondaryIndex.getIndexName());
@@ -1639,8 +1640,8 @@ public class MetadataProvider implements IMetadataProvider<DataSourceId, String>
             }
 
             tokenizerOp = new BinaryTokenizerOperatorDescriptor(spec, tokenKeyPairRecDesc, tokenizerFactory,
-                    fullTextConfigFactory,
-                    docField, keyFields, isPartitioned, true, false, MissingWriterFactory.INSTANCE);
+                    fullTextConfigFactory, docField, keyFields, isPartitioned, true, false,
+                    MissingWriterFactory.INSTANCE);
             return new Pair<>(tokenizerOp, splitsAndConstraint.second);
         } catch (Exception e) {
             throw new AlgebricksException(e);

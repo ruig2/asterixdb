@@ -27,7 +27,6 @@ import org.apache.hyracks.api.dataflow.value.RecordDescriptor;
 import org.apache.hyracks.api.exceptions.HyracksDataException;
 import org.apache.hyracks.api.job.IOperatorDescriptorRegistry;
 import org.apache.hyracks.dataflow.std.base.AbstractSingleActivityOperatorDescriptor;
-import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextConfig;
 import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextConfigFactory;
 import org.apache.hyracks.storage.am.lsm.invertedindex.tokenizers.IBinaryTokenizerFactory;
 
@@ -56,10 +55,9 @@ public class BinaryTokenizerOperatorDescriptor extends AbstractSingleActivityOpe
     private final IMissingWriterFactory missingWriterFactory;
 
     public BinaryTokenizerOperatorDescriptor(IOperatorDescriptorRegistry spec, RecordDescriptor recDesc,
-            IBinaryTokenizerFactory tokenizerFactory,
-            IFullTextConfigFactory fullTextConfigFactory,
-            int docField, int[] keyFields, boolean addNumTokensKey,
-            boolean writeKeyFieldsFirst, boolean writeMissing, IMissingWriterFactory missingWriterFactory) {
+            IBinaryTokenizerFactory tokenizerFactory, IFullTextConfigFactory fullTextConfigFactory, int docField,
+            int[] keyFields, boolean addNumTokensKey, boolean writeKeyFieldsFirst, boolean writeMissing,
+            IMissingWriterFactory missingWriterFactory) {
         super(spec, 1, 1);
         this.tokenizerFactory = tokenizerFactory;
         this.fullTextConfigFactory = fullTextConfigFactory;
@@ -77,9 +75,7 @@ public class BinaryTokenizerOperatorDescriptor extends AbstractSingleActivityOpe
             IRecordDescriptorProvider recordDescProvider, int partition, int nPartitions) throws HyracksDataException {
         return new BinaryTokenizerOperatorNodePushable(ctx,
                 recordDescProvider.getInputRecordDescriptor(getActivityId(), 0), outRecDescs[0],
-                tokenizerFactory.createTokenizer(),
-                fullTextConfigFactory.createFullTextConfig(),
-                docField, keyFields, addNumTokensKey, writeKeyFieldsFirst,
-                writeMissing, missingWriterFactory);
+                tokenizerFactory.createTokenizer(), fullTextConfigFactory.createFullTextConfig(), docField, keyFields,
+                addNumTokensKey, writeKeyFieldsFirst, writeMissing, missingWriterFactory);
     }
 }

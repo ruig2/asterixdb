@@ -21,7 +21,6 @@ package org.apache.hyracks.storage.am.lsm.invertedindex.dataflow;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.util.ArrayList;
 import java.util.Arrays;
 
 import org.apache.hyracks.api.comm.VSizeFrame;
@@ -39,7 +38,6 @@ import org.apache.hyracks.dataflow.common.data.accessors.FrameTupleReference;
 import org.apache.hyracks.dataflow.common.data.accessors.ITupleReference;
 import org.apache.hyracks.dataflow.std.base.AbstractUnaryInputUnaryOutputOperatorNodePushable;
 import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextConfig;
-import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextConfigFactory;
 import org.apache.hyracks.storage.am.lsm.invertedindex.tokenizers.IBinaryTokenizer;
 import org.apache.hyracks.storage.am.lsm.invertedindex.tokenizers.IToken;
 
@@ -64,10 +62,8 @@ public class BinaryTokenizerOperatorNodePushable extends AbstractUnaryInputUnary
     private FrameTupleAppender appender;
 
     public BinaryTokenizerOperatorNodePushable(IHyracksTaskContext ctx, RecordDescriptor inputRecDesc,
-            RecordDescriptor outputRecDesc, IBinaryTokenizer tokenizer,
-            IFullTextConfig fullTextConfig,
-            int docField, int[] keyFields,
-            boolean addNumTokensKey, boolean writeKeyFieldsFirst, boolean writeMissing,
+            RecordDescriptor outputRecDesc, IBinaryTokenizer tokenizer, IFullTextConfig fullTextConfig, int docField,
+            int[] keyFields, boolean addNumTokensKey, boolean writeKeyFieldsFirst, boolean writeMissing,
             IMissingWriterFactory missingWriterFactory) {
         this.ctx = ctx;
         this.tokenizer = tokenizer;
@@ -115,7 +111,8 @@ public class BinaryTokenizerOperatorNodePushable extends AbstractUnaryInputUnary
                     IToken token = tokenizer.getToken();
                     // in progress...
 
-                    String tokenStr = new String(token.getData(), token.getStartOffset()+1, token.getTokenLength()-1);
+                    String tokenStr =
+                            new String(token.getData(), token.getStartOffset() + 1, token.getTokenLength() - 1);
                     if (fullTextConfig.proceedTokens(Arrays.asList(tokenStr)).size() == 0) {
                         continue;
                     }

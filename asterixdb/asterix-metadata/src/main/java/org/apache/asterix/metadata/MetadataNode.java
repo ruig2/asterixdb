@@ -478,11 +478,12 @@ public class MetadataNode implements IMetadataNode {
     }
 
     @Override
-    public void removeUsedByIndicesFromFullTextConfig(TxnId txnId, String indexName) throws RemoteException, AlgebricksException {
+    public void removeUsedByIndicesFromFullTextConfig(TxnId txnId, String indexName)
+            throws RemoteException, AlgebricksException {
         List<IFullTextEntity> entities = getAllFullTextEntities(txnId);
         for (IFullTextEntity e : entities) {
-            if (e.getCategory() == IFullTextEntity.FullTextEntityCategory.CONFIG &&
-                    ((IFullTextConfig) e).getUsedByIndices().contains(indexName)) {
+            if (e.getCategory() == IFullTextEntity.FullTextEntityCategory.CONFIG
+                    && ((IFullTextConfig) e).getUsedByIndices().contains(indexName)) {
                 ((IFullTextConfig) e).getUsedByIndices().remove(indexName);
                 try {
                     modifyExistingFullTextEntityToCatalog(txnId, e);
