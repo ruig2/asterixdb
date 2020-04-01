@@ -349,6 +349,7 @@ public class FullTextContainsEvaluator implements IScalarEvaluator {
             // it should not exist.
             if (rightHashSet.find(keyEntry, queryArray, false) == -1) {
                 rightHashSet.put(keyEntry);
+                uniqueQueryTokenCount++;
             }
         }
 

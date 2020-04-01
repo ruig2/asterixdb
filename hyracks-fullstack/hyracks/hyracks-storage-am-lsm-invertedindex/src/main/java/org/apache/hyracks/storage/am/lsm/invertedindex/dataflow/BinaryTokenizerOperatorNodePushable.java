@@ -102,6 +102,7 @@ public class BinaryTokenizerOperatorNodePushable extends AbstractUnaryInputUnary
                 fullTextConfig.reset(tuple.getFieldData(docField), tuple.getFieldStart(docField),
                         tuple.getFieldLength(docField));
                 if (addNumTokensKey) {
+                    // Get the total number of tokens.
                     numTokens = fullTextConfig.getTokensCount();
                 }
                 // Write token and data into frame by following the order specified
