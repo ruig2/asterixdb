@@ -22,6 +22,7 @@ package org.apache.hyracks.storage.am.lsm.invertedindex.fulltext;
 import java.util.List;
 
 import org.apache.commons.lang3.EnumUtils;
+import org.apache.hyracks.storage.am.lsm.invertedindex.tokenizers.IToken;
 
 public interface IFullTextFilter extends IFullTextEntity {
     // case-insensitive
@@ -44,5 +45,8 @@ public interface IFullTextFilter extends IFullTextEntity {
 
     void addUsedByFTConfigs(String ftConfigName);
 
+    // ToDo: take IToken as input
     List<String> proceedTokens(List<String> tokens);
+
+    IToken processToken(IToken token);
 }

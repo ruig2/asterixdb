@@ -53,23 +53,18 @@ public class InvertedIndexTokenizingTupleIterator {
 
     public void reset(ITupleReference inputTuple) {
         this.inputTuple = inputTuple;
-        tokenizer.reset(inputTuple.getFieldData(DOC_FIELD_INDEX), inputTuple.getFieldStart(DOC_FIELD_INDEX),
+        fullTextConfig.reset(inputTuple.getFieldData(DOC_FIELD_INDEX), inputTuple.getFieldStart(DOC_FIELD_INDEX),
                 inputTuple.getFieldLength(DOC_FIELD_INDEX));
     }
 
     public boolean hasNext() {
-        // in progress... the next word can be a stopword
-        return tokenizer.hasNext();
+        return fullTextConfig.hasNext();
     }
 
     public void next() throws HyracksDataException {
-        tokenizer.next();
-        IToken token = tokenizer.getToken();
-        String word = new String(token.getData(), token.getStartOffset(), token.getTokenLength());
-        if (fullTextConfig.proceedTokens(Arrays.asList(word)).size() == 0) {
-            next();
-            return;
-        }
+        fullTextConfig.next();
+        IToken token = fullTextConfig.getToken();
+
         tupleBuilder.reset();
         // Add token field.
         try {

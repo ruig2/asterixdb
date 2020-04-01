@@ -128,32 +128,27 @@ public abstract class AbstractTOccurrenceSearcher implements IInvertedIndexSearc
     protected void tokenizeQuery(InvertedIndexSearchPredicate searchPred) throws HyracksDataException {
         ITupleReference queryTuple = searchPred.getQueryTuple();
         int queryFieldIndex = searchPred.getQueryFieldIndex();
-        IBinaryTokenizer queryTokenizer = searchPred.getQueryTokenizer();
         IFullTextConfig fullTextConfig = searchPred.getFullTextConfig();
+        fullTextConfig.setTokenizer(searchPred.getQueryTokenizer());
+
         // Is this a full-text query?
         // Then, the last argument is conjunctive or disjunctive search option, not a query text.
         // Thus, we need to remove the last argument.
         boolean isFullTextSearchQuery = searchPred.getIsFullTextSearchQuery();
         // Get the type of query tokenizer.
-        TokenizerType queryTokenizerType = queryTokenizer.getTokenizerType();
+        TokenizerType queryTokenizerType = fullTextConfig.getTokenizer().getTokenizerType();
         int tokenCountInOneField = 0;
 
         queryTokenAppender.reset(queryTokenFrame, true);
-        queryTokenizer.reset(queryTuple.getFieldData(queryFieldIndex), queryTuple.getFieldStart(queryFieldIndex),
+        fullTextConfig.reset(queryTuple.getFieldData(queryFieldIndex), queryTuple.getFieldStart(queryFieldIndex),
                 queryTuple.getFieldLength(queryFieldIndex));
 
-        while (queryTokenizer.hasNext()) {
-            queryTokenizer.next();
+        while (fullTextConfig.hasNext()) {
+            fullTextConfig.next();
             queryTokenBuilder.reset();
             tokenCountInOneField++;
             try {
-                IToken token = queryTokenizer.getToken();
-                // +1 to skip the first empty space
-                // in progress...Converting to string will lead to very fragile result
-                String word = new String(token.getData(), token.getStartOffset() + 1, token.getTokenLength() - 1);
-                if (fullTextConfig.proceedTokens(Arrays.asList(word)).size() == 0) {
-                    continue;
-                }
+                IToken token = fullTextConfig.getToken();
                 // For the full-text search, we don't support a phrase search yet.
                 // So, each field should have only one token.
                 // If it's a list, it can have multiple keywords in it. But, each keyword should not be a phrase.

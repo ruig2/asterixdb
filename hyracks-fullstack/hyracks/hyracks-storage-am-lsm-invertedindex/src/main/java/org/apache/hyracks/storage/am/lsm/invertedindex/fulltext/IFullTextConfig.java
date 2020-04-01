@@ -21,7 +21,10 @@ package org.apache.hyracks.storage.am.lsm.invertedindex.fulltext;
 
 import java.util.List;
 
+import com.google.common.collect.ImmutableList;
 import org.apache.commons.lang3.EnumUtils;
+import org.apache.hyracks.storage.am.lsm.invertedindex.tokenizers.IBinaryTokenizer;
+import org.apache.hyracks.storage.am.lsm.invertedindex.tokenizers.IToken;
 
 public interface IFullTextConfig extends IFullTextEntity {
     // case-insensitive
@@ -39,11 +42,27 @@ public interface IFullTextConfig extends IFullTextEntity {
 
     TokenizerCategory getTokenizerCategory();
 
-    List<IFullTextFilter> getFilters();
+    void setTokenizer(IBinaryTokenizer tokenizer);
+
+    IBinaryTokenizer getTokenizer();
+
+    ImmutableList<IFullTextFilter> getFilters();
 
     List<String> getUsedByIndices();
 
     void addUsedByIndices(String indexName);
+
+    void reset(byte[] data, int start, int length);
+
+    IToken getToken();
+
+    boolean hasNext();
+
+    void next();
+
+    // Get the total number of tokens
+    // Currently, it returns the number of tokens in the original text, that means stopwords are not removed
+    short getTokensCount();
 
     // in progress... Assume the input is tokenized already
     // ToDo: proceed in a stream way to avoid copying strings and tokens

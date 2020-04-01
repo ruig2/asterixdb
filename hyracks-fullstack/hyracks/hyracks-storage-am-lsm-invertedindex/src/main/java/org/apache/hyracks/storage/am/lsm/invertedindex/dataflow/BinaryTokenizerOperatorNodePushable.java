@@ -44,6 +44,7 @@ import org.apache.hyracks.storage.am.lsm.invertedindex.tokenizers.IToken;
 public class BinaryTokenizerOperatorNodePushable extends AbstractUnaryInputUnaryOutputOperatorNodePushable {
 
     private final IHyracksTaskContext ctx;
+    // ToDo: remove tokenizer because now we use fullTextConfig instead
     private final IBinaryTokenizer tokenizer;
     private final IFullTextConfig fullTextConfig;
     private final int docField;
@@ -98,24 +99,16 @@ public class BinaryTokenizerOperatorNodePushable extends AbstractUnaryInputUnary
             short numTokens = 0;
 
             if (!isDocFieldMissing(tuple)) {
-                tokenizer.reset(tuple.getFieldData(docField), tuple.getFieldStart(docField),
+                fullTextConfig.reset(tuple.getFieldData(docField), tuple.getFieldStart(docField),
                         tuple.getFieldLength(docField));
                 if (addNumTokensKey) {
-                    // Get the total number of tokens.
-                    numTokens = tokenizer.getTokensCount();
+                    numTokens = fullTextConfig.getTokensCount();
                 }
                 // Write token and data into frame by following the order specified
                 // in the writeKeyFieldsFirst field.
-                while (tokenizer.hasNext()) {
-                    tokenizer.next();
-                    IToken token = tokenizer.getToken();
-                    // in progress...
-
-                    String tokenStr =
-                            new String(token.getData(), token.getStartOffset() + 1, token.getTokenLength() - 1);
-                    if (fullTextConfig.proceedTokens(Arrays.asList(tokenStr)).size() == 0) {
-                        continue;
-                    }
+                while (fullTextConfig.hasNext()) {
+                    fullTextConfig.next();
+                    IToken token = fullTextConfig.getToken();
                     writeTuple(token, numTokens, i);
                 }
             } else if (writeMissing) {

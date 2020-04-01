@@ -85,9 +85,6 @@ public class FullTextContainsEvaluator implements IScalarEvaluator {
             BinaryComparatorFactoryProvider.UTF8STRING_LOWERCASE_TOKEN_POINTABLE_INSTANCE.createBinaryComparator();
     private final IBinaryComparator strLowerCaseCmp =
             BinaryComparatorFactoryProvider.UTF8STRING_LOWERCASE_POINTABLE_INSTANCE.createBinaryComparator();
-    // ToDo: use the tokenizer in full-text config
-    private IBinaryTokenizer tokenizerForLeftArray = null;
-    private IBinaryTokenizer tokenizerForRightArray = null;
 
     // Case insensitive hash for full-text search
     private IBinaryHashFunction hashFunc = null;
@@ -109,7 +106,8 @@ public class FullTextContainsEvaluator implements IScalarEvaluator {
     private int occurrenceThreshold = 1;
 
     private String fullTextConfigStr = "";
-    private IFullTextConfig config = null;
+    private IFullTextConfig configLeft = null;
+    private IFullTextConfig configRight = null;
 
     static final int HASH_SET_SLOT_SIZE = 101;
     static final int HASH_SET_FRAME_SIZE = 32768;
@@ -222,6 +220,10 @@ public class FullTextContainsEvaluator implements IScalarEvaluator {
         // Since a fulltext search form is "ftcontains(X,Y,options)",
         // X (document) is the left side and Y (query predicate) is the right side.
 
+        setFullTextOption(argOptions);
+        configLeft = MetadataManager.INSTANCE.getFullTextConfig(mdTxnCtx, fullTextConfigStr);
+        configRight = MetadataManager.INSTANCE.getFullTextConfig(mdTxnCtx, fullTextConfigStr);
+
         // Initialize variables that are required to conduct full-text search. (e.g., hash-set, tokenizer ...)
         if (rightHashSet == null) {
             initializeFullTextContains();
@@ -255,12 +257,15 @@ public class FullTextContainsEvaluator implements IScalarEvaluator {
         // Parameter: number of bucket, frame size, hashFunction, Comparator, byte array
         // that contains the key (this array will be set later.)
         rightHashSet = new BinaryHashSet(HASH_SET_SLOT_SIZE, HASH_SET_FRAME_SIZE, hashFunc, strLowerCaseTokenCmp, null);
-        tokenizerForLeftArray = BinaryTokenizerFactoryProvider.INSTANCE
+        IBinaryTokenizer tokenizerForLeftArray = BinaryTokenizerFactoryProvider.INSTANCE
                 .getWordTokenizerFactory(ATypeTag.STRING, false, true).createTokenizer();
+        configLeft.setTokenizer(tokenizerForLeftArray);
     }
 
     void resetQueryArrayAndRight(MetadataTransactionContext mdTxnCtx, byte[] arg2Array, ATypeTag typeTag2,
             IPointable arg2) throws HyracksDataException, AlgebricksException, RemoteException {
+
+        IBinaryTokenizer tokenizerForRightArray = null;
         // If the right side is an (un)ordered list, we need to apply the (un)ordered list tokenizer.
         switch (typeTag2) {
             case ARRAY:
@@ -278,6 +283,7 @@ public class FullTextContainsEvaluator implements IScalarEvaluator {
             default:
                 break;
         }
+        configRight.setTokenizer(tokenizerForRightArray);
 
         queryArray = arg2Array;
         queryArrayStartOffset = arg2.getStartOffset();
@@ -291,8 +297,6 @@ public class FullTextContainsEvaluator implements IScalarEvaluator {
         int queryTokenCount = 0;
         int uniqueQueryTokenCount = 0;
 
-        fullTextConfigStr = "";
-
         int numBytesToStoreLength;
 
         // Reset the tokenizer for the given keywords in the given query
@@ -303,22 +307,18 @@ public class FullTextContainsEvaluator implements IScalarEvaluator {
             queryArrayStartOffset = queryArrayStartOffset + numBytesToStoreLength;
             queryArrayLength = queryArrayLength - numBytesToStoreLength;
         }
-        tokenizerForRightArray.reset(queryArray, queryArrayStartOffset, queryArrayLength);
+        configRight.reset(queryArray, queryArrayStartOffset, queryArrayLength);
 
-        // Apply the full-text search option here
-        setFullTextOption(argOptions);
-        config = MetadataManager.INSTANCE.getFullTextConfig(mdTxnCtx, fullTextConfigStr);
-
-        // ToDo: use the tokenizer in config
         // Create tokens from the given query predicate
-        while (tokenizerForRightArray.hasNext()) {
-            tokenizerForRightArray.next();
+        while (configRight.hasNext()) {
+            configRight.next();
             queryTokenCount++;
 
+            IToken token = configRight.getToken();
             // Insert the starting position and the length of the current token into the hash set.
             // We don't store the actual value of this token since we can access it via offset and length.
-            int tokenOffset = tokenizerForRightArray.getToken().getStartOffset();
-            int tokenLength = tokenizerForRightArray.getToken().getTokenLength();
+            int tokenOffset = token.getStartOffset();
+            int tokenLength = token.getTokenLength();
 
             // If a token comes from a string tokenizer, each token doesn't have the length data
             // in the beginning. Instead, if a token comes from an (un)ordered list, each token has
@@ -328,8 +328,7 @@ public class FullTextContainsEvaluator implements IScalarEvaluator {
             if (typeTag2 == ATypeTag.ARRAY || typeTag2 == ATypeTag.MULTISET) {
                 // How many bytes are required to store the length of the given token?
                 numBytesToStoreLength = UTF8StringUtil.getNumBytesToStoreLength(
-                        UTF8StringUtil.getUTFLength(tokenizerForRightArray.getToken().getData(),
-                                tokenizerForRightArray.getToken().getStartOffset()));
+                        UTF8StringUtil.getUTFLength(token.getData(), token.getStartOffset()));
                 tokenOffset = tokenOffset + numBytesToStoreLength;
                 tokenLength = tokenLength - numBytesToStoreLength;
             }
@@ -349,11 +348,7 @@ public class FullTextContainsEvaluator implements IScalarEvaluator {
             // Thus, when we find the current token (we don't increase the count in this case),
             // it should not exist.
             if (rightHashSet.find(keyEntry, queryArray, false) == -1) {
-                String keyStr = new String(queryArray, keyEntry.getOffset(), keyEntry.getLength());
-                if (config == null || config.proceedTokens(Arrays.asList(keyStr)).size() > 0) {
-                    rightHashSet.put(keyEntry);
-                    uniqueQueryTokenCount++;
-                }
+                rightHashSet.put(keyEntry);
             }
         }
 
@@ -432,22 +427,15 @@ public class FullTextContainsEvaluator implements IScalarEvaluator {
         int length = arg1.getLength() - numBytesToStoreLength;
 
         String tstr = new String(arg1.getByteArray(), startOffset, length);
-        tokenizerForLeftArray.reset(arg1.getByteArray(), startOffset, length);
+        configLeft.reset(arg1.getByteArray(), startOffset, length);
 
         // Creates tokens from a field in the left side (document)
-        while (tokenizerForLeftArray.hasNext()) {
-            tokenizerForLeftArray.next();
+        while (configLeft.hasNext()) {
+            configLeft.next();
 
-            IToken t = tokenizerForLeftArray.getToken();
-            String tokenStr = new String(t.getData(), t.getStartOffset(), t.getTokenLength());
-
-            if (config != null && config.proceedTokens(Arrays.asList(tokenStr)).size() == 0) {
-                continue;
-            }
-
+            IToken token = configLeft.getToken();
             // Records the starting position and the length of the current token.
-            keyEntry.set(tokenizerForLeftArray.getToken().getStartOffset(),
-                    tokenizerForLeftArray.getToken().getTokenLength());
+            keyEntry.set(token.getStartOffset(), token.getTokenLength());
 
             // Checks whether this token exists in the query hash-set.
             // We don't count multiple occurrence of a token now.

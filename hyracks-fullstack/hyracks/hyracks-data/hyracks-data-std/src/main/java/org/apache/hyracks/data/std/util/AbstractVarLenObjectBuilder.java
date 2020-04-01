@@ -21,6 +21,7 @@ package org.apache.hyracks.data.std.util;
 
 import java.io.DataOutput;
 import java.io.IOException;
+import java.io.Serializable;
 
 import org.apache.hyracks.util.encoding.VarLenIntEncoderDecoder;
 
@@ -33,7 +34,7 @@ import org.apache.hyracks.util.encoding.VarLenIntEncoderDecoder;
  * Then internally this builder will take care of storing the actual length field at the beginning of the
  * given storage array.
  */
-public abstract class AbstractVarLenObjectBuilder {
+public abstract class AbstractVarLenObjectBuilder implements Serializable {
     protected GrowableArray ary;
     protected DataOutput out;
     protected int startOffset;

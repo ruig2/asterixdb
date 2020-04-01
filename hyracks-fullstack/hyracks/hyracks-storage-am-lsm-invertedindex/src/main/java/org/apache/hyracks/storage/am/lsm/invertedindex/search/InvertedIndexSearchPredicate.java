@@ -38,6 +38,7 @@ public class InvertedIndexSearchPredicate extends AbstractSearchPredicate {
     // We need to have this information to stop the search process since we don't allow a phrase search yet.
     private boolean isFullTextSearchQuery;
 
+    // Used for test only
     public InvertedIndexSearchPredicate(IBinaryTokenizer queryTokenizer, IFullTextConfig fullTextConfig,
             IInvertedIndexSearchModifier searchModifier) {
         this.queryTokenizer = queryTokenizer;

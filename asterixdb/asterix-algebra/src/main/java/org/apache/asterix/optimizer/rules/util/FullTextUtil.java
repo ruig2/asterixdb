@@ -58,7 +58,7 @@ public class FullTextUtil {
 
         // ToDo: wrap the expressions in a ftcontains() function into a dedicated Java object
         // so that we don't cast the types many times
-        String configName = FullTextConfig.DEFAULT_FULL_TEXT_CONFIG.getName();
+        String configName = FullTextConfig.DEFAULT_FULL_TEXT_CONFIG_NAME;
         List<Mutable<ILogicalExpression>> arguments = funcExpr.getArguments();
         for (int i = 0; i < arguments.size() - 1; i++) {
             String optionName = "";

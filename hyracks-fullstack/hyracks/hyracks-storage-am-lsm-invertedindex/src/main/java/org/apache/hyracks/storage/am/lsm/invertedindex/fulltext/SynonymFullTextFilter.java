@@ -21,6 +21,8 @@ package org.apache.hyracks.storage.am.lsm.invertedindex.fulltext;
 import java.util.List;
 
 import com.google.common.collect.ImmutableMap;
+import org.apache.hyracks.storage.am.lsm.invertedindex.tokenizers.IToken;
+import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 public class SynonymFullTextFilter extends AbstractFullTextFilter {
     private static final long serialVersionUID = 1L;
@@ -35,5 +37,9 @@ public class SynonymFullTextFilter extends AbstractFullTextFilter {
     @Override
     public List<String> proceedTokens(List<String> tokens) {
         return null;
+    }
+
+    @Override public IToken processToken(IToken token) {
+        throw new NotImplementedException();
     }
 }

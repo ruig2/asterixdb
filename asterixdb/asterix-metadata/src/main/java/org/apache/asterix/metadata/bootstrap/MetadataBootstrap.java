@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import com.google.common.collect.ImmutableList;
 import org.apache.asterix.common.api.ILSMComponentIdGeneratorFactory;
 import org.apache.asterix.common.api.INcApplicationContext;
 import org.apache.asterix.common.config.DatasetConfig.DatasetType;
@@ -89,6 +90,7 @@ import org.apache.hyracks.storage.am.lsm.common.impls.ConstantMergePolicyFactory
 import org.apache.hyracks.storage.am.lsm.common.impls.NoMergePolicyFactory;
 import org.apache.hyracks.storage.am.lsm.common.impls.PrefixMergePolicyFactory;
 import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.FullTextConfig;
+import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextConfig;
 import org.apache.hyracks.storage.common.ILocalResourceRepository;
 import org.apache.hyracks.storage.common.LocalResource;
 import org.apache.hyracks.storage.common.compression.NoOpCompressorDecompressorFactory;
@@ -271,7 +273,14 @@ public class MetadataBootstrap {
 
     private static void insertInitialFullTextConfig(MetadataTransactionContext mdTxnCtx)
             throws AlgebricksException, HyracksDataException, RemoteException {
-        MetadataManager.INSTANCE.addFulltextConfig(mdTxnCtx, FullTextConfig.DEFAULT_FULL_TEXT_CONFIG);
+        MetadataManager.INSTANCE.addFulltextConfig(
+                mdTxnCtx,
+                new FullTextConfig(
+                        FullTextConfig.DEFAULT_FULL_TEXT_CONFIG_NAME,
+                        IFullTextConfig.TokenizerCategory.WORD,
+                        ImmutableList.of()
+                )
+        );
         if (LOGGER.isInfoEnabled()) {
             LOGGER.info("Finished inserting built-in full-text config.");
         }

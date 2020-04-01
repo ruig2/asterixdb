@@ -34,6 +34,7 @@ public class BinaryTokenizerFactoryProvider implements IBinaryTokenizerFactoryPr
 
     public static final BinaryTokenizerFactoryProvider INSTANCE = new BinaryTokenizerFactoryProvider();
 
+    // ToDo: rename aqlStringTokenizer to aqlStringTokenizerFactory because this is a **factory**
     private static final IBinaryTokenizerFactory aqlStringTokenizer =
             new DelimitedUTF8StringBinaryTokenizerFactory(true, true,
                     new UTF8WordTokenFactory(ATypeTag.SERIALIZED_STRING_TYPE_TAG, ATypeTag.SERIALIZED_INT32_TYPE_TAG));

@@ -30,33 +30,91 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.collect.ImmutableList;
+import org.apache.hyracks.storage.am.lsm.invertedindex.tokenizers.IToken;
+import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 public class FullTextConfig extends AbstractFullTextConfig {
     private static final long serialVersionUID = 1L;
 
     public FullTextConfig(String name, TokenizerCategory tokenizerCategory, ImmutableList<IFullTextFilter> filters) {
-        super(name, tokenizerCategory, filters);
+        super(name, tokenizerCategory, filters, new ArrayList<>());
     }
 
+    // For usage in fromJson() only where usedByIndices of an existing full-text config written on disk may not be null.
     public FullTextConfig(String name, TokenizerCategory tokenizerCategory, ImmutableList<IFullTextFilter> filters,
             List<String> usedByIndices) {
         super(name, tokenizerCategory, filters, usedByIndices);
     }
 
+    //// ToDo: use the tokenizer inside
     @Override
-    // ToDo: use the tokenizer inside
     public List<String> proceedTokens(List<String> tokens) {
         List<String> results = new ArrayList<>(tokens);
         for (IFullTextFilter filter : filters) {
             results = filter.proceedTokens(results);
         }
 
+        System.out.println("ftconfig " + name + " output: \t" + (results.size() == 0 ? "null" : results.get(0)) + "\n");
         return results;
     }
 
-    // This built-in default one will be used when no full-text config is specified by the user
-    public static final FullTextConfig DEFAULT_FULL_TEXT_CONFIG =
-            new FullTextConfig("DEFAULT_FULL_TEXT_CONFIG", TokenizerCategory.WORD, ImmutableList.of());
+    // This built-in default full-text config will be used only when no full-text config is specified by the user
+    // Note that on the Asterix layer, the default config should be fetched from MetadataProvider via config name when possible
+    // so that it has the latest usedByIndices field
+    public static final String DEFAULT_FULL_TEXT_CONFIG_NAME = "DEFAULT_FULL_TEXT_CONFIG";
+
+    /*
+       tokenizerForRightArray.reset(queryArray, queryArrayStartOffset, queryArrayLength);
+        while (tokenizerForRightArray.hasNext()) {
+            tokenizerForRightArray.next();
+            Token token =  tokenizerForRightArray.getToken();
+     */
+
+    private IToken currentToken = null;
+    private IToken nextToken = null;
+
+    @Override public void reset(byte[] data, int start, int length) {
+        currentToken = null;
+        nextToken = null;
+        tokenizer.reset(data, start, length);
+    }
+
+    @Override public IToken getToken() {
+        return currentToken;
+    }
+
+    @Override public boolean hasNext() {
+        if (nextToken != null) {
+            return true;
+        }
+
+        while (tokenizer.hasNext()) {
+            tokenizer.next();
+            IToken candidateToken = tokenizer.getToken();
+            for (IFullTextFilter filter: filters) {
+                candidateToken = filter.processToken(candidateToken);
+                if (candidateToken == null) {
+                    break;
+                }
+            }
+
+            if (candidateToken != null) {
+                nextToken = candidateToken;
+                break;
+            }
+        }
+
+        return nextToken != null;
+    }
+
+    @Override public void next() {
+        currentToken = nextToken;
+        nextToken = null;
+    }
+
+    @Override public short getTokensCount() {
+        return tokenizer.getTokensCount();
+    }
 
     @Override
     public JsonNode toJson(IPersistedResourceRegistry registry) throws HyracksDataException {

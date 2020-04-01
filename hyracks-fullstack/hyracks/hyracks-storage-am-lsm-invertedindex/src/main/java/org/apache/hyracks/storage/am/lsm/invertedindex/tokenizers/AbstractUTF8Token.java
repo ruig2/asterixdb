@@ -20,12 +20,13 @@ package org.apache.hyracks.storage.am.lsm.invertedindex.tokenizers;
 
 import java.io.DataOutput;
 import java.io.IOException;
+import java.io.Serializable;
 
 import org.apache.hyracks.data.std.util.GrowableArray;
 import org.apache.hyracks.data.std.util.UTF8StringBuilder;
 import org.apache.hyracks.util.string.UTF8StringUtil;
 
-public abstract class AbstractUTF8Token implements IToken {
+public abstract class AbstractUTF8Token implements IToken, Serializable {
     public static final int GOLDEN_RATIO_32 = 0x09e3779b9;
 
     protected byte[] data;

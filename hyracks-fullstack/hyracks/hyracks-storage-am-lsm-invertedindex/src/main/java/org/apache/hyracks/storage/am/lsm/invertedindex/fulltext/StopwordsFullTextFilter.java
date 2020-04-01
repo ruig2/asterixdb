@@ -30,6 +30,9 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.collect.ImmutableList;
+import org.apache.hyracks.storage.am.lsm.invertedindex.tokenizers.IToken;
+import org.apache.hyracks.util.string.UTF8StringUtil;
+import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 public class StopwordsFullTextFilter extends AbstractFullTextFilter {
     private static final long serialVersionUID = 1L;
@@ -55,6 +58,17 @@ public class StopwordsFullTextFilter extends AbstractFullTextFilter {
             }
         }
         return result;
+    }
+
+    @Override public IToken processToken(IToken token) {
+        String str = UTF8StringUtil.toString(token.getData(), token.getStartOffset());
+        System.out.print(str + " ");
+        if (stopwordList.contains(str)) {
+            System.out.println("contains");
+            //return null;
+        }
+        System.out.println();
+        return token;
     }
 
     @Override

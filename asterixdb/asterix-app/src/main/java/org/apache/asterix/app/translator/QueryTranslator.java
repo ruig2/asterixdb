@@ -1013,7 +1013,7 @@ public class QueryTranslator extends AbstractLangTranslator implements IStatemen
             // The index is of TYPE FULLTEXT in SQLPP
             if (stmtCreateIndex.getIndexType() == IndexType.SINGLE_PARTITION_WORD_INVIX
                     && Strings.isNullOrEmpty(fullTextConfigName)) {
-                fullTextConfigName = FullTextConfig.DEFAULT_FULL_TEXT_CONFIG.getName();
+                fullTextConfigName = FullTextConfig.DEFAULT_FULL_TEXT_CONFIG_NAME;
             }
 
             Index newIndex =
@@ -1902,7 +1902,7 @@ public class QueryTranslator extends AbstractLangTranslator implements IStatemen
             IHyracksClientConnection hcc, IRequestParameters requestParameters)
             throws RemoteException, AlgebricksException {
         FullTextConfigDropStatement stmtConfigDrop = (FullTextConfigDropStatement) stmt;
-        if (stmtConfigDrop.getConfigName().equalsIgnoreCase(FullTextConfig.DEFAULT_FULL_TEXT_CONFIG.getName())) {
+        if (stmtConfigDrop.getConfigName().equalsIgnoreCase(FullTextConfig.DEFAULT_FULL_TEXT_CONFIG_NAME)) {
             throw new AlgebricksException("Not allowed to drop the default full-text config");
         }
 

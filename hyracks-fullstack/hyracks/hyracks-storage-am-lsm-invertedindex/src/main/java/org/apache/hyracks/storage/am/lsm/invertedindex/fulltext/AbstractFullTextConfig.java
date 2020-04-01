@@ -19,26 +19,29 @@
 
 package org.apache.hyracks.storage.am.lsm.invertedindex.fulltext;
 
-import java.util.ArrayList;
+import java.security.InvalidParameterException;
 import java.util.List;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableList;
+import org.apache.hyracks.storage.am.lsm.invertedindex.tokenizers.DelimitedUTF8StringBinaryTokenizerFactory;
+import org.apache.hyracks.storage.am.lsm.invertedindex.tokenizers.IBinaryTokenizer;
+import org.apache.hyracks.storage.am.lsm.invertedindex.tokenizers.ITokenFactory;
+import org.apache.hyracks.storage.am.lsm.invertedindex.tokenizers.UTF8WordTokenFactory;
+import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 public abstract class AbstractFullTextConfig implements IFullTextConfig {
     protected final String name;
     protected final TokenizerCategory tokenizerCategory;
+    // By default, the tokenizer should be of the type DelimitedUTF8StringBinaryTokenizer
+    // tokenizer needs be replaced on-the-fly when used in the ftcontains() function
+    // ftcontains() can take two types of input:
+    // 1) string where a default DelimitedUTF8StringBinaryTokenizer is fine,
+    // and 2) a list of string as input where we may need a AUnorderedListBinaryTokenizer or AOrderedListBinaryTokenizer
+    protected IBinaryTokenizer tokenizer;
     protected ImmutableList<IFullTextFilter> filters;
     protected List<String> usedByIndices;
     protected static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
-
-    protected AbstractFullTextConfig(String name, TokenizerCategory tokenizerCategory,
-            ImmutableList<IFullTextFilter> filters) {
-        this.name = name;
-        this.tokenizerCategory = tokenizerCategory;
-        this.filters = filters;
-        this.usedByIndices = new ArrayList<String>();
-    }
 
     protected AbstractFullTextConfig(String name, TokenizerCategory tokenizerCategory,
             ImmutableList<IFullTextFilter> filters, List<String> usedByIndices) {
@@ -46,6 +49,20 @@ public abstract class AbstractFullTextConfig implements IFullTextConfig {
         this.tokenizerCategory = tokenizerCategory;
         this.filters = filters;
         this.usedByIndices = usedByIndices;
+
+        ITokenFactory tokenFactory = null;
+        switch (tokenizerCategory) {
+            case WORD:
+                this.tokenizer = new DelimitedUTF8StringBinaryTokenizerFactory(true, false,
+                        new UTF8WordTokenFactory()).createTokenizer();
+                break;
+            case NGRAM:
+                throw new NotImplementedException();
+                //this.tokenizer = new NGramUTF8StringBinaryTokenizerFactory(gramLength, usePrePost, true, true,
+                //        new UTF8NGramTokenFactory());
+            default:
+                throw new InvalidParameterException();
+        }
     }
 
     @Override
@@ -64,7 +81,7 @@ public abstract class AbstractFullTextConfig implements IFullTextConfig {
     }
 
     @Override
-    public List<IFullTextFilter> getFilters() {
+    public ImmutableList<IFullTextFilter> getFilters() {
         return filters;
     }
 
@@ -76,5 +93,15 @@ public abstract class AbstractFullTextConfig implements IFullTextConfig {
     @Override
     public void addUsedByIndices(String indexName) {
         this.usedByIndices.add(indexName);
+    }
+
+    @Override
+    public void setTokenizer(IBinaryTokenizer tokenizer) {
+        this.tokenizer = tokenizer;
+    }
+
+    @Override
+    public IBinaryTokenizer getTokenizer() {
+        return this.tokenizer;
     }
 }
