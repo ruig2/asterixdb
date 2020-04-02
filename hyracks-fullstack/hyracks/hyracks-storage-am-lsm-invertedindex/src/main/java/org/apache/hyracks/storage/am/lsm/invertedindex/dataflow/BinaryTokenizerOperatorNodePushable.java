@@ -69,6 +69,8 @@ public class BinaryTokenizerOperatorNodePushable extends AbstractUnaryInputUnary
         this.ctx = ctx;
         this.tokenizer = tokenizer;
         this.fullTextConfig = fullTextConfig;
+        this.fullTextConfig.setTokenizer(tokenizer);
+
         this.docField = docField;
         this.keyFields = keyFields;
         this.addNumTokensKey = addNumTokensKey;
