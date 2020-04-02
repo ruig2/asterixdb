@@ -427,7 +427,6 @@ public class FullTextContainsEvaluator implements IScalarEvaluator {
         int startOffset = arg1.getStartOffset() + numBytesToStoreLength;
         int length = arg1.getLength() - numBytesToStoreLength;
 
-        String tstr = new String(arg1.getByteArray(), startOffset, length);
         configLeft.reset(arg1.getByteArray(), startOffset, length);
 
         // Creates tokens from a field in the left side (document)

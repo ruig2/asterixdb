@@ -53,8 +53,14 @@ public abstract class AbstractFullTextConfig implements IFullTextConfig {
         ITokenFactory tokenFactory = null;
         switch (tokenizerCategory) {
             case WORD:
-                this.tokenizer = new DelimitedUTF8StringBinaryTokenizerFactory(true, false,
-                        new UTF8WordTokenFactory()).createTokenizer();
+                // Similar to aqlStringTokenizer which is in the upper Asterix layer
+                // ToDo: should we move aqlStringTokenizer so that it can be called in the Hyracks layer?
+                // If so, we need to move ATypeTag to Hyracks as well
+                this.tokenizer = new DelimitedUTF8StringBinaryTokenizerFactory(true, true,
+                        new UTF8WordTokenFactory(
+                                (byte)13, // ATypeTag.SERIALIZED_STRING_TYPE_TAG
+                                (byte)3)  // ATypeTag.SERIALIZED_INT32_TYPE_TAG
+                ).createTokenizer();
                 break;
             case NGRAM:
                 throw new NotImplementedException();

@@ -67,9 +67,10 @@ public class BinaryTokenizerOperatorNodePushable extends AbstractUnaryInputUnary
             int[] keyFields, boolean addNumTokensKey, boolean writeKeyFieldsFirst, boolean writeMissing,
             IMissingWriterFactory missingWriterFactory) {
         this.ctx = ctx;
+        // ToDo: remove tokenizer because now we have fullTextConfig
         this.tokenizer = tokenizer;
         this.fullTextConfig = fullTextConfig;
-        this.fullTextConfig.setTokenizer(tokenizer);
+        // this.fullTextConfig.setTokenizer(tokenizer);
 
         this.docField = docField;
         this.keyFields = keyFields;

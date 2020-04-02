@@ -23,6 +23,7 @@ import java.util.List;
 
 import org.apache.commons.lang3.EnumUtils;
 import org.apache.hyracks.storage.am.lsm.invertedindex.tokenizers.IToken;
+import org.apache.hyracks.storage.am.lsm.invertedindex.tokenizers.TokenizerInfo;
 
 public interface IFullTextFilter extends IFullTextEntity {
     // case-insensitive
@@ -48,5 +49,5 @@ public interface IFullTextFilter extends IFullTextEntity {
     // ToDo: take IToken as input
     List<String> proceedTokens(List<String> tokens);
 
-    IToken processToken(IToken token);
+    IToken processToken(TokenizerInfo.TokenizerType tokenizerType, IToken token);
 }

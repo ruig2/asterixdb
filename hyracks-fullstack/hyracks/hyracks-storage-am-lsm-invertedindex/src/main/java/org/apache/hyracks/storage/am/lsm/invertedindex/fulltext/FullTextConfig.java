@@ -95,7 +95,12 @@ public class FullTextConfig extends AbstractFullTextConfig {
             tokenizer.next();
             IToken candidateToken = tokenizer.getToken();
             for (IFullTextFilter filter: filters) {
-                candidateToken = filter.processToken(candidateToken);
+                // ToDo: Tokenizer of TokenizerType.List would return strings starting with the length,
+                // e.g. 8database where 8 is the length
+                // Should we let TokenizerType.List returns the same thing as TokenizerType.String to make things easier?
+                // Otherwise, filters need tokenizer.getTokenizerType to decide if they need to remove the length themselves
+                candidateToken = filter.processToken(tokenizer.getTokenizerType(), candidateToken);
+                // null means the token is removed, i.e. it is a stopword
                 if (candidateToken == null) {
                     break;
                 }

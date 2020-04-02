@@ -22,7 +22,7 @@ import java.util.List;
 
 import com.google.common.collect.ImmutableMap;
 import org.apache.hyracks.storage.am.lsm.invertedindex.tokenizers.IToken;
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
+import org.apache.hyracks.storage.am.lsm.invertedindex.tokenizers.TokenizerInfo;
 
 public class SynonymFullTextFilter extends AbstractFullTextFilter {
     private static final long serialVersionUID = 1L;
@@ -39,7 +39,7 @@ public class SynonymFullTextFilter extends AbstractFullTextFilter {
         return null;
     }
 
-    @Override public IToken processToken(IToken token) {
-        throw new NotImplementedException();
+    @Override public IToken processToken(TokenizerInfo.TokenizerType tokenizerType, IToken token) {
+        return null;
     }
 }

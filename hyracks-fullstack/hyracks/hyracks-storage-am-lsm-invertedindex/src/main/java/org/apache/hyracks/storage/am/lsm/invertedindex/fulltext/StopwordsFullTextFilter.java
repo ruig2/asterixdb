@@ -31,6 +31,7 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.collect.ImmutableList;
 import org.apache.hyracks.storage.am.lsm.invertedindex.tokenizers.IToken;
+import org.apache.hyracks.storage.am.lsm.invertedindex.tokenizers.TokenizerInfo;
 import org.apache.hyracks.util.string.UTF8StringUtil;
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
@@ -60,17 +61,26 @@ public class StopwordsFullTextFilter extends AbstractFullTextFilter {
         return result;
     }
 
-    @Override public IToken processToken(IToken token) {
-        // ToDo: in progress...
-        /*
-        String str = UTF8StringUtil.toString(token.getData(), token.getStartOffset());
-        System.out.print(str + " ");
+    @Override public IToken processToken(TokenizerInfo.TokenizerType tokenizerType, IToken token) {
+        int start = token.getStartOffset();
+        int length = token.getTokenLength();
+
+        // The List tokenizer returns token starting with the token length,
+        // e.g. 8database where the byte of value 8 means the token has a length of 8
+        // We need to skip the length to fetch the pure string (e.g. "database" without 8)
+        if (tokenizerType == TokenizerInfo.TokenizerType.LIST) {
+            start++;
+            length--;
+        }
+
+        String str = UTF8StringUtil.getUTF8StringInArrayWithOffset(token.getData(), start, length);
+        System.out.print(str + " len " + str.length() );
         if (stopwordList.contains(str)) {
             System.out.println("contains");
-            //return null;
+            return null;
         }
         System.out.println();
-         */
+
         return token;
     }
 

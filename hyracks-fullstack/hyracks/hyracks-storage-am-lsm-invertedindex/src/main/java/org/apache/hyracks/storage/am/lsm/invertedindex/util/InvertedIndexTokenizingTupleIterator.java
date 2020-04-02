@@ -50,7 +50,8 @@ public class InvertedIndexTokenizingTupleIterator {
         this.tokenizer = tokenizer;
         this.fullTextConfig = fullTextConfig;
 
-        this.fullTextConfig.setTokenizer(this.tokenizer);
+        // ToDo: remove tokenizer because now we have fullTextConfig
+        // this.fullTextConfig.setTokenizer(this.tokenizer);
     }
 
     public void reset(ITupleReference inputTuple) {
