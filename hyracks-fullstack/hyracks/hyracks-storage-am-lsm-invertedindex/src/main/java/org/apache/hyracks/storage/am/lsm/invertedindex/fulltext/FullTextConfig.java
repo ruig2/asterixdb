@@ -31,7 +31,7 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.collect.ImmutableList;
 import org.apache.hyracks.storage.am.lsm.invertedindex.tokenizers.IToken;
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
+import static org.apache.hyracks.util.string.UTF8StringUtil.getUTF8StringInArrayWithOffset;
 
 public class FullTextConfig extends AbstractFullTextConfig {
     private static final long serialVersionUID = 1L;
@@ -80,6 +80,9 @@ public class FullTextConfig extends AbstractFullTextConfig {
     }
 
     @Override public IToken getToken() {
+        String s = getUTF8StringInArrayWithOffset(currentToken.getData(), currentToken.getStartOffset(), currentToken.getTokenLength());
+        System.out.println("current token: " + s + " len: " + s.length() );
+
         return currentToken;
     }
 

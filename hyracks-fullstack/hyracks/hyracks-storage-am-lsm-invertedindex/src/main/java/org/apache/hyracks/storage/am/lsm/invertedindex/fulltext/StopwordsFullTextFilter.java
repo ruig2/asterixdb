@@ -61,6 +61,8 @@ public class StopwordsFullTextFilter extends AbstractFullTextFilter {
     }
 
     @Override public IToken processToken(IToken token) {
+        // ToDo: in progress...
+        /*
         String str = UTF8StringUtil.toString(token.getData(), token.getStartOffset());
         System.out.print(str + " ");
         if (stopwordList.contains(str)) {
@@ -68,6 +70,7 @@ public class StopwordsFullTextFilter extends AbstractFullTextFilter {
             //return null;
         }
         System.out.println();
+         */
         return token;
     }
 

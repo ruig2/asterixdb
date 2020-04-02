@@ -340,6 +340,18 @@ public class UTF8StringUtil {
         printUTF8String(str, os, false);
     }
 
+    public static String getUTF8StringInArrayWithOffset(byte[] b, int start, int len) {
+        StringBuilder builder = new StringBuilder();
+
+        for (int i = start; i < start+len; ) {
+            char c = UTF8StringUtil.charAt(b, i);
+            builder.append(c);
+            i += UTF8StringUtil.charSize(b, i);
+        }
+
+        return builder.toString();
+    }
+
     public static int encodeUTF8Length(int length, byte[] bytes, int start) {
         return VarLenIntEncoderDecoder.encode(length, bytes, start);
     }

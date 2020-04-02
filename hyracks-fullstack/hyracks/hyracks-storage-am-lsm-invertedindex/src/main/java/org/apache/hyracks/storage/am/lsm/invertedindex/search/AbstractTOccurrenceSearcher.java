@@ -54,6 +54,7 @@ import org.apache.hyracks.storage.am.lsm.invertedindex.tokenizers.IToken;
 import org.apache.hyracks.storage.am.lsm.invertedindex.tokenizers.TokenizerInfo.TokenizerType;
 import org.apache.hyracks.storage.am.lsm.invertedindex.util.ObjectCache;
 import org.apache.hyracks.storage.common.MultiComparator;
+import static org.apache.hyracks.util.string.UTF8StringUtil.getUTF8StringInArrayWithOffset;
 
 public abstract class AbstractTOccurrenceSearcher implements IInvertedIndexSearcher {
     protected static final RecordDescriptor QUERY_TOKEN_REC_DESC =
@@ -165,6 +166,12 @@ public abstract class AbstractTOccurrenceSearcher implements IInvertedIndexSearc
                     }
                 }
 
+                //token.reset(token.getData(), token.getStartOffset()+1, token.getEndOffset(), token.getTokenLength()-1, token.getTokenLength());
+
+                String s = getUTF8StringInArrayWithOffset(token.getData(), token.getStartOffset(), token.getTokenLength());
+                System.out.println("Updated token: " + s + " len: " + s.length() );
+
+                // Includes the length of the string, e.g. 8database where 8 (of type byte instead of char) is the length of "database"
                 token.serializeToken(queryTokenBuilder.getFieldData());
                 queryTokenBuilder.addFieldEndOffset();
                 // WARNING: assuming one frame is big enough to hold all tokens

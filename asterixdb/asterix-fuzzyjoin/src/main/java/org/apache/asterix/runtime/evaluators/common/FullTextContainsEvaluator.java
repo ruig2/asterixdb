@@ -20,7 +20,6 @@ package org.apache.asterix.runtime.evaluators.common;
 
 import java.io.DataOutput;
 import java.rmi.RemoteException;
-import java.util.Arrays;
 
 import org.apache.asterix.formats.nontagged.BinaryComparatorFactoryProvider;
 import org.apache.asterix.formats.nontagged.BinaryTokenizerFactoryProvider;
@@ -51,6 +50,7 @@ import org.apache.hyracks.data.std.util.ArrayBackedValueStorage;
 import org.apache.hyracks.data.std.util.BinaryEntry;
 import org.apache.hyracks.data.std.util.BinaryHashSet;
 import org.apache.hyracks.dataflow.common.data.accessors.IFrameTupleReference;
+import static org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.FullTextConfig.DEFAULT_FULL_TEXT_CONFIG_NAME;
 import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextConfig;
 import org.apache.hyracks.storage.am.lsm.invertedindex.tokenizers.DelimitedUTF8StringBinaryTokenizer;
 import org.apache.hyracks.storage.am.lsm.invertedindex.tokenizers.IBinaryTokenizer;
@@ -105,7 +105,7 @@ public class FullTextContainsEvaluator implements IScalarEvaluator {
     // Else if it is equal to the number of tokens, then we will do a conjunctive search.
     private int occurrenceThreshold = 1;
 
-    private String fullTextConfigStr = "";
+    private String fullTextConfigName = DEFAULT_FULL_TEXT_CONFIG_NAME;
     private IFullTextConfig configLeft = null;
     private IFullTextConfig configRight = null;
 
@@ -221,8 +221,8 @@ public class FullTextContainsEvaluator implements IScalarEvaluator {
         // X (document) is the left side and Y (query predicate) is the right side.
 
         setFullTextOption(argOptions);
-        configLeft = MetadataManager.INSTANCE.getFullTextConfig(mdTxnCtx, fullTextConfigStr);
-        configRight = MetadataManager.INSTANCE.getFullTextConfig(mdTxnCtx, fullTextConfigStr);
+        configLeft = MetadataManager.INSTANCE.getFullTextConfig(mdTxnCtx, fullTextConfigName);
+        configRight = MetadataManager.INSTANCE.getFullTextConfig(mdTxnCtx, fullTextConfigName);
 
         // Initialize variables that are required to conduct full-text search. (e.g., hash-set, tokenizer ...)
         if (rightHashSet == null) {
@@ -407,7 +407,7 @@ public class FullTextContainsEvaluator implements IScalarEvaluator {
             } else if (compareStrInByteArrayAndPointable(FullTextContainsDescriptor.getFulltextConfigOptionArray(),
                     argOptions[i], true) == 0) {
                 // ToDo: \r is added in front of the arg, how to solve this gracefully?
-                fullTextConfigStr = UTF8StringUtil.toString(argOptions[i + 1].getByteArray(), 1);
+                fullTextConfigName = UTF8StringUtil.toString(argOptions[i + 1].getByteArray(), 1);
             }
         }
     }
