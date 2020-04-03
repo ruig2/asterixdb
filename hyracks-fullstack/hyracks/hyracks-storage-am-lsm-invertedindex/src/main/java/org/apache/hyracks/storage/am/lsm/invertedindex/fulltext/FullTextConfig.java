@@ -46,18 +46,6 @@ public class FullTextConfig extends AbstractFullTextConfig {
         super(name, tokenizerCategory, filters, usedByIndices);
     }
 
-    //// ToDo: use the tokenizer inside
-    @Override
-    public List<String> proceedTokens(List<String> tokens) {
-        List<String> results = new ArrayList<>(tokens);
-        for (IFullTextFilter filter : filters) {
-            results = filter.proceedTokens(results);
-        }
-
-        System.out.println("ftconfig " + name + " output: \t" + (results.size() == 0 ? "null" : results.get(0)) + "\n");
-        return results;
-    }
-
     // This built-in default full-text config will be used only when no full-text config is specified by the user
     // Note that on the Asterix layer, the default config should be fetched from MetadataProvider via config name when possible
     // so that it has the latest usedByIndices field

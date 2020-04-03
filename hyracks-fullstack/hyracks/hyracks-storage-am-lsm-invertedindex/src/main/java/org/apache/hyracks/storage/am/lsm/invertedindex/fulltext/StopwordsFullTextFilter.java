@@ -49,18 +49,6 @@ public class StopwordsFullTextFilter extends AbstractFullTextFilter {
         return stopwordList;
     }
 
-    @Override
-    public List<String> proceedTokens(List<String> tokens) {
-        List<String> result = new ArrayList<>();
-
-        for (String s : tokens) {
-            if (stopwordList.contains(s) == false) {
-                result.add(s);
-            }
-        }
-        return result;
-    }
-
     @Override public IToken processToken(TokenizerInfo.TokenizerType tokenizerType, IToken token) {
         int start = token.getStartOffset();
         int length = token.getTokenLength();

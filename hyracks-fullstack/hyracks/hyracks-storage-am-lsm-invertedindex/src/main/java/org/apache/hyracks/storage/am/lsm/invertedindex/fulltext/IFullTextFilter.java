@@ -46,8 +46,5 @@ public interface IFullTextFilter extends IFullTextEntity {
 
     void addUsedByFTConfigs(String ftConfigName);
 
-    // ToDo: take IToken as input
-    List<String> proceedTokens(List<String> tokens);
-
     IToken processToken(TokenizerInfo.TokenizerType tokenizerType, IToken token);
 }

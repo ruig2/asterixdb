@@ -63,9 +63,4 @@ public interface IFullTextConfig extends IFullTextEntity {
     // Get the total number of tokens
     // Currently, it returns the number of tokens in the original text, that means stopwords are not removed
     short getTokensCount();
-
-    // in progress... Assume the input is tokenized already
-    // ToDo: proceed in a stream way to avoid copying strings and tokens
-    // A good reference is IBinaryTokenizer
-    List<String> proceedTokens(List<String> tokens);
 }

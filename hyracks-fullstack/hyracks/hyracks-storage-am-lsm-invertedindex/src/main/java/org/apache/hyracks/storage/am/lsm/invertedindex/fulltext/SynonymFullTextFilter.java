@@ -34,11 +34,6 @@ public class SynonymFullTextFilter extends AbstractFullTextFilter {
         this.synonymMap = synonymMap;
     }
 
-    @Override
-    public List<String> proceedTokens(List<String> tokens) {
-        return null;
-    }
-
     @Override public IToken processToken(TokenizerInfo.TokenizerType tokenizerType, IToken token) {
         return null;
     }
