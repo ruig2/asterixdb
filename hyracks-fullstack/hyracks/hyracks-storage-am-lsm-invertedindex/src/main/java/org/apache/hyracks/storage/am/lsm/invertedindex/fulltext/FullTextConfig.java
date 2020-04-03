@@ -19,7 +19,7 @@
 
 package org.apache.hyracks.storage.am.lsm.invertedindex.fulltext;
 
-import static org.apache.hyracks.util.string.UTF8StringUtil.getUTF8StringInArrayWithOffset;
+import static org.apache.hyracks.util.string.UTF8StringUtil.getUTF8StringInArray;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -71,7 +71,7 @@ public class FullTextConfig extends AbstractFullTextConfig {
 
     @Override
     public IToken getToken() {
-        String s = getUTF8StringInArrayWithOffset(currentToken.getData(), currentToken.getStartOffset(),
+        String s = getUTF8StringInArray(currentToken.getData(), currentToken.getStartOffset(),
                 currentToken.getTokenLength());
         System.out.println("current token: " + s + " len: " + s.length());
 

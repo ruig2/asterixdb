@@ -19,7 +19,7 @@
 
 package org.apache.hyracks.storage.am.lsm.invertedindex.search;
 
-import static org.apache.hyracks.util.string.UTF8StringUtil.getUTF8StringInArrayWithOffset;
+import static org.apache.hyracks.util.string.UTF8StringUtil.getUTF8StringInArray;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -168,7 +168,7 @@ public abstract class AbstractTOccurrenceSearcher implements IInvertedIndexSearc
                 //token.reset(token.getData(), token.getStartOffset()+1, token.getEndOffset(), token.getTokenLength()-1, token.getTokenLength());
 
                 String s =
-                        getUTF8StringInArrayWithOffset(token.getData(), token.getStartOffset(), token.getTokenLength());
+                        getUTF8StringInArray(token.getData(), token.getStartOffset(), token.getTokenLength());
                 System.out.println("Updated token: " + s + " len: " + s.length());
 
                 // Includes the length of the string, e.g. 8database where 8 (of type byte instead of char) is the length of "database"
