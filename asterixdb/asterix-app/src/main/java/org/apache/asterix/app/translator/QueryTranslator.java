@@ -24,7 +24,6 @@ import java.io.InputStream;
 import java.rmi.RemoteException;
 import java.rmi.UnexpectedException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
@@ -34,12 +33,12 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
-import java.util.stream.Collectors;
 
 import org.apache.asterix.active.ActivityState;
 import org.apache.asterix.active.EntityId;
@@ -169,6 +168,7 @@ import org.apache.asterix.metadata.entities.Library;
 import org.apache.asterix.metadata.entities.NodeGroup;
 import org.apache.asterix.metadata.entities.Synonym;
 import org.apache.asterix.metadata.feeds.FeedMetadataUtil;
+import org.apache.asterix.metadata.functions.ExternalFunctionCompilerUtil;
 import org.apache.asterix.metadata.lock.ExternalDatasetsRegistry;
 import org.apache.asterix.metadata.utils.DatasetUtil;
 import org.apache.asterix.metadata.utils.ExternalIndexingOperations;
@@ -177,6 +177,7 @@ import org.apache.asterix.metadata.utils.KeyFieldTypeUtil;
 import org.apache.asterix.metadata.utils.MetadataConstants;
 import org.apache.asterix.metadata.utils.MetadataUtil;
 import org.apache.asterix.om.base.IAObject;
+import org.apache.asterix.om.functions.ExternalFunctionLanguage;
 import org.apache.asterix.om.types.ARecordType;
 import org.apache.asterix.om.types.ATypeTag;
 import org.apache.asterix.om.types.AUnionType;
@@ -1976,16 +1977,27 @@ public class QueryTranslator extends AbstractLangTranslator implements IStatemen
     protected void handleCreateFunctionStatement(MetadataProvider metadataProvider, Statement stmt,
             IStatementRewriter stmtRewriter) throws Exception {
         CreateFunctionStatement cfs = (CreateFunctionStatement) stmt;
-        SourceLocation sourceLoc = cfs.getSourceLocation();
         FunctionSignature signature = cfs.getFunctionSignature();
-        DataverseName dataverseName = getActiveDataverseName(signature.getDataverseName());
-        signature.setDataverseName(dataverseName);
+        signature.setDataverseName(getActiveDataverseName(signature.getDataverseName()));
+        String libraryName = cfs.getLibName();
 
+        lockUtil.createFunctionBegin(lockManager, metadataProvider.getLocks(), signature.getDataverseName(),
+                signature.getName(), libraryName);
+        try {
+            doCreateFunction(metadataProvider, cfs, signature, stmtRewriter);
+        } finally {
+            metadataProvider.getLocks().unlock();
+            metadataProvider.setDefaultDataverse(activeDataverse);
+        }
+    }
+
+    protected void doCreateFunction(MetadataProvider metadataProvider, CreateFunctionStatement cfs,
+            FunctionSignature signature, IStatementRewriter stmtRewriter) throws Exception {
+        DataverseName dataverseName = signature.getDataverseName();
+        String libraryName = cfs.getLibName();
+        SourceLocation sourceLoc = cfs.getSourceLocation();
         MetadataTransactionContext mdTxnCtx = MetadataManager.INSTANCE.beginTransaction();
         metadataProvider.setMetadataTxnContext(mdTxnCtx);
-        String libraryName = cfs.getLibName();
-        lockUtil.createFunctionBegin(lockManager, metadataProvider.getLocks(), dataverseName, signature.getName(),
-                libraryName);
         try {
             Dataverse dv = MetadataManager.INSTANCE.getDataverse(mdTxnCtx, dataverseName);
             if (dv == null) {
@@ -2041,23 +2053,28 @@ public class QueryTranslator extends AbstractLangTranslator implements IStatemen
                 }
             }
             if (cfs.isExternal()) {
-                Function.FunctionLanguage functionLang = Function.FunctionLanguage.findByName(cfs.getLang());
-                if (functionLang == null || !functionLang.isExternal()) {
-                    String expectedExternalLanguages = Arrays.stream(Function.FunctionLanguage.values())
-                            .filter(Function.FunctionLanguage::isExternal).map(Function.FunctionLanguage::getName)
-                            .collect(Collectors.joining(" or "));
+                String lang = cfs.getLang();
+                if (lang == null) {
+                    throw new CompilationException(ErrorCode.COMPILATION_INCOMPATIBLE_FUNCTION_LANGUAGE, sourceLoc, "");
+                }
+                ExternalFunctionLanguage functionLang;
+                try {
+                    functionLang = ExternalFunctionLanguage.valueOf(lang.toUpperCase(Locale.ROOT));
+                } catch (IllegalArgumentException e) {
                     throw new CompilationException(ErrorCode.COMPILATION_INCOMPATIBLE_FUNCTION_LANGUAGE, sourceLoc,
-                            expectedExternalLanguages, cfs.getLang());
+                            lang);
                 }
                 Library libraryInMetadata = MetadataManager.INSTANCE.getLibrary(mdTxnCtx, dataverseName, libraryName);
                 if (libraryInMetadata == null) {
                     throw new CompilationException(ErrorCode.UNKNOWN_LIBRARY, sourceLoc, libraryName);
                 }
                 // Add functions
+                String body = ExternalFunctionCompilerUtil.encodeExternalIdentifier(signature, functionLang,
+                        cfs.getExternalIdentifier());
                 List<List<Triple<DataverseName, String, String>>> dependencies =
                         FunctionUtil.getExternalFunctionDependencies(dependentTypes);
-                Function f = new Function(signature, argNames, argTypes, returnType, cfs.getExternalIdentifier(),
-                        FunctionKind.SCALAR.toString(), functionLang, libraryName, cfs.getNullCall(),
+                Function f = new Function(signature, argNames, argTypes, returnType, body,
+                        FunctionKind.SCALAR.toString(), functionLang.name(), libraryName, cfs.getNullCall(),
                         cfs.getDeterministic(), cfs.getResources(), dependencies);
                 MetadataManager.INSTANCE.addFunction(mdTxnCtx, f);
                 if (LOGGER.isInfoEnabled()) {
@@ -2077,20 +2094,17 @@ public class QueryTranslator extends AbstractLangTranslator implements IStatemen
                         FunctionUtil.getFunctionDependencies(rewriterFactory.createQueryRewriter(),
                                 cfs.getFunctionBodyExpression(), metadataProvider, dependentTypes);
                 Function function = new Function(signature, argNames, argTypes, returnType, cfs.getFunctionBody(),
-                        FunctionKind.SCALAR.toString(), getFunctionLanguage(), null, null, null, null, dependencies);
+                        FunctionKind.SCALAR.toString(), compilationProvider.getParserFactory().getLanguage(), null,
+                        null, null, null, dependencies);
                 MetadataManager.INSTANCE.addFunction(mdTxnCtx, function);
                 if (LOGGER.isInfoEnabled()) {
                     LOGGER.info("Installed function: " + signature);
                 }
                 MetadataManager.INSTANCE.commitTransaction(mdTxnCtx);
             }
-
         } catch (Exception e) {
             abort(e, e, mdTxnCtx);
             throw e;
-        } finally {
-            metadataProvider.getLocks().unlock();
-            metadataProvider.setDefaultDataverse(activeDataverse);
         }
     }
 
@@ -2148,17 +2162,6 @@ public class QueryTranslator extends AbstractLangTranslator implements IStatemen
         }
     }
 
-    private Function.FunctionLanguage getFunctionLanguage() {
-        switch (compilationProvider.getLanguage()) {
-            case SQLPP:
-                return Function.FunctionLanguage.SQLPP;
-            case AQL:
-                return Function.FunctionLanguage.AQL;
-            default:
-                throw new IllegalStateException(String.valueOf(compilationProvider.getLanguage()));
-        }
-    }
-
     protected boolean isFunctionUsed(MetadataTransactionContext ctx, FunctionSignature signature,
             DataverseName currentDataverse) throws AlgebricksException {
         List<Dataverse> allDataverses = MetadataManager.INSTANCE.getDataverses(ctx);
@@ -2182,13 +2185,22 @@ public class QueryTranslator extends AbstractLangTranslator implements IStatemen
 
     protected void handleFunctionDropStatement(MetadataProvider metadataProvider, Statement stmt) throws Exception {
         FunctionDropStatement stmtDropFunction = (FunctionDropStatement) stmt;
-        SourceLocation sourceLoc = stmtDropFunction.getSourceLocation();
         FunctionSignature signature = stmtDropFunction.getFunctionSignature();
         signature.setDataverseName(getActiveDataverseName(signature.getDataverseName()));
-        MetadataTransactionContext mdTxnCtx = MetadataManager.INSTANCE.beginTransaction();
-        metadataProvider.setMetadataTxnContext(mdTxnCtx);
         lockUtil.dropFunctionBegin(lockManager, metadataProvider.getLocks(), signature.getDataverseName(),
                 signature.getName());
+        try {
+            doDropFunction(metadataProvider, stmtDropFunction, signature);
+        } finally {
+            metadataProvider.getLocks().unlock();
+        }
+    }
+
+    protected void doDropFunction(MetadataProvider metadataProvider, FunctionDropStatement stmtDropFunction,
+            FunctionSignature signature) throws Exception {
+        SourceLocation sourceLoc = stmtDropFunction.getSourceLocation();
+        MetadataTransactionContext mdTxnCtx = MetadataManager.INSTANCE.beginTransaction();
+        metadataProvider.setMetadataTxnContext(mdTxnCtx);
         try {
             Function function = MetadataManager.INSTANCE.getFunction(mdTxnCtx, signature);
             // If function == null && stmtDropFunction.getIfExists() == true, commit txn directly.
@@ -2205,8 +2217,6 @@ public class QueryTranslator extends AbstractLangTranslator implements IStatemen
         } catch (Exception e) {
             abort(e, e, mdTxnCtx);
             throw e;
-        } finally {
-            metadataProvider.getLocks().unlock();
         }
     }
 
