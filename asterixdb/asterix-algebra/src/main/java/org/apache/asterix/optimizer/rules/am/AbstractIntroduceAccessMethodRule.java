@@ -251,7 +251,7 @@ public abstract class AbstractIntroduceAccessMethodRule implements IAlgebraicRew
 
                     // If the function is ftcontains() and the ft config in the function differs from that in the index
                     // then skip the index
-                    if (isFullTextFuncAndConfigDiffers(analysisCtx, chosenIndex.getFullTextConfig())) {
+                    if (isFullTextFuncAndConfigDiffersFromExpected(analysisCtx, chosenIndex.getFullTextConfig())) {
                         continue;
                     }
 
@@ -273,7 +273,7 @@ public abstract class AbstractIntroduceAccessMethodRule implements IAlgebraicRew
         return result;
     }
 
-    private boolean isFullTextFuncAndConfigDiffers(AccessMethodAnalysisContext analysisCtx,
+    private boolean isFullTextFuncAndConfigDiffersFromExpected(AccessMethodAnalysisContext analysisCtx,
             String indexFullTextConfig) {
         try {
             // What if more than 1 func expr? Is it possible in ftcontains()?
@@ -286,6 +286,8 @@ public abstract class AbstractIntroduceAccessMethodRule implements IAlgebraicRew
             }
         } catch (Exception e) {
             LOGGER.info("Unexpected behavior when checking full-text config", e);
+            // If something wrong, skip this index and do a full-scan
+            return true;
         }
         return false;
     }
