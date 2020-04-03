@@ -31,8 +31,12 @@ import org.apache.hyracks.algebricks.core.algebra.expressions.AbstractFunctionCa
 import org.apache.hyracks.algebricks.core.algebra.expressions.ConstantExpression;
 import org.apache.hyracks.algebricks.core.algebra.functions.FunctionIdentifier;
 import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.FullTextConfig;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public class FullTextUtil {
+    private static final Logger LOGGER = LogManager.getLogger();
+
     public static boolean isFullTextFunctionExpr(IOptimizableFuncExpr expr) {
         return isFullTextFunctionExpr(expr.getFuncExpr());
     }
@@ -56,16 +60,17 @@ public class FullTextUtil {
             return null;
         }
 
-        // ToDo: wrap the expressions in a ftcontains() function into a dedicated Java object
-        // so that we don't cast the types many times
         String configName = FullTextConfig.DEFAULT_FULL_TEXT_CONFIG_NAME;
         List<Mutable<ILogicalExpression>> arguments = funcExpr.getArguments();
         for (int i = 0; i < arguments.size() - 1; i++) {
             String optionName = "";
             try {
+                // ToDo: wrap the expressions in a ftcontains() function into a dedicated Java object
+                // so that we don't cast the types many times
                 ConstantExpression ce = (ConstantExpression) arguments.get(i).getValue();
                 optionName = ((AString) ((AsterixConstantValue) (ce.getValue())).getObject()).getStringValue();
             } catch (Exception e) {
+                LOGGER.warn("Fail to get full-text config name", e);
                 continue;
             }
 
