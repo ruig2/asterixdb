@@ -57,8 +57,10 @@ public class StopwordsFullTextFilter extends AbstractFullTextFilter {
         // e.g. 8database where the byte of value 8 means the token has a length of 8
         // We need to skip the length to fetch the pure string (e.g. "database" without 8)
         if (tokenizerType == TokenizerInfo.TokenizerType.LIST) {
-            start++;
-            length--;
+            int numBytesToStoreLength = UTF8StringUtil.getNumBytesToStoreLength(
+                    UTF8StringUtil.getUTFLength(token.getData(), token.getStartOffset()));
+            start += numBytesToStoreLength;
+            length -= numBytesToStoreLength;
         }
 
         String str = UTF8StringUtil.getUTF8StringInArrayWithOffset(token.getData(), start, length);

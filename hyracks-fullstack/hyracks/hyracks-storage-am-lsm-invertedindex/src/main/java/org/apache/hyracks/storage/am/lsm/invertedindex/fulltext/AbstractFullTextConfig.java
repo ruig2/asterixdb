@@ -56,6 +56,8 @@ public abstract class AbstractFullTextConfig implements IFullTextConfig {
                 // Similar to aqlStringTokenizer which is in the upper Asterix layer
                 // ToDo: should we move aqlStringTokenizer so that it can be called in the Hyracks layer?
                 // If so, we need to move ATypeTag to Hyracks as well
+                // Another way to do so is to pass the tokenizer instance instead of the tokenizer category from Asterix to Hyracks
+                // However, this may make the serializing part tricky because only the tokenizer category will be written to disk
                 this.tokenizer = new DelimitedUTF8StringBinaryTokenizerFactory(true, true,
                         new UTF8WordTokenFactory(
                                 (byte)13, // ATypeTag.SERIALIZED_STRING_TYPE_TAG
