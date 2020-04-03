@@ -20,7 +20,6 @@
 package org.apache.hyracks.storage.am.lsm.invertedindex.util;
 
 import java.io.IOException;
-import java.util.Arrays;
 
 import org.apache.hyracks.api.exceptions.HyracksDataException;
 import org.apache.hyracks.dataflow.common.comm.io.ArrayTupleBuilder;

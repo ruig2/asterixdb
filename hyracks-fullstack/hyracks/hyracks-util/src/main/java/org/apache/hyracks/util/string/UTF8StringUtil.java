@@ -343,7 +343,7 @@ public class UTF8StringUtil {
     public static String getUTF8StringInArrayWithOffset(byte[] b, int start, int len) {
         StringBuilder builder = new StringBuilder();
 
-        for (int i = start; i < start+len; ) {
+        for (int i = start; i < start + len;) {
             char c = UTF8StringUtil.charAt(b, i);
             builder.append(c);
             i += UTF8StringUtil.charSize(b, i);

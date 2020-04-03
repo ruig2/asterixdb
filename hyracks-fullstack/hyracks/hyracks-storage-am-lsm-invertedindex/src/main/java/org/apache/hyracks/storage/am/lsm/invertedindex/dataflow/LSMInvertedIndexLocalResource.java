@@ -22,7 +22,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import com.google.common.collect.ImmutableList;
 import org.apache.hyracks.api.application.INCServiceContext;
 import org.apache.hyracks.api.dataflow.value.IBinaryComparatorFactory;
 import org.apache.hyracks.api.dataflow.value.ITypeTraits;
@@ -55,6 +54,7 @@ import org.apache.hyracks.storage.common.buffercache.IBufferCache;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.google.common.collect.ImmutableList;
 
 public class LSMInvertedIndexLocalResource extends LsmResource {
     // ToDo: add full-text filter and config here
@@ -198,13 +198,9 @@ public class LSMInvertedIndexLocalResource extends LsmResource {
         if (json.has("fullTextConfigFactory")) {
             fullTextConfigFactory = (IFullTextConfigFactory) registry.deserialize(json.get("fullTextConfigFactory"));
         } else {
-            fullTextConfigFactory = new FullTextConfigFactory(
-                    new FullTextConfig(
-                            FullTextConfig.DEFAULT_FULL_TEXT_CONFIG_NAME,
-                            IFullTextConfig.TokenizerCategory.WORD,
-                            ImmutableList.of()
-                    )
-            );
+            fullTextConfigFactory =
+                    new FullTextConfigFactory(new FullTextConfig(FullTextConfig.DEFAULT_FULL_TEXT_CONFIG_NAME,
+                            IFullTextConfig.TokenizerCategory.WORD, ImmutableList.of()));
         }
 
         final boolean isPartitioned = json.get("isPartitioned").asBoolean();

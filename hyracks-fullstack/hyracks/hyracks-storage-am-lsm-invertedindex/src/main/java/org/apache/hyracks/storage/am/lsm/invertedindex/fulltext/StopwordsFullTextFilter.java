@@ -19,21 +19,19 @@
 
 package org.apache.hyracks.storage.am.lsm.invertedindex.fulltext;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.hyracks.api.exceptions.HyracksDataException;
 import org.apache.hyracks.api.io.IJsonSerializable;
 import org.apache.hyracks.api.io.IPersistedResourceRegistry;
+import org.apache.hyracks.storage.am.lsm.invertedindex.tokenizers.IToken;
+import org.apache.hyracks.storage.am.lsm.invertedindex.tokenizers.TokenizerInfo;
+import org.apache.hyracks.util.string.UTF8StringUtil;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.collect.ImmutableList;
-import org.apache.hyracks.storage.am.lsm.invertedindex.tokenizers.IToken;
-import org.apache.hyracks.storage.am.lsm.invertedindex.tokenizers.TokenizerInfo;
-import org.apache.hyracks.util.string.UTF8StringUtil;
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 public class StopwordsFullTextFilter extends AbstractFullTextFilter {
     private static final long serialVersionUID = 1L;
@@ -49,7 +47,8 @@ public class StopwordsFullTextFilter extends AbstractFullTextFilter {
         return stopwordList;
     }
 
-    @Override public IToken processToken(TokenizerInfo.TokenizerType tokenizerType, IToken token) {
+    @Override
+    public IToken processToken(TokenizerInfo.TokenizerType tokenizerType, IToken token) {
         int start = token.getStartOffset();
         int length = token.getTokenLength();
 
@@ -57,14 +56,14 @@ public class StopwordsFullTextFilter extends AbstractFullTextFilter {
         // e.g. 8database where the byte of value 8 means the token has a length of 8
         // We need to skip the length to fetch the pure string (e.g. "database" without 8)
         if (tokenizerType == TokenizerInfo.TokenizerType.LIST) {
-            int numBytesToStoreLength = UTF8StringUtil.getNumBytesToStoreLength(
-                    UTF8StringUtil.getUTFLength(token.getData(), token.getStartOffset()));
+            int numBytesToStoreLength = UTF8StringUtil
+                    .getNumBytesToStoreLength(UTF8StringUtil.getUTFLength(token.getData(), token.getStartOffset()));
             start += numBytesToStoreLength;
             length -= numBytesToStoreLength;
         }
 
         String str = UTF8StringUtil.getUTF8StringInArrayWithOffset(token.getData(), start, length);
-        System.out.print(str + " len " + str.length() );
+        System.out.print(str + " len " + str.length());
         if (stopwordList.contains(str)) {
             System.out.println("contains");
             return null;

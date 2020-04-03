@@ -18,11 +18,10 @@
  */
 package org.apache.hyracks.storage.am.lsm.invertedindex.fulltext;
 
-import java.util.List;
-
-import com.google.common.collect.ImmutableMap;
 import org.apache.hyracks.storage.am.lsm.invertedindex.tokenizers.IToken;
 import org.apache.hyracks.storage.am.lsm.invertedindex.tokenizers.TokenizerInfo;
+
+import com.google.common.collect.ImmutableMap;
 
 public class SynonymFullTextFilter extends AbstractFullTextFilter {
     private static final long serialVersionUID = 1L;
@@ -34,7 +33,8 @@ public class SynonymFullTextFilter extends AbstractFullTextFilter {
         this.synonymMap = synonymMap;
     }
 
-    @Override public IToken processToken(TokenizerInfo.TokenizerType tokenizerType, IToken token) {
+    @Override
+    public IToken processToken(TokenizerInfo.TokenizerType tokenizerType, IToken token) {
         return null;
     }
 }

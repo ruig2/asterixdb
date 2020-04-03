@@ -21,7 +21,6 @@ package org.apache.hyracks.storage.am.lsm.invertedindex.dataflow;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.util.Arrays;
 
 import org.apache.hyracks.api.comm.VSizeFrame;
 import org.apache.hyracks.api.context.IHyracksTaskContext;

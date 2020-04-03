@@ -19,14 +19,12 @@
 
 package org.apache.hyracks.storage.am.lsm.invertedindex.fulltext;
 
-import com.google.common.collect.ImmutableList;
 import org.apache.hyracks.api.exceptions.HyracksDataException;
 import org.apache.hyracks.api.io.IJsonSerializable;
 import org.apache.hyracks.api.io.IPersistedResourceRegistry;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 public class FullTextConfigFactory implements IFullTextConfigFactory {
     private static final long serialVersionUID = 1L;
@@ -43,8 +41,8 @@ public class FullTextConfigFactory implements IFullTextConfigFactory {
         // The same config may be used in different places at the same time
         // For example, in ftcontains() the left expression and right expression need to be proceeded by two full-text configs
         // with the same filters but dedicated tokenizers
-        return new FullTextConfig(config.getName(), config.getTokenizerCategory(),
-                config.getFilters(), config.getUsedByIndices());
+        return new FullTextConfig(config.getName(), config.getTokenizerCategory(), config.getFilters(),
+                config.getUsedByIndices());
     }
 
     @Override

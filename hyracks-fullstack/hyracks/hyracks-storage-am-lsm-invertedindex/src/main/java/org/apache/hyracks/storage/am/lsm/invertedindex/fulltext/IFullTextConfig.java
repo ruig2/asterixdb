@@ -21,10 +21,11 @@ package org.apache.hyracks.storage.am.lsm.invertedindex.fulltext;
 
 import java.util.List;
 
-import com.google.common.collect.ImmutableList;
 import org.apache.commons.lang3.EnumUtils;
 import org.apache.hyracks.storage.am.lsm.invertedindex.tokenizers.IBinaryTokenizer;
 import org.apache.hyracks.storage.am.lsm.invertedindex.tokenizers.IToken;
+
+import com.google.common.collect.ImmutableList;
 
 public interface IFullTextConfig extends IFullTextEntity {
     // case-insensitive

@@ -19,19 +19,20 @@
 
 package org.apache.hyracks.storage.am.lsm.invertedindex.fulltext;
 
+import static org.apache.hyracks.util.string.UTF8StringUtil.getUTF8StringInArrayWithOffset;
+
 import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.hyracks.api.exceptions.HyracksDataException;
 import org.apache.hyracks.api.io.IJsonSerializable;
 import org.apache.hyracks.api.io.IPersistedResourceRegistry;
+import org.apache.hyracks.storage.am.lsm.invertedindex.tokenizers.IToken;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.collect.ImmutableList;
-import org.apache.hyracks.storage.am.lsm.invertedindex.tokenizers.IToken;
-import static org.apache.hyracks.util.string.UTF8StringUtil.getUTF8StringInArrayWithOffset;
 
 public class FullTextConfig extends AbstractFullTextConfig {
     private static final long serialVersionUID = 1L;
@@ -61,20 +62,24 @@ public class FullTextConfig extends AbstractFullTextConfig {
     private IToken currentToken = null;
     private IToken nextToken = null;
 
-    @Override public void reset(byte[] data, int start, int length) {
+    @Override
+    public void reset(byte[] data, int start, int length) {
         currentToken = null;
         nextToken = null;
         tokenizer.reset(data, start, length);
     }
 
-    @Override public IToken getToken() {
-        String s = getUTF8StringInArrayWithOffset(currentToken.getData(), currentToken.getStartOffset(), currentToken.getTokenLength());
-        System.out.println("current token: " + s + " len: " + s.length() );
+    @Override
+    public IToken getToken() {
+        String s = getUTF8StringInArrayWithOffset(currentToken.getData(), currentToken.getStartOffset(),
+                currentToken.getTokenLength());
+        System.out.println("current token: " + s + " len: " + s.length());
 
         return currentToken;
     }
 
-    @Override public boolean hasNext() {
+    @Override
+    public boolean hasNext() {
         if (nextToken != null) {
             return true;
         }
@@ -82,7 +87,7 @@ public class FullTextConfig extends AbstractFullTextConfig {
         while (tokenizer.hasNext()) {
             tokenizer.next();
             IToken candidateToken = tokenizer.getToken();
-            for (IFullTextFilter filter: filters) {
+            for (IFullTextFilter filter : filters) {
                 // ToDo: Tokenizer of TokenizerType.List would return strings starting with the length,
                 // e.g. 8database where 8 is the length
                 // Should we let TokenizerType.List returns the same thing as TokenizerType.String to make things easier?
@@ -103,12 +108,14 @@ public class FullTextConfig extends AbstractFullTextConfig {
         return nextToken != null;
     }
 
-    @Override public void next() {
+    @Override
+    public void next() {
         currentToken = nextToken;
         nextToken = null;
     }
 
-    @Override public short getTokensCount() {
+    @Override
+    public short getTokensCount() {
         return tokenizer.getTokensCount();
     }
 

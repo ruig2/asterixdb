@@ -18,6 +18,8 @@
  */
 package org.apache.asterix.runtime.evaluators.common;
 
+import static org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.FullTextConfig.DEFAULT_FULL_TEXT_CONFIG_NAME;
+
 import java.io.DataOutput;
 import java.rmi.RemoteException;
 
@@ -50,7 +52,6 @@ import org.apache.hyracks.data.std.util.ArrayBackedValueStorage;
 import org.apache.hyracks.data.std.util.BinaryEntry;
 import org.apache.hyracks.data.std.util.BinaryHashSet;
 import org.apache.hyracks.dataflow.common.data.accessors.IFrameTupleReference;
-import static org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.FullTextConfig.DEFAULT_FULL_TEXT_CONFIG_NAME;
 import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextConfig;
 import org.apache.hyracks.storage.am.lsm.invertedindex.tokenizers.DelimitedUTF8StringBinaryTokenizer;
 import org.apache.hyracks.storage.am.lsm.invertedindex.tokenizers.IBinaryTokenizer;
@@ -327,8 +328,8 @@ public class FullTextContainsEvaluator implements IScalarEvaluator {
             // e.g., 8database <--- we only need to store the offset of 'd' and length 8.
             if (typeTag2 == ATypeTag.ARRAY || typeTag2 == ATypeTag.MULTISET) {
                 // How many bytes are required to store the length of the given token?
-                numBytesToStoreLength = UTF8StringUtil.getNumBytesToStoreLength(
-                        UTF8StringUtil.getUTFLength(token.getData(), token.getStartOffset()));
+                numBytesToStoreLength = UTF8StringUtil
+                        .getNumBytesToStoreLength(UTF8StringUtil.getUTFLength(token.getData(), token.getStartOffset()));
                 tokenOffset = tokenOffset + numBytesToStoreLength;
                 tokenLength = tokenLength - numBytesToStoreLength;
             }

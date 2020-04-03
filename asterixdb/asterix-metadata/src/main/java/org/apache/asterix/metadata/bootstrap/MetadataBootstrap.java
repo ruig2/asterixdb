@@ -24,7 +24,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-import com.google.common.collect.ImmutableList;
 import org.apache.asterix.common.api.ILSMComponentIdGeneratorFactory;
 import org.apache.asterix.common.api.INcApplicationContext;
 import org.apache.asterix.common.config.DatasetConfig.DatasetType;
@@ -97,6 +96,8 @@ import org.apache.hyracks.storage.common.compression.NoOpCompressorDecompressorF
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+
+import com.google.common.collect.ImmutableList;
 
 /**
  * Initializes the remote metadata storage facilities ("universe") using a
@@ -273,14 +274,9 @@ public class MetadataBootstrap {
 
     private static void insertInitialFullTextConfig(MetadataTransactionContext mdTxnCtx)
             throws AlgebricksException, HyracksDataException, RemoteException {
-        MetadataManager.INSTANCE.addFulltextConfig(
-                mdTxnCtx,
-                new FullTextConfig(
-                        FullTextConfig.DEFAULT_FULL_TEXT_CONFIG_NAME,
-                        IFullTextConfig.TokenizerCategory.WORD,
-                        ImmutableList.of()
-                )
-        );
+        MetadataManager.INSTANCE.addFulltextConfig(mdTxnCtx,
+                new FullTextConfig(FullTextConfig.DEFAULT_FULL_TEXT_CONFIG_NAME, IFullTextConfig.TokenizerCategory.WORD,
+                        ImmutableList.of()));
         if (LOGGER.isInfoEnabled()) {
             LOGGER.info("Finished inserting built-in full-text config.");
         }

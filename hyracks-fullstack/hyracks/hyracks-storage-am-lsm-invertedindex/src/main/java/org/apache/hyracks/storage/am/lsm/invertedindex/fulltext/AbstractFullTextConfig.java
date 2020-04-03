@@ -22,12 +22,14 @@ package org.apache.hyracks.storage.am.lsm.invertedindex.fulltext;
 import java.security.InvalidParameterException;
 import java.util.List;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.collect.ImmutableList;
 import org.apache.hyracks.storage.am.lsm.invertedindex.tokenizers.DelimitedUTF8StringBinaryTokenizerFactory;
 import org.apache.hyracks.storage.am.lsm.invertedindex.tokenizers.IBinaryTokenizer;
 import org.apache.hyracks.storage.am.lsm.invertedindex.tokenizers.ITokenFactory;
 import org.apache.hyracks.storage.am.lsm.invertedindex.tokenizers.UTF8WordTokenFactory;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.collect.ImmutableList;
+
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 public abstract class AbstractFullTextConfig implements IFullTextConfig {
@@ -58,11 +60,10 @@ public abstract class AbstractFullTextConfig implements IFullTextConfig {
                 // If so, we need to move ATypeTag to Hyracks as well
                 // Another way to do so is to pass the tokenizer instance instead of the tokenizer category from Asterix to Hyracks
                 // However, this may make the serializing part tricky because only the tokenizer category will be written to disk
-                this.tokenizer = new DelimitedUTF8StringBinaryTokenizerFactory(true, true,
-                        new UTF8WordTokenFactory(
-                                (byte)13, // ATypeTag.SERIALIZED_STRING_TYPE_TAG
-                                (byte)3)  // ATypeTag.SERIALIZED_INT32_TYPE_TAG
-                ).createTokenizer();
+                this.tokenizer =
+                        new DelimitedUTF8StringBinaryTokenizerFactory(true, true, new UTF8WordTokenFactory((byte) 13, // ATypeTag.SERIALIZED_STRING_TYPE_TAG
+                                (byte) 3) // ATypeTag.SERIALIZED_INT32_TYPE_TAG
+                        ).createTokenizer();
                 break;
             case NGRAM:
                 throw new NotImplementedException();

@@ -19,9 +19,9 @@
 
 package org.apache.hyracks.storage.am.lsm.invertedindex.tokenizers;
 
-import org.apache.hyracks.util.string.UTF8StringUtil;
-
 import java.io.Serializable;
+
+import org.apache.hyracks.util.string.UTF8StringUtil;
 
 public abstract class AbstractUTF8StringBinaryTokenizer implements IBinaryTokenizer, Serializable {
 
