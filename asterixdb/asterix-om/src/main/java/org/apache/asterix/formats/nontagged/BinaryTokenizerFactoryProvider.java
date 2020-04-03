@@ -34,16 +34,15 @@ public class BinaryTokenizerFactoryProvider implements IBinaryTokenizerFactoryPr
 
     public static final BinaryTokenizerFactoryProvider INSTANCE = new BinaryTokenizerFactoryProvider();
 
-    // ToDo: rename aqlStringTokenizer to aqlStringTokenizerFactory because this is a **factory**
-    private static final IBinaryTokenizerFactory aqlStringTokenizer =
+    private static final IBinaryTokenizerFactory aqlStringTokenizerFactory =
             new DelimitedUTF8StringBinaryTokenizerFactory(true, true,
                     new UTF8WordTokenFactory(ATypeTag.SERIALIZED_STRING_TYPE_TAG, ATypeTag.SERIALIZED_INT32_TYPE_TAG));
 
-    private static final IBinaryTokenizerFactory aqlStringNoTypeTagTokenizer =
+    private static final IBinaryTokenizerFactory aqlStringNoTypeTagTokenizerFactory =
             new DelimitedUTF8StringBinaryTokenizerFactory(true, false,
                     new UTF8WordTokenFactory(ATypeTag.STRING.serialize(), ATypeTag.INTEGER.serialize()));
 
-    private static final IBinaryTokenizerFactory aqlHashingStringTokenizer =
+    private static final IBinaryTokenizerFactory aqlHashingStringTokenizerFactory =
             new DelimitedUTF8StringBinaryTokenizerFactory(true, true, new HashedUTF8WordTokenFactory(
                     ATypeTag.SERIALIZED_INT32_TYPE_TAG, ATypeTag.SERIALIZED_INT32_TYPE_TAG));
 
@@ -59,11 +58,11 @@ public class BinaryTokenizerFactoryProvider implements IBinaryTokenizerFactoryPr
         switch (typeTag) {
             case STRING:
                 if (hashedTokens) {
-                    return aqlHashingStringTokenizer;
+                    return aqlHashingStringTokenizerFactory;
                 } else if (!typeTageAlreadyRemoved) {
-                    return aqlStringTokenizer;
+                    return aqlStringTokenizerFactory;
                 } else {
-                    return aqlStringNoTypeTagTokenizer;
+                    return aqlStringNoTypeTagTokenizerFactory;
                 }
             case ARRAY:
                 return orderedListTokenizer;
