@@ -66,7 +66,8 @@ public class BinaryTokenizerOperatorNodePushable extends AbstractUnaryInputUnary
             int[] keyFields, boolean addNumTokensKey, boolean writeKeyFieldsFirst, boolean writeMissing,
             IMissingWriterFactory missingWriterFactory) {
         this.ctx = ctx;
-        // ToDo: remove tokenizer because now we have fullTextConfig
+        // ToDo: check the codes in upper layer to see if we can remove tokenizer to use fullTextConfig instead
+        // How is this tokenizer configured? Does it ignoreTokenCount and hasTypeTag?
         this.tokenizer = tokenizer;
         this.fullTextConfig = fullTextConfig;
         // this.fullTextConfig.setTokenizer(tokenizer);
