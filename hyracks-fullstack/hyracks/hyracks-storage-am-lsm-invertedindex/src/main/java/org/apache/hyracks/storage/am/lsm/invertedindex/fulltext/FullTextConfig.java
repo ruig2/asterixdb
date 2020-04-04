@@ -52,13 +52,6 @@ public class FullTextConfig extends AbstractFullTextConfig {
     // so that it has the latest usedByIndices field
     public static final String DEFAULT_FULL_TEXT_CONFIG_NAME = "DEFAULT_FULL_TEXT_CONFIG";
 
-    /*
-       tokenizerForRightArray.reset(queryArray, queryArrayStartOffset, queryArrayLength);
-        while (tokenizerForRightArray.hasNext()) {
-            tokenizerForRightArray.next();
-            Token token =  tokenizerForRightArray.getToken();
-     */
-
     private IToken currentToken = null;
     private IToken nextToken = null;
 
@@ -71,10 +64,6 @@ public class FullTextConfig extends AbstractFullTextConfig {
 
     @Override
     public IToken getToken() {
-        String s = getUTF8StringInArray(currentToken.getData(), currentToken.getStartOffset(),
-                currentToken.getTokenLength());
-        System.out.println("current token: " + s + " len: " + s.length());
-
         return currentToken;
     }
 

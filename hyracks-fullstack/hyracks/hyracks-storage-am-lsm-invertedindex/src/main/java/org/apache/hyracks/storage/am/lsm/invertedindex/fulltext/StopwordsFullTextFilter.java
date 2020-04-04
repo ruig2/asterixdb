@@ -63,12 +63,9 @@ public class StopwordsFullTextFilter extends AbstractFullTextFilter {
         }
 
         String str = UTF8StringUtil.getUTF8StringInArray(token.getData(), start, length);
-        System.out.print(str + " len " + str.length());
         if (stopwordList.contains(str)) {
-            System.out.println("contains");
             return null;
         }
-        System.out.println();
 
         return token;
     }
