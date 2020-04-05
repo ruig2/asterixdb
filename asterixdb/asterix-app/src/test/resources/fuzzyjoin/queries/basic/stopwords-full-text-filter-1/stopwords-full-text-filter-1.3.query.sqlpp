@@ -1,0 +1,13 @@
+///////////////////////////////////////
+// Step 3: Create 3 FullText Indices
+USE MyDataVerse;
+DROP INDEX MyMessageDataset.message_ft_index_0 IF EXISTS;
+DROP INDEX MyMessageDataset.message_ft_index_1 IF EXISTS;
+DROP INDEX MyMessageDataset.message_ft_index_2 IF EXISTS;
+
+CREATE INDEX message_ft_index_0  IF NOT EXISTS on MyMessageDataset(myMessageBody) TYPE FULLTEXT;
+CREATE INDEX message_ft_index_1  IF NOT EXISTS on MyMessageDataset(myMessageBody) TYPE FULLTEXT USING my_first_stopword_config;
+CREATE INDEX message_ft_index_2  IF NOT EXISTS on MyMessageDataset(myMessageBody) TYPE FULLTEXT USING my_second_stopword_config;
+
+SELECT Value v from Metadata.`Index` v;
+SELECT VALUE ix FROM Metadata.`FullTextEntity` ix;

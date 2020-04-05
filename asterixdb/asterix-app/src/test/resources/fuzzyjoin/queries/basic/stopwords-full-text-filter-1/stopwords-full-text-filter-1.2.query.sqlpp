@@ -1,0 +1,27 @@
+USE MyDataVerse;
+
+DROP FULLTEXT CONFIG my_stopword_config IF EXISTS;
+DROP FULLTEXT CONFIG my_first_stopword_config IF EXISTS;
+DROP FULLTEXT CONFIG my_second_stopword_config IF EXISTS;
+DROP FULLTEXT FILTER my_first_stopword_filter IF EXISTS;
+DROP FULLTEXT FILTER my_second_stopword_filter IF EXISTS;
+
+CREATE FULLTEXT FILTER my_first_stopword_filter IF NOT EXISTS AS {
+    "Type": "stopwords",
+    "StopwordsList": ["a", "an", "the"]
+};
+CREATE FULLTEXT CONFIG my_first_stopword_config IF NOT EXISTS AS {
+    "Tokenizer": "Word", // built-in tokenizers: "Word" or "NGram"
+    "FilterPipeline": ["my_first_stopword_filter"]
+};
+
+CREATE FULLTEXT FILTER my_second_stopword_filter IF NOT EXISTS AS {
+    "Type": "stopwords",
+    "StopwordsList": ["xxx", "yyy", "zzz"]
+};
+CREATE FULLTEXT CONFIG my_second_stopword_config IF NOT EXISTS AS {
+    "Tokenizer": "Word", // built-in tokenizers: "Word" or "NGram"
+    "FilterPipeline": ["my_second_stopword_filter"]
+};
+
+SELECT VALUE ix FROM Metadata.`FullTextEntity` ix;
