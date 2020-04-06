@@ -1,0 +1,19 @@
+///////////////////////////////////////
+// Step 4: Insert after index created
+
+USE MyDataVerse;
+UPSERT INTO MyMessageDataset ([
+  {
+      "myMessageId":    3,
+      "myMessageBody":  "xxx cute cat"
+  }
+]);
+
+
+USE MyDataVerse;
+UPSERT INTO MyMessageDataset ([
+  {
+      "myMessageId":    4,
+      "myMessageBody":  "yyy crazy cat"
+  }
+]);

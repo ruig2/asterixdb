@@ -1,0 +1,13 @@
+/////////////////////////////////////////
+
+// Step 6: Do a full-scan when no index with the same config
+USE MyDataVerse;
+DROP FULLTEXT CONFIG my_third_stopword_config IF EXISTS;
+CREATE FULLTEXT CONFIG my_third_stopword_config IF NOT EXISTS AS {
+    "Tokenizer": "Word",
+    "FilterPipeline": []
+}; // No index created with this new config
+
+// No records should be matched
+SELECT VALUE myMessage from MyMessageDataset myMessage
+    WHERE ftcontains(myMessage.myMessageBody, ["xxx", "smart", "black"], {"mode":"all", "config": "my_third_stopword_config"});

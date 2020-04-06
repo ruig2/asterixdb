@@ -1,0 +1,10 @@
+{ "$1": "Without FT Config" }
+{ "myMessageId": 2, "myMessageBody": "the smart black dog" }
+{ "$1": "With FT Config my_first_stopword_config and `the`" }
+{ "myMessageId": 1, "myMessageBody": "a smart black dog" }
+{ "myMessageId": 2, "myMessageBody": "the smart black dog" }
+{ "$1": "With FT Config my_first_stopword_config and `xxx`" }
+{ "myMessageId": 3, "myMessageBody": "xxx cute cat" }
+{ "$1": "With FT Config my_second_stopword_config and `yyy`" }
+{ "myMessageId": 4, "myMessageBody": "yyy crazy cat" }
+{ "myMessageId": 3, "myMessageBody": "xxx cute cat" }
