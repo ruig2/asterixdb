@@ -1025,6 +1025,17 @@ public class QueryTranslator extends AbstractLangTranslator implements IStatemen
                 // If the index fails to be created, then the ft config shouldn't be updated
             }
 
+            if (stmtCreateIndex.getIndexType() == IndexType.SINGLE_PARTITION_NGRAM_INVIX
+                    ||  stmtCreateIndex.getIndexType() == IndexType.LENGTH_PARTITIONED_NGRAM_INVIX) {
+                // If the index is for NGram rather than Word, then we still use the default full-text config for it
+                // Note that the tokenizer will be replaced with a NGram one at run time
+                //     (e.g. when insert and  look up NGram index)
+                // But we don't add this index to the usedByIndices list of the default config
+                //     because the tokenizer in the default config is a WORD tokenizer
+
+                fullTextConfigName = FullTextConfig.DEFAULT_FULL_TEXT_CONFIG_NAME;
+            }
+
             Index newIndex =
                     new Index(dataverseName, datasetName, indexName, stmtCreateIndex.getIndexType(), indexFields,
                             keySourceIndicators, indexFieldTypes, stmtCreateIndex.getGramLength(), fullTextConfigName,

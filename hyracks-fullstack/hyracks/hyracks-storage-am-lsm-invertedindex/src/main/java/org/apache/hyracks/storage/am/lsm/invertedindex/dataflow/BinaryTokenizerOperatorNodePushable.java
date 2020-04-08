@@ -70,7 +70,12 @@ public class BinaryTokenizerOperatorNodePushable extends AbstractUnaryInputUnary
         // How is this tokenizer configured? Does it ignoreTokenCount and hasTypeTag?
         this.tokenizer = tokenizer;
         this.fullTextConfig = fullTextConfig;
-        // this.fullTextConfig.setTokenizer(tokenizer);
+        // Need to use the tokenizer created in the upper-layer when:
+        // 1. The tokenizer is of TokenizerCategory.NGram rather than Word
+        // 2. If the tokenizer is a TokenizerCategory.Word one, then its parameters
+        //    (e.g. boolean ignoreTokenCount, boolean sourceHasTypeTag) may be different
+        //    from the tokenizer in the default full-text config
+        this.fullTextConfig.setTokenizer(tokenizer);
 
         this.docField = docField;
         this.keyFields = keyFields;

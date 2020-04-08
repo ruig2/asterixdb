@@ -19,6 +19,7 @@
 
 package org.apache.hyracks.storage.am.lsm.invertedindex.fulltext;
 
+import com.google.common.collect.ImmutableList;
 import org.apache.hyracks.api.exceptions.HyracksDataException;
 import org.apache.hyracks.api.io.IJsonSerializable;
 import org.apache.hyracks.api.io.IPersistedResourceRegistry;
@@ -37,6 +38,14 @@ public class FullTextConfigFactory implements IFullTextConfigFactory {
 
     @Override
     public IFullTextConfig createFullTextConfig() {
+        if (config == null) {
+            // If not specified, use the the default full-text config
+            // Note that though the tokenizer here is of category Word, it may be replaced by a NGram tokenizer at run time
+            //     for NGram index.
+            return new FullTextConfig(FullTextConfig.DEFAULT_FULL_TEXT_CONFIG_NAME, IFullTextConfig.TokenizerCategory.WORD,
+                    ImmutableList.of());
+        }
+
         // All the components in the full-text config can be reused except the tokenizer.
         // The same config may be used in different places at the same time
         // For example, in ftcontains() the left expression and right expression need to be proceeded by two full-text configs
@@ -50,12 +59,20 @@ public class FullTextConfigFactory implements IFullTextConfigFactory {
         final ObjectNode json = registry.getClassIdentifier(getClass(), serialVersionUID);
         // ToDo: add tokenizerFactory into FullTextConfigFactory so a new tokenizer can be generated on-the-fly
         // rather than pass a tokenizer from the upper-layer caller to the full-text config
-        json.set("fullTextConfig", config.toJson(registry));
+        if (config != null) {
+            json.set("fullTextConfig", config.toJson(registry));
+        } else {
+            json.set("fullTextConfig", null);
+        }
         return json;
     }
 
     public static IJsonSerializable fromJson(IPersistedResourceRegistry registry, JsonNode json)
             throws HyracksDataException {
+        if (json.get("fullTextConfig").isNull()) {
+            return null;
+        }
+
         final IFullTextConfig config = (IFullTextConfig) registry.deserialize(json.get("fullTextConfig"));
         return new FullTextConfigFactory(config);
     }
