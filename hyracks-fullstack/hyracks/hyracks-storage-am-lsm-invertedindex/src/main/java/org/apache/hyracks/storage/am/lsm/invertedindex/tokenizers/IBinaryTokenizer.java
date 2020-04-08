@@ -33,6 +33,6 @@ public interface IBinaryTokenizer {
     // Get the total number of tokens
     public short getTokensCount();
 
-    // Get the tokenizer types
+    // Get the tokenizer types: String or List
     public TokenizerType getTokenizerType();
 }
