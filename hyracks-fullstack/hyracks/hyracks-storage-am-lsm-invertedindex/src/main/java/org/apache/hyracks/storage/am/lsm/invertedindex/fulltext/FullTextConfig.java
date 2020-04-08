@@ -19,8 +19,6 @@
 
 package org.apache.hyracks.storage.am.lsm.invertedindex.fulltext;
 
-import static org.apache.hyracks.util.string.UTF8StringUtil.getUTF8StringInArray;
-
 import java.util.ArrayList;
 import java.util.List;
 

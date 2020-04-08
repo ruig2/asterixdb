@@ -19,8 +19,6 @@
 
 package org.apache.hyracks.storage.am.lsm.invertedindex.search;
 
-import static org.apache.hyracks.util.string.UTF8StringUtil.getUTF8StringInArray;
-
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.List;

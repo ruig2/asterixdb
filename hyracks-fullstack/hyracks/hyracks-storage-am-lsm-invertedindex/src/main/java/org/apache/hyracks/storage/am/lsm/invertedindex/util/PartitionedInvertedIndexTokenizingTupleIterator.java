@@ -37,6 +37,7 @@ public class PartitionedInvertedIndexTokenizingTupleIterator extends InvertedInd
         super(tokensFieldCount, invListFieldCount, tokenizer, fullTextConfig);
     }
 
+    @Override
     public void reset(ITupleReference inputTuple) {
         super.reset(inputTuple);
         // Run through the tokenizer once to get the total number of tokens.
@@ -48,13 +49,17 @@ public class PartitionedInvertedIndexTokenizingTupleIterator extends InvertedInd
         super.reset(inputTuple);
     }
 
+    @Override
     public void next() throws HyracksDataException {
-        tokenizer.next();
-        IToken token = tokenizer.getToken();
+        fullTextConfig.next();
+        IToken token = fullTextConfig.getToken();
+
         tupleBuilder.reset();
         try {
             // Add token field.
             token.serializeToken(tupleBuilder.getFieldData());
+
+            // Different from super.next(): here we write the numTokens
             tupleBuilder.addFieldEndOffset();
             // Add field with number of tokens.
             tupleBuilder.getDataOutput().writeShort(numTokens);
@@ -62,6 +67,7 @@ public class PartitionedInvertedIndexTokenizingTupleIterator extends InvertedInd
         } catch (IOException e) {
             throw HyracksDataException.create(e);
         }
+
         // Add inverted-list element fields.
         for (int i = 0; i < invListFieldCount; i++) {
             tupleBuilder.addField(inputTuple.getFieldData(i + 1), inputTuple.getFieldStart(i + 1),

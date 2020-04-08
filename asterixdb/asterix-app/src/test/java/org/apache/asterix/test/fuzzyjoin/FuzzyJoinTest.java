@@ -18,6 +18,10 @@
  */
 package org.apache.asterix.test.fuzzyjoin;
 
+import java.io.File;
+import java.util.ArrayList;
+import java.util.Collection;
+
 import org.apache.asterix.api.common.AsterixHyracksIntegrationUtil;
 import org.apache.asterix.test.common.TestExecutor;
 import org.apache.asterix.testframework.context.TestCaseContext;
@@ -28,10 +32,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
-
-import java.io.File;
-import java.util.ArrayList;
-import java.util.Collection;
 
 /**
  * Executes the fuzzy-join tests under src/test/resources/fuzzyjoin

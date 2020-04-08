@@ -1026,7 +1026,7 @@ public class QueryTranslator extends AbstractLangTranslator implements IStatemen
             }
 
             if (stmtCreateIndex.getIndexType() == IndexType.SINGLE_PARTITION_NGRAM_INVIX
-                    ||  stmtCreateIndex.getIndexType() == IndexType.LENGTH_PARTITIONED_NGRAM_INVIX) {
+                    || stmtCreateIndex.getIndexType() == IndexType.LENGTH_PARTITIONED_NGRAM_INVIX) {
                 // If the index is for NGram rather than Word, then we still use the default full-text config for it
                 // Note that the tokenizer will be replaced with a NGram one at run time
                 //     (e.g. when insert and  look up NGram index)

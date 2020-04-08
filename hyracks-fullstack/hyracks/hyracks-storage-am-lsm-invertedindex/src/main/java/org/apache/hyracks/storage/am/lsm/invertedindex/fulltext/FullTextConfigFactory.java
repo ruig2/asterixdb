@@ -19,13 +19,13 @@
 
 package org.apache.hyracks.storage.am.lsm.invertedindex.fulltext;
 
-import com.google.common.collect.ImmutableList;
 import org.apache.hyracks.api.exceptions.HyracksDataException;
 import org.apache.hyracks.api.io.IJsonSerializable;
 import org.apache.hyracks.api.io.IPersistedResourceRegistry;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.google.common.collect.ImmutableList;
 
 public class FullTextConfigFactory implements IFullTextConfigFactory {
     private static final long serialVersionUID = 1L;
@@ -42,8 +42,8 @@ public class FullTextConfigFactory implements IFullTextConfigFactory {
             // If not specified, use the the default full-text config
             // Note that though the tokenizer here is of category Word, it may be replaced by a NGram tokenizer at run time
             //     for NGram index.
-            return new FullTextConfig(FullTextConfig.DEFAULT_FULL_TEXT_CONFIG_NAME, IFullTextConfig.TokenizerCategory.WORD,
-                    ImmutableList.of());
+            return new FullTextConfig(FullTextConfig.DEFAULT_FULL_TEXT_CONFIG_NAME,
+                    IFullTextConfig.TokenizerCategory.WORD, ImmutableList.of());
         }
 
         // All the components in the full-text config can be reused except the tokenizer.

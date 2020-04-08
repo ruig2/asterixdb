@@ -69,13 +69,14 @@ public class InvertedIndexTokenizingTupleIterator {
         IToken token = fullTextConfig.getToken();
 
         tupleBuilder.reset();
-        // Add token field.
         try {
+            // Add token field.
             token.serializeToken(tupleBuilder.getFieldData());
         } catch (IOException e) {
             throw HyracksDataException.create(e);
         }
         tupleBuilder.addFieldEndOffset();
+
         // Add inverted-list element fields.
         for (int i = 0; i < invListFieldCount; i++) {
             tupleBuilder.addField(inputTuple.getFieldData(i + 1), inputTuple.getFieldStart(i + 1),
