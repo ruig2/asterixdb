@@ -1013,22 +1013,22 @@ public class QueryTranslator extends AbstractLangTranslator implements IStatemen
             String fullTextConfigName = stmtCreateIndex.getFullTextConfigName();
             // The index is of TYPE FULLTEXT in SQLPP
             if (stmtCreateIndex.getIndexType() == IndexType.SINGLE_PARTITION_WORD_INVIX
-                    && Strings.isNullOrEmpty(fullTextConfigName)) {
-                fullTextConfigName = FullTextConfig.DEFAULT_FULL_TEXT_CONFIG_NAME;
-            }
+                    || stmtCreateIndex.getIndexType() == IndexType.LENGTH_PARTITIONED_WORD_INVIX) {
+                if (Strings.isNullOrEmpty(fullTextConfigName)) {
+                    fullTextConfigName = FullTextConfig.DEFAULT_FULL_TEXT_CONFIG_NAME;
+                }
 
-            Index newIndex =
-                    new Index(dataverseName, datasetName, indexName, stmtCreateIndex.getIndexType(), indexFields,
-                            keySourceIndicators, indexFieldTypes, stmtCreateIndex.getGramLength(), fullTextConfigName,
-                            overridesFieldTypes, stmtCreateIndex.isEnforced(), false, MetadataUtil.PENDING_ADD_OP);
-
-            if (Strings.isNullOrEmpty(fullTextConfigName) == false) {
                 IFullTextConfig config = MetadataManager.INSTANCE.getFullTextConfig(mdTxnCtx, fullTextConfigName);
                 config.addUsedByIndices(indexName);
                 MetadataManager.INSTANCE.updateFulltextConfig(mdTxnCtx, config);
                 // The transaction should not be committed here, instead, it should be committed after the index created successfully
                 // If the index fails to be created, then the ft config shouldn't be updated
             }
+
+            Index newIndex =
+                    new Index(dataverseName, datasetName, indexName, stmtCreateIndex.getIndexType(), indexFields,
+                            keySourceIndicators, indexFieldTypes, stmtCreateIndex.getGramLength(), fullTextConfigName,
+                            overridesFieldTypes, stmtCreateIndex.isEnforced(), false, MetadataUtil.PENDING_ADD_OP);
 
             doCreateIndex(hcc, metadataProvider, ds, newIndex, jobFlags, sourceLoc);
         } finally {

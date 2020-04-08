@@ -64,6 +64,9 @@ public class FullTextConfig extends AbstractFullTextConfig {
 
     @Override
     public IToken getToken() {
+        // String s = getUTF8StringInArray(currentToken.getData(), currentToken.getStartOffset(), currentToken.getTokenLength());
+        // System.out.println("current token: " + s);
+
         return currentToken;
     }
 

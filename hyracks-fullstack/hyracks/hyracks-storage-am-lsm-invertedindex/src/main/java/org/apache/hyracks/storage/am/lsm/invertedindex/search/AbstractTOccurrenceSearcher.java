@@ -165,8 +165,6 @@ public abstract class AbstractTOccurrenceSearcher implements IInvertedIndexSearc
                     }
                 }
 
-                //token.reset(token.getData(), token.getStartOffset()+1, token.getEndOffset(), token.getTokenLength()-1, token.getTokenLength());
-
                 String s =
                         getUTF8StringInArray(token.getData(), token.getStartOffset(), token.getTokenLength());
                 System.out.println("Updated token: " + s + " len: " + s.length());
