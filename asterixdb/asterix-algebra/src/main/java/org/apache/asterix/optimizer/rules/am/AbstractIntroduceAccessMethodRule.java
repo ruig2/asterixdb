@@ -251,7 +251,7 @@ public abstract class AbstractIntroduceAccessMethodRule implements IAlgebraicRew
 
                     // If the function is ftcontains() and the ft config in the function differs from that in the index
                     // then skip the index
-                    if (isFullTextFuncAndConfigDiffersFromExpected(analysisCtx, chosenIndex.getFullTextConfig())) {
+                    if (isFullTextFuncAndConfigDiffersFromExpected(analysisCtx, chosenIndex.getFullTextConfigName())) {
                         continue;
                     }
 

@@ -81,7 +81,7 @@ public class SecondaryInvertedIndexOperationsHelper extends SecondaryTreeIndexOp
             SourceLocation sourceLoc) throws AlgebricksException {
         super(dataset, index, metadataProvider, sourceLoc);
         this.fullTextConfigFactory =
-                new FullTextConfigFactory(metadataProvider.findFullTextConfig(index.getFullTextConfig()));
+                new FullTextConfigFactory(metadataProvider.findFullTextConfig(index.getFullTextConfigName()));
     }
 
     @Override

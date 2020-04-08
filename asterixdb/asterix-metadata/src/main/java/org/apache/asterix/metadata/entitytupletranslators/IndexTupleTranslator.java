@@ -320,12 +320,12 @@ public class IndexTupleTranslator extends AbstractTupleTranslator<Index> {
     }
 
     private void writeFullTextConfig(Index index) throws HyracksDataException {
-        if (!Strings.isNullOrEmpty(index.getFullTextConfig())) {
+        if (!Strings.isNullOrEmpty(index.getFullTextConfigName())) {
             fieldValue.reset();
             nameValue.reset();
             aString.setValue(FULL_TEXT_CONFIG_FIELD_NAME);
             stringSerde.serialize(aString, nameValue.getDataOutput());
-            stringSerde.serialize(new AString(index.getFullTextConfig()), fieldValue.getDataOutput());
+            stringSerde.serialize(new AString(index.getFullTextConfigName()), fieldValue.getDataOutput());
             recordBuilder.addField(nameValue, fieldValue);
         }
     }

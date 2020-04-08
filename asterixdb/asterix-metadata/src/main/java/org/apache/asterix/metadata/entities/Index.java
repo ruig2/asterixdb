@@ -61,13 +61,13 @@ public class Index implements IMetadataEntity<Index>, Comparable<Index> {
     // Specific to NGRAM indexes.
     private final int gramLength;
     // Specific to FullText indexes.
-    private final String fullTextConfig;
+    private final String fullTextConfigName;
     // Type of pending operations with respect to atomic DDL operation
     private int pendingOp;
 
     public Index(DataverseName dataverseName, String datasetName, String indexName, IndexType indexType,
             List<List<String>> keyFieldNames, List<Integer> keyFieldSourceIndicators, List<IAType> keyFieldTypes,
-            int gramLength, String fullTextConfig, boolean overrideKeyFieldTypes, boolean isEnforced,
+            int gramLength, String fullTextConfigName, boolean overrideKeyFieldTypes, boolean isEnforced,
             boolean isPrimaryIndex, int pendingOp) {
         this.dataverseName = dataverseName;
         this.datasetName = datasetName;
@@ -77,10 +77,10 @@ public class Index implements IMetadataEntity<Index>, Comparable<Index> {
         this.keyFieldSourceIndicators = keyFieldSourceIndicators;
         this.keyFieldTypes = keyFieldTypes;
         this.gramLength = gramLength;
-        if (Strings.isNullOrEmpty(fullTextConfig)) {
-            this.fullTextConfig = DEFAULT_FULL_TEXT_CONFIG_NAME;
+        if (indexType == IndexType.SINGLE_PARTITION_WORD_INVIX && Strings.isNullOrEmpty(fullTextConfigName)) {
+            this.fullTextConfigName = DEFAULT_FULL_TEXT_CONFIG_NAME;
         } else {
-            this.fullTextConfig = fullTextConfig;
+            this.fullTextConfigName = fullTextConfigName;
         }
 
         this.overrideKeyFieldTypes = overrideKeyFieldTypes;
@@ -124,8 +124,8 @@ public class Index implements IMetadataEntity<Index>, Comparable<Index> {
         return gramLength;
     }
 
-    public String getFullTextConfig() {
-        return fullTextConfig;
+    public String getFullTextConfigName() {
+        return fullTextConfigName;
     }
 
     public IndexType getIndexType() {

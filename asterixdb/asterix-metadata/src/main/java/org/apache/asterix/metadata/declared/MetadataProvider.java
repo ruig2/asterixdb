@@ -1597,7 +1597,7 @@ public class MetadataProvider implements IMetadataProvider<DataSourceId, String>
             IBinaryTokenizerFactory tokenizerFactory = NonTaggedFormatUtil.getBinaryTokenizerFactory(
                     secondaryKeyType.getTypeTag(), indexType, secondaryIndex.getGramLength());
             IFullTextConfigFactory fullTextConfigFactory =
-                    new FullTextConfigFactory(findFullTextConfig(secondaryIndex.getFullTextConfig()));
+                    new FullTextConfigFactory(findFullTextConfig(secondaryIndex.getFullTextConfigName()));
 
             Pair<IFileSplitProvider, AlgebricksPartitionConstraint> splitsAndConstraint =
                     getSplitProviderAndConstraints(dataset, secondaryIndex.getIndexName());

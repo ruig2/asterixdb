@@ -149,7 +149,7 @@ public class SecondaryCorrelatedInvertedIndexOperationsHelper extends SecondaryC
         tokenizerFactory = NonTaggedFormatUtil.getBinaryTokenizerFactory(secondaryKeyType.getTypeTag(), indexType,
                 index.getGramLength());
         fullTextConfigFactory =
-                new FullTextConfigFactory(metadataProvider.findFullTextConfig(index.getFullTextConfig()));
+                new FullTextConfigFactory(metadataProvider.findFullTextConfig(index.getFullTextConfigName()));
         // Type traits for inverted-list elements. Inverted lists contain
         // primary keys.
         invListsTypeTraits = new ITypeTraits[numPrimaryKeys];
