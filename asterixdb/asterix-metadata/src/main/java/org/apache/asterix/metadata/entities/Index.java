@@ -21,6 +21,7 @@ package org.apache.asterix.metadata.entities;
 
 import java.util.List;
 
+import com.google.common.base.Strings;
 import org.apache.asterix.common.config.DatasetConfig.IndexType;
 import org.apache.asterix.common.exceptions.AsterixException;
 import org.apache.asterix.common.exceptions.CompilationException;
@@ -35,6 +36,7 @@ import org.apache.asterix.om.types.IAType;
 import org.apache.asterix.om.utils.NonTaggedFormatUtil;
 import org.apache.hyracks.algebricks.common.exceptions.AlgebricksException;
 import org.apache.hyracks.algebricks.common.utils.Pair;
+import static org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.FullTextConfig.DEFAULT_FULL_TEXT_CONFIG_NAME;
 
 /**
  * Metadata describing an index.
@@ -75,7 +77,12 @@ public class Index implements IMetadataEntity<Index>, Comparable<Index> {
         this.keyFieldSourceIndicators = keyFieldSourceIndicators;
         this.keyFieldTypes = keyFieldTypes;
         this.gramLength = gramLength;
-        this.fullTextConfig = fullTextConfig;
+        if (Strings.isNullOrEmpty(fullTextConfig)) {
+            this.fullTextConfig = DEFAULT_FULL_TEXT_CONFIG_NAME;
+        } else {
+            this.fullTextConfig = fullTextConfig;
+        }
+
         this.overrideKeyFieldTypes = overrideKeyFieldTypes;
         this.isEnforced = isEnforced;
         this.isPrimaryIndex = isPrimaryIndex;
