@@ -57,8 +57,12 @@ import org.apache.hyracks.storage.am.lsm.invertedindex.tokenizers.DelimitedUTF8S
 import org.apache.hyracks.storage.am.lsm.invertedindex.tokenizers.IBinaryTokenizer;
 import org.apache.hyracks.storage.am.lsm.invertedindex.tokenizers.IToken;
 import org.apache.hyracks.util.string.UTF8StringUtil;
+import static org.apache.hyracks.util.string.UTF8StringUtil.getUTF8StringInArray;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public class FullTextContainsEvaluator implements IScalarEvaluator {
+    private static final Logger LOGGER = LogManager.getLogger();
 
     // assuming type indicator in serde format
     protected static final int TYPE_INDICATOR_SIZE = 1;
@@ -335,6 +339,9 @@ public class FullTextContainsEvaluator implements IScalarEvaluator {
             }
             keyEntry.set(tokenOffset, tokenLength);
 
+            String rightTokenStr = getUTF8StringInArray(token.getData(), tokenOffset, tokenLength);
+            //LOGGER.info("Right token: " + rightTokenStr);
+
             // Check whether the given token is a phrase.
             // Currently, for the full-text search, we don't support a phrase search yet.
             // So, each query predicate should have only one token.
@@ -352,6 +359,8 @@ public class FullTextContainsEvaluator implements IScalarEvaluator {
                 rightHashSet.put(keyEntry);
                 uniqueQueryTokenCount++;
             }
+
+            //LOGGER.info("uniqueQueryTokenCount: " + uniqueQueryTokenCount);
         }
 
         // Based on the search mode option - "any" or "all", set the occurrence threshold of tokens.
@@ -422,11 +431,17 @@ public class FullTextContainsEvaluator implements IScalarEvaluator {
         // The left side: field (document)
         // Resets the tokenizer for the given keywords in a document.
 
+        int startOffset = arg1.getStartOffset();
+        int length = arg1.getLength();
+        /*
         // How many bytes are required to store the length of the given string?
         int numBytesToStoreLength = UTF8StringUtil
                 .getNumBytesToStoreLength(UTF8StringUtil.getUTFLength(arg1.getByteArray(), arg1.getStartOffset()));
-        int startOffset = arg1.getStartOffset() + numBytesToStoreLength;
-        int length = arg1.getLength() - numBytesToStoreLength;
+        int startOffset +=  numBytesToStoreLength;
+        int length -=  numBytesToStoreLength;
+         */
+
+        //LOGGER.info("entire sentence: " + getUTF8StringInArray(arg1.getByteArray(), startOffset, length));
 
         configLeft.reset(arg1.getByteArray(), startOffset, length);
 
@@ -435,6 +450,10 @@ public class FullTextContainsEvaluator implements IScalarEvaluator {
             configLeft.next();
 
             IToken token = configLeft.getToken();
+
+            String leftTokenStr = getUTF8StringInArray(token.getData(), token.getStartOffset(), token.getTokenLength());
+            //LOGGER.info("Left token: " + leftTokenStr);
+
             // Records the starting position and the length of the current token.
             keyEntry.set(token.getStartOffset(), token.getTokenLength());
 
@@ -442,7 +461,9 @@ public class FullTextContainsEvaluator implements IScalarEvaluator {
             // We don't count multiple occurrence of a token now.
             // So, finding the same query predicate twice will not be counted as a found.
             if (rightHashSet.find(keyEntry, arg1.getByteArray(), true) == 1) {
+                //LOGGER.info("\t\t\tHit!!!");
                 foundCount++;
+                //LOGGER.info("\t\t" + foundCount);
                 if (foundCount >= occurrenceThreshold) {
                     return true;
                 }
