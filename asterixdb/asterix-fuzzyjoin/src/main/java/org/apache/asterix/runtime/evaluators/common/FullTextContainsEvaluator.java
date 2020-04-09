@@ -19,6 +19,7 @@
 package org.apache.asterix.runtime.evaluators.common;
 
 import static org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.FullTextConfig.DEFAULT_FULL_TEXT_CONFIG_NAME;
+import static org.apache.hyracks.util.string.UTF8StringUtil.getUTF8StringInArray;
 
 import java.io.DataOutput;
 import java.rmi.RemoteException;
@@ -57,7 +58,6 @@ import org.apache.hyracks.storage.am.lsm.invertedindex.tokenizers.DelimitedUTF8S
 import org.apache.hyracks.storage.am.lsm.invertedindex.tokenizers.IBinaryTokenizer;
 import org.apache.hyracks.storage.am.lsm.invertedindex.tokenizers.IToken;
 import org.apache.hyracks.util.string.UTF8StringUtil;
-import static org.apache.hyracks.util.string.UTF8StringUtil.getUTF8StringInArray;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
