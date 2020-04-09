@@ -263,7 +263,7 @@ public class FullTextContainsEvaluator implements IScalarEvaluator {
         // that contains the key (this array will be set later.)
         rightHashSet = new BinaryHashSet(HASH_SET_SLOT_SIZE, HASH_SET_FRAME_SIZE, hashFunc, strLowerCaseTokenCmp, null);
         IBinaryTokenizer tokenizerForLeftArray = BinaryTokenizerFactoryProvider.INSTANCE
-                .getWordTokenizerFactory(ATypeTag.STRING, false, true).createTokenizer();
+                .getWordTokenizerFactory(ATypeTag.STRING, true, true).createTokenizer();
         configLeft.setTokenizer(tokenizerForLeftArray);
     }
 
@@ -441,7 +441,7 @@ public class FullTextContainsEvaluator implements IScalarEvaluator {
         int length -=  numBytesToStoreLength;
          */
 
-        //LOGGER.info("entire sentence: " + getUTF8StringInArray(arg1.getByteArray(), startOffset, length));
+        // LOGGER.info("entire sentence: " + getUTF8StringInArray(arg1.getByteArray(), startOffset+2, length-2));
 
         configLeft.reset(arg1.getByteArray(), startOffset, length);
 
@@ -452,7 +452,7 @@ public class FullTextContainsEvaluator implements IScalarEvaluator {
             IToken token = configLeft.getToken();
 
             String leftTokenStr = getUTF8StringInArray(token.getData(), token.getStartOffset(), token.getTokenLength());
-            //LOGGER.info("Left token: " + leftTokenStr);
+            // LOGGER.info("Left token: " + leftTokenStr);
 
             // Records the starting position and the length of the current token.
             keyEntry.set(token.getStartOffset(), token.getTokenLength());

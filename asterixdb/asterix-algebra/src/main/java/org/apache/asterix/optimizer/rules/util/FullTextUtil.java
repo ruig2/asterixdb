@@ -70,7 +70,7 @@ public class FullTextUtil {
                 ConstantExpression ce = (ConstantExpression) arguments.get(i).getValue();
                 optionName = ((AString) ((AsterixConstantValue) (ce.getValue())).getObject()).getStringValue();
             } catch (Exception e) {
-                LOGGER.info("Fail to get full-text config name", e);
+                // LOGGER.info("Fail to get full-text config name", e);
                 continue;
             }
 
