@@ -50,7 +50,7 @@ public class FullTextUtil {
     }
 
     // If not a full-text function expression, then return null
-    // Otherwise, return the full-text config if one exists in the expression, or return the default config
+    // Otherwise, return the full-text config if one exists in the expression, otherwise return the default config
     public static String getFullTextConfigNameFromExpr(IOptimizableFuncExpr expr) {
         return getFullTextConfigNameFromExpr(expr.getFuncExpr());
     }
@@ -62,7 +62,7 @@ public class FullTextUtil {
 
         String configName = FullTextConfig.DEFAULT_FULL_TEXT_CONFIG_NAME;
         List<Mutable<ILogicalExpression>> arguments = funcExpr.getArguments();
-        for (int i = 0; i < arguments.size() - 1; i++) {
+        for (int i = 0; i < arguments.size() - 1; i += 2) {
             String optionName = "";
             try {
                 // ToDo: wrap the expressions in a ftcontains() function into a dedicated Java object
