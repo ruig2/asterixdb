@@ -40,6 +40,9 @@ public abstract class AbstractFullTextConfig implements IFullTextConfig {
     // ftcontains() can take two types of input:
     // 1) string where a default DelimitedUTF8StringBinaryTokenizer is fine,
     // and 2) a list of string as input where we may need a AUnorderedListBinaryTokenizer or AOrderedListBinaryTokenizer
+
+    // ToDo: wrap tokenizer and filters into a dedicated Java class so that at runtime the corresponding evaluator
+    // doesn't care about usedByIndices
     protected IBinaryTokenizer tokenizer;
     protected ImmutableList<IFullTextFilter> filters;
     protected List<String> usedByIndices;
