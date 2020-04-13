@@ -54,7 +54,6 @@ public class FuzzyJoinFunctionRegistrant implements IFunctionRegistrant {
         // full-text function
         // The following two functions will be treated different from other general built-in functions
         // fc.add(FullTextContainsDescriptor.FACTORY);
-        // fc.add(FullTextContainsWithoutOptionDescriptor.FACTORY);
 
         // fuzzyjoin function
         fc.add(PrefixLenJaccardDescriptor.FACTORY);
