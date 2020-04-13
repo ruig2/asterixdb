@@ -21,8 +21,11 @@ package org.apache.asterix.runtime.evaluators.common;
 
 import org.apache.asterix.common.annotations.MissingNullInOutFunction;
 import org.apache.asterix.om.functions.BuiltinFunctions;
+import org.apache.asterix.om.functions.IFunctionDescriptor;
+import org.apache.asterix.om.functions.IFunctionDescriptorFactory;
 import org.apache.asterix.runtime.evaluators.base.AbstractScalarFunctionDynamicDescriptor;
 import org.apache.hyracks.algebricks.common.exceptions.AlgebricksException;
+import org.apache.hyracks.algebricks.common.exceptions.NotImplementedException;
 import org.apache.hyracks.algebricks.core.algebra.functions.FunctionIdentifier;
 import org.apache.hyracks.algebricks.runtime.base.IEvaluatorContext;
 import org.apache.hyracks.algebricks.runtime.base.IScalarEvaluator;
@@ -33,14 +36,12 @@ import org.apache.hyracks.api.exceptions.HyracksDataException;
 public class FullTextContainsWithoutOptionDescriptor extends AbstractScalarFunctionDynamicDescriptor {
     private static final long serialVersionUID = 1L;
 
-    /*
     public static final IFunctionDescriptorFactory FACTORY = new IFunctionDescriptorFactory() {
         @Override
         public IFunctionDescriptor createFunctionDescriptor() {
             return new FullTextContainsWithoutOptionDescriptor();
         }
     };
-     */
 
     /**
      * Creates full-text search evaluator. There are two arguments:
@@ -55,7 +56,9 @@ public class FullTextContainsWithoutOptionDescriptor extends AbstractScalarFunct
 
             @Override
             public IScalarEvaluator createScalarEvaluator(IEvaluatorContext ctx) throws HyracksDataException {
-                return new FullTextContainsEvaluator(args, ctx);
+                // todo: in progress...
+                //return new FullTextContainsEvaluator(args, ctx, config);
+                throw new NotImplementedException();
             }
         };
     }

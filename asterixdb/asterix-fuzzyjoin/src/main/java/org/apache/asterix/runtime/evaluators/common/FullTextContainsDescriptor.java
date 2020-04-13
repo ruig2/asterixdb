@@ -99,7 +99,7 @@ public class FullTextContainsDescriptor extends AbstractScalarFunctionDynamicDes
 
             @Override
             public IScalarEvaluator createScalarEvaluator(IEvaluatorContext ctx) throws HyracksDataException {
-                return new FullTextContainsEvaluator(args, ctx);
+                return new FullTextContainsEvaluator(args, ctx, config);
             }
         };
     }
