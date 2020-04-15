@@ -273,8 +273,7 @@ public class MetadataBootstrap {
         }
     }
 
-    private static void insertInitialFullTextConfig(MetadataTransactionContext mdTxnCtx)
-            throws AlgebricksException {
+    private static void insertInitialFullTextConfig(MetadataTransactionContext mdTxnCtx) throws AlgebricksException {
         MetadataManager.INSTANCE.addFulltextConfig(mdTxnCtx,
                 new FullTextConfig(FullTextConfig.DEFAULT_FULL_TEXT_CONFIG_NAME, IFullTextConfig.TokenizerCategory.WORD,
                         ImmutableList.of()));
