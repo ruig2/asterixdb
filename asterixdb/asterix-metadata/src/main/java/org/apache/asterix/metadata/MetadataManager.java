@@ -663,8 +663,12 @@ public abstract class MetadataManager implements IMetadataManager {
 
     @Override
     public void addFulltextConfig(MetadataTransactionContext mdTxnCtx, IFullTextConfig config)
-            throws AlgebricksException, HyracksDataException, RemoteException {
-        metadataNode.addFullTextConfig(mdTxnCtx.getTxnId(), config);
+            throws AlgebricksException {
+        try {
+            metadataNode.addFullTextConfig(mdTxnCtx.getTxnId(), config);
+        } catch (RemoteException e) {
+            throw new MetadataException(ErrorCode.REMOTE_EXCEPTION_WHEN_CALLING_METADATA_NODE, e);
+        }
     }
 
     @Override

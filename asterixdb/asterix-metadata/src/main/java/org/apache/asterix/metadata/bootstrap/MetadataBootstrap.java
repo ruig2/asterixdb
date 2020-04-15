@@ -37,6 +37,7 @@ import org.apache.asterix.common.exceptions.ACIDException;
 import org.apache.asterix.common.exceptions.MetadataException;
 import org.apache.asterix.common.ioopcallbacks.LSMIndexIOOperationCallbackFactory;
 import org.apache.asterix.common.ioopcallbacks.LSMIndexPageWriteCallbackFactory;
+import org.apache.asterix.common.metadata.DataverseName;
 import org.apache.asterix.common.utils.StorageConstants;
 import org.apache.asterix.common.utils.StoragePathUtil;
 import org.apache.asterix.external.adapter.factory.GenericAdapterFactory;
@@ -175,6 +176,7 @@ public class MetadataBootstrap {
                 }
             } else {
                 insertNewCompactionPoliciesIfNotExist(mdTxnCtx);
+                insertFullTextEntityIfNotExist(mdTxnCtx);
             }
             // #. initialize datasetIdFactory
             MetadataManager.INSTANCE.initializeDatasetIdFactory(mdTxnCtx);
@@ -305,6 +307,19 @@ public class MetadataBootstrap {
                 ConcurrentMergePolicyFactory.NAME) == null) {
             CompactionPolicy compactionPolicy = getCompactionPolicyEntity(ConcurrentMergePolicyFactory.class.getName());
             MetadataManager.INSTANCE.addCompactionPolicy(mdTxnCtx, compactionPolicy);
+        }
+    }
+
+    private static void insertFullTextEntityIfNotExist(MetadataTransactionContext mdTxnCtx) throws AlgebricksException {
+        if (MetadataManager.INSTANCE.getDataset(mdTxnCtx, MetadataConstants.METADATA_DATAVERSE_NAME, MetadataConstants.FULLTEXT_CONFIG_DATASET_NAME) == null) {
+            insertMetadataDatasets(mdTxnCtx, new IMetadataIndex[] { MetadataPrimaryIndexes.FULLTEXT_ENTITY_DATASET });
+        }
+
+        if (MetadataManager.INSTANCE.getFullTextConfig(mdTxnCtx,
+                FullTextConfig.DEFAULT_FULL_TEXT_CONFIG_NAME) == null) {
+            MetadataManager.INSTANCE.addFulltextConfig(mdTxnCtx,
+                    new FullTextConfig(FullTextConfig.DEFAULT_FULL_TEXT_CONFIG_NAME,
+                            IFullTextConfig.TokenizerCategory.WORD, ImmutableList.of()));
         }
     }
 
@@ -508,7 +523,8 @@ public class MetadataBootstrap {
     }
 
     private static void ensureCatalogUpgradability(IMetadataIndex index) {
-        if (index != MetadataPrimaryIndexes.SYNONYM_DATASET) {
+        if (index != MetadataPrimaryIndexes.SYNONYM_DATASET
+                && index != MetadataPrimaryIndexes.FULLTEXT_ENTITY_DATASET) {
             throw new IllegalStateException(
                     "attempt to create metadata index " + index.getIndexName() + ". Index should already exist");
         }

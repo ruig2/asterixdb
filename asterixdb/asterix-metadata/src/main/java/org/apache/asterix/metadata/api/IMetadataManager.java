@@ -43,7 +43,6 @@ import org.apache.asterix.metadata.entities.Node;
 import org.apache.asterix.metadata.entities.NodeGroup;
 import org.apache.asterix.metadata.entities.Synonym;
 import org.apache.hyracks.algebricks.common.exceptions.AlgebricksException;
-import org.apache.hyracks.api.exceptions.HyracksDataException;
 import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextConfig;
 import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextFilter;
 
@@ -418,8 +417,7 @@ public interface IMetadataManager extends IMetadataBootstrap {
     void dropFullTextFilter(MetadataTransactionContext mdTxnCtx, String filterName, boolean ifExists)
             throws AlgebricksException;
 
-    void addFulltextConfig(MetadataTransactionContext mdTxnCtx, IFullTextConfig config)
-            throws AlgebricksException, HyracksDataException, RemoteException;
+    void addFulltextConfig(MetadataTransactionContext mdTxnCtx, IFullTextConfig config) throws AlgebricksException;
 
     void updateFulltextConfig(MetadataTransactionContext mdTxnCtx, IFullTextConfig config) throws AlgebricksException;
 
