@@ -274,7 +274,7 @@ public class MetadataBootstrap {
     }
 
     private static void insertInitialFullTextConfig(MetadataTransactionContext mdTxnCtx)
-            throws AlgebricksException, HyracksDataException, RemoteException {
+            throws AlgebricksException {
         MetadataManager.INSTANCE.addFulltextConfig(mdTxnCtx,
                 new FullTextConfig(FullTextConfig.DEFAULT_FULL_TEXT_CONFIG_NAME, IFullTextConfig.TokenizerCategory.WORD,
                         ImmutableList.of()));
@@ -310,6 +310,8 @@ public class MetadataBootstrap {
     }
 
     private static void insertFullTextEntityIfNotExist(MetadataTransactionContext mdTxnCtx) throws AlgebricksException {
+        // Dataset d = MetadataManager.INSTANCE.getDataset(mdTxnCtx, MetadataConstants.METADATA_DATAVERSE_NAME,
+        //        MetadataConstants.FULLTEXT_CONFIG_DATASET_NAME);
         if (MetadataManager.INSTANCE.getDataset(mdTxnCtx, MetadataConstants.METADATA_DATAVERSE_NAME,
                 MetadataConstants.FULLTEXT_CONFIG_DATASET_NAME) == null) {
             insertMetadataDatasets(mdTxnCtx, new IMetadataIndex[] { MetadataPrimaryIndexes.FULLTEXT_ENTITY_DATASET });
@@ -317,9 +319,7 @@ public class MetadataBootstrap {
 
         if (MetadataManager.INSTANCE.getFullTextConfig(mdTxnCtx,
                 FullTextConfig.DEFAULT_FULL_TEXT_CONFIG_NAME) == null) {
-            MetadataManager.INSTANCE.addFulltextConfig(mdTxnCtx,
-                    new FullTextConfig(FullTextConfig.DEFAULT_FULL_TEXT_CONFIG_NAME,
-                            IFullTextConfig.TokenizerCategory.WORD, ImmutableList.of()));
+            insertInitialFullTextConfig(mdTxnCtx);
         }
     }
 

@@ -106,9 +106,9 @@ public final class MetadataRecordTypes {
     public static final String FIELD_NAME_WORKING_MEMORY_SIZE = "WorkingMemorySize";
     public static final String FIELD_NAME_APPLIED_FUNCTIONS = "AppliedFunctions";
     public static final String FIELD_NAME_WHERE_CLAUSE = "WhereClause";
-    public static final String FIELD_NAME_FULLTEXT_CATEGORY = "FulltextEntityCategory";
-    public static final String FIELD_NAME_FULLTEXT_ENTITY_NAME = "FulltextEntityName";
-    public static final String FIELD_NAME_FULLTEXT_FILTER_CATEGORY = "FulltextFilterType";
+    public static final String FIELD_NAME_FULLTEXT_CATEGORY = "FullTextEntityCategory";
+    public static final String FIELD_NAME_FULLTEXT_ENTITY_NAME = "FullTextEntityName";
+    public static final String FIELD_NAME_FULLTEXT_FILTER_CATEGORY = "FullTextFilterType";
     public static final String FIELD_NAME_FULLTEXT_TOKENIZER = "Tokenizer";
     public static final String FIELD_NAME_FULLTEXT_FILTER_PIPELINE = "FilterPipeline";
     public static final String FIELD_NAME_FULLTEXT_USED_BY_CONFIGS = "UsedByConfigs";
@@ -529,7 +529,7 @@ public final class MetadataRecordTypes {
     public static final int FULLTEXT_ENTITY_ARECORD_FULLTEXT_CONFIG_FILTERS_LIST_FIELD_INDEX = 3;
     public static final int FULLTEXT_ENTITY_ARECORD_FULLTEXT_CONFIG_USED_BY_INDICES_FIELD_INDEX = 4;
 
-    public static final String RECORD_NAME_FULLTEXT_ENTITY = "FulltextEntityRecordType";
+    public static final String RECORD_NAME_FULLTEXT_ENTITY = "FullTextEntityRecordType";
     public static final ARecordType FULLTEXT_ENTITY_RECORDTYPE = createRecordType(RECORD_NAME_FULLTEXT_ENTITY,
             // Only two fields are in common in both FulltextFilter and FulltextConfig
             // Other specific fields in FulltextFilter and FulltextConfig are OPEN
