@@ -37,7 +37,6 @@ import org.apache.asterix.common.exceptions.ACIDException;
 import org.apache.asterix.common.exceptions.MetadataException;
 import org.apache.asterix.common.ioopcallbacks.LSMIndexIOOperationCallbackFactory;
 import org.apache.asterix.common.ioopcallbacks.LSMIndexPageWriteCallbackFactory;
-import org.apache.asterix.common.metadata.DataverseName;
 import org.apache.asterix.common.utils.StorageConstants;
 import org.apache.asterix.common.utils.StoragePathUtil;
 import org.apache.asterix.external.adapter.factory.GenericAdapterFactory;
@@ -311,7 +310,8 @@ public class MetadataBootstrap {
     }
 
     private static void insertFullTextEntityIfNotExist(MetadataTransactionContext mdTxnCtx) throws AlgebricksException {
-        if (MetadataManager.INSTANCE.getDataset(mdTxnCtx, MetadataConstants.METADATA_DATAVERSE_NAME, MetadataConstants.FULLTEXT_CONFIG_DATASET_NAME) == null) {
+        if (MetadataManager.INSTANCE.getDataset(mdTxnCtx, MetadataConstants.METADATA_DATAVERSE_NAME,
+                MetadataConstants.FULLTEXT_CONFIG_DATASET_NAME) == null) {
             insertMetadataDatasets(mdTxnCtx, new IMetadataIndex[] { MetadataPrimaryIndexes.FULLTEXT_ENTITY_DATASET });
         }
 
