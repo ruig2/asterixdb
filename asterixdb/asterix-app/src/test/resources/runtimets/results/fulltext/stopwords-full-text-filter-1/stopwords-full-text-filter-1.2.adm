@@ -1,5 +1,5 @@
-{ "FulltextEntityCategory": "CONFIG", "FulltextEntityName": "DEFAULT_FULL_TEXT_CONFIG", "Tokenizer": "WORD", "FilterPipeline": [  ], "UsedByIndices": [  ] }
-{ "FulltextEntityCategory": "CONFIG", "FulltextEntityName": "my_first_stopword_config", "Tokenizer": "WORD", "FilterPipeline": [ "my_first_stopword_filter" ], "UsedByIndices": [  ] }
-{ "FulltextEntityCategory": "CONFIG", "FulltextEntityName": "my_second_stopword_config", "Tokenizer": "WORD", "FilterPipeline": [ "my_second_stopword_filter" ], "UsedByIndices": [  ] }
-{ "FulltextEntityCategory": "FILTER", "FulltextEntityName": "my_first_stopword_filter", "FulltextFilterType": "STOPWORDS", "UsedByConfigs": [ "my_first_stopword_config" ], "StopwordList": [ "a", "an", "the" ] }
-{ "FulltextEntityCategory": "FILTER", "FulltextEntityName": "my_second_stopword_filter", "FulltextFilterType": "STOPWORDS", "UsedByConfigs": [ "my_second_stopword_config" ], "StopwordList": [ "xxx", "yyy", "zzz" ] }
+{ "FullTextEntityCategory": "CONFIG", "FullTextEntityName": "DEFAULT_FULL_TEXT_CONFIG", "Tokenizer": "WORD", "FilterPipeline": [  ], "UsedByIndices": [  ] }
+{ "FullTextEntityCategory": "CONFIG", "FullTextEntityName": "my_first_stopword_config", "Tokenizer": "WORD", "FilterPipeline": [ "my_first_stopword_filter" ], "UsedByIndices": [  ] }
+{ "FullTextEntityCategory": "CONFIG", "FullTextEntityName": "my_second_stopword_config", "Tokenizer": "WORD", "FilterPipeline": [ "my_second_stopword_filter" ], "UsedByIndices": [  ] }
+{ "FullTextEntityCategory": "FILTER", "FullTextEntityName": "my_first_stopword_filter", "FullTextFilterType": "STOPWORDS", "UsedByConfigs": [ "my_first_stopword_config" ], "StopwordList": [ "a", "an", "the" ] }
+{ "FullTextEntityCategory": "FILTER", "FullTextEntityName": "my_second_stopword_filter", "FullTextFilterType": "STOPWORDS", "UsedByConfigs": [ "my_second_stopword_config" ], "StopwordList": [ "xxx", "yyy", "zzz" ] }
