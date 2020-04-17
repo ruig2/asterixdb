@@ -193,6 +193,22 @@ public class MetadataBootstrap {
             }
             throw new MetadataException(e);
         }
+
+        LOGGER.error("!!! check if full-text dataset inserted !!!");
+        if (MetadataManager.INSTANCE.getDataset(mdTxnCtx, MetadataConstants.METADATA_DATAVERSE_NAME,
+                MetadataConstants.FULLTEXT_CONFIG_DATASET_NAME) != null) {
+            LOGGER.error("!!! Yes !!!");
+        } else {
+            LOGGER.error("!!! No !!!");
+        }
+
+        LOGGER.error("!!! check if full-text dataset INDEX inserted !!!");
+        if (MetadataManager.INSTANCE.getDatasetIndexes(mdTxnCtx, MetadataConstants.METADATA_DATAVERSE_NAME,
+                MetadataConstants.FULLTEXT_CONFIG_DATASET_NAME) != null) {
+            LOGGER.error("!!! Yes !!!");
+        } else {
+            LOGGER.error("!!! No !!!");
+        }
     }
 
     private static void insertInitialDataverses(MetadataTransactionContext mdTxnCtx) throws AlgebricksException {
@@ -213,6 +229,8 @@ public class MetadataBootstrap {
     public static void insertMetadataDatasets(MetadataTransactionContext mdTxnCtx, IMetadataIndex[] indexes)
             throws AlgebricksException {
         for (int i = 0; i < indexes.length; i++) {
+            LOGGER.error("!!! inserting dataset named " + indexes[i].getIndexedDatasetName() + " !!!");
+
             IDatasetDetails id = new InternalDatasetDetails(FileStructure.BTREE, PartitioningStrategy.HASH,
                     indexes[i].getPartitioningExpr(), indexes[i].getPartitioningExpr(), null,
                     indexes[i].getPartitioningExprType(), false, null);
@@ -313,12 +331,20 @@ public class MetadataBootstrap {
         //        MetadataConstants.FULLTEXT_CONFIG_DATASET_NAME);
         if (MetadataManager.INSTANCE.getDataset(mdTxnCtx, MetadataConstants.METADATA_DATAVERSE_NAME,
                 MetadataConstants.FULLTEXT_CONFIG_DATASET_NAME) == null) {
-            insertMetadataDatasets(mdTxnCtx, new IMetadataIndex[] { MetadataPrimaryIndexes.FULLTEXT_ENTITY_DATASET });
+            LOGGER.info(
+                    "!!! full-text dataset is null, will insertMetadataDatasets MetadataPrimaryIndexes.FULLTEXT_ENTITY_DATASET !!!");
+            LOGGER.info("!!! No No No No No !!!");
+            // insertMetadataDatasets(mdTxnCtx, new IMetadataIndex[] { MetadataPrimaryIndexes.FULLTEXT_ENTITY_DATASET });
+        } else {
+            LOGGER.info("!!! full-text dataset is NOT null !!!");
         }
 
         if (MetadataManager.INSTANCE.getFullTextConfig(mdTxnCtx,
                 FullTextConfig.DEFAULT_FULL_TEXT_CONFIG_NAME) == null) {
-            insertInitialFullTextConfig(mdTxnCtx);
+            LOGGER.info("!!! full-text config is null, inserting default one !!!");
+            // insertInitialFullTextConfig(mdTxnCtx);
+        } else {
+            LOGGER.info("!!! full-text config is NOT null !!!");
         }
     }
 
@@ -391,6 +417,7 @@ public class MetadataBootstrap {
             resource = localResourceRepository.get(file.getRelativePath());
             createMetadataDataset = resource == null;
             if (createMetadataDataset) {
+                LOGGER.error("!!! is old dataverse, and dataset not exists !!!");
                 ensureCatalogUpgradability(index);
             }
         }
@@ -522,6 +549,10 @@ public class MetadataBootstrap {
     }
 
     private static void ensureCatalogUpgradability(IMetadataIndex index) {
+        if (index == MetadataPrimaryIndexes.FULLTEXT_ENTITY_DATASET) {
+            LOGGER.info("!!! get full-text dataset in ensureCatalogUpgradability !!!");
+        }
+
         if (index != MetadataPrimaryIndexes.SYNONYM_DATASET
                 && index != MetadataPrimaryIndexes.FULLTEXT_ENTITY_DATASET) {
             throw new IllegalStateException(
