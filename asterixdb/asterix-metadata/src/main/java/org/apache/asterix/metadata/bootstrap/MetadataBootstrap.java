@@ -334,7 +334,7 @@ public class MetadataBootstrap {
             LOGGER.info(
                     "!!! full-text dataset is null, will insertMetadataDatasets MetadataPrimaryIndexes.FULLTEXT_ENTITY_DATASET !!!");
             LOGGER.info("!!! No No No No No !!!");
-            // insertMetadataDatasets(mdTxnCtx, new IMetadataIndex[] { MetadataPrimaryIndexes.FULLTEXT_ENTITY_DATASET });
+            insertMetadataDatasets(mdTxnCtx, new IMetadataIndex[] { MetadataPrimaryIndexes.FULLTEXT_ENTITY_DATASET });
         } else {
             LOGGER.info("!!! full-text dataset is NOT null !!!");
         }
@@ -342,7 +342,7 @@ public class MetadataBootstrap {
         if (MetadataManager.INSTANCE.getFullTextConfig(mdTxnCtx,
                 FullTextConfig.DEFAULT_FULL_TEXT_CONFIG_NAME) == null) {
             LOGGER.info("!!! full-text config is null, inserting default one !!!");
-            // insertInitialFullTextConfig(mdTxnCtx);
+            insertInitialFullTextConfig(mdTxnCtx);
         } else {
             LOGGER.info("!!! full-text config is NOT null !!!");
         }
