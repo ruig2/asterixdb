@@ -194,6 +194,10 @@ public class MetadataBootstrap {
             throw new MetadataException(e);
         }
 
+
+        // Check if the index for FullTextEntity dataset is created in the Metadata.`index` dataset.
+
+        mdTxnCtx = MetadataManager.INSTANCE.beginTransaction();
         LOGGER.error("!!! check if full-text dataset inserted !!!");
         if (MetadataManager.INSTANCE.getDataset(mdTxnCtx, MetadataConstants.METADATA_DATAVERSE_NAME,
                 MetadataConstants.FULLTEXT_CONFIG_DATASET_NAME) != null) {
@@ -209,6 +213,7 @@ public class MetadataBootstrap {
         } else {
             LOGGER.error("!!! No !!!");
         }
+        MetadataManager.INSTANCE.commitTransaction(mdTxnCtx);
     }
 
     private static void insertInitialDataverses(MetadataTransactionContext mdTxnCtx) throws AlgebricksException {
