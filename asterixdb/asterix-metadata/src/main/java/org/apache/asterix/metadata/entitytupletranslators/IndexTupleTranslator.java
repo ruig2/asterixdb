@@ -186,6 +186,8 @@ public class IndexTupleTranslator extends AbstractTupleTranslator<Index> {
             Dataset dataset = metadataNode.getDataset(txnId, dataverseName, datasetName);
             String datatypeName = dataset.getItemTypeName();
             DataverseName datatypeDataverseName = dataset.getItemTypeDataverseName();
+            System.out.println("!!! metadataNode.getDatatype  datatypeDataverseName " + datatypeDataverseName + " !!!");
+            System.out.println("!!! metadataNode.getDatatype  datatypeName " + datatypeName + " !!!");
             ARecordType recordDt =
                     (ARecordType) metadataNode.getDatatype(txnId, datatypeDataverseName, datatypeName).getDatatype();
             String metatypeName = dataset.getMetaItemTypeName();

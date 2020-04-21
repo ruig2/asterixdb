@@ -160,6 +160,7 @@ public class MetadataBootstrap {
                 LOGGER.info(
                         "Finished enlistment of metadata B-trees in " + (isNewUniverse ? "new" : "old") + " universe");
             }
+
             if (isNewUniverse) {
                 insertInitialDataverses(mdTxnCtx);
                 insertMetadataDatasets(mdTxnCtx, PRIMARY_INDEXES);
@@ -177,6 +178,7 @@ public class MetadataBootstrap {
                 insertNewCompactionPoliciesIfNotExist(mdTxnCtx);
                 insertFullTextEntityIfNotExist(mdTxnCtx);
             }
+
             // #. initialize datasetIdFactory
             MetadataManager.INSTANCE.initializeDatasetIdFactory(mdTxnCtx);
             MetadataManager.INSTANCE.commitTransaction(mdTxnCtx);
@@ -332,8 +334,6 @@ public class MetadataBootstrap {
     }
 
     private static void insertFullTextEntityIfNotExist(MetadataTransactionContext mdTxnCtx) throws AlgebricksException {
-        // Dataset d = MetadataManager.INSTANCE.getDataset(mdTxnCtx, MetadataConstants.METADATA_DATAVERSE_NAME,
-        //        MetadataConstants.FULLTEXT_CONFIG_DATASET_NAME);
         if (MetadataManager.INSTANCE.getDataset(mdTxnCtx, MetadataConstants.METADATA_DATAVERSE_NAME,
                 MetadataConstants.FULLTEXT_CONFIG_DATASET_NAME) == null) {
             LOGGER.info(
@@ -350,6 +350,14 @@ public class MetadataBootstrap {
             insertInitialFullTextConfig(mdTxnCtx);
         } else {
             LOGGER.info("!!! full-text config is NOT null !!!");
+        }
+
+        IAType fullTextEntityRecordType = MetadataPrimaryIndexes.FULLTEXT_ENTITY_DATASET.getPayloadRecordType();
+        if (MetadataManager.INSTANCE.getDatatype(mdTxnCtx, MetadataConstants.METADATA_DATAVERSE_NAME,
+                fullTextEntityRecordType.getTypeName()) == null) {
+            LOGGER.error("!!! fullTextEntityRecordType datatype not found; inserting !!!");
+            MetadataManager.INSTANCE.addDatatype(mdTxnCtx, new Datatype(MetadataConstants.METADATA_DATAVERSE_NAME,
+                    fullTextEntityRecordType.getTypeName(), fullTextEntityRecordType, false));
         }
     }
 
