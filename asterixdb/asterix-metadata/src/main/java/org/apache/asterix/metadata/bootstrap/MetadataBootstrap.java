@@ -196,7 +196,6 @@ public class MetadataBootstrap {
             throw new MetadataException(e);
         }
 
-
         // Check if the index for FullTextEntity dataset is created in the Metadata.`index` dataset.
 
         mdTxnCtx = MetadataManager.INSTANCE.beginTransaction();
