@@ -45,7 +45,6 @@ public class TOccurrenceSearcher extends AbstractTOccurrenceSearcher {
     public void search(IIndexCursor resultCursor, InvertedIndexSearchPredicate searchPred, IIndexOperationContext ictx)
             throws HyracksDataException {
         prepareSearch();
-        System.out.println("searching...");
         tokenizeQuery(searchPred);
         int numQueryTokens = queryTokenAppender.getTupleCount();
 
