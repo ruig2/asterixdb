@@ -40,7 +40,7 @@ public interface IFullTextFilter extends IFullTextEntity {
         }
     }
 
-    FullTextFilterType getFilterKind();
+    FullTextFilterType getFilterType();
 
     List<String> getUsedByFTConfigs();
 

@@ -210,13 +210,13 @@ public class FulltextEntityTupleTranslator extends AbstractTupleTranslator<IFull
     }
 
     private void writeStopwordFilter(StopwordsFullTextFilter stopwordFilter) throws HyracksDataException {
-        writeFilterType2RecordBuilder(stopwordFilter.getFilterKind());
+        writeFilterType2RecordBuilder(stopwordFilter.getFilterType());
         writeOrderedList2RecordBuilder(FIELD_NAME_FULLTEXT_USED_BY_CONFIGS, stopwordFilter.getUsedByFTConfigs());
         writeOrderedList2RecordBuilder(FIELD_NAME_FULLTEXT_STOPWORD_LIST, stopwordFilter.getStopwordList());
     }
 
     private void writeFulltextFilter(IFullTextFilter filter) throws HyracksDataException {
-        switch (filter.getFilterKind()) {
+        switch (filter.getFilterType()) {
             case STOPWORDS:
                 writeStopwordFilter((StopwordsFullTextFilter) filter);
                 break;
