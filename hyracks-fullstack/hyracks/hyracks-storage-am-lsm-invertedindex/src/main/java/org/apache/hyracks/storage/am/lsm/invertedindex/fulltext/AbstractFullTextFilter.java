@@ -44,7 +44,7 @@ public abstract class AbstractFullTextFilter implements IFullTextFilter {
     }
 
     @Override
-    public FullTextFilterType getFilterKind() {
+    public FullTextFilterType getFilterType() {
         return type;
     }
 
