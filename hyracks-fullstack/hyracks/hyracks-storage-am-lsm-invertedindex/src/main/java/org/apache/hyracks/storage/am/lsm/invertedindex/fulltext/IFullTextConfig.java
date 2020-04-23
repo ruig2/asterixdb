@@ -45,6 +45,9 @@ public interface IFullTextConfig extends IFullTextEntity {
 
     void setTokenizer(IBinaryTokenizer tokenizer);
 
+    // ToDo: wrap the tokenizer and filters into a dedicated Java class
+    // so that at runtime the operators (evaluators) don't touch the usedByIndices filed
+    // That means, the usedByIndices field should be modified via MetadataManager only at compile time
     IBinaryTokenizer getTokenizer();
 
     ImmutableList<IFullTextFilter> getFilters();
@@ -53,6 +56,7 @@ public interface IFullTextConfig extends IFullTextEntity {
 
     void addUsedByIndices(String indexName);
 
+    // ToDo: wrap the following methods with a full-text analyzer so that the config can focus on the config only
     void reset(byte[] data, int start, int length);
 
     IToken getToken();
