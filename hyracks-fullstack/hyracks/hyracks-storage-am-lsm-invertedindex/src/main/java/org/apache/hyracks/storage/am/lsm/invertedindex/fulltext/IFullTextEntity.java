@@ -29,7 +29,7 @@ public interface IFullTextEntity extends Serializable, IJsonSerializable {
         FILTER,
         CONFIG;
 
-        public static FullTextEntityCategory fromValue(String value) {
+        public static FullTextEntityCategory getEnumIgnoreCase(String value) {
             return EnumUtils.getEnumIgnoreCase(FullTextEntityCategory.class, value);
         }
     }

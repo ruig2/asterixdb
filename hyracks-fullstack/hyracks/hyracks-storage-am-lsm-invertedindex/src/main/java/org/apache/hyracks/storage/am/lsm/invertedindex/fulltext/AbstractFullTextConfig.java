@@ -24,7 +24,6 @@ import java.util.List;
 
 import org.apache.hyracks.storage.am.lsm.invertedindex.tokenizers.DelimitedUTF8StringBinaryTokenizerFactory;
 import org.apache.hyracks.storage.am.lsm.invertedindex.tokenizers.IBinaryTokenizer;
-import org.apache.hyracks.storage.am.lsm.invertedindex.tokenizers.ITokenFactory;
 import org.apache.hyracks.storage.am.lsm.invertedindex.tokenizers.UTF8WordTokenFactory;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -37,9 +36,10 @@ public abstract class AbstractFullTextConfig implements IFullTextConfig {
     protected final TokenizerCategory tokenizerCategory;
     // By default, the tokenizer should be of the type DelimitedUTF8StringBinaryTokenizer
     // tokenizer needs be replaced on-the-fly when used in the ftcontains() function
+    //
     // ftcontains() can take two types of input:
-    // 1) string where a default DelimitedUTF8StringBinaryTokenizer is fine,
-    // and 2) a list of string as input where we may need a AUnorderedListBinaryTokenizer or AOrderedListBinaryTokenizer
+    // 1) string where a default DelimitedUTF8StringBinaryTokenizer is fine;
+    // 2) a list of strings as input where we may need a AUnorderedListBinaryTokenizer or AOrderedListBinaryTokenizer
 
     // ToDo: wrap tokenizer and filters into a dedicated Java class so that at runtime the corresponding evaluator
     // doesn't care about usedByIndices
@@ -55,7 +55,6 @@ public abstract class AbstractFullTextConfig implements IFullTextConfig {
         this.filters = filters;
         this.usedByIndices = usedByIndices;
 
-        ITokenFactory tokenFactory = null;
         switch (tokenizerCategory) {
             case WORD:
                 // Similar to aqlStringTokenizerFactory which is in the upper Asterix layer

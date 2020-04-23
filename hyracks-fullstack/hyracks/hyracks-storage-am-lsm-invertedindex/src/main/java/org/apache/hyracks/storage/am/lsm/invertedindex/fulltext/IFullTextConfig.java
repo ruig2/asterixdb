@@ -30,7 +30,7 @@ import com.google.common.collect.ImmutableList;
 public interface IFullTextConfig extends IFullTextEntity {
     // case-insensitive
     String FIELD_NAME_TOKENIZER = "tokenizer";
-    String FIELD_NAME_FILTER_PIPELINE = "filterpipeline";
+    String FIELD_NAME_FILTER_PIPELINE = "filter_pipeline";
 
     enum TokenizerCategory {
         NGRAM,
@@ -62,6 +62,6 @@ public interface IFullTextConfig extends IFullTextEntity {
     void next();
 
     // Get the total number of tokens
-    // Currently, it returns the number of tokens in the original text, that means stopwords are not removed
+    // Currently, it returns the number of tokens in the original text, that means stopwords are still counted
     short getTokensCount();
 }

@@ -33,6 +33,7 @@ public class SynonymFullTextFilter extends AbstractFullTextFilter {
         this.synonymMap = synonymMap;
     }
 
+    // Not implemented yet
     @Override
     public IToken processToken(TokenizerInfo.TokenizerType tokenizerType, IToken token) {
         return null;
