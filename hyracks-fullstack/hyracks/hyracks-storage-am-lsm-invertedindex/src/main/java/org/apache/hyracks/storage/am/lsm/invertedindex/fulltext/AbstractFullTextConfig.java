@@ -69,8 +69,6 @@ public abstract class AbstractFullTextConfig implements IFullTextConfig {
                 break;
             case NGRAM:
                 throw new NotImplementedException();
-                //this.tokenizer = new NGramUTF8StringBinaryTokenizerFactory(gramLength, usePrePost, true, true,
-                //        new UTF8NGramTokenFactory());
             default:
                 throw new InvalidParameterException();
         }
