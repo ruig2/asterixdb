@@ -86,7 +86,7 @@ public class FulltextEntityTupleTranslator extends AbstractTupleTranslator<IFull
         AString categoryAString =
                 (AString) aRecord.getValueByPos(FULLTEXT_ENTITY_ARECORD_FULLTEXT_ENTITY_CATEGORY_FIELD_INDEX);
 
-        FullTextEntityCategory category = FullTextEntityCategory.fromValue(categoryAString.getStringValue());
+        FullTextEntityCategory category = FullTextEntityCategory.getEnumIgnoreCase(categoryAString.getStringValue());
         switch (category) {
             case FILTER:
                 AString typeAString =

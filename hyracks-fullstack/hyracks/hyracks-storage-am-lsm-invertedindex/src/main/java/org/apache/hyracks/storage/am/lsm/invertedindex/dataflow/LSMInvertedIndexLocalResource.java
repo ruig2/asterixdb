@@ -42,10 +42,10 @@ import org.apache.hyracks.storage.am.lsm.common.api.ILSMPageWriteCallbackFactory
 import org.apache.hyracks.storage.am.lsm.common.api.IVirtualBufferCache;
 import org.apache.hyracks.storage.am.lsm.common.api.IVirtualBufferCacheProvider;
 import org.apache.hyracks.storage.am.lsm.common.dataflow.LsmResource;
-import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.FullTextConfig;
-import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.FullTextConfigFactory;
+import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.FullTextAnalyzer;
+import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.FullTextAnalyzerFactory;
+import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextAnalyzerFactory;
 import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextConfig;
-import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextConfigFactory;
 import org.apache.hyracks.storage.am.lsm.invertedindex.tokenizers.IBinaryTokenizerFactory;
 import org.apache.hyracks.storage.am.lsm.invertedindex.util.InvertedIndexUtils;
 import org.apache.hyracks.storage.common.IStorageManager;
@@ -65,7 +65,7 @@ public class LSMInvertedIndexLocalResource extends LsmResource {
     private final IBinaryComparatorFactory[] tokenCmpFactories;
     // ToDo: totally replace tokenizer with fullTextConfig
     private final IBinaryTokenizerFactory tokenizerFactory;
-    private final IFullTextConfigFactory fullTextConfigFactory;
+    private final IFullTextAnalyzerFactory fullTextAnalyzerFactory;
     private final boolean isPartitioned;
     private final int[] invertedIndexFields;
     private final int[] filterFieldsForNonBulkLoadOps;
@@ -84,7 +84,7 @@ public class LSMInvertedIndexLocalResource extends LsmResource {
             Map<String, String> mergePolicyProperties, boolean durable,
             // new fields
             ITypeTraits[] tokenTypeTraits, IBinaryComparatorFactory[] tokenCmpFactories,
-            IBinaryTokenizerFactory tokenizerFactory, IFullTextConfigFactory fullTextConfigFactory,
+            IBinaryTokenizerFactory tokenizerFactory, IFullTextAnalyzerFactory fullTextAnalyzerFactory,
             boolean isPartitioned, int[] invertedIndexFields, int[] filterFieldsForNonBulkLoadOps,
             int[] invertedIndexFieldsForNonBulkLoadOps, double bloomFilterFalsePositiveRate) {
 
@@ -95,7 +95,7 @@ public class LSMInvertedIndexLocalResource extends LsmResource {
         this.tokenTypeTraits = tokenTypeTraits;
         this.tokenCmpFactories = tokenCmpFactories;
         this.tokenizerFactory = tokenizerFactory;
-        this.fullTextConfigFactory = fullTextConfigFactory;
+        this.fullTextAnalyzerFactory = fullTextAnalyzerFactory;
         this.isPartitioned = isPartitioned;
         this.invertedIndexFields = invertedIndexFields;
         this.filterFieldsForNonBulkLoadOps = filterFieldsForNonBulkLoadOps;
@@ -105,7 +105,7 @@ public class LSMInvertedIndexLocalResource extends LsmResource {
 
     private LSMInvertedIndexLocalResource(IPersistedResourceRegistry registry, JsonNode json,
             ITypeTraits[] tokenTypeTraits, IBinaryComparatorFactory[] tokenCmpFactories,
-            IBinaryTokenizerFactory tokenizerFactory, IFullTextConfigFactory fullTextConfigFactory,
+            IBinaryTokenizerFactory tokenizerFactory, IFullTextAnalyzerFactory fullTextAnalyzerFactory,
             boolean isPartitioned, int[] invertedIndexFields, int[] filterFieldsForNonBulkLoadOps,
             int[] invertedIndexFieldsForNonBulkLoadOps, double bloomFilterFalsePositiveRate)
             throws HyracksDataException {
@@ -113,7 +113,7 @@ public class LSMInvertedIndexLocalResource extends LsmResource {
         this.tokenTypeTraits = tokenTypeTraits;
         this.tokenCmpFactories = tokenCmpFactories;
         this.tokenizerFactory = tokenizerFactory;
-        this.fullTextConfigFactory = fullTextConfigFactory;
+        this.fullTextAnalyzerFactory = fullTextAnalyzerFactory;
         this.isPartitioned = isPartitioned;
         this.invertedIndexFields = invertedIndexFields;
         this.filterFieldsForNonBulkLoadOps = filterFieldsForNonBulkLoadOps;
@@ -133,7 +133,7 @@ public class LSMInvertedIndexLocalResource extends LsmResource {
         pageWriteCallbackFactory.initialize(serviceCtx, this);
         if (isPartitioned) {
             return InvertedIndexUtils.createPartitionedLSMInvertedIndex(ioManager, virtualBufferCaches, typeTraits,
-                    cmpFactories, tokenTypeTraits, tokenCmpFactories, tokenizerFactory, fullTextConfigFactory,
+                    cmpFactories, tokenTypeTraits, tokenCmpFactories, tokenizerFactory, fullTextAnalyzerFactory,
                     bufferCache, file.getAbsolutePath(), bloomFilterFalsePositiveRate, mergePolicy,
                     opTrackerProvider.getOperationTracker(serviceCtx, this), ioScheduler, ioOpCallbackFactory,
                     pageWriteCallbackFactory, invertedIndexFields, filterTypeTraits, filterCmpFactories, filterFields,
@@ -141,7 +141,7 @@ public class LSMInvertedIndexLocalResource extends LsmResource {
                     metadataPageManagerFactory, serviceCtx.getTracer());
         } else {
             return InvertedIndexUtils.createLSMInvertedIndex(ioManager, virtualBufferCaches, typeTraits, cmpFactories,
-                    tokenTypeTraits, tokenCmpFactories, tokenizerFactory, fullTextConfigFactory, bufferCache,
+                    tokenTypeTraits, tokenCmpFactories, tokenizerFactory, fullTextAnalyzerFactory, bufferCache,
                     file.getAbsolutePath(), bloomFilterFalsePositiveRate, mergePolicy,
                     opTrackerProvider.getOperationTracker(serviceCtx, this), ioScheduler, ioOpCallbackFactory,
                     pageWriteCallbackFactory, invertedIndexFields, filterTypeTraits, filterCmpFactories, filterFields,
@@ -165,7 +165,7 @@ public class LSMInvertedIndexLocalResource extends LsmResource {
         }
         jsonObject.set("tokenCmpFactories", tokenCmpFactoriesArray);
         jsonObject.set("tokenizerFactory", tokenizerFactory.toJson(registry));
-        jsonObject.set("fullTextConfigFactory", fullTextConfigFactory.toJson(registry));
+        jsonObject.set("fullTextAnalyzerFactory", fullTextAnalyzerFactory.toJson(registry));
         jsonObject.put("isPartitioned", isPartitioned);
         jsonObject.putPOJO("invertedIndexFields", invertedIndexFields);
         jsonObject.putPOJO("filterFieldsForNonBulkLoadOps", filterFieldsForNonBulkLoadOps);
@@ -193,14 +193,14 @@ public class LSMInvertedIndexLocalResource extends LsmResource {
         final IBinaryTokenizerFactory tokenizerFactory =
                 (IBinaryTokenizerFactory) registry.deserialize(json.get("tokenizerFactory"));
 
-        final IFullTextConfigFactory fullTextConfigFactory;
+        final IFullTextAnalyzerFactory fullTextAnalyzerFactory;
         // back-compatible: the local resource in an older version of AsterixDB may not contain the newly added fullTextConfigFactory
-        if (json.has("fullTextConfigFactory")) {
-            fullTextConfigFactory = (IFullTextConfigFactory) registry.deserialize(json.get("fullTextConfigFactory"));
+        if (json.has("fullTextAnalyzerFactory")) {
+            fullTextAnalyzerFactory =
+                    (IFullTextAnalyzerFactory) registry.deserialize(json.get("fullTextAnalyzerFactory"));
         } else {
-            fullTextConfigFactory =
-                    new FullTextConfigFactory(new FullTextConfig(FullTextConfig.DEFAULT_FULL_TEXT_CONFIG_NAME,
-                            IFullTextConfig.TokenizerCategory.WORD, ImmutableList.of()));
+            fullTextAnalyzerFactory = new FullTextAnalyzerFactory(
+                    new FullTextAnalyzer(IFullTextConfig.TokenizerCategory.WORD, ImmutableList.of()));
         }
 
         final boolean isPartitioned = json.get("isPartitioned").asBoolean();
@@ -211,7 +211,7 @@ public class LSMInvertedIndexLocalResource extends LsmResource {
                 OBJECT_MAPPER.convertValue(json.get("invertedIndexFieldsForNonBulkLoadOps"), int[].class);
         final double bloomFilterFalsePositiveRate = json.get("bloomFilterFalsePositiveRate").asDouble();
         return new LSMInvertedIndexLocalResource(registry, json, tokenTypeTraits, tokenCmpFactories, tokenizerFactory,
-                fullTextConfigFactory, isPartitioned, invertedIndexFields, filterFieldsForNonBulkLoadOps,
+                fullTextAnalyzerFactory, isPartitioned, invertedIndexFields, filterFieldsForNonBulkLoadOps,
                 invertedIndexFieldsForNonBulkLoadOps, bloomFilterFalsePositiveRate);
     }
 }

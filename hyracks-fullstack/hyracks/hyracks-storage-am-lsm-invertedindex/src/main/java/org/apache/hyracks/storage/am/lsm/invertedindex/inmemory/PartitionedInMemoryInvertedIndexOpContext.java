@@ -21,8 +21,8 @@ package org.apache.hyracks.storage.am.lsm.invertedindex.inmemory;
 
 import org.apache.hyracks.api.dataflow.value.IBinaryComparatorFactory;
 import org.apache.hyracks.storage.am.btree.impls.BTree;
-import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextConfig;
-import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextConfigFactory;
+import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextAnalyzer;
+import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextAnalyzerFactory;
 import org.apache.hyracks.storage.am.lsm.invertedindex.tokenizers.IBinaryTokenizer;
 import org.apache.hyracks.storage.am.lsm.invertedindex.tokenizers.IBinaryTokenizerFactory;
 import org.apache.hyracks.storage.am.lsm.invertedindex.util.PartitionedInvertedIndexTokenizingTupleIterator;
@@ -30,14 +30,14 @@ import org.apache.hyracks.storage.am.lsm.invertedindex.util.PartitionedInvertedI
 public class PartitionedInMemoryInvertedIndexOpContext extends InMemoryInvertedIndexOpContext {
 
     public PartitionedInMemoryInvertedIndexOpContext(BTree btree, IBinaryComparatorFactory[] tokenCmpFactories,
-            IBinaryTokenizerFactory tokenizerFactory, IFullTextConfigFactory fullTextConfigFactory) {
-        super(btree, tokenCmpFactories, tokenizerFactory, fullTextConfigFactory);
+            IBinaryTokenizerFactory tokenizerFactory, IFullTextAnalyzerFactory fullTextAnalyzerFactory) {
+        super(btree, tokenCmpFactories, tokenizerFactory, fullTextAnalyzerFactory);
     }
 
     protected void setTokenizingTupleIterator() {
         IBinaryTokenizer tokenizer = getTokenizerFactory().createTokenizer();
-        IFullTextConfig fullTextConfig = getFullTextConfigFactory().createFullTextConfig();
+        IFullTextAnalyzer fullTextAnalyzer = getFullTextAnalyzerFactory().createFullTextAnalyzer();
         setTupleIter(new PartitionedInvertedIndexTokenizingTupleIterator(tokenCmpFactories.length,
-                btree.getFieldCount() - tokenCmpFactories.length, tokenizer, fullTextConfig));
+                btree.getFieldCount() - tokenCmpFactories.length, tokenizer, fullTextAnalyzer));
     }
 }

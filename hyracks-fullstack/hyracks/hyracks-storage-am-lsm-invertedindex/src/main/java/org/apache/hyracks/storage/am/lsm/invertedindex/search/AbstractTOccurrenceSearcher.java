@@ -44,7 +44,7 @@ import org.apache.hyracks.storage.am.lsm.invertedindex.api.IInPlaceInvertedIndex
 import org.apache.hyracks.storage.am.lsm.invertedindex.api.IInvertedIndexSearcher;
 import org.apache.hyracks.storage.am.lsm.invertedindex.api.IObjectFactory;
 import org.apache.hyracks.storage.am.lsm.invertedindex.api.InvertedListCursor;
-import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextConfig;
+import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextAnalyzer;
 import org.apache.hyracks.storage.am.lsm.invertedindex.ondisk.FixedSizeFrameTupleAccessor;
 import org.apache.hyracks.storage.am.lsm.invertedindex.ondisk.FixedSizeTupleReference;
 import org.apache.hyracks.storage.am.lsm.invertedindex.tokenizers.DelimitedUTF8StringBinaryTokenizer;
@@ -126,27 +126,27 @@ public abstract class AbstractTOccurrenceSearcher implements IInvertedIndexSearc
     protected void tokenizeQuery(InvertedIndexSearchPredicate searchPred) throws HyracksDataException {
         ITupleReference queryTuple = searchPred.getQueryTuple();
         int queryFieldIndex = searchPred.getQueryFieldIndex();
-        IFullTextConfig fullTextConfig = searchPred.getFullTextConfig();
-        fullTextConfig.setTokenizer(searchPred.getQueryTokenizer());
+        IFullTextAnalyzer fullTextAnalyzer = searchPred.getFullTextAnalyzer();
+        fullTextAnalyzer.setTokenizer(searchPred.getQueryTokenizer());
 
         // Is this a full-text query?
         // Then, the last argument is conjunctive or disjunctive search option, not a query text.
         // Thus, we need to remove the last argument.
         boolean isFullTextSearchQuery = searchPred.getIsFullTextSearchQuery();
         // Get the type of query tokenizer.
-        TokenizerType queryTokenizerType = fullTextConfig.getTokenizer().getTokenizerType();
+        TokenizerType queryTokenizerType = fullTextAnalyzer.getTokenizer().getTokenizerType();
         int tokenCountInOneField = 0;
 
         queryTokenAppender.reset(queryTokenFrame, true);
-        fullTextConfig.reset(queryTuple.getFieldData(queryFieldIndex), queryTuple.getFieldStart(queryFieldIndex),
+        fullTextAnalyzer.reset(queryTuple.getFieldData(queryFieldIndex), queryTuple.getFieldStart(queryFieldIndex),
                 queryTuple.getFieldLength(queryFieldIndex));
 
-        while (fullTextConfig.hasNext()) {
-            fullTextConfig.next();
+        while (fullTextAnalyzer.hasNext()) {
+            fullTextAnalyzer.next();
             queryTokenBuilder.reset();
             tokenCountInOneField++;
             try {
-                IToken token = fullTextConfig.getToken();
+                IToken token = fullTextAnalyzer.getToken();
                 // For the full-text search, we don't support a phrase search yet.
                 // So, each field should have only one token.
                 // If it's a list, it can have multiple keywords in it. But, each keyword should not be a phrase.

@@ -25,7 +25,6 @@ import java.util.List;
 import org.apache.hyracks.api.exceptions.HyracksDataException;
 import org.apache.hyracks.api.io.IJsonSerializable;
 import org.apache.hyracks.api.io.IPersistedResourceRegistry;
-import org.apache.hyracks.storage.am.lsm.invertedindex.tokenizers.IToken;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
@@ -50,62 +49,6 @@ public class FullTextConfig extends AbstractFullTextConfig {
     // so that it has the latest usedByIndices field
     public static final String DEFAULT_FULL_TEXT_CONFIG_NAME = "DEFAULT_FULL_TEXT_CONFIG";
 
-    private IToken currentToken = null;
-    private IToken nextToken = null;
-
-    @Override
-    public void reset(byte[] data, int start, int length) {
-        currentToken = null;
-        nextToken = null;
-        tokenizer.reset(data, start, length);
-    }
-
-    @Override
-    public IToken getToken() {
-        return currentToken;
-    }
-
-    @Override
-    public boolean hasNext() {
-        if (nextToken != null) {
-            return true;
-        }
-
-        while (tokenizer.hasNext()) {
-            tokenizer.next();
-            IToken candidateToken = tokenizer.getToken();
-            for (IFullTextFilter filter : filters) {
-                // ToDo: Tokenizer of TokenizerType.List would return strings starting with the length,
-                // e.g. 8database where 8 is the length
-                // Should we let TokenizerType.List returns the same thing as TokenizerType.String to make things easier?
-                // Otherwise, filters need tokenizer.getTokenizerType to decide if they need to remove the length themselves
-                candidateToken = filter.processToken(tokenizer.getTokenizerType(), candidateToken);
-                // null means the token is removed, i.e. it is a stopword
-                if (candidateToken == null) {
-                    break;
-                }
-            }
-
-            if (candidateToken != null) {
-                nextToken = candidateToken;
-                break;
-            }
-        }
-
-        return nextToken != null;
-    }
-
-    @Override
-    public void next() {
-        currentToken = nextToken;
-        nextToken = null;
-    }
-
-    @Override
-    public short getTokensCount() {
-        return tokenizer.getTokensCount();
-    }
-
     @Override
     public JsonNode toJson(IPersistedResourceRegistry registry) throws HyracksDataException {
         final ObjectNode json = registry.getClassIdentifier(getClass(), serialVersionUID);
@@ -125,7 +68,7 @@ public class FullTextConfig extends AbstractFullTextConfig {
             throws HyracksDataException {
         final String name = json.get("name").asText();
         final String tokenizerCategoryStr = json.get("tokenizerCategory").asText();
-        TokenizerCategory tc = TokenizerCategory.fromString(tokenizerCategoryStr);
+        TokenizerCategory tc = TokenizerCategory.getEnumIgnoreCase(tokenizerCategoryStr);
 
         ArrayNode filtersJsonNode = (ArrayNode) json.get("filters");
         List<IFullTextFilter> filterList = new ArrayList<>();
@@ -136,4 +79,5 @@ public class FullTextConfig extends AbstractFullTextConfig {
 
         return new FullTextConfig(name, tc, filters);
     }
+
 }

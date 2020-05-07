@@ -53,8 +53,9 @@ import org.apache.hyracks.dataflow.std.base.AbstractSingleActivityOperatorDescri
 import org.apache.hyracks.dataflow.std.connectors.OneToOneConnectorDescriptor;
 import org.apache.hyracks.dataflow.std.sort.ExternalSortOperatorDescriptor;
 import org.apache.hyracks.storage.am.lsm.invertedindex.dataflow.BinaryTokenizerOperatorDescriptor;
-import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.FullTextConfigFactory;
-import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextConfigFactory;
+import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.FullTextAnalyzer;
+import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.FullTextAnalyzerFactory;
+import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextAnalyzerFactory;
 import org.apache.hyracks.storage.am.lsm.invertedindex.tokenizers.IBinaryTokenizerFactory;
 
 public class SecondaryCorrelatedInvertedIndexOperationsHelper extends SecondaryCorrelatedTreeIndexOperationsHelper {
@@ -64,7 +65,7 @@ public class SecondaryCorrelatedInvertedIndexOperationsHelper extends SecondaryC
     private IBinaryComparatorFactory[] tokenComparatorFactories;
     private ITypeTraits[] tokenTypeTraits;
     private IBinaryTokenizerFactory tokenizerFactory;
-    private IFullTextConfigFactory fullTextConfigFactory;
+    private IFullTextAnalyzerFactory fullTextAnalyzerFactory;
     // For tokenization, sorting and loading. Represents <token, primary keys>.
     private int numTokenKeyPairFields;
     private IBinaryComparatorFactory[] tokenKeyPairComparatorFactories;
@@ -148,8 +149,8 @@ public class SecondaryCorrelatedInvertedIndexOperationsHelper extends SecondaryC
         // and add the choice to the index metadata.
         tokenizerFactory = NonTaggedFormatUtil.getBinaryTokenizerFactory(secondaryKeyType.getTypeTag(), indexType,
                 index.getGramLength());
-        fullTextConfigFactory =
-                new FullTextConfigFactory(metadataProvider.findFullTextConfig(index.getFullTextConfigName()));
+        fullTextAnalyzerFactory = new FullTextAnalyzerFactory(
+                new FullTextAnalyzer(metadataProvider.findFullTextConfig(index.getFullTextConfigName())));
         // Type traits for inverted-list elements. Inverted lists contain
         // primary keys.
         invListsTypeTraits = new ITypeTraits[numPrimaryKeys];
@@ -279,7 +280,7 @@ public class SecondaryCorrelatedInvertedIndexOperationsHelper extends SecondaryC
             keyFields[i] = i + numSecondaryKeys;
         }
         BinaryTokenizerOperatorDescriptor tokenizerOp = new BinaryTokenizerOperatorDescriptor(spec,
-                getTaggedRecordDescriptor(tokenKeyPairRecDesc), tokenizerFactory, fullTextConfigFactory, docField,
+                getTaggedRecordDescriptor(tokenKeyPairRecDesc), tokenizerFactory, fullTextAnalyzerFactory, docField,
                 keyFields, isPartitioned, false, true, MissingWriterFactory.INSTANCE);
         AlgebricksPartitionConstraintHelper.setPartitionConstraintInJobSpec(spec, tokenizerOp,
                 primaryPartitionConstraint);

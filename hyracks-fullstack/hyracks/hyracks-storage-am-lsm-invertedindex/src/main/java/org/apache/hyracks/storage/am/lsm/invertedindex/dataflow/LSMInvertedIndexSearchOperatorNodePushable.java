@@ -34,7 +34,7 @@ import org.apache.hyracks.storage.am.common.api.ISearchOperationCallbackFactory;
 import org.apache.hyracks.storage.am.common.dataflow.IIndexDataflowHelperFactory;
 import org.apache.hyracks.storage.am.common.dataflow.IndexSearchOperatorNodePushable;
 import org.apache.hyracks.storage.am.lsm.invertedindex.api.IInvertedIndexSearchModifier;
-import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextConfigFactory;
+import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextAnalyzerFactory;
 import org.apache.hyracks.storage.am.lsm.invertedindex.search.InvertedIndexSearchPredicate;
 import org.apache.hyracks.storage.am.lsm.invertedindex.tokenizers.IBinaryTokenizerFactory;
 import org.apache.hyracks.storage.common.IIndexAccessParameters;
@@ -44,7 +44,7 @@ public class LSMInvertedIndexSearchOperatorNodePushable extends IndexSearchOpera
 
     protected final IInvertedIndexSearchModifier searchModifier;
     protected final IBinaryTokenizerFactory binaryTokenizerFactory;
-    protected final IFullTextConfigFactory fullTextConfigFactory;
+    protected final IFullTextAnalyzerFactory fullTextAnalyzerFactory;
     protected final int queryFieldIndex;
     protected final int numOfFields;
     // Keeps the information whether the given query is a full-text search or not.
@@ -59,13 +59,13 @@ public class LSMInvertedIndexSearchOperatorNodePushable extends IndexSearchOpera
             IIndexDataflowHelperFactory indexHelperFactory, boolean retainInput, boolean retainMissing,
             IMissingWriterFactory missingWriterFactory, ISearchOperationCallbackFactory searchCallbackFactory,
             IInvertedIndexSearchModifier searchModifier, IBinaryTokenizerFactory binaryTokenizerFactory,
-            IFullTextConfigFactory fullTextConfigFactory, int queryFieldIndex, boolean isFullTextSearchQuery,
+            IFullTextAnalyzerFactory fullTextAnalyzerFactory, int queryFieldIndex, boolean isFullTextSearchQuery,
             int numOfFields, boolean appendIndexFilter, int frameLimit) throws HyracksDataException {
         super(ctx, inputRecDesc, partition, minFilterFieldIndexes, maxFilterFieldIndexes, indexHelperFactory,
                 retainInput, retainMissing, missingWriterFactory, searchCallbackFactory, appendIndexFilter);
         this.searchModifier = searchModifier;
         this.binaryTokenizerFactory = binaryTokenizerFactory;
-        this.fullTextConfigFactory = fullTextConfigFactory;
+        this.fullTextAnalyzerFactory = fullTextAnalyzerFactory;
         this.queryFieldIndex = queryFieldIndex;
         this.isFullTextSearchQuery = isFullTextSearchQuery;
         // If retainInput is true, the frameTuple is created in IndexSearchOperatorNodePushable.open().
@@ -83,7 +83,7 @@ public class LSMInvertedIndexSearchOperatorNodePushable extends IndexSearchOpera
     @Override
     protected ISearchPredicate createSearchPredicate() {
         return new InvertedIndexSearchPredicate(binaryTokenizerFactory.createTokenizer(),
-                fullTextConfigFactory.createFullTextConfig(), searchModifier, minFilterKey, maxFilterKey,
+                fullTextAnalyzerFactory.createFullTextAnalyzer(), searchModifier, minFilterKey, maxFilterKey,
                 isFullTextSearchQuery);
     }
 

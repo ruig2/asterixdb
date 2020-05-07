@@ -19,40 +19,31 @@
 
 package org.apache.hyracks.storage.am.lsm.invertedindex.fulltext;
 
-import java.util.List;
+import java.io.Serializable;
 
-import org.apache.commons.lang3.EnumUtils;
+import org.apache.hyracks.api.io.IJsonSerializable;
 import org.apache.hyracks.storage.am.lsm.invertedindex.tokenizers.IBinaryTokenizer;
+import org.apache.hyracks.storage.am.lsm.invertedindex.tokenizers.IToken;
 
 import com.google.common.collect.ImmutableList;
 
-public interface IFullTextConfig extends IFullTextEntity {
-    // case-insensitive
-    String FIELD_NAME_TOKENIZER = "tokenizer";
-    String FIELD_NAME_FILTER_PIPELINE = "filterPipeline";
+public interface IFullTextAnalyzer extends Serializable, IJsonSerializable {
 
-    enum TokenizerCategory {
-        NGRAM,
-        WORD;
-
-        public static TokenizerCategory getEnumIgnoreCase(String str) {
-            return EnumUtils.getEnumIgnoreCase(TokenizerCategory.class, str);
-        }
-    }
-
-    TokenizerCategory getTokenizerCategory();
+    IBinaryTokenizer getTokenizer();
 
     void setTokenizer(IBinaryTokenizer tokenizer);
 
-    // ToDo: wrap the tokenizer and filters into a dedicated Java class
-    // so that at runtime the operators (evaluators) don't touch the usedByIndices filed
-    // That means, the usedByIndices field should be modified via MetadataManager only at compile time
-    IBinaryTokenizer getTokenizer();
-
     ImmutableList<IFullTextFilter> getFilters();
 
-    List<String> getUsedByIndices();
+    void reset(byte[] data, int start, int length);
 
-    void addUsedByIndices(String indexName);
+    IToken getToken();
 
+    boolean hasNext();
+
+    void next();
+
+    // Get the total number of tokens
+    // Currently, it returns the number of tokens in the original text, that means stopwords are still counted
+    int getTokensCount();
 }

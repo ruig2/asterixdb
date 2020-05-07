@@ -18,8 +18,6 @@
  */
 package org.apache.asterix.runtime.evaluators.common;
 
-import static org.apache.hyracks.util.string.UTF8StringUtil.getUTF8StringInArray;
-
 import java.io.DataOutput;
 import java.rmi.RemoteException;
 
@@ -50,8 +48,8 @@ import org.apache.hyracks.data.std.util.ArrayBackedValueStorage;
 import org.apache.hyracks.data.std.util.BinaryEntry;
 import org.apache.hyracks.data.std.util.BinaryHashSet;
 import org.apache.hyracks.dataflow.common.data.accessors.IFrameTupleReference;
-import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.FullTextConfig;
-import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextConfig;
+import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextAnalyzer;
+import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextAnalyzerFactory;
 import org.apache.hyracks.storage.am.lsm.invertedindex.tokenizers.DelimitedUTF8StringBinaryTokenizer;
 import org.apache.hyracks.storage.am.lsm.invertedindex.tokenizers.IBinaryTokenizer;
 import org.apache.hyracks.storage.am.lsm.invertedindex.tokenizers.IToken;
@@ -105,8 +103,8 @@ public class FullTextContainsEvaluator implements IScalarEvaluator {
     // Else if it is equal to the number of tokens, then we will do a conjunctive search.
     private int occurrenceThreshold = 1;
 
-    private IFullTextConfig configLeft = null;
-    private IFullTextConfig configRight = null;
+    private IFullTextAnalyzer analyzerLeft = null;
+    private IFullTextAnalyzer analyzerRight = null;
 
     static final int HASH_SET_SLOT_SIZE = 101;
     static final int HASH_SET_FRAME_SIZE = 32768;
@@ -119,7 +117,7 @@ public class FullTextContainsEvaluator implements IScalarEvaluator {
             SerializerDeserializerProvider.INSTANCE.getSerializerDeserializer(BuiltinType.ANULL);
 
     public FullTextContainsEvaluator(IScalarEvaluatorFactory[] args, IEvaluatorContext context,
-            IFullTextConfig fullTextConfig) throws HyracksDataException {
+            IFullTextAnalyzerFactory analyzerFactory) throws HyracksDataException {
 
         evalLeft = args[0].createScalarEvaluator(context);
         evalRight = args[1].createScalarEvaluator(context);
@@ -129,10 +127,8 @@ public class FullTextContainsEvaluator implements IScalarEvaluator {
         this.argOptions = new TaggedValuePointable[optionArgsLength];
 
         // fullTextConfig is shared by multiple threads on the NC node, so each thread needs a local copy
-        this.configLeft = new FullTextConfig(fullTextConfig.getName(), fullTextConfig.getTokenizerCategory(),
-                fullTextConfig.getFilters());
-        this.configRight = new FullTextConfig(fullTextConfig.getName(), fullTextConfig.getTokenizerCategory(),
-                fullTextConfig.getFilters());
+        this.analyzerLeft = analyzerFactory.createFullTextAnalyzer();
+        this.analyzerRight = analyzerFactory.createFullTextAnalyzer();
 
         for (int i = 0; i < optionArgsLength; i++) {
             this.evalOptions[i] = args[i + 2].createScalarEvaluator(context);
@@ -260,7 +256,7 @@ public class FullTextContainsEvaluator implements IScalarEvaluator {
         rightHashSet = new BinaryHashSet(HASH_SET_SLOT_SIZE, HASH_SET_FRAME_SIZE, hashFunc, strLowerCaseTokenCmp, null);
         IBinaryTokenizer tokenizerForLeftArray = BinaryTokenizerFactoryProvider.INSTANCE
                 .getWordTokenizerFactory(ATypeTag.STRING, true, true).createTokenizer();
-        configLeft.setTokenizer(tokenizerForLeftArray);
+        analyzerLeft.setTokenizer(tokenizerForLeftArray);
     }
 
     void resetQueryArrayAndRight(byte[] arg2Array, ATypeTag typeTag2, IPointable arg2)
@@ -284,7 +280,7 @@ public class FullTextContainsEvaluator implements IScalarEvaluator {
             default:
                 break;
         }
-        configRight.setTokenizer(tokenizerForRightArray);
+        analyzerRight.setTokenizer(tokenizerForRightArray);
 
         queryArray = arg2Array;
         queryArrayStartOffset = arg2.getStartOffset();
@@ -308,14 +304,14 @@ public class FullTextContainsEvaluator implements IScalarEvaluator {
             queryArrayStartOffset = queryArrayStartOffset + numBytesToStoreLength;
             queryArrayLength = queryArrayLength - numBytesToStoreLength;
         }
-        configRight.reset(queryArray, queryArrayStartOffset, queryArrayLength);
+        analyzerRight.reset(queryArray, queryArrayStartOffset, queryArrayLength);
 
         // Create tokens from the given query predicate
-        while (configRight.hasNext()) {
-            configRight.next();
+        while (analyzerRight.hasNext()) {
+            analyzerRight.next();
             queryTokenCount++;
 
-            IToken token = configRight.getToken();
+            IToken token = analyzerRight.getToken();
             // Insert the starting position and the length of the current token into the hash set.
             // We don't store the actual value of this token since we can access it via offset and length.
             int tokenOffset = token.getStartOffset();
@@ -424,13 +420,13 @@ public class FullTextContainsEvaluator implements IScalarEvaluator {
         // The left side: field (document)
         // Resets the tokenizer for the given keywords in a document.
 
-        configLeft.reset(arg1.getByteArray(), arg1.getStartOffset(), arg1.getLength());
+        analyzerLeft.reset(arg1.getByteArray(), arg1.getStartOffset(), arg1.getLength());
 
         // Creates tokens from a field in the left side (document)
-        while (configLeft.hasNext()) {
-            configLeft.next();
+        while (analyzerLeft.hasNext()) {
+            analyzerLeft.next();
 
-            IToken token = configLeft.getToken();
+            IToken token = analyzerLeft.getToken();
             // String leftTokenStr = getUTF8StringInArray(token.getData(), token.getStartOffset(), token.getTokenLength());
 
             // Records the starting position and the length of the current token.

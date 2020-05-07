@@ -36,7 +36,7 @@ import org.apache.hyracks.dataflow.common.comm.util.FrameUtils;
 import org.apache.hyracks.dataflow.common.data.accessors.FrameTupleReference;
 import org.apache.hyracks.dataflow.common.data.accessors.ITupleReference;
 import org.apache.hyracks.dataflow.std.base.AbstractUnaryInputUnaryOutputOperatorNodePushable;
-import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextConfig;
+import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextAnalyzer;
 import org.apache.hyracks.storage.am.lsm.invertedindex.tokenizers.IBinaryTokenizer;
 import org.apache.hyracks.storage.am.lsm.invertedindex.tokenizers.IToken;
 
@@ -44,8 +44,7 @@ public class BinaryTokenizerOperatorNodePushable extends AbstractUnaryInputUnary
 
     private final IHyracksTaskContext ctx;
     // ToDo: remove tokenizer because now we use fullTextConfig instead
-    private final IBinaryTokenizer tokenizer;
-    private final IFullTextConfig fullTextConfig;
+    private final IFullTextAnalyzer fullTextAnalyzer;
     private final int docField;
     private final int[] keyFields;
     private final boolean addNumTokensKey;
@@ -62,20 +61,19 @@ public class BinaryTokenizerOperatorNodePushable extends AbstractUnaryInputUnary
     private FrameTupleAppender appender;
 
     public BinaryTokenizerOperatorNodePushable(IHyracksTaskContext ctx, RecordDescriptor inputRecDesc,
-            RecordDescriptor outputRecDesc, IBinaryTokenizer tokenizer, IFullTextConfig fullTextConfig, int docField,
-            int[] keyFields, boolean addNumTokensKey, boolean writeKeyFieldsFirst, boolean writeMissing,
+            RecordDescriptor outputRecDesc, IBinaryTokenizer tokenizer, IFullTextAnalyzer fullTextAnalyzer,
+            int docField, int[] keyFields, boolean addNumTokensKey, boolean writeKeyFieldsFirst, boolean writeMissing,
             IMissingWriterFactory missingWriterFactory) {
         this.ctx = ctx;
         // ToDo: check the codes in upper layer to see if we can remove tokenizer to use fullTextConfig instead
         // How is this tokenizer configured? Does it ignoreTokenCount and hasTypeTag?
-        this.tokenizer = tokenizer;
-        this.fullTextConfig = fullTextConfig;
+        this.fullTextAnalyzer = fullTextAnalyzer;
         // Need to use the tokenizer created in the upper-layer when:
         // 1. The tokenizer is of TokenizerCategory.NGram rather than Word
         // 2. If the tokenizer is a TokenizerCategory.Word one, then its parameters
         //    (e.g. boolean ignoreTokenCount, boolean sourceHasTypeTag) may be different
         //    from the tokenizer in the default full-text config
-        this.fullTextConfig.setTokenizer(tokenizer);
+        this.fullTextAnalyzer.setTokenizer(tokenizer);
 
         this.docField = docField;
         this.keyFields = keyFields;
@@ -104,20 +102,20 @@ public class BinaryTokenizerOperatorNodePushable extends AbstractUnaryInputUnary
         for (int i = 0; i < tupleCount; i++) {
             tuple.reset(accessor, i);
 
-            short numTokens = 0;
+            int numTokens = 0;
 
             if (!isDocFieldMissing(tuple)) {
-                fullTextConfig.reset(tuple.getFieldData(docField), tuple.getFieldStart(docField),
+                fullTextAnalyzer.reset(tuple.getFieldData(docField), tuple.getFieldStart(docField),
                         tuple.getFieldLength(docField));
                 if (addNumTokensKey) {
                     // Get the total number of tokens.
-                    numTokens = fullTextConfig.getTokensCount();
+                    numTokens = fullTextAnalyzer.getTokensCount();
                 }
                 // Write token and data into frame by following the order specified
                 // in the writeKeyFieldsFirst field.
-                while (fullTextConfig.hasNext()) {
-                    fullTextConfig.next();
-                    IToken token = fullTextConfig.getToken();
+                while (fullTextAnalyzer.hasNext()) {
+                    fullTextAnalyzer.next();
+                    IToken token = fullTextAnalyzer.getToken();
                     writeTuple(token, numTokens, i);
                 }
             } else if (writeMissing) {

@@ -88,10 +88,10 @@ import org.apache.hyracks.storage.am.lsm.invertedindex.api.IInvertedIndexAccesso
 import org.apache.hyracks.storage.am.lsm.invertedindex.api.IInvertedIndexSearchModifier;
 import org.apache.hyracks.storage.am.lsm.invertedindex.api.InvertedListCursor;
 import org.apache.hyracks.storage.am.lsm.invertedindex.common.LSMInvertedIndexTestHarness;
-import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.FullTextConfig;
-import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.FullTextConfigFactory;
+import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.FullTextAnalyzer;
+import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.FullTextAnalyzerFactory;
+import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextAnalyzerFactory;
 import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextConfig;
-import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextConfigFactory;
 import org.apache.hyracks.storage.am.lsm.invertedindex.impls.LSMInvertedIndexAccessor;
 import org.apache.hyracks.storage.am.lsm.invertedindex.impls.LSMInvertedIndexMergeCursor;
 import org.apache.hyracks.storage.am.lsm.invertedindex.search.InvertedIndexSearchPredicate;
@@ -124,9 +124,8 @@ public class LSMInvertedIndexTestUtils {
 
     public static final int TEST_GRAM_LENGTH = 3;
 
-    public static IFullTextConfigFactory ftFactory =
-            new FullTextConfigFactory(new FullTextConfig(FullTextConfig.DEFAULT_FULL_TEXT_CONFIG_NAME,
-                    IFullTextConfig.TokenizerCategory.WORD, ImmutableList.of()));
+    public static IFullTextAnalyzerFactory ftFactory = new FullTextAnalyzerFactory(
+            new FullTextAnalyzer(IFullTextConfig.TokenizerCategory.WORD, ImmutableList.of()));
 
     public static TupleGenerator createStringDocumentTupleGen(Random rnd) throws IOException {
         IFieldValueGenerator[] fieldGens = new IFieldValueGenerator[2];
@@ -572,8 +571,7 @@ public class LSMInvertedIndexTestUtils {
         IInvertedIndexAccessor accessor = (IInvertedIndexAccessor) invIndex.createAccessor(iap);
         IBinaryTokenizer tokenizer = testCtx.getTokenizerFactory().createTokenizer();
         InvertedIndexSearchPredicate searchPred = new InvertedIndexSearchPredicate(tokenizer,
-                new FullTextConfig("test_config", IFullTextConfig.TokenizerCategory.WORD, ImmutableList.of()),
-                searchModifier);
+                new FullTextAnalyzer(IFullTextConfig.TokenizerCategory.WORD, ImmutableList.of()), searchModifier);
         List<ITupleReference> documentCorpus = testCtx.getDocumentCorpus();
         // Project away the primary-key field.
         int[] fieldPermutation = new int[] { 0 };

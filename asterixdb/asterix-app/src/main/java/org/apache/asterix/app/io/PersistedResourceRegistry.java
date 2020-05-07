@@ -110,6 +110,8 @@ import org.apache.hyracks.storage.am.lsm.common.impls.NoMergePolicyFactory;
 import org.apache.hyracks.storage.am.lsm.common.impls.NoOpIOOperationCallbackFactory;
 import org.apache.hyracks.storage.am.lsm.common.impls.PrefixMergePolicyFactory;
 import org.apache.hyracks.storage.am.lsm.invertedindex.dataflow.LSMInvertedIndexLocalResource;
+import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.FullTextAnalyzer;
+import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.FullTextAnalyzerFactory;
 import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.FullTextConfig;
 import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.FullTextConfigFactory;
 import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.StopwordsFullTextFilter;
@@ -279,6 +281,8 @@ public class PersistedResourceRegistry implements IPersistedResourceRegistry {
         registeredClasses.put("FullTextConfigFactory", FullTextConfigFactory.class);
         registeredClasses.put("FullTextConfig", FullTextConfig.class);
         registeredClasses.put("StopwordsFullTextFilter", StopwordsFullTextFilter.class);
+        registeredClasses.put("FullTextAnalyzerFactory", FullTextAnalyzerFactory.class);
+        registeredClasses.put("FullTextAnalyzer", FullTextAnalyzer.class);
 
         // ITokenFactory
         registeredClasses.put("AListElementTokenFactory", AListElementTokenFactory.class);

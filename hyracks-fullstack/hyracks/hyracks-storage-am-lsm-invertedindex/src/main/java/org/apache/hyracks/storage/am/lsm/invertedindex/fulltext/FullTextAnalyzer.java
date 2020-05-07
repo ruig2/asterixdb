@@ -1,4 +1,4 @@
-/**
+/*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -19,41 +19,31 @@
 
 package org.apache.hyracks.storage.am.lsm.invertedindex.fulltext;
 
+import static org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.AbstractFullTextConfig.OBJECT_MAPPER;
+
 import java.security.InvalidParameterException;
+import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.hyracks.api.exceptions.HyracksDataException;
+import org.apache.hyracks.api.io.IJsonSerializable;
+import org.apache.hyracks.api.io.IPersistedResourceRegistry;
 import org.apache.hyracks.storage.am.lsm.invertedindex.tokenizers.DelimitedUTF8StringBinaryTokenizerFactory;
-import org.apache.hyracks.storage.am.lsm.invertedindex.tokenizers.IBinaryTokenizer;
 import org.apache.hyracks.storage.am.lsm.invertedindex.tokenizers.UTF8WordTokenFactory;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.collect.ImmutableList;
 
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
-public abstract class AbstractFullTextConfig implements IFullTextConfig {
-    protected final String name;
-    protected final TokenizerCategory tokenizerCategory;
-    // By default, the tokenizer should be of the type DelimitedUTF8StringBinaryTokenizer
-    // tokenizer needs be replaced on-the-fly when used in the ftcontains() function
-    //
-    // ftcontains() can take two types of input:
-    // 1) string where a default DelimitedUTF8StringBinaryTokenizer is fine;
-    // 2) a list of strings as input where we may need a AUnorderedListBinaryTokenizer or AOrderedListBinaryTokenizer
+public class FullTextAnalyzer extends AbstractFullTextAnalyzer {
+    private static final long serialVersionUID = 1L;
 
-    // ToDo: wrap tokenizer and filters into a dedicated Java class so that at runtime the corresponding evaluator
-    // doesn't care about usedByIndices
-    protected IBinaryTokenizer tokenizer;
-    protected ImmutableList<IFullTextFilter> filters;
-    protected List<String> usedByIndices;
-    protected static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
-
-    protected AbstractFullTextConfig(String name, TokenizerCategory tokenizerCategory,
-            ImmutableList<IFullTextFilter> filters, List<String> usedByIndices) {
-        this.name = name;
-        this.tokenizerCategory = tokenizerCategory;
+    public FullTextAnalyzer(IFullTextConfig.TokenizerCategory tokenizerCategory,
+            ImmutableList<IFullTextFilter> filters) {
         this.filters = filters;
-        this.usedByIndices = usedByIndices;
 
         switch (tokenizerCategory) {
             case WORD:
@@ -74,44 +64,37 @@ public abstract class AbstractFullTextConfig implements IFullTextConfig {
         }
     }
 
-    @Override
-    public String getName() {
-        return name;
+    public FullTextAnalyzer(IFullTextConfig config) {
+        this(config.getTokenizerCategory(), config.getFilters());
     }
 
     @Override
-    public FullTextEntityCategory getCategory() {
-        return FullTextEntityCategory.CONFIG;
+    public JsonNode toJson(IPersistedResourceRegistry registry) throws HyracksDataException {
+        final ObjectNode json = registry.getClassIdentifier(getClass(), serialVersionUID);
+        json.put("tokenizerCategory", tokenizer.getTokenizerCategory().toString());
+
+        final ArrayNode filterArray = OBJECT_MAPPER.createArrayNode();
+        for (IFullTextFilter filter : filters) {
+            filterArray.add(filter.toJson(registry));
+        }
+        json.set("filters", filterArray);
+
+        return json;
     }
 
-    @Override
-    public TokenizerCategory getTokenizerCategory() {
-        return tokenizerCategory;
-    }
+    public static IJsonSerializable fromJson(IPersistedResourceRegistry registry, JsonNode json)
+            throws HyracksDataException {
+        final String tokenizerCategoryStr = json.get("tokenizerCategory").asText();
+        IFullTextConfig.TokenizerCategory tc = IFullTextConfig.TokenizerCategory.getEnumIgnoreCase(tokenizerCategoryStr);
 
-    @Override
-    public ImmutableList<IFullTextFilter> getFilters() {
-        return filters;
-    }
+        ArrayNode filtersJsonNode = (ArrayNode) json.get("filters");
+        List<IFullTextFilter> filterList = new ArrayList<>();
+        for (int i = 0; i < filtersJsonNode.size(); i++) {
+            filterList.add((IFullTextFilter) registry.deserialize(filtersJsonNode.get(i)));
+        }
+        ImmutableList<IFullTextFilter> filters = ImmutableList.copyOf(filterList);
 
-    @Override
-    public List<String> getUsedByIndices() {
-        return usedByIndices;
-    }
-
-    @Override
-    public void addUsedByIndices(String indexName) {
-        this.usedByIndices.add(indexName);
-    }
-
-    @Override
-    public void setTokenizer(IBinaryTokenizer tokenizer) {
-        this.tokenizer = tokenizer;
-    }
-
-    @Override
-    public IBinaryTokenizer getTokenizer() {
-        return this.tokenizer;
+        return new FullTextAnalyzer(tc, filters);
     }
 
 }

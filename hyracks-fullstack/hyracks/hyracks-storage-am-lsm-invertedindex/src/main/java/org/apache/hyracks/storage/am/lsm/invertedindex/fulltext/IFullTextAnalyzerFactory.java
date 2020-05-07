@@ -17,26 +17,12 @@
  * under the License.
  */
 
-package org.apache.hyracks.storage.am.lsm.invertedindex.tokenizers;
+package org.apache.hyracks.storage.am.lsm.invertedindex.fulltext;
 
-import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextConfig;
-import org.apache.hyracks.storage.am.lsm.invertedindex.tokenizers.TokenizerInfo.TokenizerType;
+import java.io.Serializable;
 
-public interface IBinaryTokenizer {
-    IToken getToken();
+import org.apache.hyracks.api.io.IJsonSerializable;
 
-    boolean hasNext();
-
-    void next();
-
-    void reset(byte[] data, int start, int length);
-
-    // Get the total number of tokens
-    short getTokensCount();
-
-    // Get the tokenizer types: String or List
-    TokenizerType getTokenizerType();
-
-    IFullTextConfig.TokenizerCategory getTokenizerCategory();
-
+public interface IFullTextAnalyzerFactory extends Serializable, IJsonSerializable {
+    IFullTextAnalyzer createFullTextAnalyzer();
 }

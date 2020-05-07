@@ -1133,7 +1133,7 @@ public class QueryTranslator extends AbstractLangTranslator implements IStatemen
         String tokenizerTupleValueStr =
                 ((LiteralExpr) (fb.get(0).getRightExpr())).getValue().getStringValue().toLowerCase();
         IFullTextConfig.TokenizerCategory tokenizerCategory =
-                IFullTextConfig.TokenizerCategory.fromString(tokenizerTupleValueStr);
+                IFullTextConfig.TokenizerCategory.getEnumIgnoreCase(tokenizerTupleValueStr);
 
         String filterPipelineTupleKeyStr =
                 ((LiteralExpr) (fb.get(1).getLeftExpr())).getValue().getStringValue().toLowerCase();
