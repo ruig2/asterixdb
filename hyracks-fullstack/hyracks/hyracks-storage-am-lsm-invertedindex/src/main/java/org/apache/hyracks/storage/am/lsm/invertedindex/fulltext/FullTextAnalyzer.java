@@ -85,7 +85,8 @@ public class FullTextAnalyzer extends AbstractFullTextAnalyzer {
     public static IJsonSerializable fromJson(IPersistedResourceRegistry registry, JsonNode json)
             throws HyracksDataException {
         final String tokenizerCategoryStr = json.get("tokenizerCategory").asText();
-        IFullTextConfig.TokenizerCategory tc = IFullTextConfig.TokenizerCategory.getEnumIgnoreCase(tokenizerCategoryStr);
+        IFullTextConfig.TokenizerCategory tc =
+                IFullTextConfig.TokenizerCategory.getEnumIgnoreCase(tokenizerCategoryStr);
 
         ArrayNode filtersJsonNode = (ArrayNode) json.get("filters");
         List<IFullTextFilter> filterList = new ArrayList<>();
