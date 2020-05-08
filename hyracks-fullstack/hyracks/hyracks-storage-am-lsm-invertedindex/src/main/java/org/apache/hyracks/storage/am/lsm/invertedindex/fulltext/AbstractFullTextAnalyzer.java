@@ -19,11 +19,12 @@
 
 package org.apache.hyracks.storage.am.lsm.invertedindex.fulltext;
 
+import static org.apache.hyracks.util.string.UTF8StringUtil.getUTF8StringInArray;
+
 import org.apache.hyracks.storage.am.lsm.invertedindex.tokenizers.IBinaryTokenizer;
 import org.apache.hyracks.storage.am.lsm.invertedindex.tokenizers.IToken;
 
 import com.google.common.collect.ImmutableList;
-import static org.apache.hyracks.util.string.UTF8StringUtil.getUTF8StringInArray;
 
 public class AbstractFullTextAnalyzer implements IFullTextAnalyzer {
 
@@ -57,7 +58,8 @@ public class AbstractFullTextAnalyzer implements IFullTextAnalyzer {
 
     // For debug usage
     private void printCurrentToken() {
-        String s = getUTF8StringInArray(currentToken.getData(), currentToken.getStartOffset(), currentToken.getTokenLength());
+        String s = getUTF8StringInArray(currentToken.getData(), currentToken.getStartOffset(),
+                currentToken.getTokenLength());
         System.out.println("current token: " + s);
     }
 
