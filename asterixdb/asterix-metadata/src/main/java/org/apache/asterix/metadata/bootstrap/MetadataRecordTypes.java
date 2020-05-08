@@ -114,6 +114,7 @@ public final class MetadataRecordTypes {
     public static final String FIELD_NAME_FULLTEXT_USED_BY_CONFIGS = "UsedByConfigs";
     public static final String FIELD_NAME_FULLTEXT_USED_BY_INDICES = "UsedByIndices";
     public static final String FIELD_NAME_FULLTEXT_STOPWORD_LIST = "StopwordList";
+    public static final String FIELD_NAME_FULLTEXT_STEMMER_LANGUAGE = "Language";
 
     //---------------------------------- Record Types Creation ----------------------------------//
     //--------------------------------------- Properties ----------------------------------------//
@@ -523,6 +524,9 @@ public final class MetadataRecordTypes {
 
     // Stopword Filter
     public static final int FULLTEXT_ENTITY_ARECORD_STOPWORD_LIST_FIELD_INDEX = 4;
+
+    // Stemmer Filter
+    public static final int FULLTEXT_ENTITY_ARECORD_STEMMER_LANGUAGE_FIELD_INDEX = 4;
 
     // FullText Config
     public static final int FULLTEXT_ENTITY_ARECORD_FULLTEXT_CONFIG_TOKENIZER_FIELD_INDEX = 2;

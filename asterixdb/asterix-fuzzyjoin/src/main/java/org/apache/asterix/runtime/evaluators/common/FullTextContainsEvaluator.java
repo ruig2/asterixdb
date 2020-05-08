@@ -338,7 +338,7 @@ public class FullTextContainsEvaluator implements IScalarEvaluator {
             // Currently, for the full-text search, we don't support a phrase search yet.
             // So, each query predicate should have only one token.
             // The same logic should be applied in AbstractTOccurrenceSearcher() class.
-            checkWhetherFullTextPredicateIsPhrase(typeTag2, queryArray, tokenOffset, tokenLength, queryTokenCount);
+            checkWhetherFullTextPredicateIsPhrase(typeTag2, token.getData(), tokenOffset, tokenLength, queryTokenCount);
 
             // Count the number of tokens in the given query. We only count the unique tokens.
             // We only care about the first insertion of the token into the hash set

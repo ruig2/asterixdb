@@ -18,6 +18,9 @@
  */
 package org.apache.asterix.app.translator;
 
+import static org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.AbstractStemmerFullTextFilter.StemmerLanguage.ENGLISH;
+import static org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextFilter.*;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
@@ -232,6 +235,8 @@ import org.apache.hyracks.api.result.ResultSetId;
 import org.apache.hyracks.control.cc.ClusterControllerService;
 import org.apache.hyracks.control.common.controllers.CCConfig;
 import org.apache.hyracks.storage.am.lsm.common.api.ILSMMergePolicyFactory;
+import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.AbstractStemmerFullTextFilter;
+import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.EnglishStemmerFullTextFilter;
 import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.FullTextConfig;
 import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextConfig;
 import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextFilter;
@@ -1064,18 +1069,19 @@ public class QueryTranslator extends AbstractLangTranslator implements IStatemen
         String leftStr = ((LiteralExpr) fbs.get(0).getLeftExpr()).getValue().getStringValue().toLowerCase();
         String rightStr = ((LiteralExpr) fbs.get(0).getRightExpr()).getValue().getStringValue().toLowerCase();
 
-        if (leftStr.equalsIgnoreCase(IFullTextFilter.FIELD_NAME_TYPE) == false) {
+        if (leftStr.equalsIgnoreCase(FIELD_NAME_TYPE) == false) {
             throw new IllegalStateException("expect filter type in the first row");
         }
 
         switch (rightStr.toLowerCase()) {
-            case IFullTextFilter.FIELD_NAME_STOPWORDS: {
+            case FIELD_NAME_STOPWORDS: {
                 ImmutableList.Builder stopwordsBuilder = ImmutableList.<String> builder();
 
                 String leftStopwordListStr =
                         ((LiteralExpr) fbs.get(1).getLeftExpr()).getValue().getStringValue().toLowerCase();
-                if (leftStopwordListStr.equalsIgnoreCase(IFullTextFilter.FIELD_NAME_STOPWORDS_LIST) == false) {
-                    throw new IllegalStateException("expect StopwordsList in the second row");
+                if (leftStopwordListStr.equalsIgnoreCase(FIELD_NAME_STOPWORDS_LIST) == false) {
+                    throw new IllegalStateException(
+                            "expect StopwordsList in the second row; get " + leftStopwordListStr);
                 }
 
                 for (Expression l : ((ListConstructor) (fbs.get(1).getRightExpr())).getExprList()) {
@@ -1083,6 +1089,31 @@ public class QueryTranslator extends AbstractLangTranslator implements IStatemen
                 }
 
                 filter = new StopwordsFullTextFilter(stmtCreateFilter.getFilterName(), stopwordsBuilder.build());
+                break;
+            }
+
+            case FIELD_NAME_STEMMER: {
+                String leftStemmerLanguageStr =
+                        ((LiteralExpr) fbs.get(1).getLeftExpr()).getValue().getStringValue().toLowerCase();
+                if (leftStemmerLanguageStr.equalsIgnoreCase(FIELD_NAME_STEMMER_LANGUAGE) == false) {
+                    throw new IllegalStateException(
+                            "expect language of the stemmer in the second row; get " + leftStemmerLanguageStr);
+                }
+
+                String languageStr =
+                        ((LiteralExpr) fbs.get(1).getRightExpr()).getValue().getStringValue().toLowerCase();
+                AbstractStemmerFullTextFilter.StemmerLanguage language =
+                        AbstractStemmerFullTextFilter.StemmerLanguage.getEnumIgnoreCase(languageStr);
+                switch (language) {
+                    case ENGLISH: {
+                        filter = new EnglishStemmerFullTextFilter(stmtCreateFilter.getFilterName());
+                        break;
+                    }
+
+                    default:
+                        throw new IllegalArgumentException("Language not supported to stem");
+                }
+
                 break;
             }
 

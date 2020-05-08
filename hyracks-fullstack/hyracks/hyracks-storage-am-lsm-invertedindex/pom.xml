@@ -36,6 +36,7 @@
   </licenses>
   <properties>
     <root.dir>${basedir}/../..</root.dir>
+    <opennlp.version>1.9.2</opennlp.version>
   </properties>
   <dependencies>
 
@@ -104,6 +105,11 @@
   <dependency>
     <groupId>com.google.guava</groupId>
     <artifactId>guava</artifactId>
+  </dependency>
+  <dependency>
+    <groupId>org.apache.opennlp</groupId>
+    <artifactId>opennlp-tools</artifactId>
+    <version>${opennlp.version}</version>
   </dependency>
 
   </dependencies>

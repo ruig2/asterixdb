@@ -30,13 +30,21 @@ public interface IFullTextFilter extends IFullTextEntity {
     String FIELD_NAME_TYPE = "type";
     String FIELD_NAME_STOPWORDS = "stopwords";
     String FIELD_NAME_STOPWORDS_LIST = "stopwordsList";
+    String FIELD_NAME_STEMMER = "stemmer";
+    String FIELD_NAME_STEMMER_LANGUAGE = "language";
 
     enum FullTextFilterType {
         STOPWORDS,
-        SYNONYM;
+        SYNONYM,
+        STEMMER;
 
-        public static FullTextFilterType getEnumIgnoreCase(String value) {
-            return EnumUtils.getEnumIgnoreCase(FullTextFilterType.class, value);
+        public static FullTextFilterType getEnumIgnoreCase(String str) {
+            FullTextFilterType type = EnumUtils.getEnumIgnoreCase(FullTextFilterType.class, str);
+
+            if (type == null) {
+                throw new IllegalArgumentException("Cannot convert string " + str + " to FullTextFilterType!");
+            }
+            return type;
         }
     }
 

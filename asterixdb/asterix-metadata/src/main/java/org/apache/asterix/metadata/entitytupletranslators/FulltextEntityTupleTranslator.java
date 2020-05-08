@@ -21,6 +21,7 @@ package org.apache.asterix.metadata.entitytupletranslators;
 
 import static org.apache.asterix.metadata.bootstrap.MetadataRecordTypes.FIELD_NAME_FULLTEXT_FILTER_CATEGORY;
 import static org.apache.asterix.metadata.bootstrap.MetadataRecordTypes.FIELD_NAME_FULLTEXT_FILTER_PIPELINE;
+import static org.apache.asterix.metadata.bootstrap.MetadataRecordTypes.FIELD_NAME_FULLTEXT_STEMMER_LANGUAGE;
 import static org.apache.asterix.metadata.bootstrap.MetadataRecordTypes.FIELD_NAME_FULLTEXT_STOPWORD_LIST;
 import static org.apache.asterix.metadata.bootstrap.MetadataRecordTypes.FIELD_NAME_FULLTEXT_TOKENIZER;
 import static org.apache.asterix.metadata.bootstrap.MetadataRecordTypes.FIELD_NAME_FULLTEXT_USED_BY_CONFIGS;
@@ -55,6 +56,7 @@ import org.apache.hyracks.data.std.util.ArrayBackedValueStorage;
 import org.apache.hyracks.dataflow.common.comm.io.ArrayTupleBuilder;
 import org.apache.hyracks.dataflow.common.comm.io.ArrayTupleReference;
 import org.apache.hyracks.dataflow.common.data.accessors.ITupleReference;
+import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.AbstractStemmerFullTextFilter;
 import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.FullTextConfig;
 import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextConfig;
 import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextEntity;
@@ -96,6 +98,8 @@ public class FulltextEntityTupleTranslator extends AbstractTupleTranslator<IFull
                 switch (kind) {
                     case STOPWORDS:
                         return createStopwordsFilterFromARecord(aRecord);
+                    case STEMMER:
+                        return createStemmerFilterFromARecord(aRecord);
                     case SYNONYM:
                     default:
                         throw new AlgebricksException("Not supported yet");
@@ -127,6 +131,20 @@ public class FulltextEntityTupleTranslator extends AbstractTupleTranslator<IFull
         }
 
         return filter;
+    }
+
+    public AbstractStemmerFullTextFilter createStemmerFilterFromARecord(ARecord aRecord) {
+        String name = ((AString) aRecord
+                .getValueByPos(MetadataRecordTypes.FULLTEXT_ENTITY_ARECORD_FULLTEXT_ENTITY_NAME_FIELD_INDEX))
+                        .getStringValue();
+        String languageStr = ((AString) aRecord
+                .getValueByPos(MetadataRecordTypes.FULLTEXT_ENTITY_ARECORD_STEMMER_LANGUAGE_FIELD_INDEX))
+                        .getStringValue();
+        AbstractStemmerFullTextFilter stemmer =
+                AbstractStemmerFullTextFilter.createStemmerFullTextFilter(name, languageStr);
+
+        return stemmer;
+
     }
 
     public FullTextConfig createConfigFromARecord(ARecord aRecord) {
@@ -209,16 +227,30 @@ public class FulltextEntityTupleTranslator extends AbstractTupleTranslator<IFull
         recordBuilder.addField(fieldName, fieldValue);
     }
 
+    private void writeFilterBasic(IFullTextFilter filter) throws HyracksDataException {
+        writeFilterType2RecordBuilder(filter.getFilterType());
+        writeOrderedList2RecordBuilder(FIELD_NAME_FULLTEXT_USED_BY_CONFIGS, filter.getUsedByFTConfigs());
+    }
+
     private void writeStopwordFilter(StopwordsFullTextFilter stopwordFilter) throws HyracksDataException {
-        writeFilterType2RecordBuilder(stopwordFilter.getFilterType());
-        writeOrderedList2RecordBuilder(FIELD_NAME_FULLTEXT_USED_BY_CONFIGS, stopwordFilter.getUsedByFTConfigs());
+        writeFilterBasic(stopwordFilter);
         writeOrderedList2RecordBuilder(FIELD_NAME_FULLTEXT_STOPWORD_LIST, stopwordFilter.getStopwordList());
+    }
+
+    private void writeStemmerFilter(AbstractStemmerFullTextFilter stemmerFilter) throws HyracksDataException {
+        writeFilterBasic(stemmerFilter);
+
+        writeKeyAndValue2FieldVariables(FIELD_NAME_FULLTEXT_STEMMER_LANGUAGE, stemmerFilter.getLanguage().toString());
+        recordBuilder.addField(fieldName, fieldValue);
     }
 
     private void writeFulltextFilter(IFullTextFilter filter) throws HyracksDataException {
         switch (filter.getFilterType()) {
             case STOPWORDS:
                 writeStopwordFilter((StopwordsFullTextFilter) filter);
+                break;
+            case STEMMER:
+                writeStemmerFilter((AbstractStemmerFullTextFilter) filter);
                 break;
             case SYNONYM:
             default:
