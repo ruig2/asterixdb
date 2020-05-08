@@ -87,12 +87,17 @@ public abstract class AbstractStemmerFullTextFilter extends AbstractFullTextFilt
         String str = UTF8StringUtil.getUTF8StringInArray(token.getData(), start, length);
         // Will stemmed be null?
         String stemmedStr = String.valueOf(stemmer.stem(str));
+
+        System.out.println("before: \t" + str);
+        System.out.println("after:  \t" + stemmedStr);
+        System.out.println();
+
         if (stemmedStr.equals(str)) {
             return token;
         } else {
-
             // ToDo: move the aqlStringTokenizerFactory from Asterix-layer to Hyracks-layer so that we can use it here
-            IToken stemmedToken = new UTF8WordToken((byte) 13, // ATypeTag.SERIALIZED_STRING_TYPE_TAG
+            IToken stemmedToken = new UTF8WordToken(
+                    (byte) 13, // ATypeTag.SERIALIZED_STRING_TYPE_TAG
                     (byte) 3 // ATypeTag.SERIALIZED_INT32_TYPE_TAG
             );
 
@@ -109,11 +114,12 @@ public abstract class AbstractStemmerFullTextFilter extends AbstractFullTextFilt
             int stemmedTokenStart = 0;
             int stemmedTokenLength = array.getLength();
 
-            if (tokenizerType == TokenizerInfo.TokenizerType.STRING) {
+            //if (tokenizerType == TokenizerInfo.TokenizerType.STRING) {
+                // For tokenizer of type LIST, the length of the token needs to be included in the first few bytes to be consistent
                 int stemmedTokenNumBytesToStoreLength = UTF8StringUtil.getNumBytesToStoreLength(UTF8StringUtil.getUTFLength(array.getByteArray(), stemmedTokenStart));
                 stemmedTokenStart += stemmedTokenNumBytesToStoreLength;
                 stemmedTokenLength -= stemmedTokenNumBytesToStoreLength;
-            }
+            //}
 
             stemmedToken.reset(array.getByteArray(), stemmedTokenStart, array.getLength(), stemmedTokenLength, 1);
             return stemmedToken;

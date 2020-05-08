@@ -348,6 +348,7 @@ public class FullTextContainsEvaluator implements IScalarEvaluator {
             // Thus, when we find the current token (we don't increase the count in this case),
             // it should not exist.
             if (rightHashSet.find(keyEntry, queryArray, false) == -1) {
+                rightHashSet.setRefArray(token.getData());
                 rightHashSet.put(keyEntry);
                 uniqueQueryTokenCount++;
             }
