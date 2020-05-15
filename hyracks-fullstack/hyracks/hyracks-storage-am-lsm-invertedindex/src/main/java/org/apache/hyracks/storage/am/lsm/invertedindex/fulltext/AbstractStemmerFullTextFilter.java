@@ -20,7 +20,9 @@
 package org.apache.hyracks.storage.am.lsm.invertedindex.fulltext;
 
 import java.io.IOException;
+import java.util.Map;
 
+import com.google.common.collect.ImmutableMap;
 import org.apache.commons.lang3.EnumUtils;
 import org.apache.hyracks.data.std.util.GrowableArray;
 import org.apache.hyracks.data.std.util.UTF8StringBuilder;
@@ -33,7 +35,6 @@ import opennlp.tools.stemmer.snowball.SnowballStemmer;
 
 public abstract class AbstractStemmerFullTextFilter extends AbstractFullTextFilter {
     private static final long serialVersionUID = 1L;
-    protected SnowballStemmer stemmer;
 
     public enum StemmerLanguage {
         ENGLISH;
@@ -59,8 +60,7 @@ public abstract class AbstractStemmerFullTextFilter extends AbstractFullTextFilt
     }
 
     // This should be put into FullTextUtil class, however it is in asterix-layer and its usage is limited
-    public static AbstractStemmerFullTextFilter createStemmerFullTextFilter(String name, String languageStr) {
-        StemmerLanguage language = StemmerLanguage.getEnumIgnoreCase(languageStr);
+    public static AbstractStemmerFullTextFilter createStemmerFullTextFilter(String name, StemmerLanguage language) {
         switch (language) {
             case ENGLISH:
                 return new EnglishStemmerFullTextFilter(name);
@@ -71,6 +71,16 @@ public abstract class AbstractStemmerFullTextFilter extends AbstractFullTextFilt
 
     @Override
     public IToken processToken(TokenizerInfo.TokenizerType tokenizerType, IToken token) {
+        SnowballStemmer stemmer;
+
+        switch (language) {
+            case ENGLISH:
+                stemmer = new SnowballStemmer(SnowballStemmer.ALGORITHM.ENGLISH);
+                break;
+            default:
+                throw new IllegalArgumentException("Stemmer of the language " + language.toString() + " not supported yet!");
+        }
+
         int start = token.getStartOffset();
         int length = token.getTokenLength();
 

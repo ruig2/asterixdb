@@ -22,13 +22,10 @@ package org.apache.hyracks.storage.am.lsm.invertedindex.fulltext;
 import org.apache.hyracks.api.exceptions.HyracksDataException;
 import org.apache.hyracks.api.io.IJsonSerializable;
 import org.apache.hyracks.api.io.IPersistedResourceRegistry;
-import org.apache.hyracks.storage.am.lsm.invertedindex.tokenizers.IToken;
-import org.apache.hyracks.storage.am.lsm.invertedindex.tokenizers.TokenizerInfo;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
-import opennlp.tools.stemmer.snowball.SnowballStemmer;
 
 public class EnglishStemmerFullTextFilter extends AbstractStemmerFullTextFilter {
     private static final long serialVersionUID = 1L;
@@ -36,15 +33,6 @@ public class EnglishStemmerFullTextFilter extends AbstractStemmerFullTextFilter 
     public EnglishStemmerFullTextFilter(String name) {
         super(name);
         this.language = StemmerLanguage.ENGLISH;
-    }
-
-    @Override
-    public IToken processToken(TokenizerInfo.TokenizerType tokenizerType, IToken token) {
-        if (this.stemmer == null) {
-            this.stemmer = new SnowballStemmer(SnowballStemmer.ALGORITHM.ENGLISH);
-        }
-
-        return super.processToken(tokenizerType, token);
     }
 
     @Override

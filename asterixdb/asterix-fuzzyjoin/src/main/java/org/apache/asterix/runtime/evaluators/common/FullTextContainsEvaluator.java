@@ -375,9 +375,11 @@ public class FullTextContainsEvaluator implements IScalarEvaluator {
             case MULTISET:
                 for (int j = 0; j < tokenLength; j++) {
                     if (DelimitedUTF8StringBinaryTokenizer.isSeparator((char) refArray[tokenOffset + j])) {
+                        /*
                         throw new HyracksDataException(
                                 "Phrase in Full-text is not supported. An expression should include only one word."
                                         + (char) refArray[tokenOffset + j] + " " + refArray[tokenOffset + j]);
+                         */
                     }
                 }
                 break;

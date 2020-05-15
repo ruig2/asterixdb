@@ -18,9 +18,12 @@
  */
 package org.apache.asterix.optimizer.rules.util;
 
+import com.google.common.collect.ImmutableMap;
+import opennlp.tools.stemmer.snowball.SnowballStemmer;
 import static org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.AbstractStemmerFullTextFilter.*;
 
 import java.util.List;
+import java.util.Map;
 
 import org.apache.asterix.om.base.AString;
 import org.apache.asterix.om.constants.AsterixConstantValue;

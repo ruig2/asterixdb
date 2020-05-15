@@ -52,6 +52,8 @@ public class DelimitedUTF8StringBinaryTokenizer extends AbstractUTF8StringBinary
         return byteIndex < sentenceEndOffset;
     }
 
+    // ToDo: current solution (where a white list defined for non-separator chars) is not suitable for utf-8 chars
+    // which are always judged as separators
     public static boolean isSeparator(char c) {
         return !(Character.isLetterOrDigit(c) || Character.getType(c) == Character.OTHER_LETTER
                 || Character.getType(c) == Character.OTHER_NUMBER);
