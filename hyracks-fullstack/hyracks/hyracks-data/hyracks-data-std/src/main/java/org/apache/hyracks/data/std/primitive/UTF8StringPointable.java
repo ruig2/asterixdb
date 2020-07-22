@@ -20,6 +20,7 @@ package org.apache.hyracks.data.std.primitive;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.nio.charset.Charset;
 import java.util.PrimitiveIterator;
 import java.util.Set;
 
@@ -51,6 +52,7 @@ public final class UTF8StringPointable extends AbstractPointable implements IHas
     private int stringLength;
 
     public static final UTF8StringPointable SPACE_STRING_POINTABLE = generateUTF8Pointable(" ");
+    public static final Charset CESU8_CHARSET = Charset.forName("CESU8");
 
     /**
      * reset those meta length.
@@ -192,11 +194,7 @@ public final class UTF8StringPointable extends AbstractPointable implements IHas
 
     @Override
     public String toString() {
-        try {
-            return new String(bytes, getCharStartOffset(), getUTF8Length(), "CESU8");
-        } catch (UnsupportedEncodingException e) {
-            throw new IllegalStateException(e);
-        }
+        return new String(bytes, getCharStartOffset(), getUTF8Length(), CESU8_CHARSET);
     }
 
     public int ignoreCaseCompareTo(UTF8StringPointable other) {
