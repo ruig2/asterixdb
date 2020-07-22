@@ -20,8 +20,6 @@ package org.apache.hyracks.data.std.primitive;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
 import java.util.Set;
 
 import org.apache.commons.lang3.CharSet;
