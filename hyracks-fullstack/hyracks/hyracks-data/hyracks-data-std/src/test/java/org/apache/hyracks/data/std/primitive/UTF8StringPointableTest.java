@@ -231,6 +231,7 @@ public class UTF8StringPointableTest {
         GrowableArray storage = new GrowableArray();
         UTF8StringPointable result = new UTF8StringPointable();
         UTF8StringPointable input = generateUTF8Pointable("  this is it.i am;here.  ");
+        // Use HashSet instead of it.unimi.dsi.fastutil.ints.IntArraySet to avoid adding a new dependency to the test module
         Set<Integer> spaceCodePointSet = new HashSet<Integer>(Arrays.asList((int) ' '));
 
         // Trims both sides.
@@ -270,8 +271,9 @@ public class UTF8StringPointableTest {
         UTF8StringPointable input = generateUTF8Pointable("  this is it.i am;here.  ");
 
         String pattern = " hert.";
+        UTF8StringPointable patternPointable = generateUTF8Pointable(pattern);
         Set<Integer> codePointSet = new HashSet<>();
-        UTF8StringUtil.getCodePointSetFromString(codePointSet, pattern);
+        patternPointable.getCodePoints(codePointSet);
 
         // Trims both sides.
         input.trim(builder, storage, true, true, codePointSet);
@@ -296,7 +298,8 @@ public class UTF8StringPointableTest {
         // Test Emoji trim
         input = STRING_POINTABLE_EMOJI_FAMILY_OF_4;
         pattern = "👨👦";
-        UTF8StringUtil.getCodePointSetFromString(codePointSet, pattern);
+        patternPointable = generateUTF8Pointable(pattern);
+        patternPointable.getCodePoints(codePointSet);
 
         // Trim left
         storage.reset();

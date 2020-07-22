@@ -731,12 +731,4 @@ public class UTF8StringUtil {
         return tempBytes;
     }
 
-    public static void getCodePointSetFromString(Set<Integer> codePointSet, String str) {
-        codePointSet.clear();
-        PrimitiveIterator.OfInt it = str.codePoints().iterator();
-
-        while (it.hasNext()) {
-            codePointSet.add(it.nextInt());
-        }
-    }
 }

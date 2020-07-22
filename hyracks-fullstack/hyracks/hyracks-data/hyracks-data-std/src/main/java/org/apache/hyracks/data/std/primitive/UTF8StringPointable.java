@@ -20,6 +20,7 @@ package org.apache.hyracks.data.std.primitive;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.util.PrimitiveIterator;
 import java.util.Set;
 
 import org.apache.hyracks.api.dataflow.value.ITypeTraits;
@@ -48,6 +49,8 @@ public final class UTF8StringPointable extends AbstractPointable implements IHas
     private int metaLength;
     private int hashValue;
     private int stringLength;
+
+    public static final UTF8StringPointable SPACE_STRING_POINTABLE = generateUTF8Pointable(" ");
 
     /**
      * reset those meta length.
@@ -119,6 +122,20 @@ public final class UTF8StringPointable extends AbstractPointable implements IHas
 
     public int codePointSize(int offset) {
         return UTF8StringUtil.codePointSize(bytes, start + offset);
+    }
+
+    public void getCodePoints(Set<Integer> codePointSet) {
+        codePointSet.clear();
+
+        int byteIdx = 0;
+        while (byteIdx < utf8Length) {
+            codePointSet.add(codePointAt(metaLength + byteIdx));
+            byteIdx += codePointSize(metaLength + byteIdx);
+        }
+
+        if (byteIdx != utf8Length) {
+            throw new IllegalArgumentException("Decoding error: malformed bytes");
+        }
     }
 
     /**
