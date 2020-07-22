@@ -434,6 +434,7 @@
         * the first argument is any other non-string value
 
  * Example:
+ 
         reverse("hello");
 
  * The expected result is:
