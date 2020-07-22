@@ -78,7 +78,7 @@ public class StringTrimmer {
      *            , a pattern string.
      */
     public void build(UTF8StringPointable patternPtr) {
-        final boolean newPattern = codePointSet == null || lastPatternPtr.compareTo(patternPtr) != 0;
+        final boolean newPattern = (codePointSet.size() == 0) || lastPatternPtr.compareTo(patternPtr) != 0;
         if (newPattern) {
             StringEvaluatorUtils.copyResetUTF8Pointable(patternPtr, lastPatternStorage, lastPatternPtr);
             UTF8StringUtil.getCodePointSetFromString(codePointSet, patternPtr.toString());
