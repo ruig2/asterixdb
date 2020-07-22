@@ -451,6 +451,7 @@
     * `string` : a `string` to be split.
  * Return Value:
     * an array of substrings by splitting the input `string` by `sep`,
+    * in case of two consecutive `sep`s in the `string`, the result of splitting the two consecutive `sep`s will be the empty string `""`,
     * `missing` if the argument is a `missing` value,
     * `null` if the argument is a `null` value,
     * any other non-string input value will cause a type error.
@@ -463,6 +464,16 @@
  * The expected result is:
 
         [ "test", "driven", "development" ]
+
+
+ * Example with two consecutive `sep`s in the `string`:
+
+        split("123//456", "/");
+
+
+ * The expected result is:
+
+        [ "123", "", "456" ]
 
 
 ### starts_with ###
