@@ -638,7 +638,8 @@ public final class UTF8StringPointable extends AbstractPointable implements IHas
                         if (UTF8StringUtil.isCharStart(srcPtr.bytes, cursorIndex)) {
                             ch = UTF8StringUtil.charAt(srcPtr.bytes, cursorIndex);
                             if (Character.isHighSurrogate(ch) == false) {
-                                throw new IllegalArgumentException("Decoding Error: no corresponding high surrogate found for the following low surrogate");
+                                throw new IllegalArgumentException(
+                                        "Decoding Error: no corresponding high surrogate found for the following low surrogate");
                             }
 
                             charSize += UTF8StringUtil.charSize(srcPtr.bytes, cursorIndex);
