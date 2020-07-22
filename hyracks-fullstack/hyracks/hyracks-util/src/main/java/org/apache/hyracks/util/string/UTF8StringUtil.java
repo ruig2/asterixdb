@@ -25,8 +25,6 @@ import java.io.EOFException;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.UTFDataFormatException;
-import java.util.PrimitiveIterator;
-import java.util.Set;
 
 import org.apache.hyracks.util.encoding.VarLenIntEncoderDecoder;
 

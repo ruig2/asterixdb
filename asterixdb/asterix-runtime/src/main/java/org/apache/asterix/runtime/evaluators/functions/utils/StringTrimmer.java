@@ -20,17 +20,16 @@
 package org.apache.asterix.runtime.evaluators.functions.utils;
 
 import java.io.IOException;
-import java.util.HashSet;
 import java.util.Set;
 
-import it.unimi.dsi.fastutil.ints.IntArraySet;
 import org.apache.asterix.runtime.evaluators.functions.StringEvaluatorUtils;
 import org.apache.hyracks.data.std.api.IPointable;
 import org.apache.hyracks.data.std.primitive.UTF8StringPointable;
 import org.apache.hyracks.data.std.util.ByteArrayAccessibleOutputStream;
 import org.apache.hyracks.data.std.util.GrowableArray;
 import org.apache.hyracks.data.std.util.UTF8StringBuilder;
-import org.apache.hyracks.util.string.UTF8StringUtil;
+
+import it.unimi.dsi.fastutil.ints.IntArraySet;
 
 /**
  * A wrapper for string trim methods.

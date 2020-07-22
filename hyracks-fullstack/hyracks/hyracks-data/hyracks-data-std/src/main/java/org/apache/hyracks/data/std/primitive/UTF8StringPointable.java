@@ -19,9 +19,7 @@
 package org.apache.hyracks.data.std.primitive;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
-import java.util.PrimitiveIterator;
 import java.util.Set;
 
 import org.apache.hyracks.api.dataflow.value.ITypeTraits;
