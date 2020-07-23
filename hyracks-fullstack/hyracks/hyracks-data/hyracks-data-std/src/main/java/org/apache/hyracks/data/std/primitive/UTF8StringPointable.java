@@ -126,8 +126,6 @@ public final class UTF8StringPointable extends AbstractPointable implements IHas
     }
 
     public void getCodePoints(IntCollection codePointSet) {
-        codePointSet.clear();
-
         int byteIdx = 0;
         while (byteIdx < utf8Length) {
             codePointSet.add(codePointAt(metaLength + byteIdx));
@@ -567,6 +565,60 @@ public final class UTF8StringPointable extends AbstractPointable implements IHas
     }
 
     /**
+     * Generates a trimmed string of an input source string.
+     *
+     * @param srcPtr
+     *            , the input source string
+     * @param builder
+     *            , the result string builder.
+     * @param out
+     *            , the storage for the output string.
+     * @param left
+     *            , whether to trim the left side.
+     * @param right
+     *            , whether to trim the right side.
+     * @param codePointSet
+     *            , the set of code points that should be trimmed.
+     * @throws IOException
+     */
+    public static void trim(UTF8StringPointable srcPtr, UTF8StringBuilder builder, GrowableArray out, boolean left, boolean right,
+            IntCollection codePointSet) throws IOException {
+        final int srcUtfLen = srcPtr.getUTF8Length();
+        final int srcStart = srcPtr.getMetaDataLength();
+        // Finds the start Index (inclusive).
+        int startIndex = 0;
+        if (left) {
+            while (startIndex < srcUtfLen) {
+                int codepoint = srcPtr.codePointAt(srcStart + startIndex);
+                if (!codePointSet.contains(codepoint)) {
+                    break;
+                }
+                startIndex += srcPtr.codePointSize(srcStart + startIndex);
+            }
+        }
+
+        // Finds the end index (exclusive).
+        int endIndex = srcUtfLen;
+        if (right) {
+            endIndex = startIndex;
+            int cursorIndex = startIndex;
+            while (cursorIndex < srcUtfLen) {
+                int codePioint = srcPtr.codePointAt(srcStart + cursorIndex);
+                cursorIndex += srcPtr.codePointSize(srcStart + cursorIndex);
+                if (!codePointSet.contains(codePioint)) {
+                    endIndex = cursorIndex;
+                }
+            }
+        }
+
+        // Outputs the desired substring.
+        int len = endIndex - startIndex;
+        builder.reset(out, len);
+        builder.appendUtf8StringPointable(srcPtr, srcPtr.getStartOffset() + srcStart + startIndex, len);
+        builder.finish();
+    }
+
+    /**
      * Generates a trimmed string from the original string.
      *
      * @param builder
@@ -583,39 +635,7 @@ public final class UTF8StringPointable extends AbstractPointable implements IHas
      */
     public void trim(UTF8StringBuilder builder, GrowableArray out, boolean left, boolean right,
             IntCollection codePointSet) throws IOException {
-        final int srcUtfLen = getUTF8Length();
-        final int srcStart = getMetaDataLength();
-        // Finds the start Index (inclusive).
-        int startIndex = 0;
-        if (left) {
-            while (startIndex < srcUtfLen) {
-                int codepoint = codePointAt(srcStart + startIndex);
-                if (!codePointSet.contains(codepoint)) {
-                    break;
-                }
-                startIndex += codePointSize(srcStart + startIndex);
-            }
-        }
-
-        // Finds the end index (exclusive).
-        int endIndex = srcUtfLen;
-        if (right) {
-            endIndex = startIndex;
-            int cursorIndex = startIndex;
-            while (cursorIndex < srcUtfLen) {
-                int codePioint = codePointAt(srcStart + cursorIndex);
-                cursorIndex += codePointSize(srcStart + cursorIndex);
-                if (!codePointSet.contains(codePioint)) {
-                    endIndex = cursorIndex;
-                }
-            }
-        }
-
-        // Outputs the desired substring.
-        int len = endIndex - startIndex;
-        builder.reset(out, len);
-        builder.appendUtf8StringPointable(this, this.getStartOffset() + srcStart + startIndex, len);
-        builder.finish();
+        trim(this, builder, out, left, right, codePointSet);
     }
 
     /**

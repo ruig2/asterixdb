@@ -273,6 +273,7 @@ public class UTF8StringPointableTest {
         String pattern = " hert.";
         UTF8StringPointable patternPointable = generateUTF8Pointable(pattern);
         IntCollection codePointSet = new IntArraySet();
+        codePointSet.clear();
         patternPointable.getCodePoints(codePointSet);
 
         // Trims both sides.
@@ -299,6 +300,7 @@ public class UTF8StringPointableTest {
         input = STRING_POINTABLE_EMOJI_FAMILY_OF_4;
         pattern = "👨👦";
         patternPointable = generateUTF8Pointable(pattern);
+        codePointSet.clear();
         patternPointable.getCodePoints(codePointSet);
 
         // Trim left

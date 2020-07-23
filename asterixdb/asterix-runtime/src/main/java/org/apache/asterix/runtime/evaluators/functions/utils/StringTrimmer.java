@@ -67,6 +67,7 @@ public class StringTrimmer {
         this.resultBuilder = resultBuilder;
         this.resultArray = resultArray;
         if (pattern != null) {
+            codePointSet.clear();
             pattern.getCodePoints(codePointSet);
         }
     }
@@ -81,6 +82,7 @@ public class StringTrimmer {
         final boolean newPattern = (codePointSet.size() == 0) || lastPatternPtr.compareTo(patternPtr) != 0;
         if (newPattern) {
             StringEvaluatorUtils.copyResetUTF8Pointable(patternPtr, lastPatternStorage, lastPatternPtr);
+            codePointSet.clear();
             patternPtr.getCodePoints(codePointSet);
         }
     }
