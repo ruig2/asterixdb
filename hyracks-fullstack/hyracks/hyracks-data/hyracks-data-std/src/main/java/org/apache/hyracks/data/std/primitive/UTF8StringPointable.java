@@ -581,8 +581,8 @@ public final class UTF8StringPointable extends AbstractPointable implements IHas
      *            , the set of code points that should be trimmed.
      * @throws IOException
      */
-    public static void trim(UTF8StringPointable srcPtr, UTF8StringBuilder builder, GrowableArray out, boolean left, boolean right,
-            IntCollection codePointSet) throws IOException {
+    public static void trim(UTF8StringPointable srcPtr, UTF8StringBuilder builder, GrowableArray out, boolean left,
+            boolean right, IntCollection codePointSet) throws IOException {
         final int srcUtfLen = srcPtr.getUTF8Length();
         final int srcStart = srcPtr.getMetaDataLength();
         // Finds the start Index (inclusive).
