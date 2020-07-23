@@ -728,5 +728,4 @@ public class UTF8StringUtil {
         }
         return tempBytes;
     }
-
 }

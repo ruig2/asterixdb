@@ -28,14 +28,15 @@ import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
 import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
 
 import org.apache.hyracks.data.std.util.GrowableArray;
 import org.apache.hyracks.data.std.util.UTF8StringBuilder;
 import org.apache.hyracks.util.string.UTF8StringSample;
 import org.apache.hyracks.util.string.UTF8StringUtil;
 import org.junit.Test;
+
+import it.unimi.dsi.fastutil.ints.IntArraySet;
+import it.unimi.dsi.fastutil.ints.IntCollection;
 
 public class UTF8StringPointableTest {
     public static UTF8StringPointable STRING_EMPTY = generateUTF8Pointable(UTF8StringSample.EMPTY_STRING);
@@ -231,8 +232,7 @@ public class UTF8StringPointableTest {
         GrowableArray storage = new GrowableArray();
         UTF8StringPointable result = new UTF8StringPointable();
         UTF8StringPointable input = generateUTF8Pointable("  this is it.i am;here.  ");
-        // Use HashSet instead of it.unimi.dsi.fastutil.ints.IntArraySet to avoid adding a new dependency to the test module
-        Set<Integer> spaceCodePointSet = new HashSet<Integer>(Arrays.asList((int) ' '));
+        IntCollection spaceCodePointSet = new IntArraySet(Arrays.asList((int) ' '));
 
         // Trims both sides.
         input.trim(builder, storage, true, true, spaceCodePointSet);
@@ -272,7 +272,7 @@ public class UTF8StringPointableTest {
 
         String pattern = " hert.";
         UTF8StringPointable patternPointable = generateUTF8Pointable(pattern);
-        Set<Integer> codePointSet = new HashSet<>();
+        IntCollection codePointSet = new IntArraySet();
         patternPointable.getCodePoints(codePointSet);
 
         // Trims both sides.
