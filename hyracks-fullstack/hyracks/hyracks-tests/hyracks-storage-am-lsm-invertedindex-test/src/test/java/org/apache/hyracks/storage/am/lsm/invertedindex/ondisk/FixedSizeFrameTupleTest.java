@@ -25,6 +25,8 @@ import java.util.Random;
 
 import org.apache.hyracks.api.dataflow.value.ITypeTraits;
 import org.apache.hyracks.data.std.primitive.IntegerPointable;
+import org.apache.hyracks.storage.am.lsm.invertedindex.ondisk.fixedsize.FixedSizeFrameTupleAccessor;
+import org.apache.hyracks.storage.am.lsm.invertedindex.ondisk.fixedsize.FixedSizeFrameTupleAppender;
 import org.junit.Assert;
 import org.junit.Test;
 

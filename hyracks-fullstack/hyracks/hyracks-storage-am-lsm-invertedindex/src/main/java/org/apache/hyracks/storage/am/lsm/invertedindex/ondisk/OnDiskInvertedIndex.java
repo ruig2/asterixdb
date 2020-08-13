@@ -49,6 +49,8 @@ import org.apache.hyracks.storage.am.lsm.invertedindex.api.IInvertedIndexSearche
 import org.apache.hyracks.storage.am.lsm.invertedindex.api.IInvertedListBuilder;
 import org.apache.hyracks.storage.am.lsm.invertedindex.api.InvertedListCursor;
 import org.apache.hyracks.storage.am.lsm.invertedindex.impls.LSMInvertedIndexSearchCursorInitialState;
+import org.apache.hyracks.storage.am.lsm.invertedindex.ondisk.fixedsize.FixedSizeElementInvertedListCursor;
+import org.apache.hyracks.storage.am.lsm.invertedindex.ondisk.fixedsize.FixedSizeElementInvertedListScanCursor;
 import org.apache.hyracks.storage.am.lsm.invertedindex.search.InvertedIndexSearchPredicate;
 import org.apache.hyracks.storage.am.lsm.invertedindex.search.TOccurrenceSearcher;
 import org.apache.hyracks.storage.am.lsm.invertedindex.tuples.TokenKeyPairTuple;

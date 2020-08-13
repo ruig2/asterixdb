@@ -36,9 +36,9 @@ import org.apache.hyracks.dataflow.common.io.RunFileReader;
 import org.apache.hyracks.dataflow.common.io.RunFileWriter;
 import org.apache.hyracks.dataflow.std.buffermanager.BufferManagerBackedVSizeFrame;
 import org.apache.hyracks.dataflow.std.buffermanager.ISimpleFrameBufferManager;
-import org.apache.hyracks.storage.am.lsm.invertedindex.ondisk.FixedSizeFrameTupleAccessor;
-import org.apache.hyracks.storage.am.lsm.invertedindex.ondisk.FixedSizeFrameTupleAppender;
-import org.apache.hyracks.storage.am.lsm.invertedindex.ondisk.FixedSizeTupleReference;
+import org.apache.hyracks.storage.am.lsm.invertedindex.ondisk.fixedsize.FixedSizeFrameTupleAccessor;
+import org.apache.hyracks.storage.am.lsm.invertedindex.ondisk.fixedsize.FixedSizeFrameTupleAppender;
+import org.apache.hyracks.storage.am.lsm.invertedindex.ondisk.fixedsize.FixedSizeTupleReference;
 
 /**
  * Disk-based or in-memory based storage for intermediate and final results of inverted-index

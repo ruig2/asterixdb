@@ -17,7 +17,7 @@
  * under the License.
  */
 
-package org.apache.hyracks.storage.am.lsm.invertedindex.ondisk;
+package org.apache.hyracks.storage.am.lsm.invertedindex.ondisk.fixedsize;
 
 import org.apache.hyracks.api.dataflow.value.ITypeTraits;
 import org.apache.hyracks.dataflow.common.data.accessors.ITupleReference;

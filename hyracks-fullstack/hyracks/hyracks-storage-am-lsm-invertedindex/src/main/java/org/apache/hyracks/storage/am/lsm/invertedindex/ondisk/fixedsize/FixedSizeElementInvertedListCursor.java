@@ -17,7 +17,7 @@
  * under the License.
  */
 
-package org.apache.hyracks.storage.am.lsm.invertedindex.ondisk;
+package org.apache.hyracks.storage.am.lsm.invertedindex.ondisk.fixedsize;
 
 import java.io.ByteArrayInputStream;
 import java.io.DataInput;

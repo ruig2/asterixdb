@@ -44,8 +44,8 @@ import org.apache.hyracks.storage.am.lsm.invertedindex.api.IInPlaceInvertedIndex
 import org.apache.hyracks.storage.am.lsm.invertedindex.api.IInvertedIndexSearcher;
 import org.apache.hyracks.storage.am.lsm.invertedindex.api.IObjectFactory;
 import org.apache.hyracks.storage.am.lsm.invertedindex.api.InvertedListCursor;
-import org.apache.hyracks.storage.am.lsm.invertedindex.ondisk.FixedSizeFrameTupleAccessor;
-import org.apache.hyracks.storage.am.lsm.invertedindex.ondisk.FixedSizeTupleReference;
+import org.apache.hyracks.storage.am.lsm.invertedindex.ondisk.fixedsize.FixedSizeFrameTupleAccessor;
+import org.apache.hyracks.storage.am.lsm.invertedindex.ondisk.fixedsize.FixedSizeTupleReference;
 import org.apache.hyracks.storage.am.lsm.invertedindex.tokenizers.DelimitedUTF8StringBinaryTokenizer;
 import org.apache.hyracks.storage.am.lsm.invertedindex.tokenizers.IBinaryTokenizer;
 import org.apache.hyracks.storage.am.lsm.invertedindex.tokenizers.IToken;
