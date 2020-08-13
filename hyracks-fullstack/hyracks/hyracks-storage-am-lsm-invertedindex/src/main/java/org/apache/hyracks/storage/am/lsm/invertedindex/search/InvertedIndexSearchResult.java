@@ -50,13 +50,16 @@ public class InvertedIndexSearchResult {
     // I/O buffer's index in the buffers
     protected static final int IO_BUFFER_IDX = 0;
     protected static final String FILE_PREFIX = "InvertedIndexSearchResult";
+    // We assume most of the inverted list element is of type integer which takes 4 bytes
+    // In case of using string as the primary key, the size is not fixed and cannot be estimated easily
+    protected int ESTIMATED_INVERTED_LIST_ELEMENT_SIZE = 4;
+
     protected final IHyracksTaskContext ctx;
     protected final FixedSizeFrameTupleAppender appender;
     protected final FixedSizeFrameTupleAccessor accessor;
     protected final FixedSizeTupleReference tuple;
     protected final ISimpleFrameBufferManager bufferManager;
     protected ITypeTraits[] typeTraits;
-    protected int invListElementSize;
 
     protected int currentWriterBufIdx;
     protected int currentReaderBufIdx;
@@ -105,12 +108,9 @@ public class InvertedIndexSearchResult {
      */
     protected void initTypeTraits(ITypeTraits[] invListFields) {
         typeTraits = new ITypeTraits[invListFields.length + 1];
-        int tmp = 0;
         for (int i = 0; i < invListFields.length; i++) {
             typeTraits[i] = invListFields[i];
-            tmp += invListFields[i].getFixedLength();
         }
-        invListElementSize = tmp;
         // Integer for counting occurrences.
         typeTraits[invListFields.length] = IntegerPointable.TYPE_TRAITS;
     }
@@ -154,7 +154,7 @@ public class InvertedIndexSearchResult {
             appender.reset(currentBuffer);
         }
         // Appends inverted-list element.
-        if (!appender.append(invListElement.getFieldData(0), invListElement.getFieldStart(0), invListElementSize)) {
+        if (!appender.append(invListElement.getFieldData(0), invListElement.getFieldStart(0), invListElement.getFieldLength(0))) {
             throw HyracksDataException.create(ErrorCode.CANNOT_ADD_ELEMENT_TO_INVERTED_INDEX_SEARCH_RESULT);
         }
         // Appends count.
@@ -305,7 +305,7 @@ public class InvertedIndexSearchResult {
         // The count of Minframe, and the count of tuples in a frame should be deducted.
         frameSize = frameSize - FixedSizeFrameTupleAppender.MINFRAME_COUNT_SIZE
                 - FixedSizeFrameTupleAppender.TUPLE_COUNT_SIZE;
-        numPossibleElementPerPage = (int) Math.floor((double) frameSize / (invListElementSize + ELEMENT_COUNT_SIZE));
+        numPossibleElementPerPage = (int) Math.floor((double) frameSize / (ESTIMATED_INVERTED_LIST_ELEMENT_SIZE + ELEMENT_COUNT_SIZE));
     }
 
     /**

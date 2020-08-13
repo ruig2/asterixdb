@@ -45,12 +45,9 @@ public class InvertedIndexFinalSearchResult extends InvertedIndexSearchResult {
     @Override
     protected void initTypeTraits(ITypeTraits[] invListFields) {
         typeTraits = new ITypeTraits[invListFields.length];
-        int tmp = 0;
         for (int i = 0; i < invListFields.length; i++) {
             typeTraits[i] = invListFields[i];
-            tmp += invListFields[i].getFixedLength();
         }
-        invListElementSize = tmp;
     }
 
     /**
@@ -81,7 +78,7 @@ public class InvertedIndexFinalSearchResult extends InvertedIndexSearchResult {
             return false;
         }
         // Appends the given inverted-list element.
-        if (!appender.append(invListElement.getFieldData(0), invListElement.getFieldStart(0), invListElementSize)) {
+        if (!appender.append(invListElement.getFieldData(0), invListElement.getFieldStart(0), invListElement.getFieldLength(0))) {
             throw HyracksDataException.create(ErrorCode.CANNOT_ADD_ELEMENT_TO_INVERTED_INDEX_SEARCH_RESULT);
         }
         appender.incrementTupleCount(1);
