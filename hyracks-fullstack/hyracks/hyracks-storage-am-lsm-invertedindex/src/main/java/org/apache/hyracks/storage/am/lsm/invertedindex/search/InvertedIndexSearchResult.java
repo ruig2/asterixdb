@@ -36,8 +36,8 @@ import org.apache.hyracks.dataflow.common.io.RunFileReader;
 import org.apache.hyracks.dataflow.common.io.RunFileWriter;
 import org.apache.hyracks.dataflow.std.buffermanager.BufferManagerBackedVSizeFrame;
 import org.apache.hyracks.dataflow.std.buffermanager.ISimpleFrameBufferManager;
+import org.apache.hyracks.storage.am.lsm.invertedindex.ondisk.InvertedListFrameTupleAppender;
 import org.apache.hyracks.storage.am.lsm.invertedindex.ondisk.fixedsize.FixedSizeFrameTupleAccessor;
-import org.apache.hyracks.storage.am.lsm.invertedindex.ondisk.fixedsize.FixedSizeFrameTupleAppender;
 import org.apache.hyracks.storage.am.lsm.invertedindex.ondisk.fixedsize.FixedSizeTupleReference;
 
 /**
@@ -55,7 +55,7 @@ public class InvertedIndexSearchResult {
     protected int ESTIMATED_INVERTED_LIST_ELEMENT_SIZE = 4;
 
     protected final IHyracksTaskContext ctx;
-    protected final FixedSizeFrameTupleAppender appender;
+    protected final InvertedListFrameTupleAppender appender;
     protected final FixedSizeFrameTupleAccessor accessor;
     protected final FixedSizeTupleReference tuple;
     protected final ISimpleFrameBufferManager bufferManager;
@@ -83,7 +83,7 @@ public class InvertedIndexSearchResult {
             ISimpleFrameBufferManager bufferManager) throws HyracksDataException {
         initTypeTraits(invListFields);
         this.ctx = ctx;
-        appender = new FixedSizeFrameTupleAppender(ctx.getInitialFrameSize(), typeTraits);
+        appender = new InvertedListFrameTupleAppender(ctx.getInitialFrameSize());
         accessor = new FixedSizeFrameTupleAccessor(ctx.getInitialFrameSize(), typeTraits);
         tuple = new FixedSizeTupleReference(typeTraits);
         this.bufferManager = bufferManager;
@@ -143,7 +143,7 @@ public class InvertedIndexSearchResult {
     public boolean append(ITupleReference invListElement, int count) throws HyracksDataException {
         ByteBuffer currentBuffer;
         // Moves to the next page if the current page is full.
-        if (!appender.hasSpace()) {
+        if (!appender.hasSpace(invListElement.getFieldLength(0))) {
             currentWriterBufIdx++;
             if (isInMemoryOpMode) {
                 currentBuffer = buffers.get(currentWriterBufIdx);
@@ -303,8 +303,8 @@ public class InvertedIndexSearchResult {
     protected void calculateNumElementPerPage() {
         int frameSize = ctx.getInitialFrameSize();
         // The count of Minframe, and the count of tuples in a frame should be deducted.
-        frameSize = frameSize - FixedSizeFrameTupleAppender.MINFRAME_COUNT_SIZE
-                - FixedSizeFrameTupleAppender.TUPLE_COUNT_SIZE;
+        frameSize = frameSize - InvertedListFrameTupleAppender.MINFRAME_COUNT_SIZE
+                - InvertedListFrameTupleAppender.TUPLE_COUNT_SIZE;
         numPossibleElementPerPage = (int) Math.floor((double) frameSize / (ESTIMATED_INVERTED_LIST_ELEMENT_SIZE + ELEMENT_COUNT_SIZE));
     }
 
@@ -394,7 +394,7 @@ public class InvertedIndexSearchResult {
         return accessor;
     }
 
-    public FixedSizeFrameTupleAppender getAppender() {
+    public InvertedListFrameTupleAppender getAppender() {
         return appender;
     }
 

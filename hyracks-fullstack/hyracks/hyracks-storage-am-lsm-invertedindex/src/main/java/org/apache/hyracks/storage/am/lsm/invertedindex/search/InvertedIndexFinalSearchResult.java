@@ -74,11 +74,12 @@ public class InvertedIndexFinalSearchResult extends InvertedIndexSearchResult {
     @Override
     public boolean append(ITupleReference invListElement, int count) throws HyracksDataException {
         // Pauses the addition of this tuple if the current page is full.
-        if (!appender.hasSpace()) {
+        if (!appender.hasSpace(invListElement.getFieldLength(0))) {
             return false;
         }
         // Appends the given inverted-list element.
-        if (!appender.append(invListElement.getFieldData(0), invListElement.getFieldStart(0), invListElement.getFieldLength(0))) {
+        if (!appender.append(invListElement.getFieldData(0), invListElement.getFieldStart(0),
+                invListElement.getFieldLength(0))) {
             throw HyracksDataException.create(ErrorCode.CANNOT_ADD_ELEMENT_TO_INVERTED_INDEX_SEARCH_RESULT);
         }
         appender.incrementTupleCount(1);

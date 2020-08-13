@@ -24,6 +24,7 @@ import java.nio.ByteBuffer;
 import org.apache.hyracks.api.comm.FrameHelper;
 import org.apache.hyracks.api.comm.IFrameTupleAccessor;
 import org.apache.hyracks.api.dataflow.value.ITypeTraits;
+import org.apache.hyracks.storage.am.lsm.invertedindex.ondisk.InvertedListFrameTupleAppender;
 
 /**
  * This is a fixed-size tuple accessor class.
@@ -102,7 +103,7 @@ public class FixedSizeFrameTupleAccessor implements IFrameTupleAccessor {
 
     @Override
     public int getTupleStartOffset(int tupleIndex) {
-        return FixedSizeFrameTupleAppender.MINFRAME_COUNT_SIZE + tupleIndex * tupleSize;
+        return InvertedListFrameTupleAppender.MINFRAME_COUNT_SIZE + tupleIndex * tupleSize;
     }
 
     @Override

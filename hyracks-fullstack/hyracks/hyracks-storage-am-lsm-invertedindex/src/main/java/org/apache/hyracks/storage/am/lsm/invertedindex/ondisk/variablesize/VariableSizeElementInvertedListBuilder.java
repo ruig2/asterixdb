@@ -36,7 +36,8 @@ public class VariableSizeElementInvertedListBuilder extends AInvertedListBuilder
             }
         }
         if (isFixedSize) {
-            throw new IllegalArgumentException("all the type traits are fixed size when expect at least one variable size trait");
+            throw new IllegalArgumentException(
+                    "all the type traits are fixed size when expect at least one variable size trait");
         }
     }
 
@@ -69,8 +70,7 @@ public class VariableSizeElementInvertedListBuilder extends AInvertedListBuilder
         for (int i = 0; i < numElementFields; i++) {
             int field = numTokenFields + i;
             int lenField = tuple.getFieldLength(field);
-            System.arraycopy(tuple.getFieldData(field), tuple.getFieldStart(field), targetBuf, pos,
-                    lenField);
+            System.arraycopy(tuple.getFieldData(field), tuple.getFieldStart(field), targetBuf, pos, lenField);
             pos += lenField;
         }
 

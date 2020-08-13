@@ -17,21 +17,25 @@
  * under the License.
  */
 
-package org.apache.hyracks.storage.am.lsm.invertedindex.ondisk.fixedsize;
-
-import java.nio.ByteBuffer;
-import java.util.Arrays;
+package org.apache.hyracks.storage.am.lsm.invertedindex.ondisk;
 
 import org.apache.hyracks.api.comm.FrameHelper;
 import org.apache.hyracks.api.dataflow.value.ITypeTraits;
+import org.apache.hyracks.storage.am.lsm.invertedindex.api.IInvertedListFrameTupleAppender;
+
+import java.nio.ByteBuffer;
+import java.util.Arrays;
 
 /**
  * An appender class for an inverted list. Each frame has two integer values at the beginning and at the end.
  * The first represents the number of minimum Hyracks frames in a frame. Currently, we use 1 for this value.
  * The latter represents the number of tuples in a frame. This design is required since we may need to use
  * RunFileWriter and RunFileReader class during the inverted-index-search operation.
+ *
+ * Note that this appender is not aware of the tuple element type because the length of the tuple is given by the caller
+ * at run time.
  */
-public class FixedSizeFrameTupleAppender {
+public class InvertedListFrameTupleAppender implements IInvertedListFrameTupleAppender {
 
     // At the end of a frame, an integer value is written to keep the tuple count in this frame.
     public static final int TUPLE_COUNT_SIZE = 4;
@@ -39,19 +43,13 @@ public class FixedSizeFrameTupleAppender {
     // For this class, the frame size is equal to the minimum frame size in Hyracks.
     public static final int MINFRAME_COUNT_SIZE = 4;
 
-    private final int frameSize;
-    private final int tupleSize;
-    private ByteBuffer buffer;
-    private int tupleCount;
-    private int tupleDataEndOffset;
+    protected final int frameSize;
+    protected ByteBuffer buffer;
+    protected int tupleCount;
+    protected int tupleDataEndOffset;
 
-    public FixedSizeFrameTupleAppender(int frameSize, ITypeTraits[] fields) {
+    public InvertedListFrameTupleAppender(int frameSize) {
         this.frameSize = frameSize;
-        int tmp = 0;
-        for (int i = 0; i < fields.length; i++) {
-            tmp += fields[i].getFixedLength();
-        }
-        tupleSize = tmp;
     }
 
     public void reset(ByteBuffer buffer) {
@@ -70,16 +68,6 @@ public class FixedSizeFrameTupleAppender {
         this.buffer.putInt(FrameHelper.getTupleCountOffset(frameSize), tupleCount);
         this.tupleCount = tupleCount;
         this.tupleDataEndOffset = tupleDataEndOffset;
-    }
-
-    public boolean append(byte[] bytes, int offset) {
-        if (tupleDataEndOffset + tupleSize + TUPLE_COUNT_SIZE <= frameSize) {
-            System.arraycopy(bytes, offset, buffer.array(), tupleDataEndOffset, tupleSize);
-            tupleDataEndOffset += tupleSize;
-            tupleCount++;
-            return true;
-        }
-        return false;
     }
 
     public boolean append(byte[] bytes, int offset, int length) {
@@ -131,10 +119,8 @@ public class FixedSizeFrameTupleAppender {
         return false;
     }
 
-    // returns true if an entire tuple fits
-    // returns false otherwise
-    public boolean hasSpace() {
-        return tupleDataEndOffset + tupleSize + TUPLE_COUNT_SIZE <= frameSize;
+    public boolean hasSpace(int length) {
+        return tupleDataEndOffset + length + TUPLE_COUNT_SIZE <= frameSize;
     }
 
     public void incrementTupleCount(int count) {
