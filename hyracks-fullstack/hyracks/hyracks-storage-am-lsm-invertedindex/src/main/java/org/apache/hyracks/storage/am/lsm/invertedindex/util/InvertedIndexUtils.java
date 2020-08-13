@@ -55,12 +55,12 @@ import org.apache.hyracks.storage.am.lsm.invertedindex.impls.LSMInvertedIndexFil
 import org.apache.hyracks.storage.am.lsm.invertedindex.impls.PartitionedLSMInvertedIndex;
 import org.apache.hyracks.storage.am.lsm.invertedindex.inmemory.InMemoryInvertedIndex;
 import org.apache.hyracks.storage.am.lsm.invertedindex.inmemory.PartitionedInMemoryInvertedIndex;
+import org.apache.hyracks.storage.am.lsm.invertedindex.ondisk.InvertedListBuilderFactory;
 import org.apache.hyracks.storage.am.lsm.invertedindex.ondisk.OnDiskInvertedIndex;
 import org.apache.hyracks.storage.am.lsm.invertedindex.ondisk.OnDiskInvertedIndexFactory;
 import org.apache.hyracks.storage.am.lsm.invertedindex.ondisk.PartitionedOnDiskInvertedIndex;
 import org.apache.hyracks.storage.am.lsm.invertedindex.ondisk.PartitionedOnDiskInvertedIndexFactory;
 import org.apache.hyracks.storage.am.lsm.invertedindex.ondisk.fixedsize.FixedSizeElementInvertedListBuilder;
-import org.apache.hyracks.storage.am.lsm.invertedindex.ondisk.fixedsize.FixedSizeElementInvertedListBuilderFactory;
 import org.apache.hyracks.storage.am.lsm.invertedindex.tokenizers.IBinaryTokenizerFactory;
 import org.apache.hyracks.storage.common.buffercache.IBufferCache;
 import org.apache.hyracks.util.trace.ITracer;
@@ -147,8 +147,7 @@ public class InvertedIndexUtils {
         LSMInvertedIndexFileManager fileManager =
                 new LSMInvertedIndexFileManager(ioManager, onDiskDirFileRef, deletedKeysBTreeFactory);
 
-        IInvertedListBuilderFactory invListBuilderFactory =
-                new FixedSizeElementInvertedListBuilderFactory(invListTypeTraits);
+        IInvertedListBuilderFactory invListBuilderFactory = new InvertedListBuilderFactory(invListTypeTraits);
         OnDiskInvertedIndexFactory invIndexFactory =
                 new OnDiskInvertedIndexFactory(ioManager, diskBufferCache, invListBuilderFactory, invListTypeTraits,
                         invListCmpFactories, tokenTypeTraits, tokenCmpFactories, fileManager, pageManagerFactory);
@@ -196,8 +195,7 @@ public class InvertedIndexUtils {
         LSMInvertedIndexFileManager fileManager =
                 new LSMInvertedIndexFileManager(ioManager, onDiskDirFileRef, deletedKeysBTreeFactory);
 
-        IInvertedListBuilderFactory invListBuilderFactory =
-                new FixedSizeElementInvertedListBuilderFactory(invListTypeTraits);
+        IInvertedListBuilderFactory invListBuilderFactory = new InvertedListBuilderFactory(invListTypeTraits);
         PartitionedOnDiskInvertedIndexFactory invIndexFactory = new PartitionedOnDiskInvertedIndexFactory(ioManager,
                 diskBufferCache, invListBuilderFactory, invListTypeTraits, invListCmpFactories, tokenTypeTraits,
                 tokenCmpFactories, fileManager, pageManagerFactory);

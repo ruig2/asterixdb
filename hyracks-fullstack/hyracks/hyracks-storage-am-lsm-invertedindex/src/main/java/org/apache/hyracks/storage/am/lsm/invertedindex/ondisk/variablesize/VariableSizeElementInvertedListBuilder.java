@@ -17,57 +17,68 @@
  * under the License.
  */
 
-package org.apache.hyracks.storage.am.lsm.invertedindex.ondisk.fixedsize;
+package org.apache.hyracks.storage.am.lsm.invertedindex.ondisk.variablesize;
 
 import org.apache.hyracks.api.dataflow.value.ITypeTraits;
 import org.apache.hyracks.dataflow.common.data.accessors.ITupleReference;
 import org.apache.hyracks.storage.am.lsm.invertedindex.ondisk.AInvertedListBuilder;
 
-public class FixedSizeElementInvertedListBuilder extends AInvertedListBuilder {
-    private final int listElementSize;
+public class VariableSizeElementInvertedListBuilder extends AInvertedListBuilder {
 
-    public FixedSizeElementInvertedListBuilder(ITypeTraits[] invListFields) {
+    public VariableSizeElementInvertedListBuilder(ITypeTraits[] invListFields) {
         super(invListFields);
-        int tmp = 0;
-        for (int i = 0; i < invListFields.length; i++) {
-            if (invListFields[i].isFixedLength() == false) {
-                throw new IllegalArgumentException("get variable-size type trait when expected fixed-size trait");
+
+        boolean isFixedSize = true;
+        for (ITypeTraits trait : invListFields) {
+            if (trait.isFixedLength() == false) {
+                isFixedSize = false;
+                break;
             }
-            tmp += invListFields[i].getFixedLength();
         }
-        listElementSize = tmp;
+        if (isFixedSize) {
+            throw new IllegalArgumentException("all the type traits are fixed size when expect at least one variable size trait");
+        }
     }
 
     @Override
     public boolean startNewList(ITupleReference tuple, int tokenField) {
-        if (pos + listElementSize > targetBuf.length) {
-            return false;
-        } else {
-            listSize = 0;
-            return true;
+        listSize = 0;
+        return true;
+    }
+
+    private boolean checkEnoughSpace(ITupleReference tuple, int numTokenFields, int numElementFields) {
+        int lenFields = 0;
+        for (int i = 0; i < numElementFields; i++) {
+            int field = numTokenFields + i;
+            lenFields += tuple.getFieldLength(field);
         }
+        if (pos + lenFields > targetBuf.length) {
+            return false;
+        }
+
+        return true;
     }
 
     @Override
     public boolean appendElement(ITupleReference tuple, int numTokenFields, int numElementFields) {
-        if (pos + listElementSize > targetBuf.length) {
+
+        if (checkEnoughSpace(tuple, numTokenFields, numElementFields) == false) {
             return false;
         }
 
         for (int i = 0; i < numElementFields; i++) {
             int field = numTokenFields + i;
+            int lenField = tuple.getFieldLength(field);
             System.arraycopy(tuple.getFieldData(field), tuple.getFieldStart(field), targetBuf, pos,
-                    tuple.getFieldLength(field));
+                    lenField);
+            pos += lenField;
         }
-
-        listSize++;
-        pos += listElementSize;
 
         return true;
     }
 
     @Override
     public boolean isFixedSize() {
-        return true;
+        return false;
     }
 }

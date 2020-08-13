@@ -16,23 +16,38 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
-package org.apache.hyracks.storage.am.lsm.invertedindex.ondisk.fixedsize;
+package org.apache.hyracks.storage.am.lsm.invertedindex.ondisk;
 
 import org.apache.hyracks.api.dataflow.value.ITypeTraits;
 import org.apache.hyracks.storage.am.lsm.invertedindex.api.IInvertedListBuilder;
 import org.apache.hyracks.storage.am.lsm.invertedindex.api.IInvertedListBuilderFactory;
+import org.apache.hyracks.storage.am.lsm.invertedindex.ondisk.fixedsize.FixedSizeElementInvertedListBuilder;
+import org.apache.hyracks.storage.am.lsm.invertedindex.ondisk.variablesize.VariableSizeElementInvertedListBuilder;
 
-public class FixedSizeElementInvertedListBuilderFactory implements IInvertedListBuilderFactory {
+public class InvertedListBuilderFactory implements IInvertedListBuilderFactory {
 
-    private final ITypeTraits[] invListFields;
+    protected final ITypeTraits[] invListFields;
+    private final boolean isFixedSize;
 
-    public FixedSizeElementInvertedListBuilderFactory(ITypeTraits[] invListFields) {
+    public InvertedListBuilderFactory(ITypeTraits[] invListFields) {
         this.invListFields = invListFields;
+
+        for (ITypeTraits t : this.invListFields) {
+            if (t.isFixedLength() == false) {
+                isFixedSize = false;
+                return;
+            }
+        }
+
+        isFixedSize = true;
     }
 
     @Override
     public IInvertedListBuilder create() {
-        return new FixedSizeElementInvertedListBuilder(invListFields);
+        if (isFixedSize) {
+            return new FixedSizeElementInvertedListBuilder(invListFields);
+        } else {
+            return new VariableSizeElementInvertedListBuilder(invListFields);
+        }
     }
 }

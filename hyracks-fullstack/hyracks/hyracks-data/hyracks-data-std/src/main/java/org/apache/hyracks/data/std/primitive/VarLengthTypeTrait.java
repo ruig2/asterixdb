@@ -25,6 +25,8 @@ import org.apache.hyracks.api.io.IPersistedResourceRegistry;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
+import sun.reflect.generics.reflectiveObjects.NotImplementedException;
+
 public class VarLengthTypeTrait implements ITypeTraits {
     public static final VarLengthTypeTrait INSTANCE = new VarLengthTypeTrait();
     private static final long serialVersionUID = 1L;
@@ -39,7 +41,7 @@ public class VarLengthTypeTrait implements ITypeTraits {
 
     @Override
     public int getFixedLength() {
-        return 0;
+        throw new UnsupportedOperationException("try to get the fixed length of a variable length type trait");
     }
 
     @Override
