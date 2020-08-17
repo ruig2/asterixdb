@@ -70,6 +70,9 @@ import org.apache.hyracks.util.trace.ITracer;
 
 public class InvertedIndexUtils {
 
+    public static final String EXPECT_ALL_FIX_GET_VAR_SIZE = "expecting all type trait to be fixed-size while getting at least one variable-length one";
+    public static final String EXPECT_VAR_GET_ALL_FIX_SIZE = "expecting at least one variable-size type trait while all are fixed-size";
+
     public static InMemoryInvertedIndex createInMemoryBTreeInvertedindex(IBufferCache memBufferCache,
             IPageManager virtualFreePageManager, ITypeTraits[] invListTypeTraits,
             IBinaryComparatorFactory[] invListCmpFactories, ITypeTraits[] tokenTypeTraits,
@@ -229,6 +232,18 @@ public class InvertedIndexUtils {
             }
         }
         return true;
+    }
+
+    public static void verifyAllFixedSizeTypeTrait(ITypeTraits[] typeTraits) {
+        if (InvertedIndexUtils.checkTypeTraitsAllFixed(typeTraits) == false) {
+            throw new IllegalArgumentException(InvertedIndexUtils.EXPECT_ALL_FIX_GET_VAR_SIZE);
+        }
+    }
+
+    public static void verifyHasVarSizeTypeTrait(ITypeTraits[] typeTraits) {
+        if (InvertedIndexUtils.checkTypeTraitsAllFixed(typeTraits) == true) {
+            throw new IllegalArgumentException(InvertedIndexUtils.EXPECT_VAR_GET_ALL_FIX_SIZE);
+        }
     }
 
     public static IInvertedListTupleReference createInvertedListTupleReference(ITypeTraits[] typeTraits) {

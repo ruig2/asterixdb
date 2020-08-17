@@ -31,10 +31,8 @@ public class FixedSizeInvertedListTupleReference extends AbstractInvertedListTup
         super(typeTraits);
     }
 
-    @Override protected void checkTypeTrait() {
-        if (InvertedIndexUtils.checkTypeTraitsAllFixed(typeTraits) == false) {
-            throw new IllegalArgumentException("expecting all type trait to be fixed-size while getting at least one variable-length one");
-        }
+    @Override protected void verifyTypeTrait() {
+        InvertedIndexUtils.verifyAllFixedSizeTypeTrait(typeTraits);
     }
 
     @Override protected void calculateFieldStartOffsets() {

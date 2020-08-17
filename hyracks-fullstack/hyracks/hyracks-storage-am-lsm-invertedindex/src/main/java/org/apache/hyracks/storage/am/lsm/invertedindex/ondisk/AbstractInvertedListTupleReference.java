@@ -12,14 +12,14 @@ public abstract class AbstractInvertedListTupleReference implements IInvertedLis
 
     // check if the type trait is fixed-size or variable-size
     // throws an IllegalArgument exception if get unexpected traits
-    protected abstract void checkTypeTrait();
+    protected abstract void verifyTypeTrait();
 
     public AbstractInvertedListTupleReference(ITypeTraits[] typeTraits) {
         this.typeTraits = typeTraits;
         this.fieldStartOffsets = new int[typeTraits.length];
         this.fieldStartOffsets[0] = 0;
 
-        checkTypeTrait();
+        verifyTypeTrait();
     }
 
     protected abstract void calculateFieldStartOffsets();

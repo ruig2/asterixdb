@@ -29,10 +29,8 @@ public class VariableSizeInvertedListTupleReference extends AbstractInvertedList
 
     private int lenLastField;
 
-    @Override protected void checkTypeTrait() {
-        if (InvertedIndexUtils.checkTypeTraitsAllFixed(typeTraits) == true) {
-            throw new IllegalArgumentException("expecting at least one variable-size type trait while all are fixed-size");
-        }
+    @Override protected void verifyTypeTrait() {
+        InvertedIndexUtils.verifyHasVarSizeTypeTrait(typeTraits);
     }
 
     public VariableSizeInvertedListTupleReference(ITypeTraits[] typeTraits) {
