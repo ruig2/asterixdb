@@ -21,6 +21,7 @@ package org.apache.hyracks.storage.am.lsm.invertedindex.util;
 
 import java.util.List;
 
+import org.apache.hyracks.api.comm.IFrameTupleAccessor;
 import org.apache.hyracks.api.dataflow.value.IBinaryComparatorFactory;
 import org.apache.hyracks.api.dataflow.value.ITypeTraits;
 import org.apache.hyracks.api.exceptions.HyracksDataException;
@@ -62,7 +63,9 @@ import org.apache.hyracks.storage.am.lsm.invertedindex.ondisk.OnDiskInvertedInde
 import org.apache.hyracks.storage.am.lsm.invertedindex.ondisk.PartitionedOnDiskInvertedIndex;
 import org.apache.hyracks.storage.am.lsm.invertedindex.ondisk.PartitionedOnDiskInvertedIndexFactory;
 import org.apache.hyracks.storage.am.lsm.invertedindex.ondisk.fixedsize.FixedSizeElementInvertedListBuilder;
+import org.apache.hyracks.storage.am.lsm.invertedindex.ondisk.fixedsize.FixedSizeInvertedListFrameTupleAccessor;
 import org.apache.hyracks.storage.am.lsm.invertedindex.ondisk.fixedsize.FixedSizeInvertedListTupleReference;
+import org.apache.hyracks.storage.am.lsm.invertedindex.ondisk.variablesize.VariableSizeInvertedListFrameTupleAccessor;
 import org.apache.hyracks.storage.am.lsm.invertedindex.ondisk.variablesize.VariableSizeInvertedListTupleReference;
 import org.apache.hyracks.storage.am.lsm.invertedindex.tokenizers.IBinaryTokenizerFactory;
 import org.apache.hyracks.storage.common.buffercache.IBufferCache;
@@ -70,8 +73,10 @@ import org.apache.hyracks.util.trace.ITracer;
 
 public class InvertedIndexUtils {
 
-    public static final String EXPECT_ALL_FIX_GET_VAR_SIZE = "expecting all type trait to be fixed-size while getting at least one variable-length one";
-    public static final String EXPECT_VAR_GET_ALL_FIX_SIZE = "expecting at least one variable-size type trait while all are fixed-size";
+    public static final String EXPECT_ALL_FIX_GET_VAR_SIZE =
+            "expecting all type trait to be fixed-size while getting at least one variable-length one";
+    public static final String EXPECT_VAR_GET_ALL_FIX_SIZE =
+            "expecting at least one variable-size type trait while all are fixed-size";
 
     public static InMemoryInvertedIndex createInMemoryBTreeInvertedindex(IBufferCache memBufferCache,
             IPageManager virtualFreePageManager, ITypeTraits[] invListTypeTraits,
@@ -140,8 +145,9 @@ public class InvertedIndexUtils {
             boolean durable, IMetadataPageManagerFactory pageManagerFactory, ITracer tracer)
             throws HyracksDataException {
 
-        BTreeFactory deletedKeysBTreeFactory = createDeletedKeysBTreeFactory(ioManager, invListTypeTraits,
-                invListCmpFactories, diskBufferCache, pageManagerFactory);
+        BTreeFactory deletedKeysBTreeFactory =
+                createDeletedKeysBTreeFactory(ioManager, invListTypeTraits, invListCmpFactories, diskBufferCache,
+                        pageManagerFactory);
 
         int[] bloomFilterKeyFields = new int[invListCmpFactories.length];
         for (int i = 0; i < invListCmpFactories.length; i++) {
@@ -167,8 +173,9 @@ public class InvertedIndexUtils {
             filterFrameFactory = new LSMComponentFilterFrameFactory(filterTupleWriterFactory);
             filterManager = new LSMComponentFilterManager(filterFrameFactory);
         }
-        ILSMDiskComponentFactory componentFactory = new LSMInvertedIndexDiskComponentFactory(invIndexFactory,
-                deletedKeysBTreeFactory, bloomFilterFactory, filterHelper);
+        ILSMDiskComponentFactory componentFactory =
+                new LSMInvertedIndexDiskComponentFactory(invIndexFactory, deletedKeysBTreeFactory, bloomFilterFactory,
+                        filterHelper);
 
         return new LSMInvertedIndex(ioManager, virtualBufferCaches, componentFactory, filterHelper, filterFrameFactory,
                 filterManager, bloomFilterFalsePositiveRate, diskBufferCache, fileManager, invListTypeTraits,
@@ -188,8 +195,9 @@ public class InvertedIndexUtils {
             int[] filterFields, int[] filterFieldsForNonBulkLoadOps, int[] invertedIndexFieldsForNonBulkLoadOps,
             boolean durable, IPageManagerFactory pageManagerFactory, ITracer tracer) throws HyracksDataException {
 
-        BTreeFactory deletedKeysBTreeFactory = createDeletedKeysBTreeFactory(ioManager, invListTypeTraits,
-                invListCmpFactories, diskBufferCache, pageManagerFactory);
+        BTreeFactory deletedKeysBTreeFactory =
+                createDeletedKeysBTreeFactory(ioManager, invListTypeTraits, invListCmpFactories, diskBufferCache,
+                        pageManagerFactory);
 
         int[] bloomFilterKeyFields = new int[invListCmpFactories.length];
         for (int i = 0; i < invListCmpFactories.length; i++) {
@@ -202,9 +210,10 @@ public class InvertedIndexUtils {
                 new LSMInvertedIndexFileManager(ioManager, onDiskDirFileRef, deletedKeysBTreeFactory);
 
         IInvertedListBuilderFactory invListBuilderFactory = new InvertedListBuilderFactory(invListTypeTraits);
-        PartitionedOnDiskInvertedIndexFactory invIndexFactory = new PartitionedOnDiskInvertedIndexFactory(ioManager,
-                diskBufferCache, invListBuilderFactory, invListTypeTraits, invListCmpFactories, tokenTypeTraits,
-                tokenCmpFactories, fileManager, pageManagerFactory);
+        PartitionedOnDiskInvertedIndexFactory invIndexFactory =
+                new PartitionedOnDiskInvertedIndexFactory(ioManager, diskBufferCache, invListBuilderFactory,
+                        invListTypeTraits, invListCmpFactories, tokenTypeTraits, tokenCmpFactories, fileManager,
+                        pageManagerFactory);
 
         ComponentFilterHelper filterHelper = null;
         LSMComponentFilterFrameFactory filterFrameFactory = null;
@@ -215,8 +224,9 @@ public class InvertedIndexUtils {
             filterFrameFactory = new LSMComponentFilterFrameFactory(filterTupleWriterFactory);
             filterManager = new LSMComponentFilterManager(filterFrameFactory);
         }
-        ILSMDiskComponentFactory componentFactory = new LSMInvertedIndexDiskComponentFactory(invIndexFactory,
-                deletedKeysBTreeFactory, bloomFilterFactory, filterHelper);
+        ILSMDiskComponentFactory componentFactory =
+                new LSMInvertedIndexDiskComponentFactory(invIndexFactory, deletedKeysBTreeFactory, bloomFilterFactory,
+                        filterHelper);
 
         return new PartitionedLSMInvertedIndex(ioManager, virtualBufferCaches, componentFactory, filterHelper,
                 filterFrameFactory, filterManager, bloomFilterFalsePositiveRate, diskBufferCache, fileManager,
@@ -226,7 +236,7 @@ public class InvertedIndexUtils {
     }
 
     public static boolean checkTypeTraitsAllFixed(ITypeTraits[] typeTraits) {
-        for (int i = 1; i < typeTraits.length; i++) {
+        for (int i = 0; i < typeTraits.length; i++) {
             if (!typeTraits[i].isFixedLength()) {
                 return false;
             }
@@ -253,4 +263,13 @@ public class InvertedIndexUtils {
             return new VariableSizeInvertedListTupleReference(typeTraits);
         }
     }
+
+    public static IFrameTupleAccessor createInvertedListFrameTupleAccessor(int frameSize, ITypeTraits[] typeTraits) {
+        if (checkTypeTraitsAllFixed(typeTraits)) {
+            return new FixedSizeInvertedListFrameTupleAccessor(frameSize, typeTraits);
+        } else {
+            return new VariableSizeInvertedListFrameTupleAccessor(frameSize, typeTraits);
+        }
+    }
+
 }

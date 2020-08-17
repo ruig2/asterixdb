@@ -25,6 +25,7 @@ import java.util.Arrays;
 import java.util.ListIterator;
 
 import org.apache.hyracks.api.comm.IFrame;
+import org.apache.hyracks.api.comm.IFrameTupleAccessor;
 import org.apache.hyracks.api.context.IHyracksTaskContext;
 import org.apache.hyracks.api.dataflow.value.ITypeTraits;
 import org.apache.hyracks.api.exceptions.ErrorCode;
@@ -38,8 +39,7 @@ import org.apache.hyracks.dataflow.std.buffermanager.BufferManagerBackedVSizeFra
 import org.apache.hyracks.dataflow.std.buffermanager.ISimpleFrameBufferManager;
 import org.apache.hyracks.storage.am.lsm.invertedindex.api.IInvertedListTupleReference;
 import org.apache.hyracks.storage.am.lsm.invertedindex.ondisk.InvertedListFrameTupleAppender;
-import org.apache.hyracks.storage.am.lsm.invertedindex.ondisk.fixedsize.FixedSizeFrameTupleAccessor;
-import org.apache.hyracks.storage.am.lsm.invertedindex.ondisk.fixedsize.FixedSizeInvertedListTupleReference;
+import org.apache.hyracks.storage.am.lsm.invertedindex.ondisk.fixedsize.FixedSizeInvertedListFrameTupleAccessor;
 import org.apache.hyracks.storage.am.lsm.invertedindex.util.InvertedIndexUtils;
 
 /**
@@ -58,7 +58,7 @@ public class InvertedIndexSearchResult {
 
     protected final IHyracksTaskContext ctx;
     protected final InvertedListFrameTupleAppender appender;
-    protected final FixedSizeFrameTupleAccessor accessor;
+    protected final IFrameTupleAccessor accessor;
     protected final IInvertedListTupleReference tuple;
     protected final ISimpleFrameBufferManager bufferManager;
     protected ITypeTraits[] typeTraits;
@@ -86,7 +86,7 @@ public class InvertedIndexSearchResult {
         initTypeTraits(invListFields);
         this.ctx = ctx;
         appender = new InvertedListFrameTupleAppender(ctx.getInitialFrameSize());
-        accessor = new FixedSizeFrameTupleAccessor(ctx.getInitialFrameSize(), typeTraits);
+        accessor = InvertedIndexUtils.createInvertedListFrameTupleAccessor(ctx.getInitialFrameSize(), typeTraits);
         tuple = InvertedIndexUtils.createInvertedListTupleReference(typeTraits);
         this.bufferManager = bufferManager;
         this.isInReadMode = false;
@@ -394,7 +394,7 @@ public class InvertedIndexSearchResult {
         }
     }
 
-    public FixedSizeFrameTupleAccessor getAccessor() {
+    public IFrameTupleAccessor getAccessor() {
         return accessor;
     }
 

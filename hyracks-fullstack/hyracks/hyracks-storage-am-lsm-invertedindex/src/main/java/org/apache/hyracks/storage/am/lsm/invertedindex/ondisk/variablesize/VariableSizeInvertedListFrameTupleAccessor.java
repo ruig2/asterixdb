@@ -17,34 +17,32 @@
  * under the License.
  */
 
-package org.apache.hyracks.storage.am.lsm.invertedindex.ondisk.fixedsize;
-
-import java.nio.ByteBuffer;
+package org.apache.hyracks.storage.am.lsm.invertedindex.ondisk.variablesize;
 
 import org.apache.hyracks.api.comm.FrameHelper;
-import org.apache.hyracks.api.comm.IFrameTupleAccessor;
 import org.apache.hyracks.api.dataflow.value.ITypeTraits;
+import org.apache.hyracks.storage.am.lsm.invertedindex.ondisk.AbstractInvertedListFrameTupleAccessor;
 import org.apache.hyracks.storage.am.lsm.invertedindex.ondisk.InvertedListFrameTupleAppender;
+import org.apache.hyracks.storage.am.lsm.invertedindex.util.InvertedIndexUtils;
+
+import java.nio.ByteBuffer;
 
 /**
  * This is a fixed-size tuple accessor class.
  * The frame structure: [4 bytes for minimum Hyracks frame count] [fixed-size tuple 1] ... [fixed-size tuple n] ...
  * [4 bytes for the tuple count in a frame]
  */
-public class FixedSizeFrameTupleAccessor implements IFrameTupleAccessor {
+public class VariableSizeInvertedListFrameTupleAccessor extends AbstractInvertedListFrameTupleAccessor {
 
-    private final int frameSize;
-    private ByteBuffer buffer;
-
-    private final ITypeTraits[] fields;
-    private final int[] fieldStartOffsets;
     private final int tupleSize;
 
-    public FixedSizeFrameTupleAccessor(int frameSize, ITypeTraits[] fields) {
-        this.frameSize = frameSize;
-        this.fields = fields;
-        this.fieldStartOffsets = new int[fields.length];
-        this.fieldStartOffsets[0] = 0;
+    @Override protected void verifyTypeTraits() {
+        InvertedIndexUtils.verifyHasVarSizeTypeTrait(fields);
+    }
+
+    public VariableSizeInvertedListFrameTupleAccessor(int frameSize, ITypeTraits[] fields) {
+        super(frameSize, fields);
+
         for (int i = 1; i < fields.length; i++) {
             fieldStartOffsets[i] = fieldStartOffsets[i - 1] + fields[i - 1].getFixedLength();
         }
@@ -57,17 +55,7 @@ public class FixedSizeFrameTupleAccessor implements IFrameTupleAccessor {
     }
 
     @Override
-    public ByteBuffer getBuffer() {
-        return buffer;
-    }
-
-    @Override
-    public int getFieldCount() {
-        return fields.length;
-    }
-
-    @Override
-    public int getFieldEndOffset(int tupleIndex, int fIdx) {
+   public int getFieldEndOffset(int tupleIndex, int fIdx) {
         return getTupleStartOffset(tupleIndex) + fieldStartOffsets[fIdx] + fields[fIdx].getFixedLength();
     }
 

@@ -25,7 +25,7 @@ import java.util.Random;
 
 import org.apache.hyracks.api.dataflow.value.ITypeTraits;
 import org.apache.hyracks.data.std.primitive.IntegerPointable;
-import org.apache.hyracks.storage.am.lsm.invertedindex.ondisk.fixedsize.FixedSizeFrameTupleAccessor;
+import org.apache.hyracks.storage.am.lsm.invertedindex.ondisk.fixedsize.FixedSizeInvertedListFrameTupleAccessor;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -50,7 +50,7 @@ public class InvertedListTupleFrameTupleTest {
         fields[0] = IntegerPointable.TYPE_TRAITS;
 
         InvertedListFrameTupleAppender ftapp = new InvertedListFrameTupleAppender(FRAME_SIZE);
-        FixedSizeFrameTupleAccessor ftacc = new FixedSizeFrameTupleAccessor(FRAME_SIZE, fields);
+        FixedSizeInvertedListFrameTupleAccessor ftacc = new FixedSizeInvertedListFrameTupleAccessor(FRAME_SIZE, fields);
 
         boolean frameHasSpace = true;
 

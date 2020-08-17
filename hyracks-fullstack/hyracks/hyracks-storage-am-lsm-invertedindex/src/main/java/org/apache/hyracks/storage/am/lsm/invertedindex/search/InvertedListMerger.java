@@ -23,6 +23,7 @@ import java.nio.ByteBuffer;
 import java.util.Collections;
 import java.util.List;
 
+import org.apache.hyracks.api.comm.IFrameTupleAccessor;
 import org.apache.hyracks.api.context.IHyracksTaskContext;
 import org.apache.hyracks.api.exceptions.ErrorCode;
 import org.apache.hyracks.api.exceptions.HyracksDataException;
@@ -32,7 +33,7 @@ import org.apache.hyracks.dataflow.std.buffermanager.ISimpleFrameBufferManager;
 import org.apache.hyracks.storage.am.lsm.invertedindex.api.IInvertedIndex;
 import org.apache.hyracks.storage.am.lsm.invertedindex.api.IInvertedListTupleReference;
 import org.apache.hyracks.storage.am.lsm.invertedindex.api.InvertedListCursor;
-import org.apache.hyracks.storage.am.lsm.invertedindex.ondisk.fixedsize.FixedSizeFrameTupleAccessor;
+import org.apache.hyracks.storage.am.lsm.invertedindex.ondisk.fixedsize.FixedSizeInvertedListFrameTupleAccessor;
 import org.apache.hyracks.storage.common.MultiComparator;
 
 /**
@@ -63,7 +64,7 @@ public class InvertedListMerger {
     protected int maxPrevBufIdx;
     protected int numExpectedPages;
     protected ByteBuffer prevCurrentBuffer;
-    protected FixedSizeFrameTupleAccessor resultFrameTupleAcc;
+    protected IFrameTupleAccessor resultFrameTupleAcc;
     protected IInvertedListTupleReference resultTuple;
     protected boolean advanceCursor;
     protected boolean advancePrevResult;
