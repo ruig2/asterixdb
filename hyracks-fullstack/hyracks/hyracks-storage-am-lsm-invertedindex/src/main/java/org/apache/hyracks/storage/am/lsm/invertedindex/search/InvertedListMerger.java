@@ -30,9 +30,9 @@ import org.apache.hyracks.data.std.primitive.IntegerPointable;
 import org.apache.hyracks.dataflow.common.data.accessors.ITupleReference;
 import org.apache.hyracks.dataflow.std.buffermanager.ISimpleFrameBufferManager;
 import org.apache.hyracks.storage.am.lsm.invertedindex.api.IInvertedIndex;
+import org.apache.hyracks.storage.am.lsm.invertedindex.api.IInvertedListTupleReference;
 import org.apache.hyracks.storage.am.lsm.invertedindex.api.InvertedListCursor;
 import org.apache.hyracks.storage.am.lsm.invertedindex.ondisk.fixedsize.FixedSizeFrameTupleAccessor;
-import org.apache.hyracks.storage.am.lsm.invertedindex.ondisk.fixedsize.FixedSizeTupleReference;
 import org.apache.hyracks.storage.common.MultiComparator;
 
 /**
@@ -64,7 +64,7 @@ public class InvertedListMerger {
     protected int numExpectedPages;
     protected ByteBuffer prevCurrentBuffer;
     protected FixedSizeFrameTupleAccessor resultFrameTupleAcc;
-    protected FixedSizeTupleReference resultTuple;
+    protected IInvertedListTupleReference resultTuple;
     protected boolean advanceCursor;
     protected boolean advancePrevResult;
     protected int resultTidx;
@@ -539,7 +539,7 @@ public class InvertedListMerger {
     /**
      * Gets the count of the given tuple in the previous search result.
      */
-    protected int getCount(FixedSizeTupleReference resultTuple) {
+    protected int getCount(IInvertedListTupleReference resultTuple) {
         return IntegerPointable.getInteger(resultTuple.getFieldData(0),
                 resultTuple.getFieldStart(resultTuple.getFieldCount() - 1));
     }

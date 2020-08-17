@@ -35,7 +35,9 @@ import org.apache.hyracks.api.util.HyracksConstants;
 import org.apache.hyracks.dataflow.common.data.accessors.ITupleReference;
 import org.apache.hyracks.dataflow.common.utils.TaskUtil;
 import org.apache.hyracks.dataflow.std.buffermanager.ISimpleFrameBufferManager;
+import org.apache.hyracks.storage.am.lsm.invertedindex.api.IInvertedListTupleReference;
 import org.apache.hyracks.storage.am.lsm.invertedindex.api.InvertedListCursor;
+import org.apache.hyracks.storage.am.lsm.invertedindex.util.InvertedIndexUtils;
 import org.apache.hyracks.storage.common.IIndexCursorStats;
 import org.apache.hyracks.storage.common.MultiComparator;
 import org.apache.hyracks.storage.common.buffercache.IBufferCache;
@@ -68,9 +70,9 @@ public class FixedSizeElementInvertedListCursor extends InvertedListCursor {
     private int bufferEndElementIx;
     private int bufferNumLoadedPages;
 
-    private final FixedSizeTupleReference tuple;
+    private final IInvertedListTupleReference tuple;
     // The last element in the current range in memory
-    private final FixedSizeTupleReference bufferEndElementTuple;
+    private final IInvertedListTupleReference bufferEndElementTuple;
     private ICachedPage page;
     // The last element index per page
     private int[] elementIndexes = new int[10];
@@ -101,8 +103,8 @@ public class FixedSizeElementInvertedListCursor extends InvertedListCursor {
         this.bufferNumLoadedPages = 0;
         this.lastRandomSearchedElementIx = 0;
         this.moreBlocksToRead = true;
-        this.tuple = new FixedSizeTupleReference(invListFields);
-        this.bufferEndElementTuple = new FixedSizeTupleReference(invListFields);
+        this.tuple = InvertedIndexUtils.createInvertedListTupleReference(invListFields);
+        this.bufferEndElementTuple = InvertedIndexUtils.createInvertedListTupleReference(invListFields);
         this.buffers = new ArrayList<ByteBuffer>();
         if (ctx == null) {
             throw HyracksDataException.create(ErrorCode.CANNOT_CONTINUE_TEXT_SEARCH_HYRACKS_TASK_IS_NULL);
@@ -290,7 +292,7 @@ public class FixedSizeElementInvertedListCursor extends InvertedListCursor {
     /**
      * Gets the tuple for the given element index.
      */
-    private void getElementAtIndex(int elementIx, FixedSizeTupleReference tuple) {
+    private void getElementAtIndex(int elementIx, IInvertedListTupleReference tuple) {
         int currentPageIx =
                 binarySearch(elementIndexes, bufferStartPageId - startPageId, bufferNumLoadedPages, elementIx);
         if (currentPageIx < 0) {

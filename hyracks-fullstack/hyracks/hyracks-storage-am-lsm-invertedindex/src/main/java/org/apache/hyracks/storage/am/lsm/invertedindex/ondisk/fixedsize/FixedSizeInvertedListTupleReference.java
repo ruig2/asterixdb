@@ -21,45 +21,30 @@ package org.apache.hyracks.storage.am.lsm.invertedindex.ondisk.fixedsize;
 
 import org.apache.hyracks.api.dataflow.value.ITypeTraits;
 import org.apache.hyracks.dataflow.common.data.accessors.ITupleReference;
+import org.apache.hyracks.storage.am.lsm.invertedindex.api.IInvertedListTupleReference;
+import org.apache.hyracks.storage.am.lsm.invertedindex.ondisk.AbstractInvertedListTupleReference;
+import org.apache.hyracks.storage.am.lsm.invertedindex.util.InvertedIndexUtils;
 
-public class FixedSizeTupleReference implements ITupleReference {
+public class FixedSizeInvertedListTupleReference extends AbstractInvertedListTupleReference {
 
-    private final ITypeTraits[] typeTraits;
-    private final int[] fieldStartOffsets;
-    private byte[] data;
-    private int startOff;
+    public FixedSizeInvertedListTupleReference(ITypeTraits[] typeTraits) {
+        super(typeTraits);
+    }
 
-    public FixedSizeTupleReference(ITypeTraits[] typeTraits) {
-        this.typeTraits = typeTraits;
-        this.fieldStartOffsets = new int[typeTraits.length];
-        this.fieldStartOffsets[0] = 0;
+    @Override protected void checkTypeTrait() {
+        if (InvertedIndexUtils.checkTypeTraitsAllFixed(typeTraits) == false) {
+            throw new IllegalArgumentException("expecting all type trait to be fixed-size while getting at least one variable-length one");
+        }
+    }
+
+    @Override protected void calculateFieldStartOffsets() {
         for (int i = 1; i < typeTraits.length; i++) {
             fieldStartOffsets[i] = fieldStartOffsets[i - 1] + typeTraits[i - 1].getFixedLength();
         }
     }
 
-    public void reset(byte[] data, int startOff) {
-        this.data = data;
-        this.startOff = startOff;
-    }
-
-    @Override
-    public int getFieldCount() {
-        return typeTraits.length;
-    }
-
-    @Override
-    public byte[] getFieldData(int fIdx) {
-        return data;
-    }
-
     @Override
     public int getFieldLength(int fIdx) {
         return typeTraits[fIdx].getFixedLength();
-    }
-
-    @Override
-    public int getFieldStart(int fIdx) {
-        return startOff + fieldStartOffsets[fIdx];
     }
 }

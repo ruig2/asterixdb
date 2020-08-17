@@ -23,7 +23,9 @@ import org.apache.hyracks.api.dataflow.value.ISerializerDeserializer;
 import org.apache.hyracks.api.dataflow.value.ITypeTraits;
 import org.apache.hyracks.api.exceptions.HyracksDataException;
 import org.apache.hyracks.dataflow.common.data.accessors.ITupleReference;
+import org.apache.hyracks.storage.am.lsm.invertedindex.api.IInvertedListTupleReference;
 import org.apache.hyracks.storage.am.lsm.invertedindex.api.InvertedListCursor;
+import org.apache.hyracks.storage.am.lsm.invertedindex.util.InvertedIndexUtils;
 import org.apache.hyracks.storage.common.IIndexCursorStats;
 import org.apache.hyracks.storage.common.MultiComparator;
 import org.apache.hyracks.storage.common.buffercache.IBufferCache;
@@ -50,7 +52,7 @@ public class FixedSizeElementInvertedListScanCursor extends InvertedListCursor {
     protected int numElements;
     protected int numPages;
 
-    protected final FixedSizeTupleReference tuple;
+    protected final IInvertedListTupleReference tuple;
     protected ICachedPage page;
 
     protected boolean pinned;
@@ -74,7 +76,7 @@ public class FixedSizeElementInvertedListScanCursor extends InvertedListCursor {
         this.startOff = 0;
         this.numElements = 0;
         this.numPages = 0;
-        this.tuple = new FixedSizeTupleReference(invListFields);
+        this.tuple = InvertedIndexUtils.createInvertedListTupleReference(invListFields);
         this.pinned = false;
         this.stats = stats;
     }

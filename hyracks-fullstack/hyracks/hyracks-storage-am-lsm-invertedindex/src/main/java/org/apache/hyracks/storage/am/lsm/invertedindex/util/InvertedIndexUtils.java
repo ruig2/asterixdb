@@ -49,6 +49,7 @@ import org.apache.hyracks.storage.am.lsm.common.impls.ComponentFilterHelper;
 import org.apache.hyracks.storage.am.lsm.common.impls.LSMComponentFilterManager;
 import org.apache.hyracks.storage.am.lsm.invertedindex.api.IInvertedListBuilder;
 import org.apache.hyracks.storage.am.lsm.invertedindex.api.IInvertedListBuilderFactory;
+import org.apache.hyracks.storage.am.lsm.invertedindex.api.IInvertedListTupleReference;
 import org.apache.hyracks.storage.am.lsm.invertedindex.impls.LSMInvertedIndex;
 import org.apache.hyracks.storage.am.lsm.invertedindex.impls.LSMInvertedIndexDiskComponentFactory;
 import org.apache.hyracks.storage.am.lsm.invertedindex.impls.LSMInvertedIndexFileManager;
@@ -61,6 +62,8 @@ import org.apache.hyracks.storage.am.lsm.invertedindex.ondisk.OnDiskInvertedInde
 import org.apache.hyracks.storage.am.lsm.invertedindex.ondisk.PartitionedOnDiskInvertedIndex;
 import org.apache.hyracks.storage.am.lsm.invertedindex.ondisk.PartitionedOnDiskInvertedIndexFactory;
 import org.apache.hyracks.storage.am.lsm.invertedindex.ondisk.fixedsize.FixedSizeElementInvertedListBuilder;
+import org.apache.hyracks.storage.am.lsm.invertedindex.ondisk.fixedsize.FixedSizeInvertedListTupleReference;
+import org.apache.hyracks.storage.am.lsm.invertedindex.ondisk.variablesize.VariableSizeInvertedListTupleReference;
 import org.apache.hyracks.storage.am.lsm.invertedindex.tokenizers.IBinaryTokenizerFactory;
 import org.apache.hyracks.storage.common.buffercache.IBufferCache;
 import org.apache.hyracks.util.trace.ITracer;
@@ -217,5 +220,22 @@ public class InvertedIndexUtils {
                 invListTypeTraits, invListCmpFactories, tokenTypeTraits, tokenCmpFactories, tokenizerFactory,
                 mergePolicy, opTracker, ioScheduler, ioOpCallbackFactory, pageWriteCallbackFactory, invertedIndexFields,
                 filterFields, filterFieldsForNonBulkLoadOps, invertedIndexFieldsForNonBulkLoadOps, durable, tracer);
+    }
+
+    public static boolean checkTypeTraitsAllFixed(ITypeTraits[] typeTraits) {
+        for (int i = 1; i < typeTraits.length; i++) {
+            if (!typeTraits[i].isFixedLength()) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    public static IInvertedListTupleReference createInvertedListTupleReference(ITypeTraits[] typeTraits) {
+        if (checkTypeTraitsAllFixed(typeTraits)) {
+            return new FixedSizeInvertedListTupleReference(typeTraits);
+        } else {
+            return new VariableSizeInvertedListTupleReference(typeTraits);
+        }
     }
 }

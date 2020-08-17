@@ -36,9 +36,11 @@ import org.apache.hyracks.dataflow.common.io.RunFileReader;
 import org.apache.hyracks.dataflow.common.io.RunFileWriter;
 import org.apache.hyracks.dataflow.std.buffermanager.BufferManagerBackedVSizeFrame;
 import org.apache.hyracks.dataflow.std.buffermanager.ISimpleFrameBufferManager;
+import org.apache.hyracks.storage.am.lsm.invertedindex.api.IInvertedListTupleReference;
 import org.apache.hyracks.storage.am.lsm.invertedindex.ondisk.InvertedListFrameTupleAppender;
 import org.apache.hyracks.storage.am.lsm.invertedindex.ondisk.fixedsize.FixedSizeFrameTupleAccessor;
-import org.apache.hyracks.storage.am.lsm.invertedindex.ondisk.fixedsize.FixedSizeTupleReference;
+import org.apache.hyracks.storage.am.lsm.invertedindex.ondisk.fixedsize.FixedSizeInvertedListTupleReference;
+import org.apache.hyracks.storage.am.lsm.invertedindex.util.InvertedIndexUtils;
 
 /**
  * Disk-based or in-memory based storage for intermediate and final results of inverted-index
@@ -57,7 +59,7 @@ public class InvertedIndexSearchResult {
     protected final IHyracksTaskContext ctx;
     protected final InvertedListFrameTupleAppender appender;
     protected final FixedSizeFrameTupleAccessor accessor;
-    protected final FixedSizeTupleReference tuple;
+    protected final IInvertedListTupleReference tuple;
     protected final ISimpleFrameBufferManager bufferManager;
     protected ITypeTraits[] typeTraits;
 
@@ -85,7 +87,7 @@ public class InvertedIndexSearchResult {
         this.ctx = ctx;
         appender = new InvertedListFrameTupleAppender(ctx.getInitialFrameSize());
         accessor = new FixedSizeFrameTupleAccessor(ctx.getInitialFrameSize(), typeTraits);
-        tuple = new FixedSizeTupleReference(typeTraits);
+        tuple = InvertedIndexUtils.createInvertedListTupleReference(typeTraits);
         this.bufferManager = bufferManager;
         this.isInReadMode = false;
         this.isWriteFinished = false;
@@ -400,7 +402,7 @@ public class InvertedIndexSearchResult {
         return appender;
     }
 
-    public FixedSizeTupleReference getTuple() {
+    public IInvertedListTupleReference getTuple() {
         return tuple;
     }
 
