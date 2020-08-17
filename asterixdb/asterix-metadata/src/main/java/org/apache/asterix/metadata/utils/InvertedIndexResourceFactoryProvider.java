@@ -127,6 +127,8 @@ public class InvertedIndexResourceFactoryProvider implements IResourceFactoryPro
                 invertedIndexFieldsForNonBulkLoadOps, bloomFilterFalsePositiveRate);
     }
 
+    // Return the array of inverted list element type traits, it can be 1) the primary key(s) of the indexed row,
+    // and 2) the length of the index row if the inverted list is of certain types
     private static ITypeTraits[] getInvListTypeTraits(MetadataProvider metadataProvider, Dataset dataset,
             ARecordType recordType, ARecordType metaType) throws AlgebricksException {
         ITypeTraits[] primaryTypeTraits = dataset.getPrimaryTypeTraits(metadataProvider, recordType, metaType);

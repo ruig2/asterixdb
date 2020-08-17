@@ -154,7 +154,8 @@ public class InvertedIndexSearchResult {
             appender.reset(currentBuffer);
         }
         // Appends inverted-list element.
-        if (!appender.append(invListElement.getFieldData(0), invListElement.getFieldStart(0), invListElement.getFieldLength(0))) {
+        if (!appender.append(invListElement.getFieldData(0), invListElement.getFieldStart(0),
+                invListElement.getFieldLength(0))) {
             throw HyracksDataException.create(ErrorCode.CANNOT_ADD_ELEMENT_TO_INVERTED_INDEX_SEARCH_RESULT);
         }
         // Appends count.
@@ -305,7 +306,8 @@ public class InvertedIndexSearchResult {
         // The count of Minframe, and the count of tuples in a frame should be deducted.
         frameSize = frameSize - InvertedListFrameTupleAppender.MINFRAME_COUNT_SIZE
                 - InvertedListFrameTupleAppender.TUPLE_COUNT_SIZE;
-        numPossibleElementPerPage = (int) Math.floor((double) frameSize / (ESTIMATED_INVERTED_LIST_ELEMENT_SIZE + ELEMENT_COUNT_SIZE));
+        numPossibleElementPerPage =
+                (int) Math.floor((double) frameSize / (ESTIMATED_INVERTED_LIST_ELEMENT_SIZE + ELEMENT_COUNT_SIZE));
     }
 
     /**

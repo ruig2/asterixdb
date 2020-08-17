@@ -19,12 +19,11 @@
 
 package org.apache.hyracks.storage.am.lsm.invertedindex.ondisk;
 
-import org.apache.hyracks.api.comm.FrameHelper;
-import org.apache.hyracks.api.dataflow.value.ITypeTraits;
-import org.apache.hyracks.storage.am.lsm.invertedindex.api.IInvertedListFrameTupleAppender;
-
 import java.nio.ByteBuffer;
 import java.util.Arrays;
+
+import org.apache.hyracks.api.comm.FrameHelper;
+import org.apache.hyracks.storage.am.lsm.invertedindex.api.IInvertedListFrameTupleAppender;
 
 /**
  * An appender class for an inverted list. Each frame has two integer values at the beginning and at the end.
