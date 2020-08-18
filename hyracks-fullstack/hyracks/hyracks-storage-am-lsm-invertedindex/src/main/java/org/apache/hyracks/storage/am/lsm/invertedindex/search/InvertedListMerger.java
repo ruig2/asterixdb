@@ -31,9 +31,8 @@ import org.apache.hyracks.data.std.primitive.IntegerPointable;
 import org.apache.hyracks.dataflow.common.data.accessors.ITupleReference;
 import org.apache.hyracks.dataflow.std.buffermanager.ISimpleFrameBufferManager;
 import org.apache.hyracks.storage.am.lsm.invertedindex.api.IInvertedIndex;
+import org.apache.hyracks.storage.am.lsm.invertedindex.api.IInvertedListCursor;
 import org.apache.hyracks.storage.am.lsm.invertedindex.api.IInvertedListTupleReference;
-import org.apache.hyracks.storage.am.lsm.invertedindex.api.InvertedListCursor;
-import org.apache.hyracks.storage.am.lsm.invertedindex.ondisk.fixedsize.FixedSizeInvertedListFrameTupleAccessor;
 import org.apache.hyracks.storage.common.MultiComparator;
 
 /**
@@ -55,7 +54,7 @@ public class InvertedListMerger {
     protected InvertedIndexFinalSearchResult finalSearchResult;
 
     // To Keep the status of this merge process since we only calculate one frame at a time in case of the final result
-    protected InvertedListCursor finalInvListCursor;
+    protected IInvertedListCursor finalInvListCursor;
     protected int occurrenceThreshold;
     protected int numInvertedLists;
     protected int invListIdx;
@@ -99,7 +98,7 @@ public class InvertedListMerger {
      *         false otherwise.
      * @throws HyracksDataException
      */
-    public boolean merge(List<InvertedListCursor> invListCursors, int occurrenceThreshold, int numPrefixLists,
+    public boolean merge(List<IInvertedListCursor> invListCursors, int occurrenceThreshold, int numPrefixLists,
             InvertedIndexFinalSearchResult finalSearchResult) throws HyracksDataException {
         Collections.sort(invListCursors);
         int numInvLists = invListCursors.size();
@@ -126,7 +125,7 @@ public class InvertedListMerger {
                 result = finalSearchResult;
                 isFinalList = true;
             }
-            InvertedListCursor invListCursor = invListCursors.get(i);
+            IInvertedListCursor invListCursor = invListCursors.get(i);
             // Track whether an exception is occurred.
             boolean finishedTryBlock = false;
             try {
@@ -220,7 +219,7 @@ public class InvertedListMerger {
      * @return true only if all processing for the final list for a partition is done.
      *         false otherwise.
      */
-    protected boolean mergeSuffixListProbe(InvertedListCursor invListCursor, InvertedIndexSearchResult prevSearchResult,
+    protected boolean mergeSuffixListProbe(IInvertedListCursor invListCursor, InvertedIndexSearchResult prevSearchResult,
             InvertedIndexSearchResult newSearchResult, int invListIx, int numInvLists, int occurrenceThreshold,
             boolean isFinalList) throws HyracksDataException {
         if (isProcessingFinished) {
@@ -264,7 +263,7 @@ public class InvertedListMerger {
      * @return true only if all processing for the final list for a partition is done.
      *         false otherwise.
      */
-    protected boolean mergeSuffixListScan(InvertedListCursor invListCursor, InvertedIndexSearchResult prevSearchResult,
+    protected boolean mergeSuffixListScan(IInvertedListCursor invListCursor, InvertedIndexSearchResult prevSearchResult,
             InvertedIndexSearchResult newSearchResult, int invListIx, int numInvLists, int occurrenceThreshold,
             boolean isFinalList) throws HyracksDataException {
         if (isProcessingFinished) {
@@ -339,7 +338,7 @@ public class InvertedListMerger {
      * then generates a new result by applying UNIONALL operation on these two. This method returns true
      * only if all processing for the given final list is done. Otherwise, it returns false.
      */
-    protected boolean mergePrefixList(InvertedListCursor invListCursor, InvertedIndexSearchResult prevSearchResult,
+    protected boolean mergePrefixList(IInvertedListCursor invListCursor, InvertedIndexSearchResult prevSearchResult,
             InvertedIndexSearchResult newSearchResult, boolean isFinalList) throws HyracksDataException {
         if (isProcessingFinished) {
             return true;
@@ -426,7 +425,7 @@ public class InvertedListMerger {
     /**
      * Initializes necessary information for each merging operation (prefix_list) for a list.
      */
-    protected void initMergingOneList(InvertedListCursor invListCursor, InvertedIndexSearchResult prevSearchResult,
+    protected void initMergingOneList(IInvertedListCursor invListCursor, InvertedIndexSearchResult prevSearchResult,
             InvertedIndexSearchResult newSearchResult, boolean isFinalList, processType mergeOpType)
             throws HyracksDataException {
         initMergingOneList(invListCursor, prevSearchResult, newSearchResult, isFinalList, 0, 0, 0, mergeOpType);
@@ -435,7 +434,7 @@ public class InvertedListMerger {
     /**
      * Initializes necessary information for each merging operation (suffix_list_probe or suffix_list_scan) for a list.
      */
-    protected void initMergingOneList(InvertedListCursor invListCursor, InvertedIndexSearchResult prevSearchResult,
+    protected void initMergingOneList(IInvertedListCursor invListCursor, InvertedIndexSearchResult prevSearchResult,
             InvertedIndexSearchResult newSearchResult, boolean isFinalList, int invListIx, int numInvLists,
             int occurrenceThreshold, processType mergeOpType) throws HyracksDataException {
         // Each inverted list will be visited only once except the final inverted list.
@@ -486,7 +485,7 @@ public class InvertedListMerger {
      *         false otherwise
      */
     protected boolean finishMergingOneList(boolean isFinalList, InvertedIndexSearchResult prevSearchResult,
-            InvertedIndexSearchResult newSearchResult, InvertedListCursor invListCursor) throws HyracksDataException {
+            InvertedIndexSearchResult newSearchResult, IInvertedListCursor invListCursor) throws HyracksDataException {
         prevSearchResult.closeResultRead(false);
         invListCursor.close();
         // Final search result can be called multiple times for partitioned occurrence searcher case
@@ -507,7 +506,7 @@ public class InvertedListMerger {
      * Also fetches next element from the inverted list cursor.
      */
     protected void advancePrevResultAndList(boolean advancePrevResult, boolean advanceCursor,
-            InvertedIndexSearchResult prevSearchResult, InvertedListCursor invListCursor) throws HyracksDataException {
+            InvertedIndexSearchResult prevSearchResult, IInvertedListCursor invListCursor) throws HyracksDataException {
         if (advancePrevResult) {
             resultTidx++;
             checkPrevResultAndFetchNextFrame(prevSearchResult);

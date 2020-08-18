@@ -36,10 +36,13 @@ import org.apache.hyracks.storage.am.lsm.invertedindex.util.InvertedIndexUtils;
 public class FixedSizeInvertedListFrameTupleAccessor extends AbstractInvertedListFrameTupleAccessor {
 
     private final int tupleSize;
+    private final int[] fieldStartOffsets;
 
     public FixedSizeInvertedListFrameTupleAccessor(int frameSize, ITypeTraits[] fields) {
         super(frameSize, fields);
 
+        this.fieldStartOffsets = new int[fields.length];
+        this.fieldStartOffsets[0] = 0;
         for (int i = 1; i < fields.length; i++) {
             fieldStartOffsets[i] = fieldStartOffsets[i - 1] + fields[i - 1].getFixedLength();
         }

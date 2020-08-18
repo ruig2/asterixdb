@@ -35,8 +35,9 @@ import org.apache.hyracks.api.util.HyracksConstants;
 import org.apache.hyracks.dataflow.common.data.accessors.ITupleReference;
 import org.apache.hyracks.dataflow.common.utils.TaskUtil;
 import org.apache.hyracks.dataflow.std.buffermanager.ISimpleFrameBufferManager;
+import org.apache.hyracks.storage.am.lsm.invertedindex.api.IInvertedListCursor;
 import org.apache.hyracks.storage.am.lsm.invertedindex.api.IInvertedListTupleReference;
-import org.apache.hyracks.storage.am.lsm.invertedindex.api.InvertedListCursor;
+import org.apache.hyracks.storage.am.lsm.invertedindex.impls.AbstractInvertedListCursor;
 import org.apache.hyracks.storage.am.lsm.invertedindex.util.InvertedIndexUtils;
 import org.apache.hyracks.storage.common.IIndexCursorStats;
 import org.apache.hyracks.storage.common.MultiComparator;
@@ -48,7 +49,7 @@ import org.apache.hyracks.storage.common.file.BufferedFileHandle;
  * A cursor class that traverse an inverted list that consists of fixed-size elements on disk
  *
  */
-public class FixedSizeElementInvertedListCursor extends InvertedListCursor {
+public class FixedSizeElementInvertedListCursor extends AbstractInvertedListCursor {
 
     private final IBufferCache bufferCache;
     private final int fileId;
@@ -480,7 +481,7 @@ public class FixedSizeElementInvertedListCursor extends InvertedListCursor {
      * A compare function that is used to sort inverted list cursors
      */
     @Override
-    public int compareTo(InvertedListCursor invListCursor) {
+    public int compareTo(IInvertedListCursor invListCursor) {
         try {
             return numElements - invListCursor.size();
         } catch (HyracksDataException hde) {

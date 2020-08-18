@@ -23,8 +23,9 @@ import org.apache.hyracks.api.dataflow.value.ISerializerDeserializer;
 import org.apache.hyracks.api.dataflow.value.ITypeTraits;
 import org.apache.hyracks.api.exceptions.HyracksDataException;
 import org.apache.hyracks.dataflow.common.data.accessors.ITupleReference;
+import org.apache.hyracks.storage.am.lsm.invertedindex.api.IInvertedListCursor;
 import org.apache.hyracks.storage.am.lsm.invertedindex.api.IInvertedListTupleReference;
-import org.apache.hyracks.storage.am.lsm.invertedindex.api.InvertedListCursor;
+import org.apache.hyracks.storage.am.lsm.invertedindex.impls.AbstractInvertedListCursor;
 import org.apache.hyracks.storage.am.lsm.invertedindex.util.InvertedIndexUtils;
 import org.apache.hyracks.storage.common.IIndexCursorStats;
 import org.apache.hyracks.storage.common.MultiComparator;
@@ -37,7 +38,7 @@ import org.apache.hyracks.storage.common.file.BufferedFileHandle;
  * conduct a binary search. It only supports the scan operation. The main purpose of this cursor is
  * doing a full-scan of an inverted list during a storage-component-merge process.
  */
-public class FixedSizeElementInvertedListScanCursor extends InvertedListCursor {
+public class FixedSizeElementInvertedListScanCursor extends AbstractInvertedListCursor {
 
     protected final IBufferCache bufferCache;
     protected final int fileId;
@@ -149,7 +150,7 @@ public class FixedSizeElementInvertedListScanCursor extends InvertedListCursor {
     }
 
     @Override
-    public int compareTo(InvertedListCursor invListCursor) {
+    public int compareTo(IInvertedListCursor invListCursor) {
         try {
             return numElements - invListCursor.size();
         } catch (HyracksDataException hde) {

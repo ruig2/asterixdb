@@ -47,7 +47,7 @@ import org.apache.hyracks.storage.am.lsm.invertedindex.api.IInPlaceInvertedIndex
 import org.apache.hyracks.storage.am.lsm.invertedindex.api.IInvertedIndexAccessor;
 import org.apache.hyracks.storage.am.lsm.invertedindex.api.IInvertedIndexSearcher;
 import org.apache.hyracks.storage.am.lsm.invertedindex.api.IInvertedListBuilder;
-import org.apache.hyracks.storage.am.lsm.invertedindex.api.InvertedListCursor;
+import org.apache.hyracks.storage.am.lsm.invertedindex.api.IInvertedListCursor;
 import org.apache.hyracks.storage.am.lsm.invertedindex.impls.LSMInvertedIndexSearchCursorInitialState;
 import org.apache.hyracks.storage.am.lsm.invertedindex.ondisk.fixedsize.FixedSizeElementInvertedListCursor;
 import org.apache.hyracks.storage.am.lsm.invertedindex.ondisk.fixedsize.FixedSizeElementInvertedListScanCursor;
@@ -191,18 +191,18 @@ public class OnDiskInvertedIndex implements IInPlaceInvertedIndex {
     }
 
     @Override
-    public InvertedListCursor createInvertedListCursor(IHyracksTaskContext ctx) throws HyracksDataException {
+    public IInvertedListCursor createInvertedListCursor(IHyracksTaskContext ctx) throws HyracksDataException {
         return new FixedSizeElementInvertedListCursor(bufferCache, fileId, invListTypeTraits, ctx,
                 NoOpIndexCursorStats.INSTANCE);
     }
 
     @Override
-    public InvertedListCursor createInvertedListRangeSearchCursor(IIndexCursorStats stats) throws HyracksDataException {
+    public IInvertedListCursor createInvertedListRangeSearchCursor(IIndexCursorStats stats) throws HyracksDataException {
         return new FixedSizeElementInvertedListScanCursor(bufferCache, fileId, invListTypeTraits, stats);
     }
 
     @Override
-    public void openInvertedListCursor(InvertedListCursor listCursor, ITupleReference searchKey,
+    public void openInvertedListCursor(IInvertedListCursor listCursor, ITupleReference searchKey,
             IIndexOperationContext ictx) throws HyracksDataException {
         OnDiskInvertedIndexOpContext ctx = (OnDiskInvertedIndexOpContext) ictx;
         ctx.getBtreePred().setLowKeyComparator(ctx.getSearchCmp());
@@ -224,7 +224,7 @@ public class OnDiskInvertedIndex implements IInPlaceInvertedIndex {
         }
     }
 
-    public void openInvertedListCursor(ITupleReference btreeTuple, InvertedListCursor listCursor,
+    public void openInvertedListCursor(ITupleReference btreeTuple, IInvertedListCursor listCursor,
             OnDiskInvertedIndexOpContext opCtx) throws HyracksDataException {
         int startPageId = IntegerPointable.getInteger(btreeTuple.getFieldData(invListStartPageIdField),
                 btreeTuple.getFieldStart(invListStartPageIdField));
@@ -514,12 +514,12 @@ public class OnDiskInvertedIndex implements IInPlaceInvertedIndex {
         }
 
         @Override
-        public InvertedListCursor createInvertedListCursor() throws HyracksDataException {
+        public IInvertedListCursor createInvertedListCursor() throws HyracksDataException {
             return index.createInvertedListCursor(ctx);
         }
 
         @Override
-        public void openInvertedListCursor(InvertedListCursor listCursor, ITupleReference searchKey)
+        public void openInvertedListCursor(IInvertedListCursor listCursor, ITupleReference searchKey)
                 throws HyracksDataException {
             index.openInvertedListCursor(listCursor, searchKey, opCtx);
         }
@@ -620,7 +620,7 @@ public class OnDiskInvertedIndex implements IInPlaceInvertedIndex {
         ArrayTupleReference prevTuple = new ArrayTupleReference();
         IInvertedIndexAccessor invIndexAccessor = createAccessor(NoOpIndexAccessParameters.INSTANCE);
         try {
-            InvertedListCursor invListCursor = createInvertedListRangeSearchCursor(NoOpIndexCursorStats.INSTANCE);
+            IInvertedListCursor invListCursor = createInvertedListRangeSearchCursor(NoOpIndexCursorStats.INSTANCE);
             MultiComparator invListCmp = MultiComparator.create(invListCmpFactories);
             while (btreeCursor.hasNext()) {
                 btreeCursor.next();

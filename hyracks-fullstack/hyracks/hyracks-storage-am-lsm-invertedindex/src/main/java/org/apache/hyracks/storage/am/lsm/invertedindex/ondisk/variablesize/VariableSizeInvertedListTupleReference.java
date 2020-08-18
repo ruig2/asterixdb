@@ -20,7 +20,6 @@
 package org.apache.hyracks.storage.am.lsm.invertedindex.ondisk.variablesize;
 
 import org.apache.hyracks.api.dataflow.value.ITypeTraits;
-import org.apache.hyracks.dataflow.common.data.accessors.ITupleReference;
 import org.apache.hyracks.storage.am.lsm.invertedindex.ondisk.AbstractInvertedListTupleReference;
 import org.apache.hyracks.storage.am.lsm.invertedindex.util.InvertedIndexUtils;
 import org.apache.hyracks.util.string.UTF8StringUtil;
@@ -39,19 +38,20 @@ public class VariableSizeInvertedListTupleReference extends AbstractInvertedList
 
     @Override protected void calculateFieldStartOffsets() {
         this.fieldStartOffsets[0] = 0;
+        if (data[0] == 13) {
+            int lenField = UTF8StringUtil.getUTFStringFieldLength(data, 0);
+            lenLastField = lenField;
+        }
 
         for (int i = 1; i < typeTraits.length; i++) {
-            if (typeTraits[i].isFixedLength()) {
+            if (typeTraits[i-1].isFixedLength()) {
                 fieldStartOffsets[i] = fieldStartOffsets[i - 1] + typeTraits[i - 1].getFixedLength();
             } else {
                 // 13 is the type tag of ATypeTag.String which is defined in the upper AsterixDB layer
                 // ToDo: find a better way to handle ATypeTag.String
                 int tmpPos = startOff + fieldStartOffsets[i - 1];
                 if (data[tmpPos] == 13) {
-                    tmpPos++;
-                    int utf8StringLen = UTF8StringUtil.getUTFLength(data, tmpPos);
-                    int numBytesToStoreLength = UTF8StringUtil.getNumBytesToStoreLength(utf8StringLen);
-                    int lenField = 1 + numBytesToStoreLength + utf8StringLen;
+                    int lenField = UTF8StringUtil.getUTFStringFieldLength(data, tmpPos);
                     fieldStartOffsets[i] = fieldStartOffsets[i - 1] + lenField;
 
                     if (i == typeTraits.length-1) {

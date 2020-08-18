@@ -224,6 +224,17 @@ public class UTF8StringUtil {
         return VarLenIntEncoderDecoder.getBytesRequired(strlen);
     }
 
+    // includes the type tag (should be a byte of value 13), the number of bytes to store length, and the actual length of the string
+    public static int getUTFStringFieldLength(byte[] b, int s) {
+        if (b[s] != 13) {
+            throw new IllegalArgumentException("Not a string tuple");
+        }
+
+        int utfLen = getUTFLength(b, s+1);
+        int numBytesToStoreLength = getNumBytesToStoreLength(utfLen);
+        return 1 + numBytesToStoreLength + utfLen;
+    }
+
     public static int codePointToUTF8(int codePoint, char[] tempChars, byte[] outputUTF8) {
         int len = 0;
         int numChars = Character.toChars(codePoint, tempChars, 0);

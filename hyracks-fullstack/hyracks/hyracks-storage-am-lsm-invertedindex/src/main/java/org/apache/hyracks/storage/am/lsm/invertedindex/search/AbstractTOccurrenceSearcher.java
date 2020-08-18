@@ -42,10 +42,9 @@ import org.apache.hyracks.dataflow.std.buffermanager.BufferManagerBackedVSizeFra
 import org.apache.hyracks.dataflow.std.buffermanager.ISimpleFrameBufferManager;
 import org.apache.hyracks.storage.am.lsm.invertedindex.api.IInPlaceInvertedIndex;
 import org.apache.hyracks.storage.am.lsm.invertedindex.api.IInvertedIndexSearcher;
+import org.apache.hyracks.storage.am.lsm.invertedindex.api.IInvertedListCursor;
 import org.apache.hyracks.storage.am.lsm.invertedindex.api.IInvertedListTupleReference;
 import org.apache.hyracks.storage.am.lsm.invertedindex.api.IObjectFactory;
-import org.apache.hyracks.storage.am.lsm.invertedindex.api.InvertedListCursor;
-import org.apache.hyracks.storage.am.lsm.invertedindex.ondisk.fixedsize.FixedSizeInvertedListFrameTupleAccessor;
 import org.apache.hyracks.storage.am.lsm.invertedindex.tokenizers.DelimitedUTF8StringBinaryTokenizer;
 import org.apache.hyracks.storage.am.lsm.invertedindex.tokenizers.IBinaryTokenizer;
 import org.apache.hyracks.storage.am.lsm.invertedindex.tokenizers.IToken;
@@ -77,14 +76,14 @@ public abstract class AbstractTOccurrenceSearcher implements IInvertedIndexSearc
 
     protected int occurrenceThreshold;
 
-    protected final IObjectFactory<InvertedListCursor> invListCursorFactory;
-    protected final ObjectCache<InvertedListCursor> invListCursorCache;
+    protected final IObjectFactory<IInvertedListCursor> invListCursorFactory;
+    protected final ObjectCache<IInvertedListCursor> invListCursorCache;
 
     protected final ISimpleFrameBufferManager bufferManager;
     protected boolean isFinishedSearch;
 
     // For a single inverted list case
-    protected InvertedListCursor singleInvListCursor;
+    protected IInvertedListCursor singleInvListCursor;
     protected boolean isSingleInvertedList;
 
     // To read the final search result

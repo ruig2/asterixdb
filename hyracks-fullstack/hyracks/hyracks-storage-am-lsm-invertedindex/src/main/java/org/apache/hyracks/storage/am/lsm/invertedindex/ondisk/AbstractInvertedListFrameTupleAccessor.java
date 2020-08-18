@@ -37,15 +37,12 @@ public abstract class AbstractInvertedListFrameTupleAccessor implements IFrameTu
     protected ByteBuffer buffer;
 
     protected final ITypeTraits[] fields;
-    protected final int[] fieldStartOffsets;
 
     protected abstract void verifyTypeTraits();
 
     public AbstractInvertedListFrameTupleAccessor(int frameSize, ITypeTraits[] fields) {
         this.frameSize = frameSize;
         this.fields = fields;
-        this.fieldStartOffsets = new int[fields.length];
-        this.fieldStartOffsets[0] = 0;
 
         verifyTypeTraits();
     }
@@ -61,11 +58,6 @@ public abstract class AbstractInvertedListFrameTupleAccessor implements IFrameTu
     }
 
     @Override
-    public int getFieldLength(int tupleIndex, int fIdx) {
-        return fields[fIdx].getFixedLength();
-    }
-
-    @Override
     public int getTupleLength(int tupleIndex) {
         return getTupleEndOffset(tupleIndex) - getTupleStartOffset(tupleIndex);
     }
@@ -76,11 +68,6 @@ public abstract class AbstractInvertedListFrameTupleAccessor implements IFrameTu
     }
 
     @Override
-    public int getFieldStartOffset(int tupleIndex, int fIdx) {
-        return getTupleStartOffset(tupleIndex) + fieldStartOffsets[fIdx];
-    }
-
-    @Override
     public int getTupleCount() {
         return buffer != null ? buffer.getInt(FrameHelper.getTupleCountOffset(frameSize)) : 0;
     }
@@ -88,12 +75,6 @@ public abstract class AbstractInvertedListFrameTupleAccessor implements IFrameTu
     @Override
     public int getTupleEndOffset(int tupleIndex) {
         return getFieldEndOffset(tupleIndex, fields.length - 1);
-    }
-
-    @Override
-    public int getTupleStartOffset(int tupleIndex) {
-        // return InvertedListFrameTupleAppender.MINFRAME_COUNT_SIZE + tupleIndex * tupleSize;
-        throw new NotImplementedException();
     }
 
     @Override
