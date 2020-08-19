@@ -343,7 +343,15 @@ public abstract class IndexSearchOperatorNodePushable extends AbstractUnaryInput
 
     protected void writeTupleToOutput(ITupleReference tuple) throws IOException {
         try {
+            System.out.println("sssssssssssssssss searching...");
             for (int i = 0; i < tuple.getFieldCount(); i++) {
+                System.out.print("item " + i + " : ");
+                byte[] temp = tuple.getFieldData(i);
+                for (int ti = 1; ti < tuple.getFieldLength(i); ti++) {
+                    System.out.print((char) temp[tuple.getFieldStart(i) + ti]);
+                }
+                System.out.println();
+
                 dos.write(tuple.getFieldData(i), tuple.getFieldStart(i), tuple.getFieldLength(i));
                 tb.addFieldEndOffset();
             }

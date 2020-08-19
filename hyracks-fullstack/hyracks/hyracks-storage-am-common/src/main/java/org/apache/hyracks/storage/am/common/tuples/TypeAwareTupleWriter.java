@@ -81,10 +81,21 @@ public class TypeAwareTupleWriter implements ITreeIndexTupleWriter {
         }
 
         // write data fields
+        System.out.println();
+        System.out.println("wwwwwwwwwwww writing: ");
         for (int i = 0; i < tuple.getFieldCount(); i++) {
+            System.out.print("item " + i + ": ");
+            int start = tuple.getFieldStart(i);
+            int len = tuple.getFieldLength(i);
+            for (int k = 1; k < len; k++) {
+                System.out.print((char) tuple.getFieldData(i)[start + k]);
+            }
+            System.out.println();
+
             System.arraycopy(tuple.getFieldData(i), tuple.getFieldStart(i), targetBuf, runner, tuple.getFieldLength(i));
             runner += tuple.getFieldLength(i);
         }
+        System.out.println();
 
         return runner - targetOff;
     }
