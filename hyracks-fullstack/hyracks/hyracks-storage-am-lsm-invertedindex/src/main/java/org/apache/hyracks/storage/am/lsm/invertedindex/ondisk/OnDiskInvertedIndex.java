@@ -51,9 +51,11 @@ import org.apache.hyracks.storage.am.lsm.invertedindex.api.IInvertedListCursor;
 import org.apache.hyracks.storage.am.lsm.invertedindex.impls.LSMInvertedIndexSearchCursorInitialState;
 import org.apache.hyracks.storage.am.lsm.invertedindex.ondisk.fixedsize.FixedSizeElementInvertedListCursor;
 import org.apache.hyracks.storage.am.lsm.invertedindex.ondisk.fixedsize.FixedSizeElementInvertedListScanCursor;
+import org.apache.hyracks.storage.am.lsm.invertedindex.ondisk.variablesize.VariableSizeElementInvertedListCursor;
 import org.apache.hyracks.storage.am.lsm.invertedindex.search.InvertedIndexSearchPredicate;
 import org.apache.hyracks.storage.am.lsm.invertedindex.search.TOccurrenceSearcher;
 import org.apache.hyracks.storage.am.lsm.invertedindex.tuples.TokenKeyPairTuple;
+import org.apache.hyracks.storage.am.lsm.invertedindex.util.InvertedIndexUtils;
 import org.apache.hyracks.storage.common.IIndexAccessParameters;
 import org.apache.hyracks.storage.common.IIndexAccessor;
 import org.apache.hyracks.storage.common.IIndexBulkLoader;
@@ -192,12 +194,18 @@ public class OnDiskInvertedIndex implements IInPlaceInvertedIndex {
 
     @Override
     public IInvertedListCursor createInvertedListCursor(IHyracksTaskContext ctx) throws HyracksDataException {
-        return new FixedSizeElementInvertedListCursor(bufferCache, fileId, invListTypeTraits, ctx,
-                NoOpIndexCursorStats.INSTANCE);
+        if (InvertedIndexUtils.checkTypeTraitsAllFixed(invListTypeTraits)) {
+            return new FixedSizeElementInvertedListCursor(bufferCache, fileId, invListTypeTraits, ctx,
+                    NoOpIndexCursorStats.INSTANCE);
+        } else {
+            return new VariableSizeElementInvertedListCursor(bufferCache, fileId, invListTypeTraits, ctx,
+                    NoOpIndexCursorStats.INSTANCE);
+        }
     }
 
     @Override
-    public IInvertedListCursor createInvertedListRangeSearchCursor(IIndexCursorStats stats) throws HyracksDataException {
+    public IInvertedListCursor createInvertedListRangeSearchCursor(IIndexCursorStats stats)
+            throws HyracksDataException {
         return new FixedSizeElementInvertedListScanCursor(bufferCache, fileId, invListTypeTraits, stats);
     }
 
@@ -234,6 +242,7 @@ public class OnDiskInvertedIndex implements IInPlaceInvertedIndex {
                 btreeTuple.getFieldStart(invListStartOffField));
         int numElements = IntegerPointable.getInteger(btreeTuple.getFieldData(invListNumElementsField),
                 btreeTuple.getFieldStart(invListNumElementsField));
+        System.out.println("xxxxxxxxxx " + startPageId + " " + endPageId + " " + startOff + " " + numElements);
         LSMInvertedIndexSearchCursorInitialState initState = opCtx.getCursorInitialState();
         initState.setInvertedListInfo(startPageId, endPageId, startOff, numElements);
         listCursor.open(initState, null);

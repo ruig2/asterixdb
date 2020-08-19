@@ -19,12 +19,11 @@
 
 package org.apache.hyracks.storage.am.lsm.invertedindex.ondisk;
 
+import java.nio.ByteBuffer;
+
 import org.apache.hyracks.api.comm.FrameHelper;
 import org.apache.hyracks.api.comm.IFrameTupleAccessor;
 import org.apache.hyracks.api.dataflow.value.ITypeTraits;
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
-
-import java.nio.ByteBuffer;
 
 /**
  * This is a frame tuple accessor class for inverted list.

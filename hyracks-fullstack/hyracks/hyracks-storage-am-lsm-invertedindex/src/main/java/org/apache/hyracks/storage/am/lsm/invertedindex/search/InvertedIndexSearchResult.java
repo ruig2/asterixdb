@@ -39,7 +39,6 @@ import org.apache.hyracks.dataflow.std.buffermanager.BufferManagerBackedVSizeFra
 import org.apache.hyracks.dataflow.std.buffermanager.ISimpleFrameBufferManager;
 import org.apache.hyracks.storage.am.lsm.invertedindex.api.IInvertedListTupleReference;
 import org.apache.hyracks.storage.am.lsm.invertedindex.ondisk.InvertedListFrameTupleAppender;
-import org.apache.hyracks.storage.am.lsm.invertedindex.ondisk.fixedsize.FixedSizeInvertedListFrameTupleAccessor;
 import org.apache.hyracks.storage.am.lsm.invertedindex.util.InvertedIndexUtils;
 
 /**

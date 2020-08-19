@@ -23,7 +23,6 @@ import java.nio.ByteBuffer;
 
 import org.apache.hyracks.api.comm.FrameHelper;
 import org.apache.hyracks.api.dataflow.value.ITypeTraits;
-
 import org.apache.hyracks.storage.am.lsm.invertedindex.ondisk.AbstractInvertedListFrameTupleAccessor;
 import org.apache.hyracks.storage.am.lsm.invertedindex.ondisk.InvertedListFrameTupleAppender;
 import org.apache.hyracks.storage.am.lsm.invertedindex.util.InvertedIndexUtils;
@@ -54,14 +53,15 @@ public class FixedSizeInvertedListFrameTupleAccessor extends AbstractInvertedLis
         tupleSize = tmp;
     }
 
-    @Override protected void verifyTypeTraits() {
+    @Override
+    protected void verifyTypeTraits() {
         if (InvertedIndexUtils.checkTypeTraitsAllFixed(fields) == false) {
             throw new IllegalArgumentException(InvertedIndexUtils.EXPECT_ALL_FIX_GET_VAR_SIZE);
         }
     }
 
     @Override
-   public int getFieldEndOffset(int tupleIndex, int fIdx) {
+    public int getFieldEndOffset(int tupleIndex, int fIdx) {
         return getTupleStartOffset(tupleIndex) + fieldStartOffsets[fIdx] + fields[fIdx].getFixedLength();
     }
 

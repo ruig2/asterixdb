@@ -123,8 +123,10 @@ public class InvertedListFrameTupleAppender implements IInvertedListFrameTupleAp
     }
 
     public void incrementTupleCount(int count) {
-        buffer.putInt(FrameHelper.getTupleCountOffset(frameSize),
-                buffer.getInt(FrameHelper.getTupleCountOffset(frameSize)) + count);
+        int tupleCountOffset = FrameHelper.getTupleCountOffset(frameSize);
+        int currentCount = buffer.getInt(tupleCountOffset);
+        buffer.putInt(tupleCountOffset, currentCount + count);
+        System.out.println("yyyyyyyyyyyyyyyy " + (currentCount + count));
     }
 
     public int getTupleCount() {

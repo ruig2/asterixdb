@@ -26,7 +26,6 @@ import org.apache.hyracks.dataflow.common.data.accessors.ITupleReference;
 import org.apache.hyracks.storage.am.lsm.invertedindex.api.IInvertedListCursor;
 import org.apache.hyracks.storage.am.lsm.invertedindex.api.IInvertedListTupleReference;
 import org.apache.hyracks.storage.am.lsm.invertedindex.impls.AbstractInvertedListCursor;
-import org.apache.hyracks.storage.am.lsm.invertedindex.util.InvertedIndexUtils;
 import org.apache.hyracks.storage.common.IIndexCursorStats;
 import org.apache.hyracks.storage.common.MultiComparator;
 import org.apache.hyracks.storage.common.buffercache.IBufferCache;
@@ -77,7 +76,7 @@ public class FixedSizeElementInvertedListScanCursor extends AbstractInvertedList
         this.startOff = 0;
         this.numElements = 0;
         this.numPages = 0;
-        this.tuple = InvertedIndexUtils.createInvertedListTupleReference(invListFields);
+        this.tuple = new FixedSizeInvertedListTupleReference(invListFields);
         this.pinned = false;
         this.stats = stats;
     }

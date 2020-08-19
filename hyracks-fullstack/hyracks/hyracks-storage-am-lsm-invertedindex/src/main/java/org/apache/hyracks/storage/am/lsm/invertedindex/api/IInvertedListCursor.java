@@ -53,8 +53,7 @@ public interface IInvertedListCursor extends IIndexCursor, Comparable<IInvertedL
     /**
      * Checks whether the given tuple is contained in the cursor.
      */
-    boolean containsKey(ITupleReference searchTuple, MultiComparator invListCmp)
-            throws HyracksDataException;
+    boolean containsKey(ITupleReference searchTuple, MultiComparator invListCmp) throws HyracksDataException;
 
     /**
      * Prints all elements in the cursor (debug method).

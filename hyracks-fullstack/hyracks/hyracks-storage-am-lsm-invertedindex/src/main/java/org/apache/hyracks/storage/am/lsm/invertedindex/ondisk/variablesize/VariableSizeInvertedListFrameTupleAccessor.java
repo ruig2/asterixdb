@@ -19,13 +19,13 @@
 
 package org.apache.hyracks.storage.am.lsm.invertedindex.ondisk.variablesize;
 
+import java.nio.ByteBuffer;
+
 import org.apache.hyracks.api.dataflow.value.ITypeTraits;
 import org.apache.hyracks.storage.am.lsm.invertedindex.ondisk.AbstractInvertedListFrameTupleAccessor;
 import org.apache.hyracks.storage.am.lsm.invertedindex.ondisk.InvertedListFrameTupleAppender;
 import org.apache.hyracks.storage.am.lsm.invertedindex.util.InvertedIndexUtils;
 import org.apache.hyracks.util.string.UTF8StringUtil;
-
-import java.nio.ByteBuffer;
 
 /**
  * This is a fixed-size tuple accessor class.
@@ -42,7 +42,8 @@ public class VariableSizeInvertedListFrameTupleAccessor extends AbstractInverted
         super(frameSize, fields);
     }
 
-    @Override protected void verifyTypeTraits() {
+    @Override
+    protected void verifyTypeTraits() {
         InvertedIndexUtils.verifyHasVarSizeTypeTrait(fields);
     }
 
@@ -84,7 +85,7 @@ public class VariableSizeInvertedListFrameTupleAccessor extends AbstractInverted
         } else if (tupleIndex < 0) {
             return InvertedListFrameTupleAppender.MINFRAME_COUNT_SIZE;
         }
-        return InvertedListFrameTupleAppender.MINFRAME_COUNT_SIZE + tupleStartOffsets[tupleIndex+1];
+        return InvertedListFrameTupleAppender.MINFRAME_COUNT_SIZE + tupleStartOffsets[tupleIndex + 1];
     }
 
     @Override

@@ -28,7 +28,8 @@ public class VariableSizeInvertedListTupleReference extends AbstractInvertedList
 
     private int lenLastField;
 
-    @Override protected void verifyTypeTrait() {
+    @Override
+    protected void verifyTypeTrait() {
         InvertedIndexUtils.verifyHasVarSizeTypeTrait(typeTraits);
     }
 
@@ -36,7 +37,8 @@ public class VariableSizeInvertedListTupleReference extends AbstractInvertedList
         super(typeTraits);
     }
 
-    @Override protected void calculateFieldStartOffsets() {
+    @Override
+    protected void calculateFieldStartOffsets() {
         this.fieldStartOffsets[0] = 0;
         if (data[0] == 13) {
             int lenField = UTF8StringUtil.getUTFStringFieldLength(data, 0);
@@ -44,7 +46,7 @@ public class VariableSizeInvertedListTupleReference extends AbstractInvertedList
         }
 
         for (int i = 1; i < typeTraits.length; i++) {
-            if (typeTraits[i-1].isFixedLength()) {
+            if (typeTraits[i - 1].isFixedLength()) {
                 fieldStartOffsets[i] = fieldStartOffsets[i - 1] + typeTraits[i - 1].getFixedLength();
             } else {
                 // 13 is the type tag of ATypeTag.String which is defined in the upper AsterixDB layer
@@ -54,7 +56,7 @@ public class VariableSizeInvertedListTupleReference extends AbstractInvertedList
                     int lenField = UTF8StringUtil.getUTFStringFieldLength(data, tmpPos);
                     fieldStartOffsets[i] = fieldStartOffsets[i - 1] + lenField;
 
-                    if (i == typeTraits.length-1) {
+                    if (i == typeTraits.length - 1) {
                         lenLastField = lenField;
                     }
                 } else {
@@ -77,10 +79,11 @@ public class VariableSizeInvertedListTupleReference extends AbstractInvertedList
 
     @Override
     public int getFieldLength(int fIdx) {
-        if (fIdx == typeTraits.length-1) {
+        if (fIdx == typeTraits.length - 1) {
             return lenLastField;
         } else {
-            return fieldStartOffsets[fIdx+1] - fieldStartOffsets[fIdx];
+            System.out.println("zzzzzzzzzzzz " + (fieldStartOffsets[fIdx + 1] - fieldStartOffsets[fIdx]));
+            return fieldStartOffsets[fIdx + 1] - fieldStartOffsets[fIdx];
         }
     }
 

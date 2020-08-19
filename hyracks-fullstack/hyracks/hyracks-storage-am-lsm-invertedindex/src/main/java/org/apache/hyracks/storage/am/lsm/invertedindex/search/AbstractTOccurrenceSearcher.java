@@ -119,8 +119,8 @@ public abstract class AbstractTOccurrenceSearcher implements IInvertedIndexSearc
         this.queryTokenAppender.reset(queryTokenFrame, true);
         this.isSingleInvertedList = false;
         this.searchResultTuple = InvertedIndexUtils.createInvertedListTupleReference(invIndex.getInvListTypeTraits());
-        this.searchResultFta =
-                InvertedIndexUtils.createInvertedListFrameTupleAccessor(ctx.getInitialFrameSize(), invIndex.getInvListTypeTraits());
+        this.searchResultFta = InvertedIndexUtils.createInvertedListFrameTupleAccessor(ctx.getInitialFrameSize(),
+                invIndex.getInvListTypeTraits());
     }
 
     protected void tokenizeQuery(InvertedIndexSearchPredicate searchPred) throws HyracksDataException {

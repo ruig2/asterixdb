@@ -19,15 +19,11 @@
 
 package org.apache.hyracks.storage.am.lsm.invertedindex.impls;
 
-import org.apache.hyracks.api.dataflow.value.ISerializerDeserializer;
 import org.apache.hyracks.api.exceptions.HyracksDataException;
-import org.apache.hyracks.dataflow.common.data.accessors.ITupleReference;
 import org.apache.hyracks.storage.am.lsm.invertedindex.api.IInvertedListCursor;
-import org.apache.hyracks.storage.am.lsm.invertedindex.impls.LSMInvertedIndexSearchCursorInitialState;
 import org.apache.hyracks.storage.common.EnforcedIndexCursor;
 import org.apache.hyracks.storage.common.ICursorInitialState;
 import org.apache.hyracks.storage.common.ISearchPredicate;
-import org.apache.hyracks.storage.common.MultiComparator;
 
 /**
  * A cursor that reads an inverted list.
@@ -57,10 +53,6 @@ public abstract class AbstractInvertedListCursor extends EnforcedIndexCursor imp
         }
     }
 
-    /**
-     * Sets the disk-based inverted list information such as page ids and the number of elements
-     * for the given inverted list.
-     */
     protected abstract void setInvListInfo(int startPageId, int endPageId, int startOff, int numElements)
             throws HyracksDataException;
 }

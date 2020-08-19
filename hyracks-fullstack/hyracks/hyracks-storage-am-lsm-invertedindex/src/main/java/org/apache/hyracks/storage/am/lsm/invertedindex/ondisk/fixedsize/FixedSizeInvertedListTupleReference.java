@@ -20,8 +20,6 @@
 package org.apache.hyracks.storage.am.lsm.invertedindex.ondisk.fixedsize;
 
 import org.apache.hyracks.api.dataflow.value.ITypeTraits;
-import org.apache.hyracks.dataflow.common.data.accessors.ITupleReference;
-import org.apache.hyracks.storage.am.lsm.invertedindex.api.IInvertedListTupleReference;
 import org.apache.hyracks.storage.am.lsm.invertedindex.ondisk.AbstractInvertedListTupleReference;
 import org.apache.hyracks.storage.am.lsm.invertedindex.util.InvertedIndexUtils;
 
@@ -31,11 +29,13 @@ public class FixedSizeInvertedListTupleReference extends AbstractInvertedListTup
         super(typeTraits);
     }
 
-    @Override protected void verifyTypeTrait() {
+    @Override
+    protected void verifyTypeTrait() {
         InvertedIndexUtils.verifyAllFixedSizeTypeTrait(typeTraits);
     }
 
-    @Override protected void calculateFieldStartOffsets() {
+    @Override
+    protected void calculateFieldStartOffsets() {
         for (int i = 1; i < typeTraits.length; i++) {
             fieldStartOffsets[i] = fieldStartOffsets[i - 1] + typeTraits[i - 1].getFixedLength();
         }

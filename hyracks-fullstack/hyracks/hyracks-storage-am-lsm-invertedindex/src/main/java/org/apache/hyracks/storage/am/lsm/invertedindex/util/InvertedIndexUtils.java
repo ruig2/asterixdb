@@ -145,9 +145,8 @@ public class InvertedIndexUtils {
             boolean durable, IMetadataPageManagerFactory pageManagerFactory, ITracer tracer)
             throws HyracksDataException {
 
-        BTreeFactory deletedKeysBTreeFactory =
-                createDeletedKeysBTreeFactory(ioManager, invListTypeTraits, invListCmpFactories, diskBufferCache,
-                        pageManagerFactory);
+        BTreeFactory deletedKeysBTreeFactory = createDeletedKeysBTreeFactory(ioManager, invListTypeTraits,
+                invListCmpFactories, diskBufferCache, pageManagerFactory);
 
         int[] bloomFilterKeyFields = new int[invListCmpFactories.length];
         for (int i = 0; i < invListCmpFactories.length; i++) {
@@ -173,9 +172,8 @@ public class InvertedIndexUtils {
             filterFrameFactory = new LSMComponentFilterFrameFactory(filterTupleWriterFactory);
             filterManager = new LSMComponentFilterManager(filterFrameFactory);
         }
-        ILSMDiskComponentFactory componentFactory =
-                new LSMInvertedIndexDiskComponentFactory(invIndexFactory, deletedKeysBTreeFactory, bloomFilterFactory,
-                        filterHelper);
+        ILSMDiskComponentFactory componentFactory = new LSMInvertedIndexDiskComponentFactory(invIndexFactory,
+                deletedKeysBTreeFactory, bloomFilterFactory, filterHelper);
 
         return new LSMInvertedIndex(ioManager, virtualBufferCaches, componentFactory, filterHelper, filterFrameFactory,
                 filterManager, bloomFilterFalsePositiveRate, diskBufferCache, fileManager, invListTypeTraits,
@@ -195,9 +193,8 @@ public class InvertedIndexUtils {
             int[] filterFields, int[] filterFieldsForNonBulkLoadOps, int[] invertedIndexFieldsForNonBulkLoadOps,
             boolean durable, IPageManagerFactory pageManagerFactory, ITracer tracer) throws HyracksDataException {
 
-        BTreeFactory deletedKeysBTreeFactory =
-                createDeletedKeysBTreeFactory(ioManager, invListTypeTraits, invListCmpFactories, diskBufferCache,
-                        pageManagerFactory);
+        BTreeFactory deletedKeysBTreeFactory = createDeletedKeysBTreeFactory(ioManager, invListTypeTraits,
+                invListCmpFactories, diskBufferCache, pageManagerFactory);
 
         int[] bloomFilterKeyFields = new int[invListCmpFactories.length];
         for (int i = 0; i < invListCmpFactories.length; i++) {
@@ -210,10 +207,9 @@ public class InvertedIndexUtils {
                 new LSMInvertedIndexFileManager(ioManager, onDiskDirFileRef, deletedKeysBTreeFactory);
 
         IInvertedListBuilderFactory invListBuilderFactory = new InvertedListBuilderFactory(invListTypeTraits);
-        PartitionedOnDiskInvertedIndexFactory invIndexFactory =
-                new PartitionedOnDiskInvertedIndexFactory(ioManager, diskBufferCache, invListBuilderFactory,
-                        invListTypeTraits, invListCmpFactories, tokenTypeTraits, tokenCmpFactories, fileManager,
-                        pageManagerFactory);
+        PartitionedOnDiskInvertedIndexFactory invIndexFactory = new PartitionedOnDiskInvertedIndexFactory(ioManager,
+                diskBufferCache, invListBuilderFactory, invListTypeTraits, invListCmpFactories, tokenTypeTraits,
+                tokenCmpFactories, fileManager, pageManagerFactory);
 
         ComponentFilterHelper filterHelper = null;
         LSMComponentFilterFrameFactory filterFrameFactory = null;
@@ -224,9 +220,8 @@ public class InvertedIndexUtils {
             filterFrameFactory = new LSMComponentFilterFrameFactory(filterTupleWriterFactory);
             filterManager = new LSMComponentFilterManager(filterFrameFactory);
         }
-        ILSMDiskComponentFactory componentFactory =
-                new LSMInvertedIndexDiskComponentFactory(invIndexFactory, deletedKeysBTreeFactory, bloomFilterFactory,
-                        filterHelper);
+        ILSMDiskComponentFactory componentFactory = new LSMInvertedIndexDiskComponentFactory(invIndexFactory,
+                deletedKeysBTreeFactory, bloomFilterFactory, filterHelper);
 
         return new PartitionedLSMInvertedIndex(ioManager, virtualBufferCaches, componentFactory, filterHelper,
                 filterFrameFactory, filterManager, bloomFilterFalsePositiveRate, diskBufferCache, fileManager,

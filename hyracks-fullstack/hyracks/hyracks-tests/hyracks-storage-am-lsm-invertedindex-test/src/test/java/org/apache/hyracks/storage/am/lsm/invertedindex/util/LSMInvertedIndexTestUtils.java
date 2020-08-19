@@ -19,7 +19,6 @@
 
 package org.apache.hyracks.storage.am.lsm.invertedindex.util;
 
-import org.apache.hyracks.storage.am.lsm.invertedindex.api.IInvertedListCursor;
 import static org.junit.Assert.fail;
 
 import java.io.ByteArrayInputStream;
@@ -87,7 +86,7 @@ import org.apache.hyracks.storage.am.config.AccessMethodTestsConfig;
 import org.apache.hyracks.storage.am.lsm.invertedindex.api.IInvertedIndex;
 import org.apache.hyracks.storage.am.lsm.invertedindex.api.IInvertedIndexAccessor;
 import org.apache.hyracks.storage.am.lsm.invertedindex.api.IInvertedIndexSearchModifier;
-import org.apache.hyracks.storage.am.lsm.invertedindex.impls.AbstractInvertedListCursor;
+import org.apache.hyracks.storage.am.lsm.invertedindex.api.IInvertedListCursor;
 import org.apache.hyracks.storage.am.lsm.invertedindex.common.LSMInvertedIndexTestHarness;
 import org.apache.hyracks.storage.am.lsm.invertedindex.impls.LSMInvertedIndexAccessor;
 import org.apache.hyracks.storage.am.lsm.invertedindex.impls.LSMInvertedIndexMergeCursor;

@@ -230,7 +230,7 @@ public class UTF8StringUtil {
             throw new IllegalArgumentException("Not a string tuple");
         }
 
-        int utfLen = getUTFLength(b, s+1);
+        int utfLen = getUTFLength(b, s + 1);
         int numBytesToStoreLength = getNumBytesToStoreLength(utfLen);
         return 1 + numBytesToStoreLength + utfLen;
     }

@@ -219,9 +219,9 @@ public class InvertedListMerger {
      * @return true only if all processing for the final list for a partition is done.
      *         false otherwise.
      */
-    protected boolean mergeSuffixListProbe(IInvertedListCursor invListCursor, InvertedIndexSearchResult prevSearchResult,
-            InvertedIndexSearchResult newSearchResult, int invListIx, int numInvLists, int occurrenceThreshold,
-            boolean isFinalList) throws HyracksDataException {
+    protected boolean mergeSuffixListProbe(IInvertedListCursor invListCursor,
+            InvertedIndexSearchResult prevSearchResult, InvertedIndexSearchResult newSearchResult, int invListIx,
+            int numInvLists, int occurrenceThreshold, boolean isFinalList) throws HyracksDataException {
         if (isProcessingFinished) {
             return true;
         }
