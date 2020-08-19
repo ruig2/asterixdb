@@ -68,7 +68,10 @@ public abstract class AbstractInvertedListFrameTupleAccessor implements IFrameTu
 
     @Override
     public int getTupleCount() {
-        return buffer != null ? buffer.getInt(FrameHelper.getTupleCountOffset(frameSize)) : 0;
+        int count = buffer != null ? buffer.getInt(FrameHelper.getTupleCountOffset(frameSize)) : 0;
+
+        System.out.println("mmmmmmmmmmmm " + count);
+        return buffer != null ? count : 0;
     }
 
     @Override
@@ -79,5 +82,10 @@ public abstract class AbstractInvertedListFrameTupleAccessor implements IFrameTu
     @Override
     public int getAbsoluteFieldStartOffset(int tupleIndex, int fIdx) {
         return getTupleStartOffset(tupleIndex) + getFieldSlotsLength() + getFieldStartOffset(tupleIndex, fIdx);
+    }
+
+    @Override
+    public void reset(ByteBuffer buffer) {
+        this.buffer = buffer;
     }
 }

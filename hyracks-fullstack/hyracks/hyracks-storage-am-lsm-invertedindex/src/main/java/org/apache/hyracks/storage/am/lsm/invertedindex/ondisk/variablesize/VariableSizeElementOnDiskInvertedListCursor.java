@@ -35,11 +35,11 @@ import org.apache.hyracks.util.string.UTF8StringUtil;
  *
  */
 
-public class VariableSizeElementInvertedListCursor extends AbstractOnDiskInvertedListCursor {
+public class VariableSizeElementOnDiskInvertedListCursor extends AbstractOnDiskInvertedListCursor {
 
     private boolean isInit;
 
-    public VariableSizeElementInvertedListCursor(IBufferCache bufferCache, int fileId, ITypeTraits[] invListFields,
+    public VariableSizeElementOnDiskInvertedListCursor(IBufferCache bufferCache, int fileId, ITypeTraits[] invListFields,
             IHyracksTaskContext ctx, IIndexCursorStats stats) throws HyracksDataException {
         super(bufferCache, fileId, invListFields, ctx, stats);
         isInit = true;

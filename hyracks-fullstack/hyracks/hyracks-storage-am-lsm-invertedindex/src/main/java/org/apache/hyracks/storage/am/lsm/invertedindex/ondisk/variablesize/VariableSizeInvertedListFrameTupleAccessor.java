@@ -49,7 +49,7 @@ public class VariableSizeInvertedListFrameTupleAccessor extends AbstractInverted
 
     @Override
     public void reset(ByteBuffer buffer) {
-        this.buffer = buffer;
+        super.reset(buffer);
 
         tupleCount = getTupleCount();
         tupleStartOffsets = new int[tupleCount];

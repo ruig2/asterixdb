@@ -73,6 +73,7 @@ public class VariableSizeElementInvertedListBuilder extends AInvertedListBuilder
             System.arraycopy(tuple.getFieldData(field), tuple.getFieldStart(field), targetBuf, pos, lenField);
             pos += lenField;
         }
+        listSize++;
 
         return true;
     }

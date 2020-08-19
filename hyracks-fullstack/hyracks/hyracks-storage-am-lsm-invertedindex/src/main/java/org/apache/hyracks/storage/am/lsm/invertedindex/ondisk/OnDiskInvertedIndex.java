@@ -49,9 +49,9 @@ import org.apache.hyracks.storage.am.lsm.invertedindex.api.IInvertedIndexSearche
 import org.apache.hyracks.storage.am.lsm.invertedindex.api.IInvertedListBuilder;
 import org.apache.hyracks.storage.am.lsm.invertedindex.api.IInvertedListCursor;
 import org.apache.hyracks.storage.am.lsm.invertedindex.impls.LSMInvertedIndexSearchCursorInitialState;
-import org.apache.hyracks.storage.am.lsm.invertedindex.ondisk.fixedsize.FixedSizeElementInvertedListCursor;
+import org.apache.hyracks.storage.am.lsm.invertedindex.ondisk.fixedsize.FixedSizeElementOnDiskInvertedListCursor;
 import org.apache.hyracks.storage.am.lsm.invertedindex.ondisk.fixedsize.FixedSizeElementInvertedListScanCursor;
-import org.apache.hyracks.storage.am.lsm.invertedindex.ondisk.variablesize.VariableSizeElementInvertedListCursor;
+import org.apache.hyracks.storage.am.lsm.invertedindex.ondisk.variablesize.VariableSizeElementOnDiskInvertedListCursor;
 import org.apache.hyracks.storage.am.lsm.invertedindex.search.InvertedIndexSearchPredicate;
 import org.apache.hyracks.storage.am.lsm.invertedindex.search.TOccurrenceSearcher;
 import org.apache.hyracks.storage.am.lsm.invertedindex.tuples.TokenKeyPairTuple;
@@ -195,10 +195,10 @@ public class OnDiskInvertedIndex implements IInPlaceInvertedIndex {
     @Override
     public IInvertedListCursor createInvertedListCursor(IHyracksTaskContext ctx) throws HyracksDataException {
         if (InvertedIndexUtils.checkTypeTraitsAllFixed(invListTypeTraits)) {
-            return new FixedSizeElementInvertedListCursor(bufferCache, fileId, invListTypeTraits, ctx,
+            return new FixedSizeElementOnDiskInvertedListCursor(bufferCache, fileId, invListTypeTraits, ctx,
                     NoOpIndexCursorStats.INSTANCE);
         } else {
-            return new VariableSizeElementInvertedListCursor(bufferCache, fileId, invListTypeTraits, ctx,
+            return new VariableSizeElementOnDiskInvertedListCursor(bufferCache, fileId, invListTypeTraits, ctx,
                     NoOpIndexCursorStats.INSTANCE);
         }
     }
@@ -306,6 +306,7 @@ public class OnDiskInvertedIndex implements IInPlaceInvertedIndex {
                 btreeTupleBuilder.addFieldEndOffset();
                 output.writeInt(currentInvListStartOffset);
                 btreeTupleBuilder.addFieldEndOffset();
+                System.out.println("aaaaaaaaaaaaaaaa " + invListBuilder.getListSize());
                 output.writeInt(invListBuilder.getListSize());
                 btreeTupleBuilder.addFieldEndOffset();
             } catch (IOException e) {

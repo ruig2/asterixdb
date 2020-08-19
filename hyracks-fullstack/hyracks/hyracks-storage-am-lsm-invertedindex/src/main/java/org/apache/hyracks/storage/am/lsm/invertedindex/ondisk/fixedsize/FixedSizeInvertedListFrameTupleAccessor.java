@@ -28,7 +28,7 @@ import org.apache.hyracks.storage.am.lsm.invertedindex.ondisk.InvertedListFrameT
 import org.apache.hyracks.storage.am.lsm.invertedindex.util.InvertedIndexUtils;
 
 /**
- * This is a fixed-size tuple accessor class.
+ * This is a fixed-size tuple accessor class to get one inverted list.
  * The frame structure: [4 bytes for minimum Hyracks frame count] [fixed-size tuple 1] ... [fixed-size tuple n] ...
  * [4 bytes for the tuple count in a frame]
  */
@@ -86,11 +86,6 @@ public class FixedSizeInvertedListFrameTupleAccessor extends AbstractInvertedLis
     }
 
     @Override
-    public int getTupleCount() {
-        return buffer != null ? buffer.getInt(FrameHelper.getTupleCountOffset(frameSize)) : 0;
-    }
-
-    @Override
     public int getTupleEndOffset(int tupleIndex) {
         return getFieldEndOffset(tupleIndex, fields.length - 1);
     }
@@ -103,10 +98,5 @@ public class FixedSizeInvertedListFrameTupleAccessor extends AbstractInvertedLis
     @Override
     public int getAbsoluteFieldStartOffset(int tupleIndex, int fIdx) {
         return getTupleStartOffset(tupleIndex) + getFieldSlotsLength() + getFieldStartOffset(tupleIndex, fIdx);
-    }
-
-    @Override
-    public void reset(ByteBuffer buffer) {
-        this.buffer = buffer;
     }
 }

@@ -39,7 +39,7 @@ import org.apache.hyracks.storage.common.buffercache.IBufferCache;
  * A cursor class that traverse an inverted list that consists of fixed-size elements on disk
  *
  */
-public class FixedSizeElementInvertedListCursor extends AbstractOnDiskInvertedListCursor {
+public class FixedSizeElementOnDiskInvertedListCursor extends AbstractOnDiskInvertedListCursor {
 
     private final int elementSize;
     private int bufferEndElementIx;
@@ -48,7 +48,7 @@ public class FixedSizeElementInvertedListCursor extends AbstractOnDiskInvertedLi
     // The last element index per page
     private int[] elementIndexes = new int[10];
 
-    public FixedSizeElementInvertedListCursor(IBufferCache bufferCache, int fileId, ITypeTraits[] invListFields,
+    public FixedSizeElementOnDiskInvertedListCursor(IBufferCache bufferCache, int fileId, ITypeTraits[] invListFields,
             IHyracksTaskContext ctx, IIndexCursorStats stats) throws HyracksDataException {
         super(bufferCache, fileId, invListFields, ctx, stats);
 
