@@ -69,6 +69,7 @@ import org.apache.hyracks.storage.am.lsm.invertedindex.ondisk.variablesize.Varia
 import org.apache.hyracks.storage.am.lsm.invertedindex.ondisk.variablesize.VariableSizeInvertedListTupleReference;
 import org.apache.hyracks.storage.am.lsm.invertedindex.tokenizers.IBinaryTokenizerFactory;
 import org.apache.hyracks.storage.common.buffercache.IBufferCache;
+import org.apache.hyracks.util.string.UTF8StringUtil;
 import org.apache.hyracks.util.trace.ITracer;
 
 public class InvertedIndexUtils {
@@ -264,6 +265,15 @@ public class InvertedIndexUtils {
             return new FixedSizeInvertedListFrameTupleAccessor(frameSize, typeTraits);
         } else {
             return new VariableSizeInvertedListFrameTupleAccessor(frameSize, typeTraits);
+        }
+    }
+
+    public static int calculateFieldLength(ITypeTraits trait, byte[] bytes, int pos) {
+        if (trait.isFixedLength()) {
+            return trait.getFixedLength();
+        } else {
+            // assume the only variable-len field is of type string
+            return UTF8StringUtil.getUTFStringFieldLength(bytes, pos);
         }
     }
 

@@ -25,6 +25,7 @@ import org.apache.hyracks.api.dataflow.value.ITypeTraits;
 import org.apache.hyracks.storage.am.lsm.invertedindex.ondisk.AbstractInvertedListFrameTupleAccessor;
 import org.apache.hyracks.storage.am.lsm.invertedindex.ondisk.InvertedListFrameTupleAppender;
 import org.apache.hyracks.storage.am.lsm.invertedindex.util.InvertedIndexUtils;
+import static org.apache.hyracks.storage.am.lsm.invertedindex.util.InvertedIndexUtils.calculateFieldLength;
 import org.apache.hyracks.util.string.UTF8StringUtil;
 
 /**
@@ -58,11 +59,11 @@ public class VariableSizeInvertedListFrameTupleAccessor extends AbstractInverted
             int startOff = InvertedListFrameTupleAppender.MINFRAME_COUNT_SIZE;
             int pos = startOff;
             tupleStartOffsets[0] = 0;
-            // If there is only one tuple, store the tuple length in lastTupleLen
-            lastTupleLen = UTF8StringUtil.getUTFStringFieldLength(buffer.array(), pos);
+            int firstTupleLen = calculateFieldLength(fields[0], buffer.array(), pos);
+            lastTupleLen = firstTupleLen;
 
             for (int i = 1; i < tupleCount; i++) {
-                int len = UTF8StringUtil.getUTFStringFieldLength(buffer.array(), pos);
+                int len = calculateFieldLength(fields[i-1], buffer.array(), pos);
                 tupleStartOffsets[i] = tupleStartOffsets[i - 1] + len;
                 if (i == tupleCount - 1) {
                     lastTupleLen = len;
