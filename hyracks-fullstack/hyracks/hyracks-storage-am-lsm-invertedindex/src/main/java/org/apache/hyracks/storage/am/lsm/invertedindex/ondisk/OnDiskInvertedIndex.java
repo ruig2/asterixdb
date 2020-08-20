@@ -49,8 +49,8 @@ import org.apache.hyracks.storage.am.lsm.invertedindex.api.IInvertedIndexSearche
 import org.apache.hyracks.storage.am.lsm.invertedindex.api.IInvertedListBuilder;
 import org.apache.hyracks.storage.am.lsm.invertedindex.api.IInvertedListCursor;
 import org.apache.hyracks.storage.am.lsm.invertedindex.impls.LSMInvertedIndexSearchCursorInitialState;
-import org.apache.hyracks.storage.am.lsm.invertedindex.ondisk.fixedsize.FixedSizeElementOnDiskInvertedListCursor;
 import org.apache.hyracks.storage.am.lsm.invertedindex.ondisk.fixedsize.FixedSizeElementInvertedListScanCursor;
+import org.apache.hyracks.storage.am.lsm.invertedindex.ondisk.fixedsize.FixedSizeElementOnDiskInvertedListCursor;
 import org.apache.hyracks.storage.am.lsm.invertedindex.ondisk.variablesize.VariableSizeElementOnDiskInvertedListCursor;
 import org.apache.hyracks.storage.am.lsm.invertedindex.search.InvertedIndexSearchPredicate;
 import org.apache.hyracks.storage.am.lsm.invertedindex.search.TOccurrenceSearcher;
@@ -306,7 +306,6 @@ public class OnDiskInvertedIndex implements IInPlaceInvertedIndex {
                 btreeTupleBuilder.addFieldEndOffset();
                 output.writeInt(currentInvListStartOffset);
                 btreeTupleBuilder.addFieldEndOffset();
-                System.out.println("aaaaaaaaaaaaaaaa " + invListBuilder.getListSize());
                 output.writeInt(invListBuilder.getListSize());
                 btreeTupleBuilder.addFieldEndOffset();
             } catch (IOException e) {

@@ -39,8 +39,8 @@ public class VariableSizeElementOnDiskInvertedListCursor extends AbstractOnDiskI
 
     private boolean isInit;
 
-    public VariableSizeElementOnDiskInvertedListCursor(IBufferCache bufferCache, int fileId, ITypeTraits[] invListFields,
-            IHyracksTaskContext ctx, IIndexCursorStats stats) throws HyracksDataException {
+    public VariableSizeElementOnDiskInvertedListCursor(IBufferCache bufferCache, int fileId,
+            ITypeTraits[] invListFields, IHyracksTaskContext ctx, IIndexCursorStats stats) throws HyracksDataException {
         super(bufferCache, fileId, invListFields, ctx, stats);
         isInit = true;
     }

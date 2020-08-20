@@ -28,6 +28,7 @@ public abstract class AbstractInvertedListTupleReference implements IInvertedLis
     protected final int[] fieldStartOffsets;
     protected byte[] data;
     protected int startOff;
+
     // check if the type trait is fixed-size or variable-size
     // throws an IllegalArgument exception if get unexpected traits
     protected abstract void verifyTypeTrait();

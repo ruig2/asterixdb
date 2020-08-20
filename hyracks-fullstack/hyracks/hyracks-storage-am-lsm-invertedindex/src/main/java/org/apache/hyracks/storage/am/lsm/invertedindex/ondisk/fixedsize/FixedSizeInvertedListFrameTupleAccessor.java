@@ -19,9 +19,6 @@
 
 package org.apache.hyracks.storage.am.lsm.invertedindex.ondisk.fixedsize;
 
-import java.nio.ByteBuffer;
-
-import org.apache.hyracks.api.comm.FrameHelper;
 import org.apache.hyracks.api.dataflow.value.ITypeTraits;
 import org.apache.hyracks.storage.am.lsm.invertedindex.ondisk.AbstractInvertedListFrameTupleAccessor;
 import org.apache.hyracks.storage.am.lsm.invertedindex.ondisk.InvertedListFrameTupleAppender;
