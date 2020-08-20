@@ -33,6 +33,12 @@ public class VariableSizeInvertedListTupleReference extends AbstractInvertedList
         InvertedIndexUtils.verifyHasVarSizeTypeTrait(typeTraits);
     }
 
+    private void verifyFieldTypeTag(ITypeTraits typeTrait, int tag) {
+        if (!typeTrait.isFixedLength() && tag != 13) {
+            throw new UnsupportedOperationException("For variable-size type trait, only string is supported");
+        }
+    }
+
     public VariableSizeInvertedListTupleReference(ITypeTraits[] typeTraits) {
         super(typeTraits);
     }
@@ -40,10 +46,10 @@ public class VariableSizeInvertedListTupleReference extends AbstractInvertedList
     @Override
     protected void calculateFieldStartOffsets() {
         this.fieldStartOffsets[0] = 0;
-        if (data[0] == 13) {
-            int lenField = UTF8StringUtil.getUTFStringFieldLength(data, 0);
-            lenLastField = lenField;
-        }
+
+        verifyFieldTypeTag(typeTraits[0], data[0]);
+        int lenField = UTF8StringUtil.getUTFStringFieldLength(data, 0);
+        lenLastField = lenField;
 
         for (int i = 1; i < typeTraits.length; i++) {
             if (typeTraits[i - 1].isFixedLength()) {
@@ -52,16 +58,13 @@ public class VariableSizeInvertedListTupleReference extends AbstractInvertedList
                 // 13 is the type tag of ATypeTag.String which is defined in the upper AsterixDB layer
                 // ToDo: find a better way to handle ATypeTag.String
                 int tmpPos = startOff + fieldStartOffsets[i - 1];
-                if (data[tmpPos] == 13) {
-                    int lenField = UTF8StringUtil.getUTFStringFieldLength(data, tmpPos);
-                    fieldStartOffsets[i] = fieldStartOffsets[i - 1] + lenField;
 
-                    if (i == typeTraits.length - 1) {
-                        lenLastField = lenField;
-                    }
-                } else {
-                    // ToDo: support other types (non-string) later
-                    throw new UnsupportedOperationException();
+                verifyFieldTypeTag(typeTraits[i], data[tmpPos]);
+                lenField = UTF8StringUtil.getUTFStringFieldLength(data, tmpPos);
+                fieldStartOffsets[i] = fieldStartOffsets[i - 1] + lenField;
+
+                if (i == typeTraits.length - 1) {
+                    lenLastField = lenField;
                 }
             }
         }
@@ -82,7 +85,6 @@ public class VariableSizeInvertedListTupleReference extends AbstractInvertedList
         if (fIdx == typeTraits.length - 1) {
             return lenLastField;
         } else {
-            System.out.println("zzzzzzzzzzzz " + (fieldStartOffsets[fIdx + 1] - fieldStartOffsets[fIdx]));
             return fieldStartOffsets[fIdx + 1] - fieldStartOffsets[fIdx];
         }
     }
