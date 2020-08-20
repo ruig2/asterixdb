@@ -67,8 +67,8 @@ public class InvertedListMerger {
     protected IInvertedListTupleReference resultTuple;
     protected boolean advanceCursor;
     protected boolean advancePrevResult;
-    protected int resultTidx;
-    protected int invListTidx;
+    protected int resultTupleIdx;
+    protected int invListTupleIdx;
     protected int invListTupleCount;
     protected ITupleReference invListTuple;
     protected int prevResultFrameTupleCount;
@@ -229,8 +229,8 @@ public class InvertedListMerger {
         initMergingOneList(invListCursor, prevSearchResult, newSearchResult, isFinalList, invListIx, numInvLists,
                 occurrenceThreshold, processType.SUFFIX_LIST_PROBE);
 
-        while (resultTidx < prevResultFrameTupleCount) {
-            resultTuple.reset(prevCurrentBuffer.array(), resultFrameTupleAcc.getTupleStartOffset(resultTidx));
+        while (resultTupleIdx < prevResultFrameTupleCount) {
+            resultTuple.reset(prevCurrentBuffer.array(), resultFrameTupleAcc.getTupleStartOffset(resultTupleIdx));
             int count = getCount(resultTuple);
             if (invListCursor.containsKey(resultTuple, invListCmp)) {
                 // Found the same tuple again on the current list. Increases the count by one.
@@ -249,7 +249,7 @@ public class InvertedListMerger {
                     return false;
                 }
             }
-            resultTidx++;
+            resultTupleIdx++;
             checkPrevResultAndFetchNextFrame(prevSearchResult);
         }
 
@@ -276,9 +276,9 @@ public class InvertedListMerger {
 
         int cmp;
         int count;
-        while (invListTidx < invListTupleCount && resultTidx < prevResultFrameTupleCount) {
+        while (invListTupleIdx < invListTupleCount && resultTupleIdx < prevResultFrameTupleCount) {
             invListTuple = invListCursor.getTuple();
-            resultTuple.reset(prevCurrentBuffer.array(), resultFrameTupleAcc.getTupleStartOffset(resultTidx));
+            resultTuple.reset(prevCurrentBuffer.array(), resultFrameTupleAcc.getTupleStartOffset(resultTupleIdx));
             cmp = invListCmp.compare(invListTuple, resultTuple);
             if (cmp == 0) {
                 // Found the same tuple again on the current list. Increases the count by one.
@@ -316,8 +316,8 @@ public class InvertedListMerger {
 
         // append remaining elements from previous result set
         // These remaining elements can be a part of the answer if they will be found again in the remaining lists.
-        while (resultTidx < prevResultFrameTupleCount) {
-            resultTuple.reset(prevCurrentBuffer.array(), resultFrameTupleAcc.getTupleStartOffset(resultTidx));
+        while (resultTupleIdx < prevResultFrameTupleCount) {
+            resultTuple.reset(prevCurrentBuffer.array(), resultFrameTupleAcc.getTupleStartOffset(resultTupleIdx));
             count = getCount(resultTuple);
             if (count + numInvLists - invListIx > occurrenceThreshold) {
                 if (!newSearchResult.append(resultTuple, count)) {
@@ -326,7 +326,7 @@ public class InvertedListMerger {
                     return false;
                 }
             }
-            resultTidx++;
+            resultTupleIdx++;
             checkPrevResultAndFetchNextFrame(prevSearchResult);
         }
 
@@ -350,9 +350,9 @@ public class InvertedListMerger {
         int cmp;
         int count;
         // Traverses the inverted list and the previous result at the same time.
-        while (invListTidx < invListTupleCount && resultTidx < prevResultFrameTupleCount) {
+        while (invListTupleIdx < invListTupleCount && resultTupleIdx < prevResultFrameTupleCount) {
             invListTuple = invListCursor.getTuple();
-            resultTuple.reset(prevCurrentBuffer.array(), resultFrameTupleAcc.getTupleStartOffset(resultTidx));
+            resultTuple.reset(prevCurrentBuffer.array(), resultFrameTupleAcc.getTupleStartOffset(resultTupleIdx));
             cmp = invListCmp.compare(invListTuple, resultTuple);
             // Found the same tuple again on the current list: count + 1. Both the result and the cursor advances.
             if (cmp == 0) {
@@ -393,29 +393,29 @@ public class InvertedListMerger {
 
         // append remaining new elements from inverted list
         //
-        while (invListTidx < invListTupleCount) {
+        while (invListTupleIdx < invListTupleCount) {
             invListTuple = invListCursor.getTuple();
             if (!newSearchResult.append(invListTuple, 1)) {
                 // For a final result, needs to pause when a frame becomes full to let the caller
                 // consume the frame. SearchResult.append() should only return false for this case.
                 return false;
             }
-            invListTidx++;
+            invListTupleIdx++;
             if (invListCursor.hasNext()) {
                 invListCursor.next();
             }
         }
 
         // append remaining elements from previous result set
-        while (resultTidx < prevResultFrameTupleCount) {
-            resultTuple.reset(prevCurrentBuffer.array(), resultFrameTupleAcc.getTupleStartOffset(resultTidx));
+        while (resultTupleIdx < prevResultFrameTupleCount) {
+            resultTuple.reset(prevCurrentBuffer.array(), resultFrameTupleAcc.getTupleStartOffset(resultTupleIdx));
             count = getCount(resultTuple);
             if (!newSearchResult.append(resultTuple, count)) {
                 // For a final result, needs to pause when a frame becomes full to let the caller
                 // consume the frame. SearchResult.append() should only return false for this case.
                 return false;
             }
-            resultTidx++;
+            resultTupleIdx++;
             checkPrevResultAndFetchNextFrame(prevSearchResult);
         }
 
@@ -455,9 +455,9 @@ public class InvertedListMerger {
             resultTuple = prevSearchResult.getTuple();
             advanceCursor = true;
             advancePrevResult = false;
-            resultTidx = 0;
+            resultTupleIdx = 0;
             resultFrameTupleAcc.reset(prevCurrentBuffer);
-            invListTidx = 0;
+            invListTupleIdx = 0;
             numInvertedLists = numInvLists;
             invListIdx = invListIx;
             prevResultFrameTupleCount = prevCurrentBuffer == null ? 0 : resultFrameTupleAcc.getTupleCount();
@@ -508,12 +508,12 @@ public class InvertedListMerger {
     protected void advancePrevResultAndList(boolean advancePrevResult, boolean advanceCursor,
             InvertedIndexSearchResult prevSearchResult, IInvertedListCursor invListCursor) throws HyracksDataException {
         if (advancePrevResult) {
-            resultTidx++;
+            resultTupleIdx++;
             checkPrevResultAndFetchNextFrame(prevSearchResult);
         }
 
         if (advanceCursor) {
-            invListTidx++;
+            invListTupleIdx++;
             if (invListCursor.hasNext()) {
                 invListCursor.next();
             }
@@ -525,13 +525,13 @@ public class InvertedListMerger {
      */
     protected void checkPrevResultAndFetchNextFrame(InvertedIndexSearchResult prevSearchResult)
             throws HyracksDataException {
-        if (resultTidx >= prevResultFrameTupleCount) {
+        if (resultTupleIdx >= prevResultFrameTupleCount) {
             prevBufIdx++;
             if (prevBufIdx <= maxPrevBufIdx) {
                 prevCurrentBuffer = prevSearchResult.getNextFrame();
                 resultFrameTupleAcc.reset(prevCurrentBuffer);
                 prevResultFrameTupleCount = resultFrameTupleAcc.getTupleCount();
-                resultTidx = 0;
+                resultTupleIdx = 0;
             }
         }
     }
@@ -585,8 +585,8 @@ public class InvertedListMerger {
         resultTuple = null;
         advanceCursor = false;
         advancePrevResult = false;
-        resultTidx = 0;
-        invListTidx = 0;
+        resultTupleIdx = 0;
+        invListTupleIdx = 0;
         prevResultFrameTupleCount = 0;
         finalInvListCursor = null;
         finalSearchResult = null;
