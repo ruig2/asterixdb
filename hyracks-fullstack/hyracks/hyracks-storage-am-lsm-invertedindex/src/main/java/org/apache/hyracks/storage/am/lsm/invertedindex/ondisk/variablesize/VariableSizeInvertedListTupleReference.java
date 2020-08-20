@@ -45,10 +45,11 @@ public class VariableSizeInvertedListTupleReference extends AbstractInvertedList
 
     @Override
     protected void calculateFieldStartOffsets() {
+        int tmpPos = startOff;
         this.fieldStartOffsets[0] = 0;
 
-        verifyFieldTypeTag(typeTraits[0], data[0]);
-        int lenField = UTF8StringUtil.getUTFStringFieldLength(data, 0);
+        verifyFieldTypeTag(typeTraits[0], data[tmpPos]);
+        int lenField = UTF8StringUtil.getUTFStringFieldLength(data, tmpPos);
         lenLastField = lenField;
 
         for (int i = 1; i < typeTraits.length; i++) {
@@ -57,7 +58,6 @@ public class VariableSizeInvertedListTupleReference extends AbstractInvertedList
             } else {
                 // 13 is the type tag of ATypeTag.String which is defined in the upper AsterixDB layer
                 // ToDo: find a better way to handle ATypeTag.String
-                int tmpPos = startOff + fieldStartOffsets[i - 1];
 
                 verifyFieldTypeTag(typeTraits[i], data[tmpPos]);
                 lenField = UTF8StringUtil.getUTFStringFieldLength(data, tmpPos);
@@ -66,6 +66,7 @@ public class VariableSizeInvertedListTupleReference extends AbstractInvertedList
                 if (i == typeTraits.length - 1) {
                     lenLastField = lenField;
                 }
+                tmpPos += lenField;
             }
         }
     }
