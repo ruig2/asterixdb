@@ -24,6 +24,8 @@ import org.apache.hyracks.storage.am.lsm.invertedindex.ondisk.AbstractInvertedLi
 import org.apache.hyracks.storage.am.lsm.invertedindex.util.InvertedIndexUtils;
 import org.apache.hyracks.util.string.UTF8StringUtil;
 
+import java.nio.ByteBuffer;
+
 public class VariableSizeInvertedListTupleReference extends AbstractInvertedListTupleReference {
 
     private int lenLastField;
@@ -93,5 +95,22 @@ public class VariableSizeInvertedListTupleReference extends AbstractInvertedList
     @Override
     public int getFieldStart(int fIdx) {
         return startOff + fieldStartOffsets[fIdx];
+    }
+
+    @Override public String toString() {
+        String result = "";
+
+        for (int i = 0; i < typeTraits.length; i++) {
+            int pos = getFieldStart(i);
+            if (typeTraits[i].isFixedLength()) {
+                int len = typeTraits[i].getFixedLength();
+                result += ByteBuffer.wrap(data, pos, len).getInt() + ", ";
+            } else {
+                StringBuilder builder = new StringBuilder();
+                // pos + 1 to skip the type tag
+                result += UTF8StringUtil.toString(builder, data, pos+1).toString() + ", ";
+            }
+        }
+        return result;
     }
 }

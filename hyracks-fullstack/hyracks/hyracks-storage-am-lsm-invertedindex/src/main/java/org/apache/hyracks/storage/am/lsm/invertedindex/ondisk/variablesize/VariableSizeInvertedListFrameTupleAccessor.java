@@ -32,8 +32,13 @@ import org.apache.hyracks.util.string.UTF8StringUtil;
  * This is a fixed-size tuple accessor class.
  * The frame structure: [4 bytes for minimum Hyracks frame count] [fixed-size tuple 1] ... [fixed-size tuple n] ...
  * [4 bytes for the tuple count in a frame]
+ *
+ * For such a variable-size tuple accessor, for now it supports to get the position of the next tuple only,
+ * i.e. supports iteration instead of random access to the tuples
  */
 public class VariableSizeInvertedListFrameTupleAccessor extends AbstractInvertedListFrameTupleAccessor {
+    // ToDo: use a scanner model to read tuples one by one, in fact, it is not necessary to support random access
+    // because it is used only when merging lists
 
     private int[] tupleStartOffsets;
     private int tupleCount;
@@ -48,6 +53,18 @@ public class VariableSizeInvertedListFrameTupleAccessor extends AbstractInverted
         InvertedIndexUtils.verifyHasVarSizeTypeTrait(fields);
     }
 
+    private int getTupleLengthAtPos(int startPos) {
+        int tupleLen = 0;
+        int pos = startPos;
+        for (int i = 0; i < fields.length; i++) {
+            int fieldLen = calculateFieldLength(fields[i], buffer.array(), pos);
+            tupleLen += fieldLen;
+            pos += fieldLen;
+        }
+
+        return tupleLen;
+    }
+
     @Override
     public void reset(ByteBuffer buffer) {
         super.reset(buffer);
@@ -59,11 +76,11 @@ public class VariableSizeInvertedListFrameTupleAccessor extends AbstractInverted
             int startOff = InvertedListFrameTupleAppender.MINFRAME_COUNT_SIZE;
             int pos = startOff;
             tupleStartOffsets[0] = 0;
-            int firstTupleLen = calculateFieldLength(fields[0], buffer.array(), pos);
+            int firstTupleLen = getTupleLengthAtPos(pos);
             lastTupleLen = firstTupleLen;
 
             for (int i = 1; i < tupleCount; i++) {
-                int len = calculateFieldLength(fields[i-1], buffer.array(), pos);
+                int len = getTupleLengthAtPos(pos);
                 tupleStartOffsets[i] = tupleStartOffsets[i - 1] + len;
                 if (i == tupleCount - 1) {
                     lastTupleLen = len;
