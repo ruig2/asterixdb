@@ -38,7 +38,9 @@ import org.apache.hyracks.dataflow.std.buffermanager.ISimpleFrameBufferManager;
 import org.apache.hyracks.storage.am.lsm.invertedindex.api.IInvertedListCursor;
 import org.apache.hyracks.storage.am.lsm.invertedindex.api.IInvertedListTupleReference;
 import org.apache.hyracks.storage.am.lsm.invertedindex.util.InvertedIndexUtils;
+import org.apache.hyracks.storage.common.ICursorInitialState;
 import org.apache.hyracks.storage.common.IIndexCursorStats;
+import org.apache.hyracks.storage.common.ISearchPredicate;
 import org.apache.hyracks.storage.common.buffercache.IBufferCache;
 import org.apache.hyracks.storage.common.buffercache.ICachedPage;
 import org.apache.hyracks.storage.common.file.BufferedFileHandle;
@@ -51,7 +53,7 @@ public abstract class AbstractOnDiskInvertedListCursor extends AbstractInvertedL
     protected final IBufferCache bufferCache;
     protected final int fileId;
     // for sequential scan
-    protected int currentElementIxForScan;
+    public int currentElementIxForScan;
     protected int currentOffsetForScan;
     protected int currentPageIxForScan;
     // the whole range of the given inverted list
@@ -67,6 +69,7 @@ public abstract class AbstractOnDiskInvertedListCursor extends AbstractInvertedL
     protected int bufferNumLoadedPages;
 
     protected final IInvertedListTupleReference tuple;
+    protected final ITypeTraits[] invListFields;
     protected ICachedPage page;
     // buffer manager to conform to the memory budget
     protected final ISimpleFrameBufferManager bufferManagerForSearch;
@@ -89,6 +92,7 @@ public abstract class AbstractOnDiskInvertedListCursor extends AbstractInvertedL
         this.bufferNumLoadedPages = 0;
         this.lastRandomSearchedElementIx = 0;
         this.moreBlocksToRead = true;
+        this.invListFields = invListFields;
         this.tuple = InvertedIndexUtils.createInvertedListTupleReference(invListFields);
         this.buffers = new ArrayList<ByteBuffer>();
         if (ctx == null) {

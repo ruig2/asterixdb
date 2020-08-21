@@ -28,6 +28,7 @@ import org.apache.hyracks.storage.am.common.api.IIndexOperationContext;
 import org.apache.hyracks.storage.am.lsm.invertedindex.api.IInPlaceInvertedIndex;
 import org.apache.hyracks.storage.am.lsm.invertedindex.api.IInvertedIndexSearchModifier;
 import org.apache.hyracks.storage.am.lsm.invertedindex.api.IInvertedListCursor;
+import org.apache.hyracks.storage.am.lsm.invertedindex.impls.AbstractOnDiskInvertedListCursor;
 import org.apache.hyracks.storage.common.IIndexCursor;
 
 /**
@@ -53,6 +54,12 @@ public class TOccurrenceSearcher extends AbstractTOccurrenceSearcher {
         for (int i = 0; i < numQueryTokens; i++) {
             searchKey.reset(queryTokenAppender, i);
             IInvertedListCursor invListCursor = invListCursorCache.getNext();
+
+            invListCursor = new InvertedListCursorFactory(invIndex, ctx).create();
+            if (((AbstractOnDiskInvertedListCursor)invListCursor).currentElementIxForScan != 0) {
+                System.out.println("fffffffffffff");
+            }
+            invListCursor.close();
             invIndex.openInvertedListCursor(invListCursor, searchKey, ictx);
             invListCursors.add(invListCursor);
         }

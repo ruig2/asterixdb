@@ -100,6 +100,11 @@ public class InvertedListMerger {
      */
     public boolean merge(List<IInvertedListCursor> invListCursors, int occurrenceThreshold, int numPrefixLists,
             InvertedIndexFinalSearchResult finalSearchResult) throws HyracksDataException {
+
+        for (IInvertedListCursor cursor : invListCursors) {
+            // cursor.toString();
+        }
+
         Collections.sort(invListCursors);
         int numInvLists = invListCursors.size();
         InvertedIndexSearchResult result = null;
