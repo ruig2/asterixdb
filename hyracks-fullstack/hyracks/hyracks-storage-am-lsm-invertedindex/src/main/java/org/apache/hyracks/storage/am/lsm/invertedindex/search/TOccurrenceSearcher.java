@@ -56,9 +56,6 @@ public class TOccurrenceSearcher extends AbstractTOccurrenceSearcher {
             IInvertedListCursor invListCursor = invListCursorCache.getNext();
 
             invListCursor = new InvertedListCursorFactory(invIndex, ctx).create();
-            if (((AbstractOnDiskInvertedListCursor)invListCursor).currentElementIxForScan != 0) {
-                System.out.println("fffffffffffff");
-            }
             invListCursor.close();
             invIndex.openInvertedListCursor(invListCursor, searchKey, ictx);
             invListCursors.add(invListCursor);
