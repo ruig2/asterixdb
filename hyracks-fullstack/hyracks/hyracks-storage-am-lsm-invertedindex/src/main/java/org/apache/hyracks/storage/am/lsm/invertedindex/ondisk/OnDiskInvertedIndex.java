@@ -242,7 +242,6 @@ public class OnDiskInvertedIndex implements IInPlaceInvertedIndex {
                 btreeTuple.getFieldStart(invListStartOffField));
         int numElements = IntegerPointable.getInteger(btreeTuple.getFieldData(invListNumElementsField),
                 btreeTuple.getFieldStart(invListNumElementsField));
-        System.out.println("xxxxxxxxxx " + startPageId + " " + endPageId + " " + startOff + " " + numElements);
         LSMInvertedIndexSearchCursorInitialState initState = opCtx.getCursorInitialState();
         initState.setInvertedListInfo(startPageId, endPageId, startOff, numElements);
         listCursor.open(initState, null);
