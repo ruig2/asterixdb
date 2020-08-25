@@ -4604,6 +4604,9 @@
         <output-dir compare="Text">scan-delete-inverted-index-word-secondary-index-nullable</output-dir>
       </compilation-unit>
     </test-case>
+
+
+
     <test-case FilePath="dml">
       <compilation-unit name="load-with-index-open">
         <output-dir compare="Text">load-with-index-open</output-dir>
