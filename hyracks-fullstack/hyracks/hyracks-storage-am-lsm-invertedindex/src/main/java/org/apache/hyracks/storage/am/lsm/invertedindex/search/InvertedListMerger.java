@@ -67,6 +67,11 @@ public class InvertedListMerger {
     protected IInvertedListTupleReference resultTuple;
     protected boolean advanceCursor;
     protected boolean advancePrevResult;
+    // ToDo: we need those tuple indexes because when generating the intermediate result,
+    // the resultFrameTupleAcc API needs tuple index.
+    // In fact, the elements in resultFrameTupleAcc are retrieved sequentially one by one instead of accessed randomly.
+    // Maybe we can wrap the tuple index and the resultFrameTupleAcc into a new class so that we can iterate the elements
+    // in resultFrameTupleAcc and avoid having the tuple indexes here.
     protected int resultTupleIdx;
     protected int invListTupleIdx;
     protected int invListTupleCount;

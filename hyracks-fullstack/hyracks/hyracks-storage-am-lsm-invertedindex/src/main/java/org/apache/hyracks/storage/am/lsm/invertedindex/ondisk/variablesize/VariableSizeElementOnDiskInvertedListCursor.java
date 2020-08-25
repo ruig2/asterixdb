@@ -107,6 +107,9 @@ public class VariableSizeElementOnDiskInvertedListCursor extends AbstractOnDiskI
      */
     @Override
     public boolean containsKey(ITupleReference searchTuple, MultiComparator invListCmp) throws HyracksDataException {
+        if (!isInit) {
+            next();
+        }
         while (hasNext()) {
             int cmp = invListCmp.compare(searchTuple, tuple);
             if (cmp < 0) {
@@ -114,10 +117,11 @@ public class VariableSizeElementOnDiskInvertedListCursor extends AbstractOnDiskI
             } else if (cmp == 0) {
                 return true;
             }
+            // ToDo: here we get the tuple first and then call next() later because the upper-layer caller in InvertedListMerger does so
+            // However, this is not consistent with other use cases of next() in AsterixDB
+            // Maybe we need to fix the InvertedListMerger part to call next() first then getTuple() to follow the convention to use cursor
+            next();
         }
-        // ToDo: here we get the tuple first and then call next() because it is in this way in the upper-layer caller in InvertedListMerger
-        // We need to fix the InvertedListMerger part of this because that is not consistent with the convention to use cursor in AsterixDB
-        next();
 
         return false;
     }
