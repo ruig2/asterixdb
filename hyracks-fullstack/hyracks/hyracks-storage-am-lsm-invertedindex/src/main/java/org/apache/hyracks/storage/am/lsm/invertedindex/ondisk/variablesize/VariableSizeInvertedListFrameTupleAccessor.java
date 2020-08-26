@@ -19,13 +19,14 @@
 
 package org.apache.hyracks.storage.am.lsm.invertedindex.ondisk.variablesize;
 
+import static org.apache.hyracks.storage.am.lsm.invertedindex.util.InvertedIndexUtils.calculateFieldLength;
+
 import java.nio.ByteBuffer;
 
 import org.apache.hyracks.api.dataflow.value.ITypeTraits;
 import org.apache.hyracks.storage.am.lsm.invertedindex.ondisk.AbstractInvertedListFrameTupleAccessor;
 import org.apache.hyracks.storage.am.lsm.invertedindex.ondisk.InvertedListFrameTupleAppender;
 import org.apache.hyracks.storage.am.lsm.invertedindex.util.InvertedIndexUtils;
-import static org.apache.hyracks.storage.am.lsm.invertedindex.util.InvertedIndexUtils.calculateFieldLength;
 import org.apache.hyracks.util.string.UTF8StringUtil;
 
 /**

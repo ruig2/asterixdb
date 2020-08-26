@@ -19,6 +19,8 @@
 
 package org.apache.hyracks.storage.am.lsm.invertedindex.ondisk.variablesize;
 
+import java.nio.ByteBuffer;
+
 import org.apache.hyracks.api.context.IHyracksTaskContext;
 import org.apache.hyracks.api.dataflow.value.ISerializerDeserializer;
 import org.apache.hyracks.api.dataflow.value.ITypeTraits;
@@ -31,11 +33,6 @@ import org.apache.hyracks.storage.common.ISearchPredicate;
 import org.apache.hyracks.storage.common.MultiComparator;
 import org.apache.hyracks.storage.common.buffercache.IBufferCache;
 import org.apache.hyracks.util.string.UTF8StringUtil;
-
-import java.io.ByteArrayInputStream;
-import java.io.DataInput;
-import java.io.DataInputStream;
-import java.nio.ByteBuffer;
 
 /**
  * A cursor class that traverse an inverted list that consists of fixed-size elements on disk
@@ -52,8 +49,8 @@ public class VariableSizeElementOnDiskInvertedListCursor extends AbstractOnDiskI
         isInit = true;
     }
 
-    @Override protected void doOpen(ICursorInitialState initialState, ISearchPredicate searchPred)
-            throws HyracksDataException {
+    @Override
+    protected void doOpen(ICursorInitialState initialState, ISearchPredicate searchPred) throws HyracksDataException {
         super.doOpen(initialState, searchPred);
         currentElementIxForScan = 0;
     }
@@ -140,7 +137,8 @@ public class VariableSizeElementOnDiskInvertedListCursor extends AbstractOnDiskI
 
     // Debugging purpose
     @SuppressWarnings("rawtypes")
-    @Override public String toString() {
+    @Override
+    public String toString() {
 
         int oldCurrentOff = currentOffsetForScan;
         int oldCurrentPageId = currentPageIxForScan;
@@ -170,7 +168,7 @@ public class VariableSizeElementOnDiskInvertedListCursor extends AbstractOnDiskI
                     } else {
                         StringBuilder builder = new StringBuilder();
                         // pos + 1 to skip the type tag
-                        result += UTF8StringUtil.toString(builder, tuple.getFieldData(i), pos+1).toString() + ", ";
+                        result += UTF8StringUtil.toString(builder, tuple.getFieldData(i), pos + 1).toString() + ", ";
                     }
                 }
                 result += " ";

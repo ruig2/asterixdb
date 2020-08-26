@@ -19,12 +19,12 @@
 
 package org.apache.hyracks.storage.am.lsm.invertedindex.ondisk.variablesize;
 
+import java.nio.ByteBuffer;
+
 import org.apache.hyracks.api.dataflow.value.ITypeTraits;
 import org.apache.hyracks.storage.am.lsm.invertedindex.ondisk.AbstractInvertedListTupleReference;
 import org.apache.hyracks.storage.am.lsm.invertedindex.util.InvertedIndexUtils;
 import org.apache.hyracks.util.string.UTF8StringUtil;
-
-import java.nio.ByteBuffer;
 
 public class VariableSizeInvertedListTupleReference extends AbstractInvertedListTupleReference {
 
@@ -97,7 +97,8 @@ public class VariableSizeInvertedListTupleReference extends AbstractInvertedList
         return startOff + fieldStartOffsets[fIdx];
     }
 
-    @Override public String toString() {
+    @Override
+    public String toString() {
         String result = "";
 
         for (int i = 0; i < typeTraits.length; i++) {
@@ -108,7 +109,7 @@ public class VariableSizeInvertedListTupleReference extends AbstractInvertedList
             } else {
                 StringBuilder builder = new StringBuilder();
                 // pos + 1 to skip the type tag
-                result += UTF8StringUtil.toString(builder, data, pos+1).toString() + ", ";
+                result += UTF8StringUtil.toString(builder, data, pos + 1).toString() + ", ";
             }
         }
         return result;
