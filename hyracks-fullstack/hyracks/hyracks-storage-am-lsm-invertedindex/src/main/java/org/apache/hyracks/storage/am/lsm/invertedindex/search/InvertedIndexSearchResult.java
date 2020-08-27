@@ -128,7 +128,15 @@ public class InvertedIndexSearchResult {
         }
         // Intermediate results? disk or in-memory based
         // Allocates more buffers.
-        isInMemoryOpMode = tryAllocateBuffers(numExpectedPages);
+        if (InvertedIndexUtils.checkTypeTraitsAllFixed(typeTraits)) {
+            isInMemoryOpMode = tryAllocateBuffers(numExpectedPages);
+        } else {
+            // When one of the type traits is variable length, disable the in memory mode
+            // because the length of the inverted list is unknown, and thus may exceed the memory budget
+            // A better way to do so might be to flush to disk when out-of-memory on the fly
+            // instead of deciding the in memory mode or not before we merge the results
+            isInMemoryOpMode = false;
+        }
         if (!isInMemoryOpMode) {
             // Not enough number of buffers. Switch to the file I/O mode.
             createAndOpenFile();
