@@ -144,7 +144,7 @@ public class InvertedIndexSearchResult {
     public boolean append(ITupleReference invListElement, int count) throws HyracksDataException {
         ByteBuffer currentBuffer;
         // Moves to the next page if the current page is full.
-        if (!appender.hasSpace(invListElement.getFieldLength(0))) {
+        if (!appender.hasSpace(invListElement.getFieldLength(0) + 4)) {
             currentWriterBufIdx++;
             if (isInMemoryOpMode) {
                 currentBuffer = buffers.get(currentWriterBufIdx);
