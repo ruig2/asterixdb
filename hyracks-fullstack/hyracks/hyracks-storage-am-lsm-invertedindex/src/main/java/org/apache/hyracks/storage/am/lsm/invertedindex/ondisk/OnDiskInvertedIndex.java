@@ -206,7 +206,11 @@ public class OnDiskInvertedIndex implements IInPlaceInvertedIndex {
     @Override
     public IInvertedListCursor createInvertedListRangeSearchCursor(IIndexCursorStats stats)
             throws HyracksDataException {
-        return new FixedSizeElementInvertedListScanCursor(bufferCache, fileId, invListTypeTraits, stats);
+        if (InvertedIndexUtils.checkTypeTraitsAllFixed(invListTypeTraits)) {
+            return new FixedSizeElementInvertedListScanCursor(bufferCache, fileId, invListTypeTraits, stats);
+        } else {
+            return new VariableSizeElementOnDiskInvertedListCursor(bufferCache, fileId, invListTypeTraits, stats);
+        }
     }
 
     @Override

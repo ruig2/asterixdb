@@ -34,7 +34,10 @@ import org.apache.hyracks.api.exceptions.HyracksDataException;
 import org.apache.hyracks.api.util.HyracksConstants;
 import org.apache.hyracks.dataflow.common.data.accessors.ITupleReference;
 import org.apache.hyracks.dataflow.common.utils.TaskUtil;
+import org.apache.hyracks.dataflow.std.buffermanager.DeallocatableFramePool;
+import org.apache.hyracks.dataflow.std.buffermanager.FramePoolBackedFrameBufferManager;
 import org.apache.hyracks.dataflow.std.buffermanager.ISimpleFrameBufferManager;
+import org.apache.hyracks.dataflow.std.buffermanager.SingleFrameBufferManager;
 import org.apache.hyracks.storage.am.lsm.invertedindex.api.IInvertedListCursor;
 import org.apache.hyracks.storage.am.lsm.invertedindex.api.IInvertedListTupleReference;
 import org.apache.hyracks.storage.am.lsm.invertedindex.util.InvertedIndexUtils;
@@ -79,6 +82,16 @@ public abstract class AbstractOnDiskInvertedListCursor extends AbstractInvertedL
 
     protected AbstractOnDiskInvertedListCursor(IBufferCache bufferCache, int fileId, ITypeTraits[] invListFields,
             IHyracksTaskContext ctx, IIndexCursorStats stats) throws HyracksDataException {
+        this(bufferCache, fileId, invListFields, ctx, stats, false);
+    }
+
+    protected AbstractOnDiskInvertedListCursor(IBufferCache bufferCache, int fileId, ITypeTraits[] invListFields,
+            IIndexCursorStats stats) throws HyracksDataException {
+        this(bufferCache, fileId, invListFields, null, stats, true);
+    }
+
+    protected AbstractOnDiskInvertedListCursor(IBufferCache bufferCache, int fileId, ITypeTraits[] invListFields,
+            IHyracksTaskContext ctx, IIndexCursorStats stats, boolean isScan) throws HyracksDataException {
         this.bufferCache = bufferCache;
         this.fileId = fileId;
 
@@ -93,20 +106,23 @@ public abstract class AbstractOnDiskInvertedListCursor extends AbstractInvertedL
         this.invListFields = invListFields;
         this.tuple = InvertedIndexUtils.createInvertedListTupleReference(invListFields);
         this.buffers = new ArrayList<ByteBuffer>();
-        if (ctx == null) {
+        if (ctx == null && !isScan) {
             throw HyracksDataException.create(ErrorCode.CANNOT_CONTINUE_TEXT_SEARCH_HYRACKS_TASK_IS_NULL);
         }
-        this.bufferManagerForSearch = TaskUtil.get(HyracksConstants.INVERTED_INDEX_SEARCH_FRAME_MANAGER, ctx);
-        if (bufferManagerForSearch == null) {
-            throw HyracksDataException.create(ErrorCode.CANNOT_CONTINUE_TEXT_SEARCH_BUFFER_MANAGER_IS_NULL);
+        if (!isScan) {
+            this.bufferManagerForSearch = TaskUtil.get(HyracksConstants.INVERTED_INDEX_SEARCH_FRAME_MANAGER, ctx);
+            if (bufferManagerForSearch == null) {
+                    throw HyracksDataException.create(ErrorCode.CANNOT_CONTINUE_TEXT_SEARCH_BUFFER_MANAGER_IS_NULL);
+            }
+        } else {
+            this.bufferManagerForSearch = new SingleFrameBufferManager();
         }
         this.stats = stats;
     }
 
     /**
      * Tries to allocate enough buffers to read the inverted list at once. If memory budget is not enough, this method
-     * stops allocating buffers.
-     */
+     * stops allocating buffers. */
     protected void allocateBuffers() throws HyracksDataException {
         do {
             ByteBuffer tmpBuffer = bufferManagerForSearch.acquireFrame(bufferCache.getPageSize());
