@@ -150,8 +150,7 @@ public class InvertedListMerger {
                     int numInvListElements = invListCursor.size();
                     int currentNumResults = prevSearchResult.getNumResults();
                     // Should we binary search the next list or should we sort-merge it?
-                    if (false && currentNumResults * Math.log(numInvListElements) < currentNumResults
-                            + numInvListElements) {
+                    if (currentNumResults * Math.log(numInvListElements) < currentNumResults + numInvListElements) {
                         doneMerge = mergeSuffixListProbe(invListCursor, prevSearchResult, result, i, numInvLists,
                                 occurrenceThreshold, isFinalList);
                     } else {

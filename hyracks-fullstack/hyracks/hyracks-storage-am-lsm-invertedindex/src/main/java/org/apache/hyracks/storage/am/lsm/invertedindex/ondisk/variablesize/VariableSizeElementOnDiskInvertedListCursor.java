@@ -64,23 +64,39 @@ public class VariableSizeElementOnDiskInvertedListCursor extends AbstractOnDiskI
         if (isInit) {
             isInit = false;
         } else {
-            int lenCurrentTuple = -1;
+            currentOffsetForScan += UTF8StringUtil.getUTFStringFieldLength(buffers.get(currentPageIxForScan).array(),
+                    currentOffsetForScan);
+            /*
+            int lenPreviousTuple = -1;
             int bufferLen = buffers.get(currentPageIxForScan).array().length;
             if (currentOffsetForScan < bufferLen) {
-                lenCurrentTuple = UTF8StringUtil.getUTFStringFieldLength(buffers.get(currentPageIxForScan).array(),
+                lenPreviousTuple = UTF8StringUtil.getUTFStringFieldLength(buffers.get(currentPageIxForScan).array(),
                         currentOffsetForScan);
             }
+            currentOffsetForScan += lenPreviousTuple;
+            
             // !!! assume the empty tailing space in a frame is filled with 0
-            if (lenCurrentTuple > 0) {
-                currentOffsetForScan += lenCurrentTuple;
+            if (lenPreviousTuple > 0) {
+                currentOffsetForScan += lenPreviousTuple;
             } else {
                 currentPageIxForScan++;
                 currentOffsetForScan = 0;
             }
+             */
+        }
+
+        int tagCurrentTuple = -1;
+        int bufferLen = buffers.get(currentPageIxForScan).array().length;
+        if (currentOffsetForScan < bufferLen) {
+            tagCurrentTuple = buffers.get(currentPageIxForScan).array()[currentOffsetForScan];
+        }
+        if (tagCurrentTuple != 13) {
+            currentPageIxForScan++;
+            currentOffsetForScan = 0;
         }
 
         // Needs to read the next block?
-        if (currentOffsetForScan >= buffers.size() && endPageId > bufferEndPageId) {
+        if (currentPageIxForScan >= buffers.size() && endPageId > bufferEndPageId) {
             loadPages();
             currentOffsetForScan = 0;
         }

@@ -68,7 +68,6 @@ public class FixedSizeElementOnDiskInvertedListCursor extends AbstractOnDiskInve
      */
     @Override
     public void doNext() throws HyracksDataException {
-        // why 2?
         if (currentOffsetForScan + 2 * elementSize > bufferCache.getPageSize()) {
             currentPageIxForScan++;
             currentOffsetForScan = 0;
