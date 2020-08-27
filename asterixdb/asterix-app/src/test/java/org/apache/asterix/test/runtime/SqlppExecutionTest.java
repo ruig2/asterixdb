@@ -56,8 +56,7 @@ public class SqlppExecutionTest {
 
     @Parameters(name = "SqlppExecutionTest {index}: {0}")
     public static Collection<Object[]> tests() throws Exception {
-        //return LangExecutionUtil.tests("only_sqlpp.xml", "testsuite_sqlpp.xml");
-        return LangExecutionUtil.tests("only_sqlpp.xml", "testsuite_sqlpp_inverted_list_variable_len_pk.xml");
+        return LangExecutionUtil.tests("only_sqlpp.xml", "testsuite_sqlpp.xml");
     }
 
     protected TestCaseContext tcCtx;
