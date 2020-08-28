@@ -30,8 +30,8 @@ import org.apache.hyracks.storage.am.lsm.invertedindex.util.InvertedIndexUtils;
 import org.apache.hyracks.util.string.UTF8StringUtil;
 
 /**
- * This is a fixed-size tuple accessor class.
- * The frame structure: [4 bytes for minimum Hyracks frame count] [fixed-size tuple 1] ... [fixed-size tuple n] ...
+ * This is a variable-size tuple accessor class.
+ * The frame structure: [4 bytes for minimum Hyracks frame count] [variable-size tuple 1] ... [variable-size tuple n] ...
  * [4 bytes for the tuple count in a frame]
  *
  * For such a variable-size tuple accessor, for now it supports to get the position of the next tuple only,

@@ -82,7 +82,6 @@ public class InvertedListFrameTupleAppender implements IInvertedListFrameTupleAp
         if (tupleDataEndOffset + 4 + TUPLE_COUNT_SIZE <= frameSize) {
             buffer.putInt(tupleDataEndOffset, fieldValue);
             tupleDataEndOffset += 4;
-            tupleCount++;
             return true;
         }
         return false;
@@ -92,7 +91,6 @@ public class InvertedListFrameTupleAppender implements IInvertedListFrameTupleAp
         if (tupleDataEndOffset + 8 + TUPLE_COUNT_SIZE <= frameSize) {
             buffer.putLong(tupleDataEndOffset, fieldValue);
             tupleDataEndOffset += 8;
-            tupleCount++;
             return true;
         }
         return false;
@@ -102,7 +100,6 @@ public class InvertedListFrameTupleAppender implements IInvertedListFrameTupleAp
         if (tupleDataEndOffset + 2 + TUPLE_COUNT_SIZE <= frameSize) {
             buffer.putLong(tupleDataEndOffset, fieldValue);
             tupleDataEndOffset += 2;
-            tupleCount++;
             return true;
         }
         return false;
@@ -112,7 +109,6 @@ public class InvertedListFrameTupleAppender implements IInvertedListFrameTupleAp
         if (tupleDataEndOffset + 1 + TUPLE_COUNT_SIZE <= frameSize) {
             buffer.put(tupleDataEndOffset, fieldValue);
             tupleDataEndOffset += 1;
-            tupleCount++;
             return true;
         }
         return false;
@@ -128,6 +124,9 @@ public class InvertedListFrameTupleAppender implements IInvertedListFrameTupleAp
         int currentCount = buffer.getInt(tupleCountOffset);
         int newCount = currentCount + count;
         buffer.putInt(tupleCountOffset, newCount);
+
+        tupleCount += count;
+        assert tupleCount == newCount;
     }
 
     public int getTupleCount() {
