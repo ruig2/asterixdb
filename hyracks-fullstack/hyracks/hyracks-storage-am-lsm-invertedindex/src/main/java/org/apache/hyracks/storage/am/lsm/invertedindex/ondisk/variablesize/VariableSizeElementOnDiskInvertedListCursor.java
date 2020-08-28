@@ -110,11 +110,6 @@ public class VariableSizeElementOnDiskInvertedListCursor extends AbstractOnDiskI
 
         currentElementIxForScan++;
         tuple.reset(buffers.get(currentPageIxForScan).array(), currentOffsetForScan);
-
-        System.out.println(tuple.toString());
-        if (tuple.toString().contains("111005657")) {
-           //System.out.println("FFFFFFFFFFFF");
-        }
     }
 
     /**
