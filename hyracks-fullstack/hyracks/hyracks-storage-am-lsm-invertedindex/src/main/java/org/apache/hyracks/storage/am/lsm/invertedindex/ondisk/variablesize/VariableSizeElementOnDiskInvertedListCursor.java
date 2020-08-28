@@ -96,8 +96,8 @@ public class VariableSizeElementOnDiskInvertedListCursor extends AbstractOnDiskI
         if (currentOffsetForScan < bufferLen) {
             tagCurrentTuple = buffers.get(currentPageIxForScan).array()[currentOffsetForScan];
         }
-        if (tagCurrentTuple != 13) {
-            assert tagCurrentTuple == 0;
+        if (tagCurrentTuple <= 0) {
+            // assert tagCurrentTuple == 0;
             currentPageIxForScan++;
             currentOffsetForScan = 0;
         }
@@ -119,7 +119,6 @@ public class VariableSizeElementOnDiskInvertedListCursor extends AbstractOnDiskI
     protected void setBlockInfo() {
         super.setBlockInfo();
         currentOffsetForScan = bufferStartElementIx == 0 ? startOff : 0;
-        // isInit = true;
     }
 
     /**
@@ -162,53 +161,54 @@ public class VariableSizeElementOnDiskInvertedListCursor extends AbstractOnDiskI
     @SuppressWarnings("rawtypes")
     @Override
     public String toString() {
+        return "";
 
-        int oldCurrentOff = currentOffsetForScan;
-        int oldCurrentPageId = currentPageIxForScan;
-        int oldCurrentElementIx = currentElementIxForScan;
-        boolean oldIsInit = isInit;
+        // int oldCurrentOff = currentOffsetForScan;
+        // int oldCurrentPageId = currentPageIxForScan;
+        // int oldCurrentElementIx = currentElementIxForScan;
+        // boolean oldIsInit = isInit;
 
-        /*
-        currentOffsetForScan = startOff;
-        currentPageIxForScan = 0;
-        currentElementIxForScan = 0;
-        isInit = false;
-         */
+        // /*
+        // currentOffsetForScan = startOff;
+        // currentPageIxForScan = 0;
+        // currentElementIxForScan = 0;
+        // isInit = false;
+        //  */
 
-        String result = "";
-        try {
-            while (hasNext()) {
-                next();
+        // String result = "";
+        // try {
+        //     while (hasNext()) {
+        //         next();
 
-                if (currentElementIxForScan - 1 == oldCurrentElementIx) {
-                    result += "->";
-                }
+        //         if (currentElementIxForScan - 1 == oldCurrentElementIx) {
+        //             result += "->";
+        //         }
 
-                ITupleReference tuple = getTuple();
-                for (int i = 0; i < tuple.getFieldCount(); i++) {
-                    int pos = tuple.getFieldStart(i);
-                    if (invListFields[i].isFixedLength()) {
-                        int len = invListFields[i].getFixedLength();
-                        result += ByteBuffer.wrap(tuple.getFieldData(i), pos, len).getInt() + ", ";
-                    } else {
-                        StringBuilder builder = new StringBuilder();
-                        // pos + 1 to skip the type tag
-                        result += UTF8StringUtil.toString(builder, tuple.getFieldData(i), pos + 1).toString() + ", ";
-                    }
-                }
-                result += " ";
-            }
-        } catch (HyracksDataException e) {
-            e.printStackTrace();
-        }
+        //         ITupleReference tuple = getTuple();
+        //         for (int i = 0; i < tuple.getFieldCount(); i++) {
+        //             int pos = tuple.getFieldStart(i);
+        //             if (invListFields[i].isFixedLength()) {
+        //                 int len = invListFields[i].getFixedLength();
+        //                 result += ByteBuffer.wrap(tuple.getFieldData(i), pos, len).getInt() + ", ";
+        //             } else {
+        //                 StringBuilder builder = new StringBuilder();
+        //                 // pos + 1 to skip the type tag
+        //                 result += UTF8StringUtil.toString(builder, tuple.getFieldData(i), pos + 1).toString() + ", ";
+        //             }
+        //         }
+        //         result += " ";
+        //     }
+        // } catch (HyracksDataException e) {
+        //     e.printStackTrace();
+        // }
 
-        // reset previous state
-        currentOffsetForScan = oldCurrentOff;
-        currentPageIxForScan = oldCurrentPageId;
-        currentElementIxForScan = oldCurrentElementIx;
-        isInit = oldIsInit;
+        // // reset previous state
+        // currentOffsetForScan = oldCurrentOff;
+        // currentPageIxForScan = oldCurrentPageId;
+        // currentElementIxForScan = oldCurrentElementIx;
+        // isInit = oldIsInit;
 
-        return result;
+        // return result;
     }
 
     /**

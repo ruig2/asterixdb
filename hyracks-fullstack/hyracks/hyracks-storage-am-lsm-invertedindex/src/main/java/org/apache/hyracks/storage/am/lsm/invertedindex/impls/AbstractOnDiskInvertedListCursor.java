@@ -34,8 +34,6 @@ import org.apache.hyracks.api.exceptions.HyracksDataException;
 import org.apache.hyracks.api.util.HyracksConstants;
 import org.apache.hyracks.dataflow.common.data.accessors.ITupleReference;
 import org.apache.hyracks.dataflow.common.utils.TaskUtil;
-import org.apache.hyracks.dataflow.std.buffermanager.DeallocatableFramePool;
-import org.apache.hyracks.dataflow.std.buffermanager.FramePoolBackedFrameBufferManager;
 import org.apache.hyracks.dataflow.std.buffermanager.ISimpleFrameBufferManager;
 import org.apache.hyracks.dataflow.std.buffermanager.SingleFrameBufferManager;
 import org.apache.hyracks.storage.am.lsm.invertedindex.api.IInvertedListCursor;
@@ -112,7 +110,7 @@ public abstract class AbstractOnDiskInvertedListCursor extends AbstractInvertedL
         if (!isScan) {
             this.bufferManagerForSearch = TaskUtil.get(HyracksConstants.INVERTED_INDEX_SEARCH_FRAME_MANAGER, ctx);
             if (bufferManagerForSearch == null) {
-                    throw HyracksDataException.create(ErrorCode.CANNOT_CONTINUE_TEXT_SEARCH_BUFFER_MANAGER_IS_NULL);
+                throw HyracksDataException.create(ErrorCode.CANNOT_CONTINUE_TEXT_SEARCH_BUFFER_MANAGER_IS_NULL);
             }
         } else {
             this.bufferManagerForSearch = new SingleFrameBufferManager();
@@ -195,6 +193,8 @@ public abstract class AbstractOnDiskInvertedListCursor extends AbstractInvertedL
         // the last page ID where the previous loadPages() stopped.
         bufferStartPageId = bufferEndPageId + 1;
         if (bufferStartPageId > endPageId) {
+            System.out.println("RRRRRRRRRRRRRRRRRRRRRRR");
+            assert false;
             return;
         }
         int currentBufferIdx = 0;
