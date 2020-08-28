@@ -97,6 +97,7 @@ public class VariableSizeElementOnDiskInvertedListCursor extends AbstractOnDiskI
             tagCurrentTuple = buffers.get(currentPageIxForScan).array()[currentOffsetForScan];
         }
         if (tagCurrentTuple != 13) {
+            assert tagCurrentTuple == 0;
             currentPageIxForScan++;
             currentOffsetForScan = 0;
         }
@@ -109,6 +110,11 @@ public class VariableSizeElementOnDiskInvertedListCursor extends AbstractOnDiskI
 
         currentElementIxForScan++;
         tuple.reset(buffers.get(currentPageIxForScan).array(), currentOffsetForScan);
+
+        System.out.println(tuple.toString());
+        if (tuple.toString().contains("111005657")) {
+           //System.out.println("FFFFFFFFFFFF");
+        }
     }
 
     /**
@@ -118,7 +124,7 @@ public class VariableSizeElementOnDiskInvertedListCursor extends AbstractOnDiskI
     protected void setBlockInfo() {
         super.setBlockInfo();
         currentOffsetForScan = bufferStartElementIx == 0 ? startOff : 0;
-        isInit = true;
+        // isInit = true;
     }
 
     /**
@@ -167,10 +173,12 @@ public class VariableSizeElementOnDiskInvertedListCursor extends AbstractOnDiskI
         int oldCurrentElementIx = currentElementIxForScan;
         boolean oldIsInit = isInit;
 
+        /*
         currentOffsetForScan = startOff;
         currentPageIxForScan = 0;
         currentElementIxForScan = 0;
         isInit = false;
+         */
 
         String result = "";
         try {

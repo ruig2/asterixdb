@@ -98,7 +98,6 @@ public class FixedSizeElementOnDiskInvertedListCursor extends AbstractOnDiskInve
         bufferEndElementIx = elementIndexes[bufferEndPageId - startPageId];
         // Gets the final element tuple in this block.
         getElementAtIndex(bufferEndElementIx, bufferEndElementTuple);
-        currentOffsetForScan = bufferStartElementIx == 0 ? startOff - elementSize : -elementSize;
     }
 
     /**
