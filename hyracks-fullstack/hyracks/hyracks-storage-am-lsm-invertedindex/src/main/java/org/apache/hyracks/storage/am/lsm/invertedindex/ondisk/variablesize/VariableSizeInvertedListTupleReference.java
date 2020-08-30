@@ -99,6 +99,8 @@ public class VariableSizeInvertedListTupleReference extends AbstractInvertedList
 
     @Override
     public String toString() {
+        return "";
+        /*
         String result = "";
 
         for (int i = 0; i < typeTraits.length; i++) {
@@ -113,5 +115,6 @@ public class VariableSizeInvertedListTupleReference extends AbstractInvertedList
             }
         }
         return result;
+         */
     }
 }
