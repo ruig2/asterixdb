@@ -19,8 +19,6 @@
 
 package org.apache.hyracks.storage.am.lsm.invertedindex.ondisk.variablesize;
 
-import java.nio.ByteBuffer;
-
 import org.apache.hyracks.api.dataflow.value.ITypeTraits;
 import org.apache.hyracks.storage.am.lsm.invertedindex.ondisk.AbstractInvertedListTupleReference;
 import org.apache.hyracks.storage.am.lsm.invertedindex.util.InvertedIndexUtils;
@@ -102,7 +100,7 @@ public class VariableSizeInvertedListTupleReference extends AbstractInvertedList
         return "";
         /*
         String result = "";
-
+        
         for (int i = 0; i < typeTraits.length; i++) {
             int pos = getFieldStart(i);
             if (typeTraits[i].isFixedLength()) {
