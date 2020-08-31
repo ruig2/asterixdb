@@ -21,6 +21,8 @@ package org.apache.hyracks.storage.am.lsm.invertedindex.ondisk;
 import org.apache.hyracks.api.dataflow.value.ITypeTraits;
 import org.apache.hyracks.storage.am.lsm.invertedindex.api.IInvertedListBuilder;
 
+import java.util.Arrays;
+
 // ToDo: Intellij Idea doesn't allow me to rename it to AbstractInvertedListBuilder
 public abstract class AInvertedListBuilder implements IInvertedListBuilder {
     protected byte[] targetBuf;
@@ -36,6 +38,9 @@ public abstract class AInvertedListBuilder implements IInvertedListBuilder {
     public void setTargetBuffer(byte[] targetBuf, int startPos) {
         this.targetBuf = targetBuf;
         this.pos = startPos;
+
+        // ToDo: remove this
+        Arrays.fill(targetBuf, (byte) 0);
     }
 
     @Override

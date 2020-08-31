@@ -23,6 +23,7 @@ import org.apache.hyracks.api.dataflow.value.ITypeTraits;
 import org.apache.hyracks.dataflow.common.data.accessors.ITupleReference;
 import org.apache.hyracks.storage.am.lsm.invertedindex.ondisk.AInvertedListBuilder;
 import org.apache.hyracks.storage.am.lsm.invertedindex.util.InvertedIndexUtils;
+import org.apache.hyracks.util.string.UTF8StringUtil;
 
 public class VariableSizeElementInvertedListBuilder extends AInvertedListBuilder {
 
@@ -32,9 +33,13 @@ public class VariableSizeElementInvertedListBuilder extends AInvertedListBuilder
     }
 
     @Override
-    public boolean startNewList(ITupleReference tuple, int tokenField) {
-        listSize = 0;
-        return true;
+    public boolean startNewList(ITupleReference tuple, int numTokenFields) {
+        if (!checkEnoughSpace(tuple, numTokenFields, tuple.getFieldCount() - numTokenFields)) {
+            return false;
+        } else {
+            listSize = 0;
+            return true;
+        }
     }
 
     private boolean checkEnoughSpace(ITupleReference tuple, int numTokenFields, int numElementFields) {

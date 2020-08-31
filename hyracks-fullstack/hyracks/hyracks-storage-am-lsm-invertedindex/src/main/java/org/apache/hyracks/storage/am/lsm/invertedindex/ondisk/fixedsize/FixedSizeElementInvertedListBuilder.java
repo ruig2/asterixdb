@@ -39,7 +39,7 @@ public class FixedSizeElementInvertedListBuilder extends AInvertedListBuilder {
     }
 
     @Override
-    public boolean startNewList(ITupleReference tuple, int tokenField) {
+    public boolean startNewList(ITupleReference tuple, int numTokenFields) {
         if (pos + listElementSize > targetBuf.length) {
             return false;
         } else {
