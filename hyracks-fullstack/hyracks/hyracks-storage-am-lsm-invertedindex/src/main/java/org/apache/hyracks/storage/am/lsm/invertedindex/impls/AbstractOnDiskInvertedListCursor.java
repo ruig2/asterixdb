@@ -192,11 +192,6 @@ public abstract class AbstractOnDiskInvertedListCursor extends AbstractInvertedL
         // Resets the start page ID to load. At this moment, the variable bufferEndPageId holds
         // the last page ID where the previous loadPages() stopped.
         bufferStartPageId = bufferEndPageId + 1;
-        if (bufferStartPageId > endPageId) {
-            System.out.println("RRRRRRRRRRRRRRRRRRRRRRR");
-            assert false;
-            return;
-        }
         int currentBufferIdx = 0;
         ByteBuffer tmpBuffer;
         for (int i = bufferStartPageId; i <= endPageId; i++) {

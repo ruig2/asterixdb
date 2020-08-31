@@ -57,6 +57,26 @@ public class VariableSizeElementOnDiskInvertedListCursor extends AbstractOnDiskI
     protected void doOpen(ICursorInitialState initialState, ISearchPredicate searchPred) throws HyracksDataException {
         super.doOpen(initialState, searchPred);
         currentElementIxForScan = 0;
+        isInit = true;
+    }
+
+    private int getOffsetPageEnd(byte[] bytes) {
+        int p = bytes.length - 4;
+        int offsetEnd = 0;
+        for (int i = 0; i < 4; i++) {
+            offsetEnd = (offsetEnd << 8) + (bytes[p++] & 0xFF);
+        }
+
+        return offsetEnd;
+    }
+
+    private int getLengthCurrentTuple() {
+        byte[] bytes = buffers.get(currentPageIxForScan).array();
+        if (bytes[currentOffsetForScan] == 0) {
+            return 0;
+        } else {
+            return UTF8StringUtil.getUTFStringFieldLength(bytes, currentOffsetForScan);
+        }
     }
 
     /**
@@ -70,32 +90,12 @@ public class VariableSizeElementOnDiskInvertedListCursor extends AbstractOnDiskI
         } else {
             currentOffsetForScan += UTF8StringUtil.getUTFStringFieldLength(buffers.get(currentPageIxForScan).array(),
                     currentOffsetForScan);
-            /*
-            int lenPreviousTuple = -1;
-            int bufferLen = buffers.get(currentPageIxForScan).array().length;
-            if (currentOffsetForScan < bufferLen) {
-                lenPreviousTuple = UTF8StringUtil.getUTFStringFieldLength(buffers.get(currentPageIxForScan).array(),
-                        currentOffsetForScan);
-            }
-            currentOffsetForScan += lenPreviousTuple;
-            
-            // !!! assume the empty tailing space in a frame is filled with 0
-            if (lenPreviousTuple > 0) {
-                currentOffsetForScan += lenPreviousTuple;
-            } else {
-                currentPageIxForScan++;
-                currentOffsetForScan = 0;
-            }
-             */
         }
 
-        int tagCurrentTuple = -1;
-        int bufferLen = buffers.get(currentPageIxForScan).array().length;
-        if (currentOffsetForScan < bufferLen) {
-            tagCurrentTuple = buffers.get(currentPageIxForScan).array()[currentOffsetForScan];
-        }
-        if (tagCurrentTuple <= 0) {
-            // assert tagCurrentTuple == 0;
+        // int lenCurrentTuple = getLengthCurrentTuple();
+        int pageEnd = getOffsetPageEnd(buffers.get(currentPageIxForScan).array());
+        assert currentOffsetForScan <= pageEnd;
+        if (currentOffsetForScan  >= getOffsetPageEnd(buffers.get(currentPageIxForScan).array())) {
             currentPageIxForScan++;
             currentOffsetForScan = 0;
         }
