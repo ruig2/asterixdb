@@ -39,8 +39,7 @@ public abstract class AInvertedListBuilder implements IInvertedListBuilder {
         this.targetBuf = targetBuf;
         this.pos = startPos;
 
-        // ToDo: remove this
-        Arrays.fill(targetBuf, (byte) 0);
+        Arrays.fill(targetBuf, startPos, targetBuf.length, (byte) 0);
     }
 
     @Override
