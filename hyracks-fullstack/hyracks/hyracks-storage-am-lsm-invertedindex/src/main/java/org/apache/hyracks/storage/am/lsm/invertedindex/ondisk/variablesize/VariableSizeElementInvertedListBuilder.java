@@ -58,10 +58,10 @@ public class VariableSizeElementInvertedListBuilder extends AInvertedListBuilder
 
     private void setPageEndOffset() {
         int off = targetBuf.length - 4;
-        targetBuf[off++] = (byte)(pos >> 24);
-        targetBuf[off++] = (byte)(pos >> 16);
-        targetBuf[off++] = (byte)(pos >> 8);
-        targetBuf[off] = (byte)(pos);
+        targetBuf[off++] = (byte) (pos >> 24);
+        targetBuf[off++] = (byte) (pos >> 16);
+        targetBuf[off++] = (byte) (pos >> 8);
+        targetBuf[off] = (byte) (pos);
     }
 
     @Override

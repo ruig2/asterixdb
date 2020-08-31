@@ -18,10 +18,10 @@
  */
 package org.apache.hyracks.storage.am.lsm.invertedindex.ondisk;
 
+import java.util.Arrays;
+
 import org.apache.hyracks.api.dataflow.value.ITypeTraits;
 import org.apache.hyracks.storage.am.lsm.invertedindex.api.IInvertedListBuilder;
-
-import java.util.Arrays;
 
 // ToDo: Intellij Idea doesn't allow me to rename it to AbstractInvertedListBuilder
 public abstract class AInvertedListBuilder implements IInvertedListBuilder {

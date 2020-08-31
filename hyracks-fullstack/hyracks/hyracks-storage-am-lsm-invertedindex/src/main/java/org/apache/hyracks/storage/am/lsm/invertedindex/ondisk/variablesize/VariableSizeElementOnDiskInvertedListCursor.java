@@ -95,7 +95,7 @@ public class VariableSizeElementOnDiskInvertedListCursor extends AbstractOnDiskI
         // int lenCurrentTuple = getLengthCurrentTuple();
         int pageEnd = getOffsetPageEnd(buffers.get(currentPageIxForScan).array());
         assert currentOffsetForScan <= pageEnd;
-        if (currentOffsetForScan  >= getOffsetPageEnd(buffers.get(currentPageIxForScan).array())) {
+        if (currentOffsetForScan >= getOffsetPageEnd(buffers.get(currentPageIxForScan).array())) {
             currentPageIxForScan++;
             currentOffsetForScan = 0;
         }
