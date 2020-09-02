@@ -4878,6 +4878,11 @@
         <output-dir compare="Text">basic-1_1_3</output-dir>
       </compilation-unit>
     </test-case>
+    <test-case FilePath="fuzzyjoin">
+      <compilation-unit name="dblp-string-as-primary-key">
+        <output-dir compare="Text">dblp-string-as-primary-key</output-dir>
+      </compilation-unit>
+    </test-case>
   </test-group>
   <!--
     <test-group name="flwor">
