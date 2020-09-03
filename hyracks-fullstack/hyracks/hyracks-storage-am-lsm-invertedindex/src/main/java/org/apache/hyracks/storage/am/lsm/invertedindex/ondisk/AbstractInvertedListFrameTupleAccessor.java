@@ -27,8 +27,11 @@ import org.apache.hyracks.api.dataflow.value.ITypeTraits;
 
 /**
  * This is a frame tuple accessor class for inverted list.
- * The frame structure: [4 bytes for minimum Hyracks frame count] [fixed-size tuple 1] ... [fixed-size tuple n] ...
+ * The frame structure: [4 bytes for minimum Hyracks frame count] [tuple 1] ... [tuple n] ...
  * [4 bytes for the tuple count in a frame]
+ *
+ * The tuples can be fixed-size or variable-size.
+ * This class is mainly used to merge two inverted lists, e.g. searching the conjunction of two keywords "abc" AND "xyz"
  */
 public abstract class AbstractInvertedListFrameTupleAccessor implements IFrameTupleAccessor {
 
