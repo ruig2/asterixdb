@@ -60,6 +60,8 @@ public class TOccurrenceSearcher extends AbstractTOccurrenceSearcher {
         IInvertedIndexSearchModifier searchModifier = searchPred.getSearchModifier();
         occurrenceThreshold = searchModifier.getOccurrenceThreshold(numQueryTokens);
         if (occurrenceThreshold <= 0) {
+            // If the threshold is 0, it might mean all the characters in the query string are delimiters/separators
+            // so after tokenization it is an empty string
             throw HyracksDataException.create(ErrorCode.OCCURRENCE_THRESHOLD_PANIC_EXCEPTION);
         }
         int numPrefixLists = searchModifier.getNumPrefixLists(occurrenceThreshold, invListCursors.size());

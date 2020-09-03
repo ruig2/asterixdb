@@ -45,23 +45,23 @@ public class DelimitedUTF8StringBinaryTokenizer extends AbstractUTF8StringBinary
     @Override
     public boolean hasNext() {
         // skip delimiters
-        while (byteIndex < sentenceEndOffset && isSeparator(UTF8StringUtil.charAt(sentenceBytes, byteIndex))) {
-            byteIndex += UTF8StringUtil.charSize(sentenceBytes, byteIndex);
+        while (byteIndex < sentenceEndOffset && isSeparator(UTF8StringUtil.codePointAt(sentenceBytes, byteIndex))) {
+            byteIndex += UTF8StringUtil.codePointSize(sentenceBytes, byteIndex);
         }
         return byteIndex < sentenceEndOffset;
     }
 
-    public static boolean isSeparator(char c) {
-        return !(Character.isLetterOrDigit(c) || Character.getType(c) == Character.OTHER_LETTER
-                || Character.getType(c) == Character.OTHER_NUMBER);
+    public static boolean isSeparator(int codePoint) {
+        return !(Character.isLetterOrDigit(codePoint) || Character.getType(codePoint) == Character.OTHER_LETTER
+                || Character.getType(codePoint) == Character.OTHER_NUMBER);
     }
 
     @Override
     public void next() {
         int tokenLength = 0;
         int currentTokenStart = byteIndex;
-        while (byteIndex < sentenceEndOffset && !isSeparator(UTF8StringUtil.charAt(sentenceBytes, byteIndex))) {
-            byteIndex += UTF8StringUtil.charSize(sentenceBytes, byteIndex);
+        while (byteIndex < sentenceEndOffset && !isSeparator(UTF8StringUtil.codePointAt(sentenceBytes, byteIndex))) {
+            byteIndex += UTF8StringUtil.codePointSize(sentenceBytes, byteIndex);
             tokenLength++;
         }
         int curTokenCount = 1;
@@ -75,12 +75,12 @@ public class DelimitedUTF8StringBinaryTokenizer extends AbstractUTF8StringBinary
                     for (int charPos = 0; charPos < tokenLength; charPos++) {
                         // case insensitive comparison
                         if (Character.toLowerCase(
-                                UTF8StringUtil.charAt(sentenceBytes, currentTokenStart + offset)) != Character
-                                        .toLowerCase(UTF8StringUtil.charAt(sentenceBytes, tokenStart + offset))) {
+                                UTF8StringUtil.codePointAt(sentenceBytes, currentTokenStart + offset)) != Character
+                                        .toLowerCase(UTF8StringUtil.codePointAt(sentenceBytes, tokenStart + offset))) {
                             curTokenCount--;
                             break;
                         }
-                        offset += UTF8StringUtil.charSize(sentenceBytes, currentTokenStart + offset);
+                        offset += UTF8StringUtil.codePointSize(sentenceBytes, currentTokenStart + offset);
                     }
                 }
             }
@@ -101,7 +101,7 @@ public class DelimitedUTF8StringBinaryTokenizer extends AbstractUTF8StringBinary
             tokenCount = 0;
             boolean previousCharIsSeparator = true;
             while (originalIndex < sentenceEndOffset) {
-                if (isSeparator(UTF8StringUtil.charAt(sentenceBytes, originalIndex))) {
+                if (isSeparator(UTF8StringUtil.codePointAt(sentenceBytes, originalIndex))) {
                     previousCharIsSeparator = true;
                 } else {
                     if (previousCharIsSeparator) {
@@ -109,7 +109,7 @@ public class DelimitedUTF8StringBinaryTokenizer extends AbstractUTF8StringBinary
                         previousCharIsSeparator = false;
                     }
                 }
-                originalIndex += UTF8StringUtil.charSize(sentenceBytes, originalIndex);
+                originalIndex += UTF8StringUtil.codePointSize(sentenceBytes, originalIndex);
             }
         }
         return tokenCount;
