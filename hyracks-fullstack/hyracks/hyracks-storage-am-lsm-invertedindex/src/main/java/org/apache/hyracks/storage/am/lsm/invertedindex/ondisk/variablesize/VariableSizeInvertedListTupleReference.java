@@ -34,6 +34,9 @@ public class VariableSizeInvertedListTupleReference extends AbstractInvertedList
     }
 
     private void verifyFieldTypeTag(ITypeTraits typeTrait, int tag) {
+        // 13 is the type tag of ATypeTag.String which is defined in the upper AsterixDB layer
+        // ToDo: find a better way to handle ATypeTag.String
+
         if (!typeTrait.isFixedLength() && tag != 13) {
             throw new UnsupportedOperationException("For variable-size type trait, only string is supported");
         }
@@ -56,9 +59,6 @@ public class VariableSizeInvertedListTupleReference extends AbstractInvertedList
             if (typeTraits[i - 1].isFixedLength()) {
                 fieldStartOffsets[i] = fieldStartOffsets[i - 1] + typeTraits[i - 1].getFixedLength();
             } else {
-                // 13 is the type tag of ATypeTag.String which is defined in the upper AsterixDB layer
-                // ToDo: find a better way to handle ATypeTag.String
-
                 verifyFieldTypeTag(typeTraits[i], data[tmpPos]);
                 lenField = UTF8StringUtil.getUTFStringFieldLength(data, tmpPos);
                 fieldStartOffsets[i] = fieldStartOffsets[i - 1] + lenField;
@@ -93,26 +93,5 @@ public class VariableSizeInvertedListTupleReference extends AbstractInvertedList
     @Override
     public int getFieldStart(int fIdx) {
         return startOff + fieldStartOffsets[fIdx];
-    }
-
-    @Override
-    public String toString() {
-        return "";
-        /*
-        String result = "";
-        
-        for (int i = 0; i < typeTraits.length; i++) {
-            int pos = getFieldStart(i);
-            if (typeTraits[i].isFixedLength()) {
-                int len = typeTraits[i].getFixedLength();
-                result += ByteBuffer.wrap(data, pos, len).getInt() + ", ";
-            } else {
-                StringBuilder builder = new StringBuilder();
-                // pos + 1 to skip the type tag
-                result += UTF8StringUtil.toString(builder, data, pos + 1).toString() + ", ";
-            }
-        }
-        return result;
-         */
     }
 }

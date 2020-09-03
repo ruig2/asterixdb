@@ -34,12 +34,17 @@ import org.apache.hyracks.util.string.UTF8StringUtil;
  * The frame structure: [4 bytes for minimum Hyracks frame count] [variable-size tuple 1] ... [variable-size tuple n] ...
  * [4 bytes for the tuple count in a frame]
  *
+ * This frame accessor is mainly used to merge two inverted lists, e.g. when searching the conjunction of two keywords ("abc" AND "xyz")
+ *
  * For such a variable-size tuple accessor, for now it supports to get the position of the next tuple only,
  * i.e. supports iteration instead of random access to the tuples
+ * because the in-page tuple offsets are not available (not stored on disk) until we scan the tuples one by one
  */
 public class VariableSizeInvertedListFrameTupleAccessor extends AbstractInvertedListFrameTupleAccessor {
-    // ToDo: use a scanner model to read tuples one by one, in fact, it is not necessary to support random access
-    // because it is used only when merging lists
+    // ToDo: use a scanner model to read tuples one by one.
+    // It is not necessary to support random access because it is used only when merging lists
+    // In fact, now we need to scan the frame twice to get the tupleStartOffsets
+    // and then use this offsets for a scan purpose (no random access needed in the upper layer) only
 
     private int[] tupleStartOffsets;
     private int tupleCount;
