@@ -25,7 +25,7 @@ use fuzzyjoin;
 
 create type DBLPType as
 {
-  id : bigint,
+  id : string,
   dblpid : string,
   title : string,
   authors : string,

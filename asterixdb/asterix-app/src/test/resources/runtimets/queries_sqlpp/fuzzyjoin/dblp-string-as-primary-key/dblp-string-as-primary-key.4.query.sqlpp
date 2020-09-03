@@ -19,4 +19,4 @@
 
 use fuzzyjoin;
 
-select * from DBLP;
+SELECT VALUE id FROM DBLP dblp where ftcontains(dblp.title, ["storage", "ExODuS"], {"mode" : "all"});
