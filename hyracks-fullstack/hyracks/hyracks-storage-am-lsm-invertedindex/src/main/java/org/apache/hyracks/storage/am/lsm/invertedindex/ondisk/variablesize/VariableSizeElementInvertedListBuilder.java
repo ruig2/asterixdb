@@ -21,12 +21,12 @@ package org.apache.hyracks.storage.am.lsm.invertedindex.ondisk.variablesize;
 
 import org.apache.hyracks.api.dataflow.value.ITypeTraits;
 import org.apache.hyracks.dataflow.common.data.accessors.ITupleReference;
-import org.apache.hyracks.storage.am.lsm.invertedindex.ondisk.AInvertedListBuilder;
+import org.apache.hyracks.storage.am.lsm.invertedindex.ondisk.AbstracInvertedListBuilder;
 import org.apache.hyracks.storage.am.lsm.invertedindex.util.InvertedIndexUtils;
 
 // The last 4 bytes in the frame is reserved for the end offset (exclusive) of the last record in the current frame
 // i.e. the trailing space after the last record and before the last 4 bytes will be treated as empty
-public class VariableSizeElementInvertedListBuilder extends AInvertedListBuilder {
+public class VariableSizeElementInvertedListBuilder extends AbstracInvertedListBuilder {
 
     public VariableSizeElementInvertedListBuilder(ITypeTraits[] invListFields) {
         super(invListFields);
