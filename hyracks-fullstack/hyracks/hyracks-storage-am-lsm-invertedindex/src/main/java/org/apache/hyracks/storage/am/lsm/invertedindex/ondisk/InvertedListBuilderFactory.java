@@ -23,6 +23,7 @@ import org.apache.hyracks.storage.am.lsm.invertedindex.api.IInvertedListBuilder;
 import org.apache.hyracks.storage.am.lsm.invertedindex.api.IInvertedListBuilderFactory;
 import org.apache.hyracks.storage.am.lsm.invertedindex.ondisk.fixedsize.FixedSizeElementInvertedListBuilder;
 import org.apache.hyracks.storage.am.lsm.invertedindex.ondisk.variablesize.VariableSizeElementInvertedListBuilder;
+import org.apache.hyracks.storage.am.lsm.invertedindex.util.InvertedIndexUtils;
 
 public class InvertedListBuilderFactory implements IInvertedListBuilderFactory {
 
@@ -32,14 +33,7 @@ public class InvertedListBuilderFactory implements IInvertedListBuilderFactory {
     public InvertedListBuilderFactory(ITypeTraits[] invListFields) {
         this.invListFields = invListFields;
 
-        for (ITypeTraits t : this.invListFields) {
-            if (t.isFixedLength() == false) {
-                isFixedSize = false;
-                return;
-            }
-        }
-
-        isFixedSize = true;
+        isFixedSize = InvertedIndexUtils.checkTypeTraitsAllFixed(invListFields);
     }
 
     @Override

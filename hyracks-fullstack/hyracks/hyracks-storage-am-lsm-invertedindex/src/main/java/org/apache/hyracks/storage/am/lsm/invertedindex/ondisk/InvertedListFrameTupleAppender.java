@@ -31,7 +31,7 @@ import org.apache.hyracks.storage.am.lsm.invertedindex.api.IInvertedListFrameTup
  * The latter represents the number of tuples in a frame. This design is required since we may need to use
  * RunFileWriter and RunFileReader class during the inverted-index-search operation.
  *
- * Note that this appender is not aware of the tuple element type because the length of the tuple is given by the caller
+ * Note that this appender is not aware of the tuple element type, and the length of the tuple is given by the caller
  * at run time.
  */
 public class InvertedListFrameTupleAppender implements IInvertedListFrameTupleAppender {
@@ -42,10 +42,10 @@ public class InvertedListFrameTupleAppender implements IInvertedListFrameTupleAp
     // For this class, the frame size is equal to the minimum frame size in Hyracks.
     public static final int MINFRAME_COUNT_SIZE = 4;
 
-    protected final int frameSize;
-    protected ByteBuffer buffer;
-    protected int tupleCount;
-    protected int tupleDataEndOffset;
+    private final int frameSize;
+    private ByteBuffer buffer;
+    private int tupleCount;
+    private int tupleDataEndOffset;
 
     public InvertedListFrameTupleAppender(int frameSize) {
         this.frameSize = frameSize;
@@ -119,7 +119,6 @@ public class InvertedListFrameTupleAppender implements IInvertedListFrameTupleAp
     }
 
     public void incrementTupleCount(int count) {
-        // May not be related to the number of tuple in the upper-layer B-tree
         int tupleCountOffset = FrameHelper.getTupleCountOffset(frameSize);
         int currentCount = buffer.getInt(tupleCountOffset);
         int newCount = currentCount + count;
