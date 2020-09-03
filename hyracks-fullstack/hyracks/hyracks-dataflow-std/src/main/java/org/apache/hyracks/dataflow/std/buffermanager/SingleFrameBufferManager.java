@@ -21,9 +21,15 @@
 package org.apache.hyracks.dataflow.std.buffermanager;
 
 import java.nio.ByteBuffer;
+import java.util.Arrays;
 
 import org.apache.hyracks.api.exceptions.HyracksDataException;
 
+// This SingleFrameBufferManager is used for **scan** purpose.
+// When scanning an inverted index, we will load the pages from disk to memory one by one,
+// and this single frame buffer manager will allocate only one frame at the same time.
+//
+// Note: this buffer manager is NOT thread-safe
 public class SingleFrameBufferManager implements ISimpleFrameBufferManager {
     boolean isAcquired = false;
     ByteBuffer buffer = null;
@@ -39,7 +45,9 @@ public class SingleFrameBufferManager implements ISimpleFrameBufferManager {
         } else {
             if (buffer.capacity() >= frameSize) {
                 isAcquired = true;
-                return (ByteBuffer) buffer.clear();
+                buffer.clear();
+                Arrays.fill(buffer.array(), (byte)0);
+                return buffer;
             } else {
                 throw new HyracksDataException("Frame size changed");
             }
