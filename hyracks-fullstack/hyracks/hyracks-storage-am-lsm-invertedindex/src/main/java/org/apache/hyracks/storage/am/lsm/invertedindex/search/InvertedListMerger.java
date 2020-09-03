@@ -72,6 +72,7 @@ public class InvertedListMerger {
     // In fact, the elements in resultFrameTupleAcc are retrieved sequentially one by one instead of accessed randomly.
     // Maybe we can wrap the tuple index and the resultFrameTupleAcc into a new class so that we can iterate the elements
     // in resultFrameTupleAcc and avoid having the tuple indexes here.
+    // We need to be very careful when handling those tuple indexes here.
     protected int resultTupleIdx;
     protected int invListTupleIdx;
     protected int invListTupleCount;
@@ -105,10 +106,6 @@ public class InvertedListMerger {
      */
     public boolean merge(List<IInvertedListCursor> invListCursors, int occurrenceThreshold, int numPrefixLists,
             InvertedIndexFinalSearchResult finalSearchResult) throws HyracksDataException {
-
-        for (IInvertedListCursor cursor : invListCursors) {
-            // cursor.toString();
-        }
 
         Collections.sort(invListCursors);
         int numInvLists = invListCursors.size();

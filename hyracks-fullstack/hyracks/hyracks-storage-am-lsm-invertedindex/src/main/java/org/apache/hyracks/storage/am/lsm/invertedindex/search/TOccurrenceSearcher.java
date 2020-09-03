@@ -52,10 +52,7 @@ public class TOccurrenceSearcher extends AbstractTOccurrenceSearcher {
         invListCursorCache.reset();
         for (int i = 0; i < numQueryTokens; i++) {
             searchKey.reset(queryTokenAppender, i);
-            IInvertedListCursor invListCursor = invListCursorCache.getNext();
-
-            invListCursor = new InvertedListCursorFactory(invIndex, ctx).create();
-            invListCursor.close();
+            IInvertedListCursor invListCursor = new InvertedListCursorFactory(invIndex, ctx).create();
             invIndex.openInvertedListCursor(invListCursor, searchKey, ictx);
             invListCursors.add(invListCursor);
         }

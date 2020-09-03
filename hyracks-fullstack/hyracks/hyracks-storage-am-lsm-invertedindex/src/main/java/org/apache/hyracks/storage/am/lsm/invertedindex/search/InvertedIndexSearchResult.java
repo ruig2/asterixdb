@@ -51,8 +51,13 @@ public class InvertedIndexSearchResult {
     // I/O buffer's index in the buffers
     protected static final int IO_BUFFER_IDX = 0;
     protected static final String FILE_PREFIX = "InvertedIndexSearchResult";
+    // This estimated element size is used to for fixed-size elements only.
+    // We use it to estimate the number of in-memory pages to allocate as buffer when initializing.
+    // And if there is no enough memory, we will use a on-disk mode by writing the intermediate results to disk.
     // We assume most of the inverted list element is of type integer which takes 4 bytes
-    // In case of using string as the primary key, the size is not fixed and cannot be estimated easily
+    //
+    // If the element size is variable, since it is not possible to estimate how many buffer pages needed,
+    // currently, we will always use the on-disk mode to catch the intermediate results
     protected int ESTIMATED_INVERTED_LIST_ELEMENT_SIZE = 4;
 
     protected final IHyracksTaskContext ctx;
@@ -152,6 +157,7 @@ public class InvertedIndexSearchResult {
     public boolean append(ITupleReference invListElement, int count) throws HyracksDataException {
         ByteBuffer currentBuffer;
         // Moves to the next page if the current page is full.
+        // + 4 for the count
         if (!appender.hasSpace(invListElement.getFieldLength(0) + 4)) {
             currentWriterBufIdx++;
             if (isInMemoryOpMode) {
