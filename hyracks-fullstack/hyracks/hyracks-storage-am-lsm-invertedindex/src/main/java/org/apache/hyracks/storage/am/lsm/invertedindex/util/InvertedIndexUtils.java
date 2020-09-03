@@ -277,4 +277,21 @@ public class InvertedIndexUtils {
         }
     }
 
+    public static void setInvertedListFrameEndOffset(byte[] bytes, int pos) {
+        int off = bytes.length - 4;
+        bytes[off++] = (byte) (pos >> 24);
+        bytes[off++] = (byte) (pos >> 16);
+        bytes[off++] = (byte) (pos >> 8);
+        bytes[off] = (byte) (pos);
+    }
+
+    public static int getInvertedListFrameEndOffset(byte[] bytes) {
+        int p = bytes.length - 4;
+        int offsetFrameEnd = 0;
+        for (int i = 0; i < 4; i++) {
+            offsetFrameEnd = (offsetFrameEnd << 8) + (bytes[p++] & 0xFF);
+        }
+
+        return offsetFrameEnd;
+    }
 }

@@ -24,7 +24,8 @@ import org.apache.hyracks.dataflow.common.data.accessors.ITupleReference;
 import org.apache.hyracks.storage.am.lsm.invertedindex.ondisk.AInvertedListBuilder;
 import org.apache.hyracks.storage.am.lsm.invertedindex.util.InvertedIndexUtils;
 
-// The last 4 bytes in the page is reserved for the end offset of the records in the current page
+// The last 4 bytes in the frame is reserved for the end offset (exclusive) of the last record in the current frame
+// i.e. the trailing space after the last record and before the last 4 bytes will be treated as empty
 public class VariableSizeElementInvertedListBuilder extends AInvertedListBuilder {
 
     public VariableSizeElementInvertedListBuilder(ITypeTraits[] invListFields) {
@@ -56,14 +57,6 @@ public class VariableSizeElementInvertedListBuilder extends AInvertedListBuilder
         return true;
     }
 
-    private void setPageEndOffset() {
-        int off = targetBuf.length - 4;
-        targetBuf[off++] = (byte) (pos >> 24);
-        targetBuf[off++] = (byte) (pos >> 16);
-        targetBuf[off++] = (byte) (pos >> 8);
-        targetBuf[off] = (byte) (pos);
-    }
-
     @Override
     public boolean appendElement(ITupleReference tuple, int numTokenFields, int numElementFields) {
 
@@ -78,7 +71,7 @@ public class VariableSizeElementInvertedListBuilder extends AInvertedListBuilder
             pos += lenField;
         }
         listSize++;
-        setPageEndOffset();
+        InvertedIndexUtils.setInvertedListFrameEndOffset(targetBuf, pos);
 
         return true;
     }

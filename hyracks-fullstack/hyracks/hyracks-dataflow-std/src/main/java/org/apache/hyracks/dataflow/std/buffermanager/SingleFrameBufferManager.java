@@ -46,7 +46,7 @@ public class SingleFrameBufferManager implements ISimpleFrameBufferManager {
             if (buffer.capacity() >= frameSize) {
                 isAcquired = true;
                 buffer.clear();
-                Arrays.fill(buffer.array(), (byte)0);
+                Arrays.fill(buffer.array(), (byte) 0);
                 return buffer;
             } else {
                 throw new HyracksDataException("Frame size changed");

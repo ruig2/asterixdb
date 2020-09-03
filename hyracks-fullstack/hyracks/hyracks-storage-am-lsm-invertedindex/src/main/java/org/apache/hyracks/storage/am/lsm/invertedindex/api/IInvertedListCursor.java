@@ -55,7 +55,7 @@ public interface IInvertedListCursor extends IIndexCursor, Comparable<IInvertedL
      *
      * Note that this method is used when merging two sorted list, that means we can move the internal cursor of a list
      * in one-direction: the cursor won't go back.
-     * A better name of this method might be moveCursorForwardToCheckContains()
+     * A better name of this method might be moveCursorForwardToCheckContainsKey()
      */
     boolean containsKey(ITupleReference searchTuple, MultiComparator invListCmp) throws HyracksDataException;
 

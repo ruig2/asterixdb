@@ -22,17 +22,17 @@ package org.apache.hyracks.storage.am.lsm.invertedindex.ondisk.fixedsize;
 import org.apache.hyracks.api.dataflow.value.ITypeTraits;
 import org.apache.hyracks.dataflow.common.data.accessors.ITupleReference;
 import org.apache.hyracks.storage.am.lsm.invertedindex.ondisk.AInvertedListBuilder;
+import org.apache.hyracks.storage.am.lsm.invertedindex.util.InvertedIndexUtils;
 
 public class FixedSizeElementInvertedListBuilder extends AInvertedListBuilder {
     private final int listElementSize;
 
     public FixedSizeElementInvertedListBuilder(ITypeTraits[] invListFields) {
         super(invListFields);
+        InvertedIndexUtils.verifyAllFixedSizeTypeTrait(invListFields);
+
         int tmp = 0;
         for (int i = 0; i < invListFields.length; i++) {
-            if (invListFields[i].isFixedLength() == false) {
-                throw new IllegalArgumentException("get variable-size type trait when expected fixed-size trait");
-            }
             tmp += invListFields[i].getFixedLength();
         }
         listElementSize = tmp;

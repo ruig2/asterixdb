@@ -19,12 +19,15 @@
 
 package org.apache.hyracks.storage.am.lsm.invertedindex.ondisk.variablesize;
 
+import static org.apache.hyracks.storage.am.lsm.invertedindex.util.InvertedIndexUtils.getInvertedListFrameEndOffset;
+
 import org.apache.hyracks.api.context.IHyracksTaskContext;
 import org.apache.hyracks.api.dataflow.value.ISerializerDeserializer;
 import org.apache.hyracks.api.dataflow.value.ITypeTraits;
 import org.apache.hyracks.api.exceptions.HyracksDataException;
 import org.apache.hyracks.dataflow.common.data.accessors.ITupleReference;
 import org.apache.hyracks.storage.am.lsm.invertedindex.impls.AbstractOnDiskInvertedListCursor;
+import org.apache.hyracks.storage.am.lsm.invertedindex.util.InvertedIndexUtils;
 import org.apache.hyracks.storage.common.ICursorInitialState;
 import org.apache.hyracks.storage.common.IIndexCursorStats;
 import org.apache.hyracks.storage.common.ISearchPredicate;
@@ -33,12 +36,14 @@ import org.apache.hyracks.storage.common.buffercache.IBufferCache;
 import org.apache.hyracks.util.string.UTF8StringUtil;
 
 /**
- * A cursor class that traverse an inverted list that consists of fixed-size elements on disk
+ * A cursor class that traverse an inverted list that consists of variable-size elements on disk
  *
  */
 
 public class VariableSizeElementOnDiskInvertedListCursor extends AbstractOnDiskInvertedListCursor {
 
+    // The scan offset is set to 0 when initialized, and we need such an isInit flag
+    // to avoid increasing the offset for the first element in the list when calling next()
     private boolean isInit;
 
     public VariableSizeElementOnDiskInvertedListCursor(IBufferCache bufferCache, int fileId,
@@ -56,27 +61,10 @@ public class VariableSizeElementOnDiskInvertedListCursor extends AbstractOnDiskI
     @Override
     protected void doOpen(ICursorInitialState initialState, ISearchPredicate searchPred) throws HyracksDataException {
         super.doOpen(initialState, searchPred);
+
+        // Note that the cursors can be re-used in the upper-layer callers so we need to reset the state variables when open()
         currentElementIxForScan = 0;
         isInit = true;
-    }
-
-    private int getOffsetPageEnd(byte[] bytes) {
-        int p = bytes.length - 4;
-        int offsetEnd = 0;
-        for (int i = 0; i < 4; i++) {
-            offsetEnd = (offsetEnd << 8) + (bytes[p++] & 0xFF);
-        }
-
-        return offsetEnd;
-    }
-
-    private int getLengthCurrentTuple() {
-        byte[] bytes = buffers.get(currentPageIxForScan).array();
-        if (bytes[currentOffsetForScan] == 0) {
-            return 0;
-        } else {
-            return UTF8StringUtil.getUTFStringFieldLength(bytes, currentOffsetForScan);
-        }
     }
 
     /**
@@ -84,7 +72,7 @@ public class VariableSizeElementOnDiskInvertedListCursor extends AbstractOnDiskI
      */
     @Override
     public void doNext() throws HyracksDataException {
-        // init state
+        // init state for the first element: keep the currentOffsetForScan at 0
         if (isInit) {
             isInit = false;
         } else {
@@ -92,10 +80,11 @@ public class VariableSizeElementOnDiskInvertedListCursor extends AbstractOnDiskI
                     currentOffsetForScan);
         }
 
-        // int lenCurrentTuple = getLengthCurrentTuple();
-        int pageEnd = getOffsetPageEnd(buffers.get(currentPageIxForScan).array());
-        assert currentOffsetForScan <= pageEnd;
-        if (currentOffsetForScan >= getOffsetPageEnd(buffers.get(currentPageIxForScan).array())) {
+        int currentPageEndOffset =
+                InvertedIndexUtils.getInvertedListFrameEndOffset(buffers.get(currentPageIxForScan).array());
+        assert currentOffsetForScan <= currentPageEndOffset;
+        // We reach the end of the current frame, turn to the next frame
+        if (currentOffsetForScan >= currentPageEndOffset) {
             currentPageIxForScan++;
             currentOffsetForScan = 0;
         }
@@ -137,7 +126,8 @@ public class VariableSizeElementOnDiskInvertedListCursor extends AbstractOnDiskI
             }
             // ToDo: here we get the tuple first and then call next() later because the upper-layer caller in InvertedListMerger already called next()
             // However, this is not consistent with other use cases of next() in AsterixDB
-            // Maybe we need to fix the InvertedListMerger part to call next() first then getTuple() to follow the convention to use cursor
+            // Maybe we need to fix the upper layer InvertedListMerger part to call next() first then getTuple()
+            // to follow the convention to use cursor
             next();
         }
 
@@ -165,99 +155,13 @@ public class VariableSizeElementOnDiskInvertedListCursor extends AbstractOnDiskI
         this.currentOffsetForScan = startOff;
     }
 
-    // Debugging purpose
-    @SuppressWarnings("rawtypes")
-    @Override
-    public String toString() {
-        return "";
-
-        // int oldCurrentOff = currentOffsetForScan;
-        // int oldCurrentPageId = currentPageIxForScan;
-        // int oldCurrentElementIx = currentElementIxForScan;
-        // boolean oldIsInit = isInit;
-
-        // /*
-        // currentOffsetForScan = startOff;
-        // currentPageIxForScan = 0;
-        // currentElementIxForScan = 0;
-        // isInit = false;
-        //  */
-
-        // String result = "";
-        // try {
-        //     while (hasNext()) {
-        //         next();
-
-        //         if (currentElementIxForScan - 1 == oldCurrentElementIx) {
-        //             result += "->";
-        //         }
-
-        //         ITupleReference tuple = getTuple();
-        //         for (int i = 0; i < tuple.getFieldCount(); i++) {
-        //             int pos = tuple.getFieldStart(i);
-        //             if (invListFields[i].isFixedLength()) {
-        //                 int len = invListFields[i].getFixedLength();
-        //                 result += ByteBuffer.wrap(tuple.getFieldData(i), pos, len).getInt() + ", ";
-        //             } else {
-        //                 StringBuilder builder = new StringBuilder();
-        //                 // pos + 1 to skip the type tag
-        //                 result += UTF8StringUtil.toString(builder, tuple.getFieldData(i), pos + 1).toString() + ", ";
-        //             }
-        //         }
-        //         result += " ";
-        //     }
-        // } catch (HyracksDataException e) {
-        //     e.printStackTrace();
-        // }
-
-        // // reset previous state
-        // currentOffsetForScan = oldCurrentOff;
-        // currentPageIxForScan = oldCurrentPageId;
-        // currentElementIxForScan = oldCurrentElementIx;
-        // isInit = oldIsInit;
-
-        // return result;
-    }
-
     /**
      * Prints the contents of the current inverted list (a debugging method).
      */
     @SuppressWarnings("rawtypes")
     @Override
     public String printInvList(ISerializerDeserializer[] serdes) throws HyracksDataException {
-        /*
-        int oldCurrentOff = currentOffsetForScan;
-        int oldCurrentPageId = currentPageIxForScan;
-        int oldCurrentElementIx = currentElementIxForScan;
-        
-        currentOffsetForScan = startOff - elementSize;
-        currentPageIxForScan = 0;
-        currentElementIxForScan = 0;
-        
-        StringBuilder strBuilder = new StringBuilder();
-        
-        while (hasNext()) {
-            next();
-            for (int i = 0; i < tuple.getFieldCount(); i++) {
-                ByteArrayInputStream inStream = new ByteArrayInputStream(tuple.getFieldData(i), tuple.getFieldStart(i),
-                        tuple.getFieldLength(i));
-                DataInput dataIn = new DataInputStream(inStream);
-                Object o = serdes[i].deserialize(dataIn);
-                strBuilder.append(o.toString());
-                if (i + 1 < tuple.getFieldCount()) {
-                    strBuilder.append(",");
-                }
-            }
-            strBuilder.append(" ");
-        }
-        
-        // reset previous state
-        currentOffsetForScan = oldCurrentOff;
-        currentPageIxForScan = oldCurrentPageId;
-        currentElementIxForScan = oldCurrentElementIx;
-        
-        return strBuilder.toString();
-         */
+        // Will implement later if necessary
         return "";
     }
 }

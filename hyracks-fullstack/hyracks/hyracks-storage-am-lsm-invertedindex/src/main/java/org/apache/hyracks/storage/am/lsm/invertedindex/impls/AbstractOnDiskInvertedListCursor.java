@@ -74,7 +74,7 @@ public abstract class AbstractOnDiskInvertedListCursor extends AbstractInvertedL
     protected final ISimpleFrameBufferManager bufferManagerForSearch;
     protected ArrayList<ByteBuffer> buffers;
     protected boolean moreBlocksToRead = true;
-    // The last searched element index (used for random traversal)
+    // The last searched element index (used for random traversal for containsKey())
     protected int lastRandomSearchedElementIx;
     protected final IIndexCursorStats stats;
 
@@ -88,6 +88,8 @@ public abstract class AbstractOnDiskInvertedListCursor extends AbstractInvertedL
         this(bufferCache, fileId, invListFields, null, stats, true);
     }
 
+    // If isScan, use the SingleFrameBufferManager to minimize memory cost by allocating only one memory frame,
+    // elsewhere use a regular buffer manager
     protected AbstractOnDiskInvertedListCursor(IBufferCache bufferCache, int fileId, ITypeTraits[] invListFields,
             IHyracksTaskContext ctx, IIndexCursorStats stats, boolean isScan) throws HyracksDataException {
         this.bufferCache = bufferCache;
