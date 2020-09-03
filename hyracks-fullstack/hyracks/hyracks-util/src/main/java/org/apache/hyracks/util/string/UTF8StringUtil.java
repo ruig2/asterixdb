@@ -224,7 +224,12 @@ public class UTF8StringUtil {
         return VarLenIntEncoderDecoder.getBytesRequired(strlen);
     }
 
-    // includes the type tag (should be a byte of value 13), the number of bytes to store length, and the actual length of the string
+    // The input byte array includes
+    // 1. the type tag (should be a byte of value 13 which is the ATypeTag.String, the only one supported here for now),
+    // 2. the number of bytes to store length
+    // 3. and the actual length of the string
+    //
+    // And the result is the sum of the lengths of the above 3 items
     public static int getUTFStringFieldLength(byte[] b, int s) {
         if (b[s] != 13) {
             throw new IllegalArgumentException("Not a string tuple");
