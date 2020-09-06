@@ -16,14 +16,28 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.hyracks.algebricks.core.utils;
+// filter on meta and query on meta with a composite primary key
+drop dataverse KeyVerse if exists;
+create dataverse KeyVerse;
+use KeyVerse;
 
-public class Substitution<T> {
-    public T substituted;
-    public T substitutedWith;
+create type DocumentType as open{
+  attr1: int64,
+  attr2: int64
+};
 
-    public Substitution(T substituted, T substitutedWith) {
-        this.substituted = substituted;
-        this.substitutedWith = substitutedWith;
-    }
-}
+create type KVMetaType as open{
+  `key`:string,
+  vbucket:int32,
+  cas:int64,
+  expiration:int32,
+  flags:int32,
+  revSeq:int64,
+  seq:int64,
+  lockTime:int32,
+  attr: int64
+};
+
+create dataset KVStore(DocumentType) with meta(KVMetaType) primary key attr1, attr2 with filter on meta().attr;
+
+select * from KVStore WHERE meta().attr > 10;
