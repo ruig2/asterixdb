@@ -26,6 +26,9 @@ import org.apache.hyracks.api.comm.FrameHelper;
 import org.apache.hyracks.storage.am.lsm.invertedindex.api.IInvertedListFrameTupleAppender;
 
 /**
+ * This class is mainly to write the intermediate results in the inverted-index **search** operation.
+ * For the inverted list building phrase, please refer to IInvertedListBuilder.
+ *
  * An appender class for an inverted list. Each frame has two integer values at the beginning and at the end.
  * The first represents the number of minimum Hyracks frames in a frame. Currently, we use 1 for this value.
  * The latter represents the number of tuples in a frame. This design is required since we may need to use
