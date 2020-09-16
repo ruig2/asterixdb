@@ -174,7 +174,8 @@ public class InvertedIndexSearchResult {
 
         // Appends inverted-list element.
         if (invListFields[0].isFixedLength()) {
-            if (!appender.append(invListElement.getFieldData(0), invListElement.getFieldStart(0), invListElement.getFieldLength(0))) {
+            if (!appender.append(invListElement.getFieldData(0), invListElement.getFieldStart(0),
+                    invListElement.getFieldLength(0))) {
                 throw HyracksDataException.create(ErrorCode.CANNOT_ADD_ELEMENT_TO_INVERTED_INDEX_SEARCH_RESULT);
             }
         } else {
@@ -189,7 +190,10 @@ public class InvertedIndexSearchResult {
 
     /**
      * Appends an element and its count to the current frame of this result. The boolean value is necessary for
-     * the final search result case since the append() of that class is overriding this method.
+     * the final search result case since the append() of that class is **overriding** this method.
+     *
+     * Note that if the the buffer is run out, then this method will automatically write to the next buffer.
+     * This is different from the append() method in the final search result which will simply return false.
      */
     public boolean append(ITupleReference invListElement, int count) throws HyracksDataException {
 

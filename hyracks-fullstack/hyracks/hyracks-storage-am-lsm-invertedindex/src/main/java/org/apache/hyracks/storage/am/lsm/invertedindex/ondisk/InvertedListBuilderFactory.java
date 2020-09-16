@@ -31,9 +31,9 @@ public class InvertedListBuilderFactory implements IInvertedListBuilderFactory {
     protected final ITypeTraits[] tokenTypeTraits;
     private final boolean isFixedSize;
 
-    public InvertedListBuilderFactory(ITypeTraits[] invListFields, ITypeTraits[] tokenTypeTraits) {
-        this.invListFields = invListFields;
+    public InvertedListBuilderFactory(ITypeTraits[] tokenTypeTraits, ITypeTraits[] invListFields) {
         this.tokenTypeTraits = tokenTypeTraits;
+        this.invListFields = invListFields;
 
         isFixedSize = InvertedIndexUtils.checkTypeTraitsAllFixed(invListFields);
     }
@@ -43,7 +43,7 @@ public class InvertedListBuilderFactory implements IInvertedListBuilderFactory {
         if (isFixedSize) {
             return new FixedSizeElementInvertedListBuilder(invListFields);
         } else {
-            return new VariableSizeElementInvertedListBuilder(invListFields, tokenTypeTraits);
+            return new VariableSizeElementInvertedListBuilder(tokenTypeTraits, invListFields);
         }
     }
 }

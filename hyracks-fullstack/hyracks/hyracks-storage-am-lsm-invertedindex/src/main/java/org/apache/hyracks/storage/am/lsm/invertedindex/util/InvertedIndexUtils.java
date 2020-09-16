@@ -69,7 +69,6 @@ import org.apache.hyracks.storage.am.lsm.invertedindex.ondisk.variablesize.Varia
 import org.apache.hyracks.storage.am.lsm.invertedindex.ondisk.variablesize.VariableSizeInvertedListTupleReference;
 import org.apache.hyracks.storage.am.lsm.invertedindex.tokenizers.IBinaryTokenizerFactory;
 import org.apache.hyracks.storage.common.buffercache.IBufferCache;
-import org.apache.hyracks.util.string.UTF8StringUtil;
 import org.apache.hyracks.util.trace.ITracer;
 
 public class InvertedIndexUtils {
@@ -159,7 +158,8 @@ public class InvertedIndexUtils {
         LSMInvertedIndexFileManager fileManager =
                 new LSMInvertedIndexFileManager(ioManager, onDiskDirFileRef, deletedKeysBTreeFactory);
 
-        IInvertedListBuilderFactory invListBuilderFactory = new InvertedListBuilderFactory(tokenTypeTraits, invListTypeTraits);
+        IInvertedListBuilderFactory invListBuilderFactory =
+                new InvertedListBuilderFactory(tokenTypeTraits, invListTypeTraits);
         OnDiskInvertedIndexFactory invIndexFactory =
                 new OnDiskInvertedIndexFactory(ioManager, diskBufferCache, invListBuilderFactory, invListTypeTraits,
                         invListCmpFactories, tokenTypeTraits, tokenCmpFactories, fileManager, pageManagerFactory);
@@ -207,7 +207,8 @@ public class InvertedIndexUtils {
         LSMInvertedIndexFileManager fileManager =
                 new LSMInvertedIndexFileManager(ioManager, onDiskDirFileRef, deletedKeysBTreeFactory);
 
-        IInvertedListBuilderFactory invListBuilderFactory = new InvertedListBuilderFactory(invListTypeTraits, tokenTypeTraits);
+        IInvertedListBuilderFactory invListBuilderFactory =
+                new InvertedListBuilderFactory(tokenTypeTraits, invListTypeTraits);
         PartitionedOnDiskInvertedIndexFactory invIndexFactory = new PartitionedOnDiskInvertedIndexFactory(ioManager,
                 diskBufferCache, invListBuilderFactory, invListTypeTraits, invListCmpFactories, tokenTypeTraits,
                 tokenCmpFactories, fileManager, pageManagerFactory);

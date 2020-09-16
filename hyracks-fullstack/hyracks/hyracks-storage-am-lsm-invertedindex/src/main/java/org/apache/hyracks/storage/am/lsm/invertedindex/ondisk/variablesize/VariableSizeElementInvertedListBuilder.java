@@ -25,16 +25,16 @@ import org.apache.hyracks.storage.am.common.api.ITreeIndexTupleWriter;
 import org.apache.hyracks.storage.am.common.tuples.TypeAwareTupleWriter;
 import org.apache.hyracks.storage.am.lsm.invertedindex.ondisk.AbstracInvertedListBuilder;
 import org.apache.hyracks.storage.am.lsm.invertedindex.util.InvertedIndexUtils;
-import org.apache.hyracks.util.encoding.VarLenIntEncoderDecoder;
 
 // The last 4 bytes in the frame is reserved for the end offset (exclusive) of the last record in the current frame
 // i.e. the trailing space after the last record and before the last 4 bytes will be treated as empty
 public class VariableSizeElementInvertedListBuilder extends AbstracInvertedListBuilder {
     private ITreeIndexTupleWriter writer;
-    private int numTokenFields, numElementFields;
     protected final ITypeTraits[] allFields;
 
-    public VariableSizeElementInvertedListBuilder(ITypeTraits[] invListFields, ITypeTraits[] tokenTypeTraits) {
+    // The tokenTypeTraits is necessary because the underlying TypeAwareTupleWriter requires all the type traits of the tuple
+    // even if the first a few fields in the tuple are never accessed by the writer
+    public VariableSizeElementInvertedListBuilder(ITypeTraits[] tokenTypeTraits, ITypeTraits[] invListFields) {
         super(invListFields);
 
         this.allFields = new ITypeTraits[invListFields.length + tokenTypeTraits.length];
@@ -65,7 +65,6 @@ public class VariableSizeElementInvertedListBuilder extends AbstracInvertedListB
     }
 
     private boolean checkEnoughSpace(int numBytesRequired) {
-
         // The last 4 bytes are reserved for the end offset of the last record in the current page
         if (pos + numBytesRequired + 4 > targetBuf.length) {
             return false;
@@ -78,7 +77,7 @@ public class VariableSizeElementInvertedListBuilder extends AbstracInvertedListB
     public boolean appendElement(ITupleReference tuple, int numTokenFields, int numElementFields) {
         int numBytesRequired = writer.bytesRequired(tuple, numTokenFields, numElementFields);
 
-        if (checkEnoughSpace(numBytesRequired) == false) {
+        if (!checkEnoughSpace(numBytesRequired)) {
             return false;
         }
 
