@@ -37,8 +37,11 @@ import org.apache.hyracks.dataflow.common.io.RunFileReader;
 import org.apache.hyracks.dataflow.common.io.RunFileWriter;
 import org.apache.hyracks.dataflow.std.buffermanager.BufferManagerBackedVSizeFrame;
 import org.apache.hyracks.dataflow.std.buffermanager.ISimpleFrameBufferManager;
+import org.apache.hyracks.storage.am.common.api.ITreeIndexTupleWriter;
+import org.apache.hyracks.storage.am.common.tuples.TypeAwareTupleWriter;
 import org.apache.hyracks.storage.am.lsm.invertedindex.api.IInvertedListTupleReference;
 import org.apache.hyracks.storage.am.lsm.invertedindex.ondisk.InvertedListFrameTupleAppender;
+import org.apache.hyracks.storage.am.lsm.invertedindex.ondisk.variablesize.VariableSizeInvertedListTupleReference;
 import org.apache.hyracks.storage.am.lsm.invertedindex.util.InvertedIndexUtils;
 
 /**
@@ -66,6 +69,7 @@ public class InvertedIndexSearchResult {
     protected final IInvertedListTupleReference tuple;
     protected final ISimpleFrameBufferManager bufferManager;
     protected ITypeTraits[] typeTraits;
+    protected ITypeTraits[] invListFields;
 
     protected int currentWriterBufIdx;
     protected int currentReaderBufIdx;
@@ -84,9 +88,15 @@ public class InvertedIndexSearchResult {
     protected boolean isInReadMode;
     protected boolean isWriteFinished;
     protected boolean isFileOpened;
+    protected IInvertedListTupleReference tupleReference;
+    protected ITreeIndexTupleWriter tupleWriter;
+    protected byte[] tempBytes;
 
     public InvertedIndexSearchResult(ITypeTraits[] invListFields, IHyracksTaskContext ctx,
             ISimpleFrameBufferManager bufferManager) throws HyracksDataException {
+        this.invListFields = invListFields;
+        this.tupleWriter = new TypeAwareTupleWriter(invListFields);
+        this.tupleReference = new VariableSizeInvertedListTupleReference(invListFields);
         initTypeTraits(invListFields);
         this.ctx = ctx;
         appender = new InvertedListFrameTupleAppender(ctx.getInitialFrameSize());
@@ -103,6 +113,7 @@ public class InvertedIndexSearchResult {
         this.currentWriterBufIdx = 0;
         this.currentReaderBufIdx = 0;
         this.numResults = 0;
+        this.tempBytes = new byte[ctx.getInitialFrameSize()];
         calculateNumElementPerPage();
         // Allocates one frame for read/write operation.
         prepareIOBuffer();
@@ -150,15 +161,43 @@ public class InvertedIndexSearchResult {
         isWriteFinished = false;
     }
 
+    protected int getNumBytesRequired(ITupleReference invListElement) {
+        if (invListFields[0].isFixedLength()) {
+            return invListElement.getFieldLength(0);
+        } else {
+            return tupleWriter.bytesRequired(invListElement, 0, 1);
+        }
+    }
+
+    protected boolean appendInvertedListElement(ITupleReference invListElement) throws HyracksDataException {
+        int numBytesRequired = getNumBytesRequired(invListElement);
+
+        // Appends inverted-list element.
+        if (invListFields[0].isFixedLength()) {
+            if (!appender.append(invListElement.getFieldData(0), invListElement.getFieldStart(0), invListElement.getFieldLength(0))) {
+                throw HyracksDataException.create(ErrorCode.CANNOT_ADD_ELEMENT_TO_INVERTED_INDEX_SEARCH_RESULT);
+            }
+        } else {
+            tupleWriter.writeTupleFields(invListElement, 0, 1, tempBytes, 0);
+            if (!appender.append(tempBytes, 0, numBytesRequired)) {
+                throw HyracksDataException.create(ErrorCode.CANNOT_ADD_ELEMENT_TO_INVERTED_INDEX_SEARCH_RESULT);
+            }
+        }
+
+        return true;
+    }
+
     /**
      * Appends an element and its count to the current frame of this result. The boolean value is necessary for
      * the final search result case since the append() of that class is overriding this method.
      */
     public boolean append(ITupleReference invListElement, int count) throws HyracksDataException {
+
+        int numBytesRequired = getNumBytesRequired(invListElement);
         ByteBuffer currentBuffer;
         // Moves to the next page if the current page is full.
         // + 4 for the count
-        if (!appender.hasSpace(invListElement.getFieldLength(0) + 4)) {
+        if (!appender.hasSpace(numBytesRequired + 4)) {
             currentWriterBufIdx++;
             if (isInMemoryOpMode) {
                 currentBuffer = buffers.get(currentWriterBufIdx);
@@ -168,11 +207,9 @@ public class InvertedIndexSearchResult {
             }
             appender.reset(currentBuffer);
         }
-        // Appends inverted-list element.
-        if (!appender.append(invListElement.getFieldData(0), invListElement.getFieldStart(0),
-                invListElement.getFieldLength(0))) {
-            throw HyracksDataException.create(ErrorCode.CANNOT_ADD_ELEMENT_TO_INVERTED_INDEX_SEARCH_RESULT);
-        }
+
+        appendInvertedListElement(invListElement);
+
         // Appends count.
         if (!appender.append(count)) {
             throw HyracksDataException.create(ErrorCode.CANNOT_ADD_ELEMENT_TO_INVERTED_INDEX_SEARCH_RESULT);
