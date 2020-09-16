@@ -19,13 +19,15 @@
 
 package org.apache.hyracks.storage.am.lsm.invertedindex.ondisk.variablesize;
 
-import static org.apache.hyracks.storage.am.lsm.invertedindex.util.InvertedIndexUtils.getInvertedListFrameEndOffset;
-
 import org.apache.hyracks.api.context.IHyracksTaskContext;
 import org.apache.hyracks.api.dataflow.value.ISerializerDeserializer;
 import org.apache.hyracks.api.dataflow.value.ITypeTraits;
 import org.apache.hyracks.api.exceptions.HyracksDataException;
 import org.apache.hyracks.dataflow.common.data.accessors.ITupleReference;
+import org.apache.hyracks.storage.am.common.api.ITreeIndexTupleReference;
+import org.apache.hyracks.storage.am.common.api.ITreeIndexTupleWriter;
+import org.apache.hyracks.storage.am.common.tuples.TypeAwareTupleWriter;
+import org.apache.hyracks.storage.am.lsm.invertedindex.api.IInvertedListTupleReference;
 import org.apache.hyracks.storage.am.lsm.invertedindex.impls.AbstractOnDiskInvertedListCursor;
 import org.apache.hyracks.storage.am.lsm.invertedindex.util.InvertedIndexUtils;
 import org.apache.hyracks.storage.common.ICursorInitialState;
@@ -45,11 +47,15 @@ public class VariableSizeElementOnDiskInvertedListCursor extends AbstractOnDiskI
     // The scan offset is set to 0 when initialized, and we need such an isInit flag
     // to avoid increasing the offset for the first element in the list when calling next()
     private boolean isInit;
+    private IInvertedListTupleReference tupleReference;
+    private ITreeIndexTupleWriter tupleWriter;
 
     public VariableSizeElementOnDiskInvertedListCursor(IBufferCache bufferCache, int fileId,
             ITypeTraits[] invListFields, IIndexCursorStats stats) throws HyracksDataException {
         super(bufferCache, fileId, invListFields, stats);
-        isInit = true;
+        this.isInit = true;
+        this.tupleReference = new VariableSizeInvertedListTupleReference(invListFields);
+        this.tupleWriter = new TypeAwareTupleWriter(invListFields);
     }
 
     public VariableSizeElementOnDiskInvertedListCursor(IBufferCache bufferCache, int fileId,
@@ -65,6 +71,8 @@ public class VariableSizeElementOnDiskInvertedListCursor extends AbstractOnDiskI
         // Note that the cursors can be re-used in the upper-layer callers so we need to reset the state variables when open()
         currentElementIxForScan = 0;
         isInit = true;
+        this.tupleReference = new VariableSizeInvertedListTupleReference(invListFields);
+        this.tupleWriter = new TypeAwareTupleWriter(invListFields);
     }
 
     /**
@@ -76,8 +84,8 @@ public class VariableSizeElementOnDiskInvertedListCursor extends AbstractOnDiskI
         if (isInit) {
             isInit = false;
         } else {
-            currentOffsetForScan += UTF8StringUtil.getUTFStringFieldLength(buffers.get(currentPageIxForScan).array(),
-                    currentOffsetForScan);
+            tupleReference.reset(buffers.get(currentPageIxForScan).array(), currentOffsetForScan);
+            currentOffsetForScan += tupleWriter.bytesRequired(tupleReference);
         }
 
         int currentPageEndOffset =

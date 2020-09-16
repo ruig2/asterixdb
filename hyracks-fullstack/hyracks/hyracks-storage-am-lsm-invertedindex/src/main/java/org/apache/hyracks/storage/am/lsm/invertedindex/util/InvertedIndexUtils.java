@@ -159,7 +159,7 @@ public class InvertedIndexUtils {
         LSMInvertedIndexFileManager fileManager =
                 new LSMInvertedIndexFileManager(ioManager, onDiskDirFileRef, deletedKeysBTreeFactory);
 
-        IInvertedListBuilderFactory invListBuilderFactory = new InvertedListBuilderFactory(invListTypeTraits);
+        IInvertedListBuilderFactory invListBuilderFactory = new InvertedListBuilderFactory(tokenTypeTraits, invListTypeTraits);
         OnDiskInvertedIndexFactory invIndexFactory =
                 new OnDiskInvertedIndexFactory(ioManager, diskBufferCache, invListBuilderFactory, invListTypeTraits,
                         invListCmpFactories, tokenTypeTraits, tokenCmpFactories, fileManager, pageManagerFactory);
@@ -207,7 +207,7 @@ public class InvertedIndexUtils {
         LSMInvertedIndexFileManager fileManager =
                 new LSMInvertedIndexFileManager(ioManager, onDiskDirFileRef, deletedKeysBTreeFactory);
 
-        IInvertedListBuilderFactory invListBuilderFactory = new InvertedListBuilderFactory(invListTypeTraits);
+        IInvertedListBuilderFactory invListBuilderFactory = new InvertedListBuilderFactory(invListTypeTraits, tokenTypeTraits);
         PartitionedOnDiskInvertedIndexFactory invIndexFactory = new PartitionedOnDiskInvertedIndexFactory(ioManager,
                 diskBufferCache, invListBuilderFactory, invListTypeTraits, invListCmpFactories, tokenTypeTraits,
                 tokenCmpFactories, fileManager, pageManagerFactory);
@@ -265,15 +265,6 @@ public class InvertedIndexUtils {
             return new FixedSizeInvertedListFrameTupleAccessor(frameSize, typeTraits);
         } else {
             return new VariableSizeInvertedListFrameTupleAccessor(frameSize, typeTraits);
-        }
-    }
-
-    public static int calculateFieldLength(ITypeTraits trait, byte[] bytes, int pos) {
-        if (trait.isFixedLength()) {
-            return trait.getFixedLength();
-        } else {
-            // assume the only variable-len field is of type string
-            return UTF8StringUtil.getUTFStringFieldLength(bytes, pos);
         }
     }
 

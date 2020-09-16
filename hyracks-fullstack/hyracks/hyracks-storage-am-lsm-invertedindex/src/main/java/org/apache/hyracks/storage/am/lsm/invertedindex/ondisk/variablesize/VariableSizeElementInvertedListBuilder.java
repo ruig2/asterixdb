@@ -21,15 +21,31 @@ package org.apache.hyracks.storage.am.lsm.invertedindex.ondisk.variablesize;
 
 import org.apache.hyracks.api.dataflow.value.ITypeTraits;
 import org.apache.hyracks.dataflow.common.data.accessors.ITupleReference;
+import org.apache.hyracks.storage.am.common.api.ITreeIndexTupleWriter;
+import org.apache.hyracks.storage.am.common.tuples.TypeAwareTupleWriter;
 import org.apache.hyracks.storage.am.lsm.invertedindex.ondisk.AbstracInvertedListBuilder;
 import org.apache.hyracks.storage.am.lsm.invertedindex.util.InvertedIndexUtils;
+import org.apache.hyracks.util.encoding.VarLenIntEncoderDecoder;
 
 // The last 4 bytes in the frame is reserved for the end offset (exclusive) of the last record in the current frame
 // i.e. the trailing space after the last record and before the last 4 bytes will be treated as empty
 public class VariableSizeElementInvertedListBuilder extends AbstracInvertedListBuilder {
+    private ITreeIndexTupleWriter writer;
+    private int numTokenFields, numElementFields;
+    protected final ITypeTraits[] allFields;
 
-    public VariableSizeElementInvertedListBuilder(ITypeTraits[] invListFields) {
+    public VariableSizeElementInvertedListBuilder(ITypeTraits[] invListFields, ITypeTraits[] tokenTypeTraits) {
         super(invListFields);
+
+        this.allFields = new ITypeTraits[invListFields.length + tokenTypeTraits.length];
+        for (int i = 0; i < tokenTypeTraits.length; i++) {
+            allFields[i] = tokenTypeTraits[i];
+        }
+        for (int i = 0; i < invListFields.length; i++) {
+            allFields[i + tokenTypeTraits.length] = invListFields[i];
+        }
+        this.writer = new TypeAwareTupleWriter(allFields);
+
         InvertedIndexUtils.verifyHasVarSizeTypeTrait(invListFields);
     }
 
@@ -44,13 +60,14 @@ public class VariableSizeElementInvertedListBuilder extends AbstracInvertedListB
     }
 
     private boolean checkEnoughSpace(ITupleReference tuple, int numTokenFields, int numElementFields) {
-        int lenFields = 0;
-        for (int i = 0; i < numElementFields; i++) {
-            int field = numTokenFields + i;
-            lenFields += tuple.getFieldLength(field);
-        }
+        int numBytesRequired = writer.bytesRequired(tuple, numTokenFields, numElementFields);
+        return checkEnoughSpace(numBytesRequired);
+    }
+
+    private boolean checkEnoughSpace(int numBytesRequired) {
+
         // The last 4 bytes are reserved for the end offset of the last record in the current page
-        if (pos + lenFields + 4 > targetBuf.length) {
+        if (pos + numBytesRequired + 4 > targetBuf.length) {
             return false;
         }
 
@@ -59,20 +76,16 @@ public class VariableSizeElementInvertedListBuilder extends AbstracInvertedListB
 
     @Override
     public boolean appendElement(ITupleReference tuple, int numTokenFields, int numElementFields) {
+        int numBytesRequired = writer.bytesRequired(tuple, numTokenFields, numElementFields);
 
-        if (checkEnoughSpace(tuple, numTokenFields, numElementFields) == false) {
+        if (checkEnoughSpace(numBytesRequired) == false) {
             return false;
         }
 
-        for (int i = 0; i < numElementFields; i++) {
-            int field = numTokenFields + i;
-            int lenField = tuple.getFieldLength(field);
-            System.arraycopy(tuple.getFieldData(field), tuple.getFieldStart(field), targetBuf, pos, lenField);
-            pos += lenField;
-        }
+        pos += writer.writeTupleFields(tuple, numTokenFields, numElementFields, targetBuf, pos);
         listSize++;
-        InvertedIndexUtils.setInvertedListFrameEndOffset(targetBuf, pos);
 
+        InvertedIndexUtils.setInvertedListFrameEndOffset(targetBuf, pos);
         return true;
     }
 

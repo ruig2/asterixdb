@@ -19,7 +19,9 @@
 
 package org.apache.hyracks.storage.am.lsm.invertedindex.ondisk.variablesize;
 
-import static org.apache.hyracks.storage.am.lsm.invertedindex.util.InvertedIndexUtils.calculateFieldLength;
+import org.apache.hyracks.storage.am.common.api.ITreeIndexTupleWriter;
+import org.apache.hyracks.storage.am.common.tuples.TypeAwareTupleWriter;
+import org.apache.hyracks.storage.am.lsm.invertedindex.api.IInvertedListTupleReference;
 
 import java.nio.ByteBuffer;
 
@@ -49,9 +51,14 @@ public class VariableSizeInvertedListFrameTupleAccessor extends AbstractInverted
     private int[] tupleStartOffsets;
     private int tupleCount;
     private int lastTupleLen;
+    private IInvertedListTupleReference tupleReference;
+    private ITreeIndexTupleWriter tupleWriter;
 
     public VariableSizeInvertedListFrameTupleAccessor(int frameSize, ITypeTraits[] fields) {
         super(frameSize, fields);
+
+        this.tupleWriter = new TypeAwareTupleWriter(fields);
+        this.tupleReference = new VariableSizeInvertedListTupleReference(fields);
     }
 
     @Override
@@ -60,15 +67,8 @@ public class VariableSizeInvertedListFrameTupleAccessor extends AbstractInverted
     }
 
     private int getTupleLengthAtPos(int startPos) {
-        int tupleLen = 0;
-        int pos = startPos;
-        for (int i = 0; i < fields.length; i++) {
-            int fieldLen = calculateFieldLength(fields[i], buffer.array(), pos);
-            tupleLen += fieldLen;
-            pos += fieldLen;
-        }
-
-        return tupleLen;
+        tupleReference.reset(buffer.array(), startPos);
+        return tupleWriter.bytesRequired(tupleReference);
     }
 
     @Override
@@ -124,20 +124,14 @@ public class VariableSizeInvertedListFrameTupleAccessor extends AbstractInverted
 
     @Override
     public int getFieldStartOffset(int tupleIndex, int fIdx) {
-        int pos = getTupleStartOffset(tupleIndex);
-        for (int i = 0; i < fIdx; i++) {
-            pos += UTF8StringUtil.getUTFStringFieldLength(buffer.array(), pos);
-        }
-        return pos;
+        tupleReference.reset(buffer.array(), getTupleStartOffset(tupleIndex));
+        return tupleReference.getFieldStart(fIdx);
     }
 
     @Override
     public int getFieldEndOffset(int tupleIndex, int fIdx) {
-        int pos = getTupleStartOffset(tupleIndex);
-        for (int i = 0; i <= fIdx; i++) {
-            pos += UTF8StringUtil.getUTFStringFieldLength(buffer.array(), pos);
-        }
-        return pos;
+        tupleReference.reset(buffer.array(), getTupleStartOffset(tupleIndex));
+        return tupleReference.getFieldStart(fIdx) + tupleReference.getFieldLength(fIdx);
     }
 
     @Override
