@@ -5668,6 +5668,7 @@
         <expected-error>ASX1119: Invalid argument to grouping() function</expected-error>
         <expected-error>ASX1119: Invalid argument to grouping() function</expected-error>
         <expected-error>ASX1118: Too many grouping sets in group by clause: 512. Maximum allowed: 128.</expected-error>
+        <expected-error>ASX1129: Cannot compile SELECT variable.* with GROUP BY GROUPING SETS/ROLLUP/CUBE followed by ORDER BY/LIMIT</expected-error>
       </compilation-unit>
     </test-case>
     <test-case FilePath="group-by">
@@ -6809,6 +6810,11 @@
     <test-case FilePath="multipart-dataverse">
       <compilation-unit name="special_chars_1">
         <output-dir compare="Text">special_chars_1</output-dir>
+      </compilation-unit>
+    </test-case>
+    <test-case FilePath="multipart-dataverse">
+      <compilation-unit name="special_chars_2">
+        <output-dir compare="Text">special_chars_2</output-dir>
       </compilation-unit>
     </test-case>
     <test-case FilePath="multipart-dataverse">
@@ -12083,6 +12089,11 @@
     <test-case FilePath="user-defined-functions">
       <compilation-unit name="udf33_overloading">
         <output-dir compare="Text">udf33_overloading</output-dir>
+      </compilation-unit>
+    </test-case>
+    <test-case FilePath="user-defined-functions">
+      <compilation-unit name="udf34">
+        <output-dir compare="Text">udf34</output-dir>
       </compilation-unit>
     </test-case>
     <test-case FilePath="user-defined-functions">
