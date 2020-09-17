@@ -88,7 +88,7 @@ public class InvertedIndexSearchResult {
     protected boolean isInReadMode;
     protected boolean isWriteFinished;
     protected boolean isFileOpened;
-    protected IInvertedListTupleReference tupleReference;
+    // Used for variable-size element in the inverted list
     protected ITreeIndexTupleWriter tupleWriter;
     protected byte[] tempBytes;
 
@@ -96,7 +96,6 @@ public class InvertedIndexSearchResult {
             ISimpleFrameBufferManager bufferManager) throws HyracksDataException {
         this.invListFields = invListFields;
         this.tupleWriter = new TypeAwareTupleWriter(invListFields);
-        this.tupleReference = new VariableSizeInvertedListTupleReference(invListFields);
         initTypeTraits(invListFields);
         this.ctx = ctx;
         appender = new InvertedListFrameTupleAppender(ctx.getInitialFrameSize());
