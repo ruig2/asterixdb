@@ -53,14 +53,6 @@ public class InvertedIndexSearchResult {
     // I/O buffer's index in the buffers
     protected static final int IO_BUFFER_IDX = 0;
     protected static final String FILE_PREFIX = "InvertedIndexSearchResult";
-    // This estimated element size is used to for fixed-size elements only.
-    // We use it to estimate the number of in-memory pages to allocate as buffer when initializing.
-    // And if there is no enough memory, we will use a on-disk mode by writing the intermediate results to disk.
-    // We assume most of the inverted list element is of type integer which takes 4 bytes
-    //
-    // If the element size is variable, since it is not possible to estimate how many buffer pages needed,
-    // currently, we will always use the on-disk mode to catch the intermediate results
-    protected int ESTIMATED_INVERTED_LIST_ELEMENT_SIZE = 4;
 
     protected final IHyracksTaskContext ctx;
     protected final InvertedListFrameTupleAppender appender;
@@ -73,7 +65,6 @@ public class InvertedIndexSearchResult {
     protected int currentWriterBufIdx;
     protected int currentReaderBufIdx;
     protected int numResults;
-    protected int numPossibleElementPerPage;
     // Read and Write I/O buffer
     protected IFrame ioBufferFrame = null;
     protected ByteBuffer ioBuffer = null;
@@ -112,7 +103,6 @@ public class InvertedIndexSearchResult {
         this.currentReaderBufIdx = 0;
         this.numResults = 0;
         this.tempBytes = new byte[ctx.getInitialFrameSize()];
-        calculateNumElementPerPage();
         // Allocates one frame for read/write operation.
         prepareIOBuffer();
     }
@@ -128,6 +118,25 @@ public class InvertedIndexSearchResult {
         }
         // Integer for counting occurrences.
         typeTraits[invListFields.length] = IntegerPointable.TYPE_TRAITS;
+    }
+
+    // If all the inverted list fileds are fixed-size, then return the number of expected pages
+    // Otherwise, return -1
+    public int getExpectedNumPages(int numExpectedElements) {
+        if (InvertedIndexUtils.checkTypeTraitsAllFixed(invListFields)) {
+            int sizeElement = 0;
+            for (int i = 0; i < invListFields.length; i++) {
+                sizeElement += invListFields[i].getFixedLength();
+            }
+
+            int frameSize = ctx.getInitialFrameSize();
+            // The count of Minframe, and the count of tuples in a frame should be deducted.
+            frameSize = frameSize - InvertedListFrameTupleAppender.MINFRAME_COUNT_SIZE - InvertedListFrameTupleAppender.TUPLE_COUNT_SIZE;
+            int numPossibleElementPerPage = (int) Math.floor((double) frameSize / (sizeElement + ELEMENT_COUNT_SIZE));
+            return (int) Math.ceil((double) numExpectedElements / numPossibleElementPerPage);
+        } else {
+            return -1;
+        }
     }
 
     /**
@@ -347,24 +356,6 @@ public class InvertedIndexSearchResult {
     }
 
     /**
-     * Gets the expected number of pages if all elements are created as a result.
-     * An assumption is that there are no common elements between the previous result and the cursor.
-     */
-    public int getExpectedNumPages(int numExpectedElements) {
-        return (int) Math.ceil((double) numExpectedElements / numPossibleElementPerPage);
-    }
-
-    // Gets the number of possible elements per page based on the inverted list element size.
-    protected void calculateNumElementPerPage() {
-        int frameSize = ctx.getInitialFrameSize();
-        // The count of Minframe, and the count of tuples in a frame should be deducted.
-        frameSize = frameSize - InvertedListFrameTupleAppender.MINFRAME_COUNT_SIZE
-                - InvertedListFrameTupleAppender.TUPLE_COUNT_SIZE;
-        numPossibleElementPerPage =
-                (int) Math.floor((double) frameSize / (ESTIMATED_INVERTED_LIST_ELEMENT_SIZE + ELEMENT_COUNT_SIZE));
-    }
-
-    /**
      * Allocates the buffer for read/write operation and initializes the buffers array that will be used keep a result.
      */
     protected void prepareIOBuffer() throws HyracksDataException {
@@ -390,12 +381,15 @@ public class InvertedIndexSearchResult {
      * Tries to allocate buffers to accommodate the results in memory.
      */
     protected boolean tryAllocateBuffers(int numExpectedPages) throws HyracksDataException {
+        assert numExpectedPages > 0;
+
         boolean allBufferAllocated = true;
         while (buffers.size() < numExpectedPages) {
             ByteBuffer tmpBuffer = bufferManager.acquireFrame(ctx.getInitialFrameSize());
             if (tmpBuffer == null) {
                 // Budget exhausted
                 allBufferAllocated = false;
+                deallocateBuffers();
                 break;
             } else {
                 clearBuffer(tmpBuffer);
