@@ -26,7 +26,6 @@ import org.apache.hyracks.api.io.IPersistedResourceRegistry;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
-
 public class EnglishStemmerFullTextFilter extends AbstractStemmerFullTextFilter {
     private static final long serialVersionUID = 1L;
 

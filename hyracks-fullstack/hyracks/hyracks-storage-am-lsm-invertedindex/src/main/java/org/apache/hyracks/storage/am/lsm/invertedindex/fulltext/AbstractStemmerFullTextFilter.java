@@ -20,9 +20,7 @@
 package org.apache.hyracks.storage.am.lsm.invertedindex.fulltext;
 
 import java.io.IOException;
-import java.util.Map;
 
-import com.google.common.collect.ImmutableMap;
 import org.apache.commons.lang3.EnumUtils;
 import org.apache.hyracks.data.std.util.GrowableArray;
 import org.apache.hyracks.data.std.util.UTF8StringBuilder;
@@ -78,7 +76,8 @@ public abstract class AbstractStemmerFullTextFilter extends AbstractFullTextFilt
                 stemmer = new SnowballStemmer(SnowballStemmer.ALGORITHM.ENGLISH);
                 break;
             default:
-                throw new IllegalArgumentException("Stemmer of the language " + language.toString() + " not supported yet!");
+                throw new IllegalArgumentException(
+                        "Stemmer of the language " + language.toString() + " not supported yet!");
         }
 
         int start = token.getStartOffset();

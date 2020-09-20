@@ -19,12 +19,12 @@
 
 package org.apache.hyracks.storage.am.lsm.invertedindex.fulltext;
 
-import org.apache.hyracks.storage.am.lsm.invertedindex.tokenizers.TokenizerInfo;
-import org.apache.hyracks.util.string.UTF8StringUtil;
 import static org.apache.hyracks.util.string.UTF8StringUtil.getUTF8StringInArray;
 
 import org.apache.hyracks.storage.am.lsm.invertedindex.tokenizers.IBinaryTokenizer;
 import org.apache.hyracks.storage.am.lsm.invertedindex.tokenizers.IToken;
+import org.apache.hyracks.storage.am.lsm.invertedindex.tokenizers.TokenizerInfo;
+import org.apache.hyracks.util.string.UTF8StringUtil;
 
 import com.google.common.collect.ImmutableList;
 
@@ -64,14 +64,13 @@ public class AbstractFullTextAnalyzer implements IFullTextAnalyzer {
         int start = currentToken.getStartOffset();
         int length = currentToken.getTokenLength();
         if (tokenizer.getTokenizerType() == TokenizerInfo.TokenizerType.LIST) {
-            int numBytesToStoreLength = UTF8StringUtil
-                    .getNumBytesToStoreLength(UTF8StringUtil.getUTFLength(currentToken.getData(), currentToken.getStartOffset()));
+            int numBytesToStoreLength = UTF8StringUtil.getNumBytesToStoreLength(
+                    UTF8StringUtil.getUTFLength(currentToken.getData(), currentToken.getStartOffset()));
             start += numBytesToStoreLength;
             length -= numBytesToStoreLength;
         }
 
-        String s = getUTF8StringInArray(currentToken.getData(), start,
-                length);
+        String s = getUTF8StringInArray(currentToken.getData(), start, length);
         System.out.println("current token: " + s);
     }
 

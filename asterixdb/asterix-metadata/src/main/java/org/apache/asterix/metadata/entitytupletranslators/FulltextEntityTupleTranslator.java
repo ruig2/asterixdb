@@ -140,7 +140,8 @@ public class FulltextEntityTupleTranslator extends AbstractTupleTranslator<IFull
         String languageStr = ((AString) aRecord
                 .getValueByPos(MetadataRecordTypes.FULLTEXT_ENTITY_ARECORD_STEMMER_LANGUAGE_FIELD_INDEX))
                         .getStringValue();
-        AbstractStemmerFullTextFilter.StemmerLanguage language = AbstractStemmerFullTextFilter.StemmerLanguage.getEnumIgnoreCase(languageStr);
+        AbstractStemmerFullTextFilter.StemmerLanguage language =
+                AbstractStemmerFullTextFilter.StemmerLanguage.getEnumIgnoreCase(languageStr);
         AbstractStemmerFullTextFilter stemmer =
                 AbstractStemmerFullTextFilter.createStemmerFullTextFilter(name, language);
 

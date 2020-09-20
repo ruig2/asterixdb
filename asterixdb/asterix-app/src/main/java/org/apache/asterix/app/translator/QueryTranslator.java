@@ -1009,7 +1009,6 @@ public class QueryTranslator extends AbstractLangTranslator implements IStatemen
         MetadataTransactionContext mdTxnCtx = MetadataManager.INSTANCE.beginTransaction();
         boolean bActiveTxn = true;
         metadataProvider.setMetadataTxnContext(mdTxnCtx);
-        boolean isSecondaryPrimary = stmtCreateIndex.getFieldExprs().isEmpty();
 
         lockUtil.createIndexBegin(lockManager, metadataProvider.getLocks(), dataverseName, datasetName);
         try {
@@ -1195,8 +1194,8 @@ public class QueryTranslator extends AbstractLangTranslator implements IStatemen
             }
 
             Index newIndex = new Index(dataverseName, datasetName, indexName, indexType, indexFields,
-                    keySourceIndicators, indexFieldTypes, stmtCreateIndex.getGramLength(), fullTextConfigName, overridesFieldTypes,
-                    stmtCreateIndex.isEnforced(), false, MetadataUtil.PENDING_ADD_OP);
+                    keySourceIndicators, indexFieldTypes, stmtCreateIndex.getGramLength(), fullTextConfigName,
+                    overridesFieldTypes, stmtCreateIndex.isEnforced(), false, MetadataUtil.PENDING_ADD_OP);
 
             bActiveTxn = false; // doCreateIndexImpl() takes over the current transaction
             doCreateIndexImpl(hcc, metadataProvider, ds, newIndex, jobFlags, sourceLoc);
@@ -1208,7 +1207,6 @@ public class QueryTranslator extends AbstractLangTranslator implements IStatemen
             throw e;
         }
     }
-
 
     public void handleCreateFullTextFilterStatement(MetadataProvider metadataProvider, Statement stmt)
             throws Exception {
