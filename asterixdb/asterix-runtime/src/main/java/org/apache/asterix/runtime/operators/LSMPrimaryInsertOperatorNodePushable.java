@@ -105,7 +105,17 @@ public class LSMPrimaryInsertOperatorNodePushable extends LSMIndexInsertUpdateDe
             }
         }
         keyTuple = new PermutingFrameTupleReference(searchKeyPermutations);
-        processor = new IFrameTupleProcessor() {
+        processor = createTupleProcessor(sourceLoc);
+        frameOpCallback = NoOpFrameOperationCallbackFactory.INSTANCE.createFrameOperationCallback(ctx, lsmAccessor);
+    }
+
+    protected void beforeModification(ITupleReference tuple) {
+        // this is used for extensions to modify tuples before persistence
+        // do nothing in the master branch
+    }
+
+    protected IFrameTupleProcessor createTupleProcessor(SourceLocation sourceLoc) {
+        return new IFrameTupleProcessor() {
             @Override
             public void process(ITupleReference tuple, int index) throws HyracksDataException {
                 if (index < currentTupleIdx) {
@@ -127,6 +137,7 @@ public class LSMPrimaryInsertOperatorNodePushable extends LSMIndexInsertUpdateDe
                     cursor.close();
                 }
                 if (!duplicate) {
+                    beforeModification(tuple);
                     lsmAccessor.forceUpsert(tuple);
                     if (lsmAccessorForKeyIndex != null) {
                         lsmAccessorForKeyIndex.forceUpsert(keyTuple);
@@ -157,8 +168,6 @@ public class LSMPrimaryInsertOperatorNodePushable extends LSMIndexInsertUpdateDe
                 // no op
             }
         };
-
-        frameOpCallback = NoOpFrameOperationCallbackFactory.INSTANCE.createFrameOperationCallback(ctx, lsmAccessor);
     }
 
     @Override
@@ -168,7 +177,6 @@ public class LSMPrimaryInsertOperatorNodePushable extends LSMIndexInsertUpdateDe
         flushedPartialTuples = false;
         accessor = new FrameTupleAccessor(inputRecDesc);
         writeBuffer = new VSizeFrame(ctx);
-        writer.open();
         indexHelper.open();
         index = indexHelper.getIndexInstance();
         IIndex indexForUniquessCheck;
@@ -183,6 +191,7 @@ public class LSMPrimaryInsertOperatorNodePushable extends LSMIndexInsertUpdateDe
                 PrimaryIndexLogMarkerCallback callback = new PrimaryIndexLogMarkerCallback((AbstractLSMIndex) index);
                 TaskUtil.put(ILogMarkerCallback.KEY_MARKER_CALLBACK, callback, ctx);
             }
+            writer.open();
             keySearchCmp =
                     BTreeUtils.getSearchMultiComparator(((ITreeIndex) index).getComparatorFactories(), frameTuple);
             searchPred = new RangePredicate(frameTuple, frameTuple, true, true, keySearchCmp, keySearchCmp, null, null);

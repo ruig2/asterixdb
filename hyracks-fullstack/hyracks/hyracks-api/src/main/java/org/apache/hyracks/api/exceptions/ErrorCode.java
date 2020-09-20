@@ -157,6 +157,7 @@ public class ErrorCode {
     public static final int NUMERIC_PROMOTION_ERROR = 121;
     public static final int ERROR_PRINTING_PLAN = 122;
     public static final int INSUFFICIENT_MEMORY = 123;
+    public static final int PARSING_ERROR = 124;
 
     // Compilation error codes.
     public static final int RULECOLLECTION_NOT_INSTANCE_OF_LIST = 10000;
@@ -168,6 +169,7 @@ public class ErrorCode {
     public static final int INAPPLICABLE_HINT = 10006;
     public static final int CROSS_PRODUCT_JOIN = 10007;
     public static final int GROUP_ALL_DECOR = 10008;
+    public static final int COMPILATION_ILLEGAL_STATE = 10009;
 
     private static class Holder {
         private static final Map<Integer, String> errorMessageMap;

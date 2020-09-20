@@ -23,6 +23,7 @@ import java.rmi.RemoteException;
 import java.util.concurrent.Executor;
 
 import org.apache.asterix.common.context.IStorageComponentProvider;
+import org.apache.asterix.common.library.ILibraryManager;
 import org.apache.asterix.common.replication.IReplicationChannel;
 import org.apache.asterix.common.replication.IReplicationManager;
 import org.apache.asterix.common.storage.IIndexCheckpointManagerProvider;
@@ -37,6 +38,7 @@ import org.apache.hyracks.api.io.IIOManager;
 import org.apache.hyracks.api.io.IPersistedResourceRegistry;
 import org.apache.hyracks.storage.am.lsm.common.api.ILSMIOOperationScheduler;
 import org.apache.hyracks.storage.am.lsm.common.api.ILSMMergePolicyFactory;
+import org.apache.hyracks.storage.am.lsm.common.api.IVirtualBufferCache;
 import org.apache.hyracks.storage.common.ILocalResourceRepository;
 import org.apache.hyracks.storage.common.buffercache.IBufferCache;
 import org.apache.hyracks.storage.common.file.IResourceIdFactory;
@@ -60,11 +62,11 @@ public interface INcApplicationContext extends IApplicationContext {
 
     IBufferCache getBufferCache();
 
+    IVirtualBufferCache getVirtualBufferCache();
+
     ILocalResourceRepository getLocalResourceRepository();
 
     IDatasetLifecycleManager getDatasetLifecycleManager();
-
-    IDatasetMemoryManager getDatasetMemoryManager();
 
     IResourceIdFactory getResourceIdFactory();
 
@@ -133,4 +135,9 @@ public interface INcApplicationContext extends IApplicationContext {
      * @return the cache manager
      */
     ICacheManager getCacheManager();
+
+    /**
+     * @return the library manager
+     */
+    ILibraryManager getLibraryManager();
 }

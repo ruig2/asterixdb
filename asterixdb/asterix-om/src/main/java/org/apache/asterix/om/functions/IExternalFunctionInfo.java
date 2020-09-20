@@ -21,6 +21,8 @@ package org.apache.asterix.om.functions;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.asterix.common.functions.ExternalFunctionLanguage;
+import org.apache.asterix.common.metadata.DataverseName;
 import org.apache.asterix.om.typecomputer.base.IResultTypeComputer;
 import org.apache.asterix.om.types.IAType;
 import org.apache.hyracks.algebricks.core.algebra.expressions.AbstractFunctionCallExpression.FunctionKind;
@@ -28,20 +30,21 @@ import org.apache.hyracks.algebricks.core.algebra.functions.IFunctionInfo;
 
 public interface IExternalFunctionInfo extends IFunctionInfo {
 
-    public IResultTypeComputer getResultTypeComputer();
+    FunctionKind getKind();
 
-    public IAType getReturnType();
+    List<IAType> getParameterTypes();
 
-    public List<String> getExternalIdentifier();
+    IAType getReturnType();
 
-    public List<IAType> getArgumentList();
+    IResultTypeComputer getResultTypeComputer();
 
-    public ExternalFunctionLanguage getLanguage();
+    ExternalFunctionLanguage getLanguage();
 
-    public FunctionKind getKind();
+    DataverseName getLibraryDataverseName();
 
-    public String getLibrary();
+    String getLibraryName();
 
-    public Map<String, String> getParams();
+    List<String> getExternalIdentifier();
 
+    Map<String, String> getResources();
 }

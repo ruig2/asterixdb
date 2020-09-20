@@ -28,6 +28,7 @@ import org.apache.asterix.common.transactions.ILogManager;
 import org.apache.asterix.common.transactions.LogRecord;
 import org.apache.asterix.common.transactions.LogType;
 import org.apache.hyracks.api.exceptions.HyracksDataException;
+import org.apache.hyracks.storage.am.lsm.common.api.ILSMIOOperation;
 import org.apache.hyracks.storage.am.lsm.common.api.ILSMIndex;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -42,10 +43,11 @@ public class DatasetInfo extends Info implements Comparable<DatasetInfo> {
     private final ILogManager logManager;
     private final LogRecord waitLog = new LogRecord();
     private int numActiveIOOps;
+    private int pendingFlushes;
+    private int pendingMerges;
     private long lastAccess;
     private boolean isExternal;
     private boolean isRegistered;
-    private boolean memoryAllocated;
     private boolean durable;
 
     public DatasetInfo(int datasetID, ILogManager logManager) {
@@ -54,7 +56,6 @@ public class DatasetInfo extends Info implements Comparable<DatasetInfo> {
         this.setLastAccess(-1);
         this.datasetID = datasetID;
         this.setRegistered(false);
-        this.setMemoryAllocated(false);
         this.logManager = logManager;
         waitLog.setLogType(LogType.WAIT_FOR_FLUSHES);
         waitLog.computeAndSetLogSize();
@@ -72,12 +73,32 @@ public class DatasetInfo extends Info implements Comparable<DatasetInfo> {
         setLastAccess(System.currentTimeMillis());
     }
 
-    public synchronized void declareActiveIOOperation() {
+    public synchronized void declareActiveIOOperation(ILSMIOOperation.LSMIOOperationType opType) {
         numActiveIOOps++;
+        switch (opType) {
+            case FLUSH:
+                pendingFlushes++;
+                break;
+            case MERGE:
+                pendingMerges++;
+                break;
+            default:
+                break;
+        }
     }
 
-    public synchronized void undeclareActiveIOOperation() {
+    public synchronized void undeclareActiveIOOperation(ILSMIOOperation.LSMIOOperationType opType) {
         numActiveIOOps--;
+        switch (opType) {
+            case FLUSH:
+                pendingFlushes--;
+                break;
+            case MERGE:
+                pendingMerges--;
+                break;
+            default:
+                break;
+        }
         //notify threads waiting on this dataset info
         notifyAll();
     }
@@ -144,8 +165,8 @@ public class DatasetInfo extends Info implements Comparable<DatasetInfo> {
     @Override
     public String toString() {
         return "DatasetID: " + getDatasetID() + ", isOpen: " + isOpen() + ", refCount: " + getReferenceCount()
-                + ", lastAccess: " + getLastAccess() + ", isRegistered: " + isRegistered() + ", memoryAllocated: "
-                + isMemoryAllocated() + ", isDurable: " + isDurable();
+                + ", lastAccess: " + getLastAccess() + ", isRegistered: " + isRegistered() + ", isDurable: "
+                + isDurable();
     }
 
     public boolean isDurable() {
@@ -192,14 +213,6 @@ public class DatasetInfo extends Info implements Comparable<DatasetInfo> {
         return datasetID;
     }
 
-    public boolean isMemoryAllocated() {
-        return memoryAllocated;
-    }
-
-    public void setMemoryAllocated(boolean memoryAllocated) {
-        this.memoryAllocated = memoryAllocated;
-    }
-
     public long getLastAccess() {
         return lastAccess;
     }
@@ -214,7 +227,7 @@ public class DatasetInfo extends Info implements Comparable<DatasetInfo> {
             while (numActiveIOOps > 0) {
                 try {
                     /**
-                     * Will be Notified by {@link DatasetInfo#undeclareActiveIOOperation()}
+                     * Will be Notified by {@link DatasetInfo#undeclareActiveIOOperation(ILSMIOOperation.LSMIOOperationType)}
                      */
                     wait();
                 } catch (InterruptedException e) {
@@ -229,5 +242,13 @@ public class DatasetInfo extends Info implements Comparable<DatasetInfo> {
                 throw new IllegalStateException("Number of IO operations cannot be negative");
             }
         }
+    }
+
+    public synchronized int getPendingFlushes() {
+        return pendingFlushes;
+    }
+
+    public synchronized int getPendingMerges() {
+        return pendingMerges;
     }
 }

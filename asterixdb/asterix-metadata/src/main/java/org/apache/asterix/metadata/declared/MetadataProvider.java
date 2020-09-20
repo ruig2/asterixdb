@@ -29,7 +29,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.function.Function;
 
 import org.apache.asterix.common.cluster.IClusterStateManager;
 import org.apache.asterix.common.config.DatasetConfig.DatasetType;
@@ -40,6 +39,8 @@ import org.apache.asterix.common.context.IStorageComponentProvider;
 import org.apache.asterix.common.dataflow.ICcApplicationContext;
 import org.apache.asterix.common.dataflow.LSMTreeInsertDeleteOperatorDescriptor;
 import org.apache.asterix.common.exceptions.AsterixException;
+import org.apache.asterix.common.external.IDataSourceAdapter;
+import org.apache.asterix.common.functions.FunctionSignature;
 import org.apache.asterix.common.metadata.DataverseName;
 import org.apache.asterix.common.metadata.LockList;
 import org.apache.asterix.common.storage.ICompressionManager;
@@ -49,9 +50,9 @@ import org.apache.asterix.common.utils.StorageConstants;
 import org.apache.asterix.common.utils.StoragePathUtil;
 import org.apache.asterix.dataflow.data.nontagged.MissingWriterFactory;
 import org.apache.asterix.dataflow.data.nontagged.serde.SerializerDeserializerUtil;
+import org.apache.asterix.external.adapter.factory.ExternalAdapterFactory;
 import org.apache.asterix.external.adapter.factory.LookupAdapterFactory;
-import org.apache.asterix.external.api.IAdapterFactory;
-import org.apache.asterix.external.api.IDataSourceAdapter;
+import org.apache.asterix.external.api.ITypedAdapterFactory;
 import org.apache.asterix.external.feed.policy.FeedPolicyAccessor;
 import org.apache.asterix.external.indexing.ExternalFile;
 import org.apache.asterix.external.indexing.IndexingConstants;
@@ -62,7 +63,6 @@ import org.apache.asterix.external.operators.ExternalScanOperatorDescriptor;
 import org.apache.asterix.external.operators.FeedIntakeOperatorDescriptor;
 import org.apache.asterix.external.provider.AdapterFactoryProvider;
 import org.apache.asterix.external.util.ExternalDataConstants;
-import org.apache.asterix.external.util.FeedConstants;
 import org.apache.asterix.formats.base.IDataFormat;
 import org.apache.asterix.formats.nontagged.BinaryBooleanInspector;
 import org.apache.asterix.formats.nontagged.BinaryComparatorFactoryProvider;
@@ -75,11 +75,13 @@ import org.apache.asterix.metadata.bootstrap.MetadataBuiltinEntities;
 import org.apache.asterix.metadata.dataset.hints.DatasetHints.DatasetCardinalityHint;
 import org.apache.asterix.metadata.entities.Dataset;
 import org.apache.asterix.metadata.entities.DatasourceAdapter;
+import org.apache.asterix.metadata.entities.Datatype;
 import org.apache.asterix.metadata.entities.Dataverse;
 import org.apache.asterix.metadata.entities.ExternalDatasetDetails;
 import org.apache.asterix.metadata.entities.Feed;
 import org.apache.asterix.metadata.entities.FeedConnection;
 import org.apache.asterix.metadata.entities.FeedPolicyEntity;
+import org.apache.asterix.metadata.entities.Function;
 import org.apache.asterix.metadata.entities.Index;
 import org.apache.asterix.metadata.entities.Synonym;
 import org.apache.asterix.metadata.feeds.FeedMetadataUtil;
@@ -129,11 +131,14 @@ import org.apache.hyracks.algebricks.runtime.operators.std.SinkWriterRuntimeFact
 import org.apache.hyracks.api.dataflow.IOperatorDescriptor;
 import org.apache.hyracks.api.dataflow.value.IBinaryComparatorFactory;
 import org.apache.hyracks.api.dataflow.value.ILinearizeComparatorFactory;
+import org.apache.hyracks.api.dataflow.value.IMissingWriterFactory;
 import org.apache.hyracks.api.dataflow.value.IResultSerializerFactory;
 import org.apache.hyracks.api.dataflow.value.ISerializerDeserializer;
 import org.apache.hyracks.api.dataflow.value.ITypeTraits;
 import org.apache.hyracks.api.dataflow.value.RecordDescriptor;
+import org.apache.hyracks.api.exceptions.IWarningCollector;
 import org.apache.hyracks.api.io.FileSplit;
+import org.apache.hyracks.api.job.IOperatorDescriptorRegistry;
 import org.apache.hyracks.api.job.JobSpecification;
 import org.apache.hyracks.api.result.IResultMetadata;
 import org.apache.hyracks.api.result.ResultSetId;
@@ -183,7 +188,7 @@ public class MetadataProvider implements IMetadataProvider<DataSourceId, String>
     private boolean blockingOperatorDisabled = false;
 
     public static MetadataProvider create(ICcApplicationContext appCtx, Dataverse defaultDataverse) {
-        Function<ICcApplicationContext, IMetadataProvider<?, ?>> factory =
+        java.util.function.Function<ICcApplicationContext, IMetadataProvider<?, ?>> factory =
                 ((ICCExtensionManager) appCtx.getExtensionManager()).getMetadataProviderFactory();
         MetadataProvider mp = factory != null ? (MetadataProvider) factory.apply(appCtx) : new MetadataProvider(appCtx);
         mp.setDefaultDataverse(defaultDataverse);
@@ -365,6 +370,10 @@ public class MetadataProvider implements IMetadataProvider<DataSourceId, String>
         return MetadataManagerUtil.findNodes(mdTxnCtx, nodeGroupName);
     }
 
+    public Datatype findTypeEntity(DataverseName dataverseName, String typeName) throws AlgebricksException {
+        return MetadataManagerUtil.findTypeEntity(mdTxnCtx, dataverseName, typeName);
+    }
+
     public IAType findType(DataverseName dataverseName, String typeName) throws AlgebricksException {
         return MetadataManagerUtil.findType(mdTxnCtx, dataverseName, typeName);
     }
@@ -446,7 +455,14 @@ public class MetadataProvider implements IMetadataProvider<DataSourceId, String>
 
     @Override
     public IFunctionInfo lookupFunction(FunctionIdentifier fid) {
-        return BuiltinFunctions.lookupFunction(fid);
+        return BuiltinFunctions.getBuiltinFunctionInfo(fid);
+    }
+
+    public Function lookupUserDefinedFunction(FunctionSignature signature) throws AlgebricksException {
+        if (signature.getDataverseName() == null) {
+            return null;
+        }
+        return MetadataManager.INSTANCE.getFunction(mdTxnCtx, signature);
     }
 
     @Override
@@ -462,7 +478,7 @@ public class MetadataProvider implements IMetadataProvider<DataSourceId, String>
     }
 
     protected Pair<IOperatorDescriptor, AlgebricksPartitionConstraint> buildLoadableDatasetScan(
-            JobSpecification jobSpec, IAdapterFactory adapterFactory, RecordDescriptor rDesc)
+            JobSpecification jobSpec, ITypedAdapterFactory adapterFactory, RecordDescriptor rDesc)
             throws AlgebricksException {
         ExternalScanOperatorDescriptor dataScanner = new ExternalScanOperatorDescriptor(jobSpec, rDesc, adapterFactory);
         try {
@@ -476,14 +492,14 @@ public class MetadataProvider implements IMetadataProvider<DataSourceId, String>
         return MetadataManager.INSTANCE.getDataverse(mdTxnCtx, dataverseName);
     }
 
-    public Triple<IOperatorDescriptor, AlgebricksPartitionConstraint, IAdapterFactory> buildFeedIntakeRuntime(
+    public Triple<IOperatorDescriptor, AlgebricksPartitionConstraint, ITypedAdapterFactory> buildFeedIntakeRuntime(
             JobSpecification jobSpec, Feed feed, FeedPolicyAccessor policyAccessor) throws Exception {
-        Triple<IAdapterFactory, RecordDescriptor, IDataSourceAdapter.AdapterType> factoryOutput;
+        Triple<ITypedAdapterFactory, RecordDescriptor, IDataSourceAdapter.AdapterType> factoryOutput;
         factoryOutput =
                 FeedMetadataUtil.getFeedFactoryAndOutput(feed, policyAccessor, mdTxnCtx, getApplicationContext());
         ARecordType recordType =
                 FeedMetadataUtil.getOutputType(feed, feed.getConfiguration().get(ExternalDataConstants.KEY_TYPE_NAME));
-        IAdapterFactory adapterFactory = factoryOutput.first;
+        ITypedAdapterFactory adapterFactory = factoryOutput.first;
         FeedIntakeOperatorDescriptor feedIngestor = null;
         switch (factoryOutput.third) {
             case INTERNAL:
@@ -491,10 +507,10 @@ public class MetadataProvider implements IMetadataProvider<DataSourceId, String>
                         policyAccessor, factoryOutput.second);
                 break;
             case EXTERNAL:
-                String libraryName = feed.getConfiguration().get(ExternalDataConstants.KEY_ADAPTER_NAME).trim()
-                        .split(FeedConstants.NamingConstants.LIBRARY_NAME_SEPARATOR)[0];
-                feedIngestor = new FeedIntakeOperatorDescriptor(jobSpec, feed, libraryName,
-                        adapterFactory.getClass().getName(), recordType, policyAccessor, factoryOutput.second);
+                ExternalAdapterFactory extAdapterFactory = (ExternalAdapterFactory) adapterFactory;
+                feedIngestor = new FeedIntakeOperatorDescriptor(jobSpec, feed, extAdapterFactory.getLibraryDataverse(),
+                        extAdapterFactory.getLibraryName(), extAdapterFactory.getClassName(), recordType,
+                        policyAccessor, factoryOutput.second);
                 break;
             default:
                 break;
@@ -721,9 +737,10 @@ public class MetadataProvider implements IMetadataProvider<DataSourceId, String>
     public Pair<IOperatorDescriptor, AlgebricksPartitionConstraint> getDeleteRuntime(
             IDataSource<DataSourceId> dataSource, IOperatorSchema propagatedSchema, IVariableTypeEnvironment typeEnv,
             List<LogicalVariable> keys, LogicalVariable payload, List<LogicalVariable> additionalNonKeyFields,
-            RecordDescriptor inputRecordDesc, JobGenContext context, JobSpecification spec) throws AlgebricksException {
+            List<LogicalVariable> additionalNonFilteringFields, RecordDescriptor inputRecordDesc, JobGenContext context,
+            JobSpecification spec) throws AlgebricksException {
         return getInsertOrDeleteRuntime(IndexOperation.DELETE, dataSource, propagatedSchema, keys, payload,
-                additionalNonKeyFields, inputRecordDesc, context, spec, false, null);
+                additionalNonKeyFields, inputRecordDesc, context, spec, false, additionalNonFilteringFields);
     }
 
     @Override
@@ -826,12 +843,14 @@ public class MetadataProvider implements IMetadataProvider<DataSourceId, String>
         return numElementsHint / numPartitions;
     }
 
-    protected IAdapterFactory getConfiguredAdapterFactory(Dataset dataset, String adapterName,
-            Map<String, String> configuration, ARecordType itemType, ARecordType metaType) throws AlgebricksException {
+    protected ITypedAdapterFactory getConfiguredAdapterFactory(Dataset dataset, String adapterName,
+            Map<String, String> configuration, ARecordType itemType, ARecordType metaType,
+            IWarningCollector warningCollector) throws AlgebricksException {
         try {
             configuration.put(ExternalDataConstants.KEY_DATAVERSE, dataset.getDataverseName().getCanonicalForm());
-            IAdapterFactory adapterFactory = AdapterFactoryProvider.getAdapterFactory(
-                    getApplicationContext().getServiceContext(), adapterName, configuration, itemType, metaType);
+            ITypedAdapterFactory adapterFactory =
+                    AdapterFactoryProvider.getAdapterFactory(getApplicationContext().getServiceContext(), adapterName,
+                            configuration, itemType, metaType, warningCollector);
 
             // check to see if dataset is indexed
             Index filesIndex =
@@ -904,7 +923,7 @@ public class MetadataProvider implements IMetadataProvider<DataSourceId, String>
             ExternalDatasetDetails datasetDetails = (ExternalDatasetDetails) dataset.getDatasetDetails();
             LookupAdapterFactory<?> adapterFactory = AdapterFactoryProvider.getLookupAdapterFactory(
                     getApplicationContext().getServiceContext(), datasetDetails.getProperties(), itemType, ridIndexes,
-                    retainInput, retainMissing, context.getMissingWriterFactory());
+                    retainInput, retainMissing, context.getMissingWriterFactory(), context.getWarningCollector());
             String fileIndexName = IndexingConstants.getFilesIndexName(dataset.getDatasetName());
             Pair<IFileSplitProvider, AlgebricksPartitionConstraint> spPc =
                     metadataProvider.getSplitProviderAndConstraints(dataset, fileIndexName);
@@ -956,24 +975,35 @@ public class MetadataProvider implements IMetadataProvider<DataSourceId, String>
         }
         // set the record permutation
         fieldPermutation[i++] = inputSchema.findVariable(payload);
-        // set the filters' permutations.
-        if (numFilterFields > 0) {
-            int idx = inputSchema.findVariable(filterKeys.get(0));
-            fieldPermutation[i++] = idx;
-        }
 
+        // set the meta record permutation
         if (additionalNonFilterFields != null) {
             for (LogicalVariable var : additionalNonFilterFields) {
                 int idx = inputSchema.findVariable(var);
                 fieldPermutation[i++] = idx;
             }
         }
-        return DatasetUtil.createPrimaryIndexUpsertOp(spec, this, dataset, recordDesc, fieldPermutation,
+
+        // set the filters' permutations.
+        if (numFilterFields > 0) {
+            int idx = inputSchema.findVariable(filterKeys.get(0));
+            fieldPermutation[i++] = idx;
+        }
+
+        return createPrimaryIndexUpsertOp(spec, this, dataset, recordDesc, fieldPermutation,
                 context.getMissingWriterFactory());
     }
 
+    protected Pair<IOperatorDescriptor, AlgebricksPartitionConstraint> createPrimaryIndexUpsertOp(JobSpecification spec,
+            MetadataProvider metadataProvider, Dataset dataset, RecordDescriptor inputRecordDesc,
+            int[] fieldPermutation, IMissingWriterFactory missingWriterFactory) throws AlgebricksException {
+        // this can be used by extensions to pick up their own operators
+        return DatasetUtil.createPrimaryIndexUpsertOp(spec, this, dataset, inputRecordDesc, fieldPermutation,
+                missingWriterFactory);
+    }
+
     public Pair<IOperatorDescriptor, AlgebricksPartitionConstraint> buildExternalDatasetDataScannerRuntime(
-            JobSpecification jobSpec, IAType itemType, IAdapterFactory adapterFactory) throws AlgebricksException {
+            JobSpecification jobSpec, IAType itemType, ITypedAdapterFactory adapterFactory) throws AlgebricksException {
         if (itemType.getTypeTag() != ATypeTag.OBJECT) {
             throw new AlgebricksException("Can only scan datasets of records.");
         }
@@ -1065,17 +1095,19 @@ public class MetadataProvider implements IMetadataProvider<DataSourceId, String>
             i++;
         }
         fieldPermutation[i++] = propagatedSchema.findVariable(payload);
-        int[] filterFields = new int[numFilterFields];
-        if (numFilterFields > 0) {
-            int idx = propagatedSchema.findVariable(additionalNonKeyFields.get(0));
-            fieldPermutation[i++] = idx;
-            filterFields[0] = idx;
-        }
+
         if (additionalNonFilteringFields != null) {
             for (LogicalVariable variable : additionalNonFilteringFields) {
                 int idx = propagatedSchema.findVariable(variable);
                 fieldPermutation[i++] = idx;
             }
+        }
+
+        int[] filterFields = new int[numFilterFields];
+        if (numFilterFields > 0) {
+            int idx = propagatedSchema.findVariable(additionalNonKeyFields.get(0));
+            fieldPermutation[i++] = idx;
+            filterFields[0] = idx;
         }
 
         Index primaryIndex = MetadataManager.INSTANCE.getIndex(mdTxnCtx, dataset.getDataverseName(),
@@ -1113,15 +1145,32 @@ public class MetadataProvider implements IMetadataProvider<DataSourceId, String>
                     pkidfh = new IndexDataflowHelperFactory(storageComponentProvider.getStorageManager(),
                             primaryKeySplitsAndConstraint.first);
                 }
-                op = new LSMPrimaryInsertOperatorDescriptor(spec, inputRecordDesc, fieldPermutation, idfh, pkidfh,
+                op = createLSMPrimaryInsertOperatorDescriptor(spec, inputRecordDesc, fieldPermutation, idfh, pkidfh,
                         modificationCallbackFactory, searchCallbackFactory, numKeys, filterFields);
 
             } else {
-                op = new LSMTreeInsertDeleteOperatorDescriptor(spec, inputRecordDesc, fieldPermutation, indexOp, idfh,
+                op = createLSMTreeInsertDeleteOperatorDescriptor(spec, inputRecordDesc, fieldPermutation, indexOp, idfh,
                         null, true, modificationCallbackFactory);
             }
         }
         return new Pair<>(op, splitsAndConstraint.second);
+    }
+
+    protected LSMPrimaryInsertOperatorDescriptor createLSMPrimaryInsertOperatorDescriptor(JobSpecification spec,
+            RecordDescriptor inputRecordDesc, int[] fieldPermutation, IIndexDataflowHelperFactory idfh,
+            IIndexDataflowHelperFactory pkidfh, IModificationOperationCallbackFactory modificationCallbackFactory,
+            ISearchOperationCallbackFactory searchCallbackFactory, int numKeys, int[] filterFields) {
+        // this can be used by extensions to pick up their own operators
+        return new LSMPrimaryInsertOperatorDescriptor(spec, inputRecordDesc, fieldPermutation, idfh, pkidfh,
+                modificationCallbackFactory, searchCallbackFactory, numKeys, filterFields);
+    }
+
+    protected LSMTreeInsertDeleteOperatorDescriptor createLSMTreeInsertDeleteOperatorDescriptor(
+            IOperatorDescriptorRegistry spec, RecordDescriptor outRecDesc, int[] fieldPermutation, IndexOperation op,
+            IIndexDataflowHelperFactory indexHelperFactory, ITupleFilterFactory tupleFilterFactory, boolean isPrimary,
+            IModificationOperationCallbackFactory modCallbackFactory) {
+        return new LSMTreeInsertDeleteOperatorDescriptor(spec, outRecDesc, fieldPermutation, op, indexHelperFactory,
+                tupleFilterFactory, isPrimary, modCallbackFactory);
     }
 
     private Pair<IOperatorDescriptor, AlgebricksPartitionConstraint> getIndexInsertOrDeleteOrUpsertRuntime(

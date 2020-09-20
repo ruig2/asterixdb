@@ -19,19 +19,16 @@
 
 package org.apache.asterix.metadata.entitytupletranslators;
 
-import static org.apache.asterix.metadata.bootstrap.MetadataRecordTypes.DATASOURCE_ARECORD_FUNCTION_LIBRARY_FIELD_NAME;
-
 import java.util.Calendar;
 
+import org.apache.asterix.common.external.IDataSourceAdapter;
 import org.apache.asterix.common.metadata.DataverseName;
-import org.apache.asterix.external.api.IDataSourceAdapter;
 import org.apache.asterix.external.dataset.adapter.AdapterIdentifier;
 import org.apache.asterix.metadata.bootstrap.MetadataPrimaryIndexes;
 import org.apache.asterix.metadata.bootstrap.MetadataRecordTypes;
 import org.apache.asterix.metadata.entities.DatasourceAdapter;
 import org.apache.asterix.om.base.ARecord;
 import org.apache.asterix.om.base.AString;
-import org.apache.asterix.om.types.ARecordType;
 import org.apache.hyracks.api.exceptions.HyracksDataException;
 import org.apache.hyracks.dataflow.common.data.accessors.ITupleReference;
 
@@ -59,17 +56,21 @@ public class DatasourceAdapterTupleTranslator extends AbstractTupleTranslator<Da
                 ((AString) adapterRecord.getValueByPos(MetadataRecordTypes.DATASOURCE_ADAPTER_ARECORD_TYPE_FIELD_INDEX))
                         .getStringValue());
 
-        String library = getAdapterLibrary(adapterRecord);
+        DataverseName libraryDataverseName = null;
+        String libraryName = null;
+        int libraryNameIdx = adapterRecord.getType().getFieldIndex(MetadataRecordTypes.FIELD_NAME_LIBRARY_NAME);
+        if (libraryNameIdx >= 0) {
+            libraryName = ((AString) adapterRecord.getValueByPos(libraryNameIdx)).getStringValue();
+            int libraryDataverseNameIdx =
+                    adapterRecord.getType().getFieldIndex(MetadataRecordTypes.FIELD_NAME_LIBRARY_DATAVERSE_NAME);
+            libraryDataverseName = libraryDataverseNameIdx >= 0
+                    ? DataverseName.createFromCanonicalForm(
+                            ((AString) adapterRecord.getValueByPos(libraryDataverseNameIdx)).getStringValue())
+                    : dataverseName;
+        }
 
-        return new DatasourceAdapter(new AdapterIdentifier(dataverseName, adapterName), classname, adapterType,
-                library);
-    }
-
-    private String getAdapterLibrary(ARecord adapterRecord) {
-        final ARecordType adapterType = adapterRecord.getType();
-        final int adapterLibraryIdx = adapterType.getFieldIndex(DATASOURCE_ARECORD_FUNCTION_LIBRARY_FIELD_NAME);
-        return adapterLibraryIdx >= 0 ? ((AString) adapterRecord.getValueByPos(adapterLibraryIdx)).getStringValue()
-                : null;
+        return new DatasourceAdapter(new AdapterIdentifier(dataverseName, adapterName), adapterType, classname,
+                libraryDataverseName, libraryName);
     }
 
     @Override
@@ -121,30 +122,39 @@ public class DatasourceAdapterTupleTranslator extends AbstractTupleTranslator<Da
         stringSerde.serialize(aString, fieldValue.getDataOutput());
         recordBuilder.addField(MetadataRecordTypes.DATASOURCE_ADAPTER_ARECORD_TIMESTAMP_FIELD_INDEX, fieldValue);
 
+        // write open fields
+        writeOpenFields(adapter);
+
         // write record
         recordBuilder.write(tupleBuilder.getDataOutput(), true);
         tupleBuilder.addFieldEndOffset();
 
         tuple.reset(tupleBuilder.getFieldEndOffsets(), tupleBuilder.getByteArray());
-
-        writeOpenTypes(adapter);
-
         return tuple;
     }
 
-    void writeOpenTypes(DatasourceAdapter adapter) throws HyracksDataException {
+    void writeOpenFields(DatasourceAdapter adapter) throws HyracksDataException {
         writeLibrary(adapter);
     }
 
     protected void writeLibrary(DatasourceAdapter adapter) throws HyracksDataException {
-        if (null == adapter.getLibrary()) {
+        if (adapter.getLibraryName() == null) {
             return;
         }
+
         fieldName.reset();
-        aString.setValue(DATASOURCE_ARECORD_FUNCTION_LIBRARY_FIELD_NAME);
+        aString.setValue(MetadataRecordTypes.FIELD_NAME_LIBRARY_DATAVERSE_NAME);
         stringSerde.serialize(aString, fieldName.getDataOutput());
         fieldValue.reset();
-        aString.setValue(adapter.getLibrary());
+        aString.setValue(adapter.getLibraryDataverseName().getCanonicalForm());
+        stringSerde.serialize(aString, fieldValue.getDataOutput());
+        recordBuilder.addField(fieldName, fieldValue);
+
+        fieldName.reset();
+        aString.setValue(MetadataRecordTypes.FIELD_NAME_LIBRARY_NAME);
+        stringSerde.serialize(aString, fieldName.getDataOutput());
+        fieldValue.reset();
+        aString.setValue(adapter.getLibraryName());
         stringSerde.serialize(aString, fieldValue.getDataOutput());
         recordBuilder.addField(fieldName, fieldValue);
     }

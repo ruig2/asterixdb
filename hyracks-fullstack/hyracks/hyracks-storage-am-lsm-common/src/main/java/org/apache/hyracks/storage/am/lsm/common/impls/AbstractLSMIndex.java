@@ -25,7 +25,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -94,6 +93,7 @@ public abstract class AbstractLSMIndex implements ILSMIndex {
     // components with lower indexes are newer than components with higher index
     protected final List<ILSMDiskComponent> diskComponents;
     protected final List<ILSMDiskComponent> inactiveDiskComponents;
+    protected final List<ILSMMemoryComponent> inactiveMemoryComponents;
     protected final double bloomFilterFalsePositiveRate;
     protected final IComponentFilterHelper filterHelper;
     protected final ILSMComponentFilterFrameFactory filterFrameFactory;
@@ -135,7 +135,8 @@ public abstract class AbstractLSMIndex implements ILSMIndex {
         this.filterManager = filterManager;
         this.treeFields = treeFields;
         this.filterFields = filterFields;
-        this.inactiveDiskComponents = new LinkedList<>();
+        this.inactiveDiskComponents = new ArrayList<>();
+        this.inactiveMemoryComponents = new ArrayList<>();
         this.durable = durable;
         this.tracer = tracer;
         lsmHarness = new LSMHarness(this, ioScheduler, mergePolicy, opTracker, diskBufferCache.isReplicationEnabled(),
@@ -170,8 +171,9 @@ public abstract class AbstractLSMIndex implements ILSMIndex {
         lsmHarness = new ExternalIndexHarness(this, ioScheduler, mergePolicy, opTracker,
                 diskBufferCache.isReplicationEnabled());
         isActive = false;
-        diskComponents = new LinkedList<>();
-        this.inactiveDiskComponents = new LinkedList<>();
+        diskComponents = new ArrayList<>();
+        this.inactiveDiskComponents = new ArrayList<>();
+        this.inactiveMemoryComponents = new ArrayList<>();
         // Memory related objects are nulled
         virtualBufferCaches = null;
         memoryComponents = null;
@@ -300,6 +302,7 @@ public abstract class AbstractLSMIndex implements ILSMIndex {
     private void resetMemoryComponents() throws HyracksDataException {
         if (memoryComponentsAllocated && memoryComponents != null) {
             for (ILSMMemoryComponent c : memoryComponents) {
+                c.cleanup();
                 c.reset();
             }
         }
@@ -700,6 +703,16 @@ public abstract class AbstractLSMIndex implements ILSMIndex {
     }
 
     @Override
+    public List<ILSMMemoryComponent> getInactiveMemoryComponents() {
+        return inactiveMemoryComponents;
+    }
+
+    @Override
+    public void addInactiveMemoryComponent(ILSMMemoryComponent memoryComponent) {
+        inactiveMemoryComponents.add(memoryComponent);
+    }
+
+    @Override
     public void scheduleReplication(ILSMIndexOperationContext ctx, List<ILSMDiskComponent> lsmComponents,
             ReplicationOperation operation, LSMOperationType opType) throws HyracksDataException {
         //get set of files to be replicated for this component
@@ -806,15 +819,6 @@ public abstract class AbstractLSMIndex implements ILSMIndex {
         for (ILSMDiskComponent c : diskComponents) {
             c.validate();
         }
-    }
-
-    @Override
-    public long getMemoryAllocationSize() {
-        long size = 0;
-        for (ILSMMemoryComponent c : memoryComponents) {
-            size += c.getSize();
-        }
-        return size;
     }
 
     @Override

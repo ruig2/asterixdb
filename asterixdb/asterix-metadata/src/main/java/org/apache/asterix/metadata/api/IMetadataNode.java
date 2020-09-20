@@ -143,12 +143,22 @@ public interface IMetadataNode extends Remote, Serializable {
      *
      * @param txnId
      *            A globally unique id for an active metadata transaction.
-     * @return A list of dataset instances.
+     * @param dataverseName
+     *            Name of the dataverse to drop.
      * @throws AlgebricksException
      *             For example, if the dataverse does not exist.
-     * @throws RemoteException
      */
     void dropDataverse(TxnId txnId, DataverseName dataverseName) throws AlgebricksException, RemoteException;
+
+    /**
+     * Returns {@code true} if given dataverse is not empty
+     * (i.e. contains any datatypes, datasets or any other entities).
+     *  @param txnId
+     *            A globally unique id for an active metadata transaction.
+     * @param dataverseName
+     *            Name of the dataverse
+     */
+    boolean isDataverseNotEmpty(TxnId txnId, DataverseName dataverseName) throws AlgebricksException, RemoteException;
 
     /**
      * Inserts a new dataset into the metadata, acquiring local locks on behalf of
@@ -825,6 +835,39 @@ public interface IMetadataNode extends Remote, Serializable {
      * @throws RemoteException
      */
     void updateDataset(TxnId txnId, Dataset dataset) throws AlgebricksException, RemoteException;
+
+    /**
+     * update an existing library in the metadata, acquiring local locks on behalf
+     * of the given transaction id.
+     *
+     * @param txnId
+     *            A globally unique id for an active metadata transaction.
+     * @param library
+     *            updated Library instance.
+     */
+    void updateLibrary(TxnId txnId, Library library) throws AlgebricksException, RemoteException;
+
+    /**
+     * update an existing function in the metadata, acquiring local locks on behalf
+     * of the given transaction id.
+     *
+     * @param txnId
+     *            A globally unique id for an active metadata transaction.
+     * @param function
+     *            updated Function instance.
+     */
+    void updateFunction(TxnId txnId, Function function) throws AlgebricksException, RemoteException;
+
+    /**
+     * update an existing datatype in the metadata, acquiring local locks on behalf
+     * of the given transaction id.
+     *
+     * @param txnId
+     *            A globally unique id for an active metadata transaction.
+     * @param datatype
+     *            updated Datatype instance.
+     */
+    void updateDatatype(TxnId txnId, Datatype datatype) throws AlgebricksException, RemoteException;
 
     /**
      * Adds an extension entity under the ongoing transaction job id

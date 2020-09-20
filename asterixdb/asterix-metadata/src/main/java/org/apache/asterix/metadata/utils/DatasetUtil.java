@@ -103,35 +103,43 @@ public class DatasetUtil {
     private DatasetUtil() {
     }
 
+    public static Integer getFilterSourceIndicator(Dataset dataset) {
+        return ((InternalDatasetDetails) dataset.getDatasetDetails()).getFilterSourceIndicator();
+    }
+
     public static List<String> getFilterField(Dataset dataset) {
         return ((InternalDatasetDetails) dataset.getDatasetDetails()).getFilterField();
     }
 
     public static IBinaryComparatorFactory[] computeFilterBinaryComparatorFactories(Dataset dataset,
-            ARecordType itemType, IBinaryComparatorFactoryProvider comparatorFactoryProvider)
+            ARecordType recordType, ARecordType metaType, IBinaryComparatorFactoryProvider comparatorFactoryProvider)
             throws AlgebricksException {
         if (dataset.getDatasetType() == DatasetType.EXTERNAL) {
             return null;
         }
+        Integer filterFieldSourceIndicator = getFilterSourceIndicator(dataset);
         List<String> filterField = getFilterField(dataset);
         if (filterField == null) {
             return null;
         }
         IBinaryComparatorFactory[] bcfs = new IBinaryComparatorFactory[1];
+        ARecordType itemType = filterFieldSourceIndicator == 0 ? recordType : metaType;
         IAType type = itemType.getSubFieldType(filterField);
         bcfs[0] = comparatorFactoryProvider.getBinaryComparatorFactory(type, true);
         return bcfs;
     }
 
-    public static ITypeTraits[] computeFilterTypeTraits(Dataset dataset, ARecordType itemType)
+    public static ITypeTraits[] computeFilterTypeTraits(Dataset dataset, ARecordType recordType, ARecordType metaType)
             throws AlgebricksException {
         if (dataset.getDatasetType() == DatasetType.EXTERNAL) {
             return null;
         }
+        Integer filterFieldSourceIndicator = getFilterSourceIndicator(dataset);
         List<String> filterField = getFilterField(dataset);
         if (filterField == null) {
             return null;
         }
+        ARecordType itemType = filterFieldSourceIndicator == 0 ? recordType : metaType;
         ITypeTraits[] typeTraits = new ITypeTraits[1];
         IAType type = itemType.getSubFieldType(filterField);
         typeTraits[0] = TypeTraitProvider.INSTANCE.getTypeTrait(type);
@@ -151,7 +159,8 @@ public class DatasetUtil {
         int numKeys = partitioningKeys.size();
 
         int[] filterFields = new int[1];
-        filterFields[0] = numKeys + 1;
+        int valueFields = dataset.hasMetaPart() ? 2 : 1;
+        filterFields[0] = numKeys + valueFields;
         return filterFields;
     }
 
@@ -208,9 +217,13 @@ public class DatasetUtil {
      * field is actually a key by making sure the field is coming from the right record (data record or meta record),
      * e.g. if the field name happens to be equal to the key name but the field is coming from the data record while
      * the key is coming from the meta record.
-     * @param keySourceIndicator indicates where the key is coming from, 1 from meta record, 0 from data record
-     * @param keyIndex the key index we're checking the field against
-     * @param fieldFromMeta whether the field is coming from the meta record or the data record
+     *
+     * @param keySourceIndicator
+     *            indicates where the key is coming from, 1 from meta record, 0 from data record
+     * @param keyIndex
+     *            the key index we're checking the field against
+     * @param fieldFromMeta
+     *            whether the field is coming from the meta record or the data record
      * @return true if the key source matches the field source. Otherwise, false.
      */
     private static boolean keySourceMatches(List<Integer> keySourceIndicator, int keyIndex, boolean fieldFromMeta) {
@@ -467,9 +480,13 @@ public class DatasetUtil {
         }
         // add the previous filter third
         int fieldIdx = -1;
+        Integer filterSourceIndicator = null;
+        ARecordType filterItemType = null;
         if (numFilterFields > 0) {
+            filterSourceIndicator = DatasetUtil.getFilterSourceIndicator(dataset);
             String filterField = DatasetUtil.getFilterField(dataset).get(0);
-            String[] fieldNames = itemType.getFieldNames();
+            filterItemType = filterSourceIndicator == 0 ? itemType : metaItemType;
+            String[] fieldNames = filterItemType.getFieldNames();
             int i = 0;
             for (; i < fieldNames.length; i++) {
                 if (fieldNames[i].equals(filterField)) {
@@ -477,9 +494,10 @@ public class DatasetUtil {
                 }
             }
             fieldIdx = i;
-            outputTypeTraits[f] = dataFormat.getTypeTraitProvider().getTypeTrait(itemType.getFieldTypes()[fieldIdx]);
+            outputTypeTraits[f] =
+                    dataFormat.getTypeTraitProvider().getTypeTrait(filterItemType.getFieldTypes()[fieldIdx]);
             outputSerDes[f] =
-                    dataFormat.getSerdeProvider().getSerializerDeserializer(itemType.getFieldTypes()[fieldIdx]);
+                    dataFormat.getSerdeProvider().getSerializerDeserializer(filterItemType.getFieldTypes()[fieldIdx]);
             f++;
         }
         for (int j = 0; j < inputRecordDesc.getFieldCount(); j++) {
@@ -489,7 +507,8 @@ public class DatasetUtil {
         RecordDescriptor outputRecordDesc = new RecordDescriptor(outputSerDes, outputTypeTraits);
         op = new LSMPrimaryUpsertOperatorDescriptor(spec, outputRecordDesc, fieldPermutation, idfh,
                 missingWriterFactory, modificationCallbackFactory, searchCallbackFactory,
-                dataset.getFrameOpCallbackFactory(metadataProvider), numKeys, itemType, fieldIdx, hasSecondaries);
+                dataset.getFrameOpCallbackFactory(metadataProvider), numKeys, filterSourceIndicator, filterItemType,
+                fieldIdx, hasSecondaries);
         return new Pair<>(op, splitsAndConstraint.second);
     }
 
@@ -578,7 +597,8 @@ public class DatasetUtil {
     public static String createNodeGroupForNewDataset(DataverseName dataverseName, String datasetName,
             long rebalanceCount, Set<String> ncNames, MetadataProvider metadataProvider) throws Exception {
         ICcApplicationContext appCtx = metadataProvider.getApplicationContext();
-        String nodeGroup = dataverseName + "." + datasetName + (rebalanceCount == 0L ? "" : "_" + rebalanceCount);
+        String nodeGroup = dataverseName.getCanonicalForm() + "." + datasetName
+                + (rebalanceCount == 0L ? "" : "_" + rebalanceCount);
         MetadataTransactionContext mdTxnCtx = metadataProvider.getMetadataTxnContext();
         appCtx.getMetadataLockManager().acquireNodeGroupWriteLock(metadataProvider.getLocks(), nodeGroup);
         NodeGroup ng = MetadataManager.INSTANCE.getNodegroup(mdTxnCtx, nodeGroup);

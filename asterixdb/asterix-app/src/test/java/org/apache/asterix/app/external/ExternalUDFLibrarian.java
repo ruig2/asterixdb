@@ -23,6 +23,8 @@ import java.io.IOException;
 import java.net.URL;
 
 import org.apache.asterix.common.exceptions.AsterixException;
+import org.apache.commons.io.IOUtils;
+import org.apache.http.HttpEntity;
 import org.apache.http.HttpHost;
 import org.apache.http.HttpResponse;
 import org.apache.http.auth.AuthScope;
@@ -33,13 +35,14 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.protocol.HttpClientContext;
-import org.apache.http.entity.FileEntity;
+import org.apache.http.entity.ContentType;
+import org.apache.http.entity.mime.HttpMultipartMode;
+import org.apache.http.entity.mime.MultipartEntityBuilder;
 import org.apache.http.impl.auth.BasicScheme;
 import org.apache.http.impl.client.BasicAuthCache;
 import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.hyracks.algebricks.common.utils.Pair;
-import org.apache.hyracks.api.exceptions.HyracksException;
 
 @SuppressWarnings("squid:S134")
 public class ExternalUDFLibrarian implements IExternalUDFLibrarian {
@@ -48,7 +51,7 @@ public class ExternalUDFLibrarian implements IExternalUDFLibrarian {
     private String host;
     private int port;
 
-    public ExternalUDFLibrarian(String host, int port) {
+    private ExternalUDFLibrarian(String host, int port) {
         hc = new DefaultHttpClient();
         this.host = host;
         this.port = port;
@@ -71,11 +74,14 @@ public class ExternalUDFLibrarian implements IExternalUDFLibrarian {
         AuthCache ac = new BasicAuthCache();
         ac.put(h, new BasicScheme());
         hcCtx.setAuthCache(ac);
-        post.setEntity(new FileEntity(new File(libPath), "application/octet-stream"));
+        File lib = new File(libPath);
+        HttpEntity file = MultipartEntityBuilder.create().setMode(HttpMultipartMode.STRICT)
+                .addBinaryBody("lib", lib, ContentType.DEFAULT_BINARY, lib.getName()).build();
+        post.setEntity(file);
         HttpResponse response = hc.execute(post, hcCtx);
         response.getEntity().consumeContent();
         if (response.getStatusLine().getStatusCode() != 200) {
-            throw new HyracksException(response.getStatusLine().toString());
+            throw new AsterixException(response.getStatusLine().toString());
         }
     }
 
@@ -93,9 +99,17 @@ public class ExternalUDFLibrarian implements IExternalUDFLibrarian {
         hcCtx.setAuthCache(ac);
         HttpDelete del = new HttpDelete(url.toString());
         HttpResponse response = hc.execute(del, hcCtx);
+        String resp = null;
+        int respCode = response.getStatusLine().getStatusCode();
+        if (respCode == 500) {
+            resp = IOUtils.toString(response.getEntity().getContent());
+        }
         response.getEntity().consumeContent();
-        if (response.getStatusLine().getStatusCode() != 200) {
-            throw new AsterixException(response.getStatusLine().toString());
+        if (resp == null && respCode != 200) {
+            resp = response.getStatusLine().toString();
+        }
+        if (resp != null) {
+            throw new AsterixException(resp);
         }
     }
 

@@ -19,45 +19,27 @@
 
 package org.apache.asterix.common.library;
 
-import java.net.URLClassLoader;
-import java.util.List;
-
 import org.apache.asterix.common.metadata.DataverseName;
-import org.apache.hyracks.algebricks.common.utils.Pair;
+import org.apache.asterix.external.ipc.ExternalFunctionResultRouter;
 import org.apache.hyracks.api.exceptions.HyracksDataException;
+import org.apache.hyracks.api.io.FileReference;
+import org.apache.hyracks.ipc.impl.IPCSystem;
 
 public interface ILibraryManager {
 
-    /**
-     * Registers the library class loader with the external library manager.
-     * <code>dataverseName</code> and <code>libraryName</code> uniquely identifies a class loader.
-     *
-     * @param dataverseName
-     * @param libraryName
-     * @param classLoader
-     */
-    void registerLibraryClassLoader(DataverseName dataverseName, String libraryName, URLClassLoader classLoader)
-            throws HyracksDataException;
+    ILibrary getLibrary(DataverseName dataverseName, String libraryName) throws HyracksDataException;
 
-    /**
-     * @return all registered libraries.
-     */
-    List<Pair<DataverseName, String>> getAllLibraries();
+    void closeLibrary(DataverseName dataverseName, String libraryName) throws HyracksDataException;
 
-    /**
-     * De-registers a library class loader.
-     *
-     * @param dataverseName
-     * @param libraryName
-     */
-    void deregisterLibraryClassLoader(DataverseName dataverseName, String libraryName);
+    // deployment helpers
 
-    /**
-     * Finds a class loader for a given pair of dataverse name and library name.
-     *
-     * @param dataverseName
-     * @param libraryName
-     * @return the library class loader associated with the dataverse and library.
-     */
-    ClassLoader getLibraryClassLoader(DataverseName dataverseName, String libraryName);
+    FileReference getLibraryDir(DataverseName dataverseName, String libraryName) throws HyracksDataException;
+
+    void dropLibraryPath(FileReference fileRef) throws HyracksDataException;
+
+    byte[] serializeLibraryDescriptor(LibraryDescriptor libraryDescriptor) throws HyracksDataException;
+
+    ExternalFunctionResultRouter getRouter();
+
+    IPCSystem getIPCI();
 }

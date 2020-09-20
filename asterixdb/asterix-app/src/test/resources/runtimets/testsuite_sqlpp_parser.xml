@@ -868,6 +868,13 @@
       </compilation-unit>
     </test-case>
   </test-group>
+  <test-group name="aggregate-subclause">
+    <test-case FilePath="aggregate-subclause">
+      <compilation-unit name="agg_filter_01">
+        <output-dir compare="AST">agg_filter_01</output-dir>
+      </compilation-unit>
+    </test-case>
+  </test-group>
   <test-group name="boolean">
     <test-case FilePath="boolean">
       <compilation-unit name="and_01">
@@ -6722,6 +6729,13 @@
     <test-case FilePath="group-by">
       <compilation-unit name="grouping-sets-2">
         <output-dir compare="AST">grouping-sets-2</output-dir>
+      </compilation-unit>
+    </test-case>
+  </test-group>
+  <test-group name="list">
+    <test-case FilePath="list">
+      <compilation-unit name="list-star_01">
+        <output-dir compare="AST">list-star_01</output-dir>
       </compilation-unit>
     </test-case>
   </test-group>

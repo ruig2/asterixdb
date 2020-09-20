@@ -570,8 +570,9 @@ public class BTreeAccessMethod implements IAccessMethod {
             if (lowKeyLimits[0] == null && lowKeyLimits[i] != null || lowKeyLimits[0] != null && lowKeyLimits[i] == null
                     || highKeyLimits[0] == null && highKeyLimits[i] != null
                     || highKeyLimits[0] != null && highKeyLimits[i] == null) {
-                numSecondaryKeys--;
+                numSecondaryKeys = i;
                 primaryIndexPostProccessingIsNeeded = true;
+                break;
             }
         }
 
@@ -791,6 +792,9 @@ public class BTreeAccessMethod implements IAccessMethod {
             } else {
                 keyVar = ((VariableReferenceExpression) searchKeyExpr).getVariableReference();
                 if (constExpression != null) {
+                    if (constExpression.getExpressionTag() != LogicalExpressionTag.CONSTANT) {
+                        constExpression = constExpression.cloneExpression();
+                    }
                     assignKeyExprList.add(new MutableObject<>(constExpression));
                     assignKeyVarList.add(constExprVars[i]);
                 }

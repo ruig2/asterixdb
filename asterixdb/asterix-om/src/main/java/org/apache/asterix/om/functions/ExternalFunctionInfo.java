@@ -21,6 +21,8 @@ package org.apache.asterix.om.functions;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.asterix.common.functions.ExternalFunctionLanguage;
+import org.apache.asterix.common.metadata.DataverseName;
 import org.apache.asterix.om.typecomputer.base.IResultTypeComputer;
 import org.apache.asterix.om.types.IAType;
 import org.apache.hyracks.algebricks.core.algebra.expressions.AbstractFunctionCallExpression.FunctionKind;
@@ -28,54 +30,30 @@ import org.apache.hyracks.algebricks.core.algebra.functions.FunctionIdentifier;
 
 public class ExternalFunctionInfo extends FunctionInfo implements IExternalFunctionInfo {
 
-    private static final long serialVersionUID = 2L;
+    private static final long serialVersionUID = 4L;
 
-    private final transient IResultTypeComputer rtc;
-    private final List<IAType> argumentTypes;
-    private final ExternalFunctionLanguage language;
     private final FunctionKind kind;
+    private final List<IAType> parameterTypes;
     private final IAType returnType;
-    private final String library;
+    private final ExternalFunctionLanguage language;
+    private final DataverseName libraryDataverseName;
+    private final String libraryName;
     private final List<String> externalIdentifier;
-    private final Map<String, String> params;
+    private final Map<String, String> resources;
 
-    public ExternalFunctionInfo(String namespace, String name, int arity, FunctionKind kind, List<IAType> argumentTypes,
-            IAType returnType, IResultTypeComputer rtc, ExternalFunctionLanguage language, String library,
-            List<String> externalIdentifier, Map<String, String> params, boolean deterministic) {
-        this(new FunctionIdentifier(namespace, name, arity), kind, argumentTypes, returnType, rtc, language, library,
-                externalIdentifier, params, deterministic);
-    }
-
-    public ExternalFunctionInfo(FunctionIdentifier fid, FunctionKind kind, List<IAType> argumentTypes,
-            IAType returnType, IResultTypeComputer rtc, ExternalFunctionLanguage language, String library,
-            List<String> externalIdentifier, Map<String, String> params, boolean deterministic) {
-        super(fid, deterministic);
-        this.rtc = rtc;
-        this.argumentTypes = argumentTypes;
-        this.library = library;
-        this.language = language;
-        this.externalIdentifier = externalIdentifier;
+    public ExternalFunctionInfo(FunctionIdentifier fid, FunctionKind kind, List<IAType> parameterTypes,
+            IAType returnType, IResultTypeComputer rtc, ExternalFunctionLanguage language,
+            DataverseName libraryDataverseName, String libraryName, List<String> externalIdentifier,
+            Map<String, String> resources, boolean deterministic) {
+        super(fid, rtc, deterministic);
         this.kind = kind;
+        this.parameterTypes = parameterTypes;
         this.returnType = returnType;
-        this.params = params;
-    }
-
-    public IResultTypeComputer getResultTypeComputer() {
-        return rtc;
-    }
-
-    public List<IAType> getArgumentTypes() {
-        return argumentTypes;
-    }
-
-    @Override
-    public List<IAType> getArgumentList() {
-        return argumentTypes;
-    }
-
-    @Override
-    public ExternalFunctionLanguage getLanguage() {
-        return language;
+        this.language = language;
+        this.libraryDataverseName = libraryDataverseName;
+        this.libraryName = libraryName;
+        this.externalIdentifier = externalIdentifier;
+        this.resources = resources;
     }
 
     @Override
@@ -84,13 +62,27 @@ public class ExternalFunctionInfo extends FunctionInfo implements IExternalFunct
     }
 
     @Override
+    public List<IAType> getParameterTypes() {
+        return parameterTypes;
+    }
+
+    @Override
     public IAType getReturnType() {
         return returnType;
     }
 
     @Override
-    public String getLibrary() {
-        return library;
+    public ExternalFunctionLanguage getLanguage() {
+        return language;
+    }
+
+    public DataverseName getLibraryDataverseName() {
+        return libraryDataverseName;
+    }
+
+    @Override
+    public String getLibraryName() {
+        return libraryName;
     }
 
     @Override
@@ -99,7 +91,7 @@ public class ExternalFunctionInfo extends FunctionInfo implements IExternalFunct
     }
 
     @Override
-    public Map<String, String> getParams() {
-        return params;
+    public Map<String, String> getResources() {
+        return resources;
     }
 }

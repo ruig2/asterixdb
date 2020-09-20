@@ -20,6 +20,7 @@ package org.apache.asterix.lang.sqlpp.rewrites;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -63,18 +64,20 @@ import org.apache.asterix.lang.sqlpp.rewrites.visitor.InlineColumnAliasVisitor;
 import org.apache.asterix.lang.sqlpp.rewrites.visitor.InlineWithExpressionVisitor;
 import org.apache.asterix.lang.sqlpp.rewrites.visitor.OperatorExpressionVisitor;
 import org.apache.asterix.lang.sqlpp.rewrites.visitor.SetOperationVisitor;
-import org.apache.asterix.lang.sqlpp.rewrites.visitor.SqlppBuiltinFunctionRewriteVisitor;
+import org.apache.asterix.lang.sqlpp.rewrites.visitor.SqlppCaseAggregateExtractionVisitor;
+import org.apache.asterix.lang.sqlpp.rewrites.visitor.SqlppCaseExpressionVisitor;
+import org.apache.asterix.lang.sqlpp.rewrites.visitor.SqlppFunctionCallResolverVisitor;
 import org.apache.asterix.lang.sqlpp.rewrites.visitor.SqlppGroupByAggregationSugarVisitor;
 import org.apache.asterix.lang.sqlpp.rewrites.visitor.SqlppGroupByVisitor;
 import org.apache.asterix.lang.sqlpp.rewrites.visitor.SqlppGroupingSetsVisitor;
 import org.apache.asterix.lang.sqlpp.rewrites.visitor.SqlppInlineUdfsVisitor;
 import org.apache.asterix.lang.sqlpp.rewrites.visitor.SqlppListInputFunctionRewriteVisitor;
+import org.apache.asterix.lang.sqlpp.rewrites.visitor.SqlppSpecialFunctionNameRewriteVisitor;
 import org.apache.asterix.lang.sqlpp.rewrites.visitor.SqlppWindowAggregationSugarVisitor;
 import org.apache.asterix.lang.sqlpp.rewrites.visitor.SqlppWindowRewriteVisitor;
 import org.apache.asterix.lang.sqlpp.rewrites.visitor.SubstituteGroupbyExpressionWithVariableVisitor;
 import org.apache.asterix.lang.sqlpp.rewrites.visitor.VariableCheckAndRewriteVisitor;
 import org.apache.asterix.lang.sqlpp.struct.SetOperationRight;
-import org.apache.asterix.lang.sqlpp.util.FunctionMapUtil;
 import org.apache.asterix.lang.sqlpp.util.SqlppAstPrintUtil;
 import org.apache.asterix.lang.sqlpp.util.SqlppVariableUtil;
 import org.apache.asterix.lang.sqlpp.visitor.base.ISqlppVisitor;
@@ -111,7 +114,7 @@ public class SqlppQueryRewriter implements IQueryRewriter {
         this.context = context;
         this.declaredFunctions = declaredFunctions;
         this.metadataProvider = metadataProvider;
-        this.externalVars = externalVars;
+        this.externalVars = externalVars != null ? externalVars : Collections.emptyList();
         this.isLogEnabled = LOGGER.isTraceEnabled();
         logExpression("Starting AST rewrites on", "");
     }
@@ -126,6 +129,9 @@ public class SqlppQueryRewriter implements IQueryRewriter {
 
         // Sets up parameters.
         setup(declaredFunctions, topStatement, metadataProvider, context, externalVars);
+
+        // Resolves function calls
+        resolveFunctionCalls();
 
         // Generates column names.
         generateColumnNames();
@@ -152,14 +158,20 @@ public class SqlppQueryRewriter implements IQueryRewriter {
         // Generate ids for variables (considering scopes) and replace global variable access with the dataset function.
         variableCheckAndRewrite();
 
+        //  Extracts SQL-92 aggregate functions from CASE/IF expressions into LET clauses
+        extractAggregatesFromCaseExpressions();
+
         // Rewrites SQL-92 aggregate functions
         rewriteGroupByAggregationSugar();
 
-        // Rewrite window expression aggregations.
+        // Rewrites window expression aggregations.
         rewriteWindowAggregationSugar();
 
         // Rewrites like/not-like expressions.
         rewriteOperatorExpression();
+
+        // Normalizes CASE expressions and rewrites simple ones into switch-case()
+        rewriteCaseExpressions();
 
         // Rewrites several variable-arg functions into their corresponding internal list-input functions.
         rewriteListInputFunctions();
@@ -167,13 +179,18 @@ public class SqlppQueryRewriter implements IQueryRewriter {
         // Inlines functions.
         inlineDeclaredUdfs(inlineUdfs);
 
-        // Rewrites function names.
-        // This should be done after inlineDeclaredUdfs() because user-defined function
-        // names could be case sensitive.
-        rewriteFunctionNames();
+        // Rewrites SQL++ core aggregate function names into internal names
+        rewriteSpecialFunctionNames();
 
         // Inlines WITH expressions after variableCheckAndRewrite(...) so that the variable scoping for WITH
         // expression is correct.
+        //
+        // Must run after rewriteSpecialFunctionNames() because it needs to have FunctionInfo
+        // for all functions to avoid inlining non-deterministic expressions.
+        // (CallExprs with special function names do not have FunctionInfo)
+        //
+        // Must run after inlineDeclaredUdfs() because we only maintain deterministic modifiers for built-in
+        // and external UDFs, therefore need to inline SQL++ UDFs to check the deterministic property.
         inlineWithExpressions();
 
         // Sets the var counter of the query.
@@ -181,7 +198,7 @@ public class SqlppQueryRewriter implements IQueryRewriter {
     }
 
     protected void rewriteGroupByAggregationSugar() throws CompilationException {
-        SqlppGroupByAggregationSugarVisitor visitor = new SqlppGroupByAggregationSugarVisitor(context);
+        SqlppGroupByAggregationSugarVisitor visitor = new SqlppGroupByAggregationSugarVisitor(context, externalVars);
         rewriteTopExpr(visitor, null);
     }
 
@@ -190,9 +207,15 @@ public class SqlppQueryRewriter implements IQueryRewriter {
         rewriteTopExpr(listInputFunctionVisitor, null);
     }
 
-    protected void rewriteFunctionNames() throws CompilationException {
-        SqlppBuiltinFunctionRewriteVisitor functionNameMapVisitor = new SqlppBuiltinFunctionRewriteVisitor();
-        rewriteTopExpr(functionNameMapVisitor, null);
+    protected void resolveFunctionCalls() throws CompilationException {
+        SqlppFunctionCallResolverVisitor visitor =
+                new SqlppFunctionCallResolverVisitor(metadataProvider, declaredFunctions);
+        rewriteTopExpr(visitor, null);
+    }
+
+    protected void rewriteSpecialFunctionNames() throws CompilationException {
+        SqlppSpecialFunctionNameRewriteVisitor visitor = new SqlppSpecialFunctionNameRewriteVisitor();
+        rewriteTopExpr(visitor, null);
     }
 
     protected void inlineWithExpressions() throws CompilationException {
@@ -263,6 +286,17 @@ public class SqlppQueryRewriter implements IQueryRewriter {
         rewriteTopExpr(windowVisitor, null);
     }
 
+    protected void extractAggregatesFromCaseExpressions() throws CompilationException {
+        SqlppCaseAggregateExtractionVisitor visitor = new SqlppCaseAggregateExtractionVisitor(context);
+        rewriteTopExpr(visitor, null);
+    }
+
+    protected void rewriteCaseExpressions() throws CompilationException {
+        // Normalizes CASE expressions and rewrites simple ones into switch-case()
+        SqlppCaseExpressionVisitor visitor = new SqlppCaseExpressionVisitor();
+        rewriteTopExpr(visitor, null);
+    }
+
     protected void inlineDeclaredUdfs(boolean inlineUdfs) throws CompilationException {
         List<FunctionSignature> funIds = new ArrayList<FunctionSignature>();
         for (FunctionDecl fdecl : declaredFunctions) {
@@ -271,16 +305,14 @@ public class SqlppQueryRewriter implements IQueryRewriter {
 
         List<FunctionDecl> usedStoredFunctionDecls = new ArrayList<>();
         for (Expression topLevelExpr : topExpr.getDirectlyEnclosedExpressions()) {
-            usedStoredFunctionDecls
-                    .addAll(FunctionUtil.retrieveUsedStoredFunctions(metadataProvider, topLevelExpr, funIds, null,
-                            expr -> getFunctionCalls(expr), functionParser, (signature, sourceLoc) -> FunctionMapUtil
-                                    .normalizeBuiltinFunctionSignature(signature, false, sourceLoc)));
+            usedStoredFunctionDecls.addAll(FunctionUtil.retrieveUsedStoredFunctions(metadataProvider, topLevelExpr,
+                    funIds, null, this::getFunctionCalls, functionParser, metadataProvider.getDefaultDataverseName()));
         }
         declaredFunctions.addAll(usedStoredFunctionDecls);
         if (inlineUdfs && !declaredFunctions.isEmpty()) {
-            SqlppInlineUdfsVisitor visitor = new SqlppInlineUdfsVisitor(context,
-                    new SqlppFunctionBodyRewriterFactory(
-                            parserFactory) /* the rewriter for function bodies expressions*/,
+            SqlppFunctionBodyRewriterFactory functionBodyRewriterFactory =
+                    new SqlppFunctionBodyRewriterFactory(parserFactory);
+            SqlppInlineUdfsVisitor visitor = new SqlppInlineUdfsVisitor(context, functionBodyRewriterFactory,
                     declaredFunctions, metadataProvider);
             while (rewriteTopExpr(visitor, declaredFunctions)) {
                 // loop until no more changes
@@ -479,6 +511,9 @@ public class SqlppQueryRewriter implements IQueryRewriter {
                 for (Pair<Expression, Identifier> p : winExpr.getWindowFieldList()) {
                     p.first.accept(this, arg);
                 }
+            }
+            if (winExpr.hasAggregateFilterExpr()) {
+                winExpr.getAggregateFilterExpr().accept(this, arg);
             }
             for (Expression expr : winExpr.getExprList()) {
                 expr.accept(this, arg);

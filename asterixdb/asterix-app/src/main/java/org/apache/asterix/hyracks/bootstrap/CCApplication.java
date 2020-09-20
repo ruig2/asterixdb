@@ -39,6 +39,7 @@ import java.util.concurrent.ConcurrentMap;
 import org.apache.asterix.api.http.IQueryWebServerRegistrant;
 import org.apache.asterix.api.http.server.ActiveStatsApiServlet;
 import org.apache.asterix.api.http.server.ApiServlet;
+import org.apache.asterix.api.http.server.BasicAuthServlet;
 import org.apache.asterix.api.http.server.CcQueryCancellationServlet;
 import org.apache.asterix.api.http.server.ClusterApiServlet;
 import org.apache.asterix.api.http.server.ClusterControllerDetailsApiServlet;
@@ -56,7 +57,7 @@ import org.apache.asterix.api.http.server.VersionApiServlet;
 import org.apache.asterix.app.active.ActiveNotificationHandler;
 import org.apache.asterix.app.cc.CCExtensionManager;
 import org.apache.asterix.app.config.ConfigValidator;
-import org.apache.asterix.app.external.ExternalLibraryUtils;
+import org.apache.asterix.app.io.PersistedResourceRegistry;
 import org.apache.asterix.app.replication.NcLifecycleCoordinator;
 import org.apache.asterix.app.result.JobResultCallback;
 import org.apache.asterix.common.api.AsterixThreadFactory;
@@ -73,11 +74,12 @@ import org.apache.asterix.common.config.PropertiesAccessor;
 import org.apache.asterix.common.config.ReplicationProperties;
 import org.apache.asterix.common.context.IStorageComponentProvider;
 import org.apache.asterix.common.dataflow.ICcApplicationContext;
+import org.apache.asterix.common.external.IAdapterFactoryService;
 import org.apache.asterix.common.library.ILibraryManager;
 import org.apache.asterix.common.metadata.IMetadataLockUtil;
 import org.apache.asterix.common.replication.INcLifecycleCoordinator;
 import org.apache.asterix.common.utils.Servlets;
-import org.apache.asterix.external.library.ExternalLibraryManager;
+import org.apache.asterix.external.adapter.factory.AdapterFactoryService;
 import org.apache.asterix.file.StorageComponentProvider;
 import org.apache.asterix.messaging.CCMessageBroker;
 import org.apache.asterix.metadata.MetadataManager;
@@ -90,6 +92,7 @@ import org.apache.asterix.runtime.utils.CcApplicationContext;
 import org.apache.asterix.translator.IStatementExecutorFactory;
 import org.apache.asterix.translator.Receptionist;
 import org.apache.asterix.util.MetadataBuiltinFunctions;
+import org.apache.asterix.utils.RedactionUtil;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
@@ -111,6 +114,7 @@ import org.apache.hyracks.http.server.HttpServerConfig;
 import org.apache.hyracks.http.server.HttpServerConfigBuilder;
 import org.apache.hyracks.http.server.WebManager;
 import org.apache.hyracks.ipc.impl.HyracksConnection;
+import org.apache.hyracks.util.LogRedactionUtil;
 import org.apache.hyracks.util.LoggingConfigUtil;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
@@ -143,27 +147,22 @@ public class CCApplication extends BaseCCApplication {
         final ClusterControllerService controllerService =
                 (ClusterControllerService) ccServiceCtx.getControllerService();
         ccServiceCtx.setMessageBroker(new CCMessageBroker(controllerService));
-
+        ccServiceCtx.setPersistedResourceRegistry(new PersistedResourceRegistry());
         configureLoggingLevel(ccServiceCtx.getAppConfig().getLoggingLevel(ExternalProperties.Option.LOG_LEVEL));
-
         LOGGER.info("Starting Asterix cluster controller");
-
         String strIP = ccServiceCtx.getCCContext().getClusterControllerInfo().getClientNetAddress();
         int port = ccServiceCtx.getCCContext().getClusterControllerInfo().getClientNetPort();
         hcc = new HyracksConnection(strIP, port,
                 ccServiceCtx.getControllerService().getNetworkSecurityManager().getSocketChannelFactory());
         MetadataBuiltinFunctions.init();
-        ILibraryManager libraryManager = new ExternalLibraryManager();
         ReplicationProperties repProp =
                 new ReplicationProperties(PropertiesAccessor.getInstance(ccServiceCtx.getAppConfig()));
         INcLifecycleCoordinator lifecycleCoordinator = createNcLifeCycleCoordinator(repProp.isReplicationEnabled());
-        ExternalLibraryUtils.setUpInstalledLibraries(libraryManager, false, ccServiceCtx.getServerCtx().getAppDir());
         componentProvider = new StorageComponentProvider();
-
         ccExtensionManager = new CCExtensionManager(new ArrayList<>(getExtensions()));
         IGlobalRecoveryManager globalRecoveryManager = createGlobalRecoveryManager();
-        appCtx = createApplicationContext(libraryManager, globalRecoveryManager, lifecycleCoordinator,
-                () -> new Receptionist("CC"), ConfigValidator::new, ccExtensionManager);
+        appCtx = createApplicationContext(null, globalRecoveryManager, lifecycleCoordinator, Receptionist::new,
+                ConfigValidator::new, ccExtensionManager, new AdapterFactoryService());
         final CCConfig ccConfig = controllerService.getCCConfig();
         if (System.getProperty("java.rmi.server.hostname") == null) {
             System.setProperty("java.rmi.server.hostname", ccConfig.getClusterPublicAddress());
@@ -211,11 +210,12 @@ public class CCApplication extends BaseCCApplication {
     protected ICcApplicationContext createApplicationContext(ILibraryManager libraryManager,
             IGlobalRecoveryManager globalRecoveryManager, INcLifecycleCoordinator lifecycleCoordinator,
             IReceptionistFactory receptionistFactory, IConfigValidatorFactory configValidatorFactory,
-            CCExtensionManager ccExtensionManager) throws AlgebricksException, IOException {
-        return new CcApplicationContext(ccServiceCtx, getHcc(), libraryManager, () -> MetadataManager.INSTANCE,
-                globalRecoveryManager, lifecycleCoordinator, new ActiveNotificationHandler(), componentProvider,
-                new MetadataLockManager(), createMetadataLockUtil(), receptionistFactory, configValidatorFactory,
-                ccExtensionManager);
+            CCExtensionManager ccExtensionManager, IAdapterFactoryService adapterFactoryService)
+            throws AlgebricksException, IOException {
+        return new CcApplicationContext(ccServiceCtx, getHcc(), () -> MetadataManager.INSTANCE, globalRecoveryManager,
+                lifecycleCoordinator, new ActiveNotificationHandler(), componentProvider, new MetadataLockManager(),
+                createMetadataLockUtil(), receptionistFactory, configValidatorFactory, ccExtensionManager,
+                adapterFactoryService);
     }
 
     protected IGlobalRecoveryManager createGlobalRecoveryManager() throws Exception {
@@ -234,6 +234,7 @@ public class CCApplication extends BaseCCApplication {
     public void configureLoggingLevel(Level level) {
         super.configureLoggingLevel(level);
         LoggingConfigUtil.defaultIfMissing(GlobalConfig.ASTERIX_LOGGER_NAME, level);
+        LogRedactionUtil.setRedactor(RedactionUtil.LOG_REDACTOR);
     }
 
     protected List<AsterixExtension> getExtensions() throws Exception {
@@ -300,7 +301,7 @@ public class CCApplication extends BaseCCApplication {
     }
 
     protected void addServlet(HttpServer server, String path) {
-        server.addServlet(createServlet(server.ctx(), path, path));
+        server.addServlet(createServlet(server, path, path));
     }
 
     protected HttpServer setupQueryWebServer(ExternalProperties externalProperties) throws Exception {
@@ -315,7 +316,8 @@ public class CCApplication extends BaseCCApplication {
         return queryWebServer;
     }
 
-    protected IServlet createServlet(ConcurrentMap<String, Object> ctx, String key, String... paths) {
+    protected IServlet createServlet(HttpServer server, String key, String... paths) {
+        ConcurrentMap<String, Object> ctx = server.ctx();
         switch (key) {
             case Servlets.RUNNING_REQUESTS:
                 return new CcQueryCancellationServlet(ctx, appCtx, paths);
@@ -349,9 +351,12 @@ public class CCApplication extends BaseCCApplication {
             case Servlets.ACTIVE_STATS:
                 return new ActiveStatsApiServlet(appCtx, ctx, paths);
             case Servlets.UDF:
-                return new UdfApiServlet(appCtx, ctx, paths);
+                return new BasicAuthServlet(ctx,
+                        new UdfApiServlet(ctx, paths, appCtx, ccExtensionManager.getCompilationProvider(SQLPP),
+                                getStatementExecutorFactory(), componentProvider, server.getScheme(),
+                                server.getAddress().getPort()));
             default:
-                throw new IllegalStateException(String.valueOf(key));
+                throw new IllegalStateException(key);
         }
     }
 

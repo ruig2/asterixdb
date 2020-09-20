@@ -21,6 +21,7 @@ package org.apache.asterix.metadata.bootstrap;
 import java.io.File;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 
@@ -35,13 +36,13 @@ import org.apache.asterix.common.context.DatasetLSMComponentIdGeneratorFactory;
 import org.apache.asterix.common.context.IStorageComponentProvider;
 import org.apache.asterix.common.exceptions.ACIDException;
 import org.apache.asterix.common.exceptions.MetadataException;
+import org.apache.asterix.common.external.IDataSourceAdapter;
 import org.apache.asterix.common.ioopcallbacks.LSMIndexIOOperationCallbackFactory;
 import org.apache.asterix.common.ioopcallbacks.LSMIndexPageWriteCallbackFactory;
 import org.apache.asterix.common.utils.StorageConstants;
 import org.apache.asterix.common.utils.StoragePathUtil;
 import org.apache.asterix.external.adapter.factory.GenericAdapterFactory;
-import org.apache.asterix.external.api.IAdapterFactory;
-import org.apache.asterix.external.api.IDataSourceAdapter;
+import org.apache.asterix.external.api.ITypedAdapterFactory;
 import org.apache.asterix.external.dataset.adapter.AdapterIdentifier;
 import org.apache.asterix.external.indexing.ExternalFile;
 import org.apache.asterix.metadata.IDatasetDetails;
@@ -160,7 +161,6 @@ public class MetadataBootstrap {
                 LOGGER.info(
                         "Finished enlistment of metadata B-trees in " + (isNewUniverse ? "new" : "old") + " universe");
             }
-
             if (isNewUniverse) {
                 insertInitialDataverses(mdTxnCtx);
                 insertMetadataDatasets(mdTxnCtx, PRIMARY_INDEXES);
@@ -176,9 +176,9 @@ public class MetadataBootstrap {
                 }
             } else {
                 insertNewCompactionPoliciesIfNotExist(mdTxnCtx);
+                insertSynonymEntitiesIfNotExist(mdTxnCtx);
                 insertFullTextEntityIfNotExist(mdTxnCtx);
             }
-
             // #. initialize datasetIdFactory
             MetadataManager.INSTANCE.initializeDatasetIdFactory(mdTxnCtx);
             MetadataManager.INSTANCE.commitTransaction(mdTxnCtx);
@@ -217,7 +217,7 @@ public class MetadataBootstrap {
         for (int i = 0; i < indexes.length; i++) {
             IDatasetDetails id = new InternalDatasetDetails(FileStructure.BTREE, PartitioningStrategy.HASH,
                     indexes[i].getPartitioningExpr(), indexes[i].getPartitioningExpr(), null,
-                    indexes[i].getPartitioningExprType(), false, null);
+                    indexes[i].getPartitioningExprType(), false, null, null);
             MetadataManager.INSTANCE.addDataset(mdTxnCtx,
                     new Dataset(indexes[i].getDataverseName(), indexes[i].getIndexedDatasetName(),
                             indexes[i].getDataverseName(), indexes[i].getPayloadRecordType().getTypeName(),
@@ -228,6 +228,10 @@ public class MetadataBootstrap {
         if (LOGGER.isInfoEnabled()) {
             LOGGER.info("Finished inserting initial datasets.");
         }
+    }
+
+    public static void getMetadataIndexes(List<IMetadataIndex> outIndexes) {
+        Collections.addAll(outIndexes, PRIMARY_INDEXES);
     }
 
     private static void getMetadataTypes(ArrayList<IAType> types) {
@@ -310,6 +314,20 @@ public class MetadataBootstrap {
         }
     }
 
+    private static void insertSynonymEntitiesIfNotExist(MetadataTransactionContext mdTxnCtx)
+            throws AlgebricksException {
+        IAType synonymDatasetRecordType = MetadataPrimaryIndexes.SYNONYM_DATASET.getPayloadRecordType();
+        if (MetadataManager.INSTANCE.getDatatype(mdTxnCtx, MetadataConstants.METADATA_DATAVERSE_NAME,
+                synonymDatasetRecordType.getTypeName()) == null) {
+            MetadataManager.INSTANCE.addDatatype(mdTxnCtx, new Datatype(MetadataConstants.METADATA_DATAVERSE_NAME,
+                    synonymDatasetRecordType.getTypeName(), synonymDatasetRecordType, false));
+        }
+        if (MetadataManager.INSTANCE.getDataset(mdTxnCtx, MetadataConstants.METADATA_DATAVERSE_NAME,
+                MetadataConstants.SYNONYM_DATASET_NAME) == null) {
+            insertMetadataDatasets(mdTxnCtx, new IMetadataIndex[] { MetadataPrimaryIndexes.SYNONYM_DATASET });
+        }
+    }
+
     private static void insertFullTextEntityIfNotExist(MetadataTransactionContext mdTxnCtx) throws AlgebricksException {
         if (MetadataManager.INSTANCE.getDataset(mdTxnCtx, MetadataConstants.METADATA_DATAVERSE_NAME,
                 MetadataConstants.FULLTEXT_CONFIG_DATASET_NAME) == null) {
@@ -331,9 +349,10 @@ public class MetadataBootstrap {
 
     private static DatasourceAdapter getAdapter(String adapterFactoryClassName) throws AlgebricksException {
         try {
-            String adapterName = ((IAdapterFactory) (Class.forName(adapterFactoryClassName).newInstance())).getAlias();
+            String adapterName =
+                    ((ITypedAdapterFactory) (Class.forName(adapterFactoryClassName).newInstance())).getAlias();
             return new DatasourceAdapter(new AdapterIdentifier(MetadataConstants.METADATA_DATAVERSE_NAME, adapterName),
-                    adapterFactoryClassName, IDataSourceAdapter.AdapterType.INTERNAL);
+                    IDataSourceAdapter.AdapterType.INTERNAL, adapterFactoryClassName, null, null);
         } catch (InstantiationException | IllegalAccessException | ClassNotFoundException e) {
             throw new MetadataException("Unable to instantiate builtin Adapter", e);
         }
@@ -361,10 +380,6 @@ public class MetadataBootstrap {
     public static void enlistMetadataDataset(INCServiceContext ncServiceCtx, IMetadataIndex index)
             throws HyracksDataException {
         final int datasetId = index.getDatasetId().getId();
-        // reserve memory for metadata dataset to ensure it can be opened when needed
-        if (!appContext.getDatasetMemoryManager().reserve(index.getDatasetId().getId())) {
-            throw new IllegalStateException("Failed to reserve memory for metadata dataset (" + datasetId + ")");
-        }
         String metadataPartitionPath =
                 StoragePathUtil.prepareStoragePartitionPath(MetadataNode.INSTANCE.getMetadataStoragePartition());
         String resourceName = metadataPartitionPath + File.separator + index.getFileNameRelativePath();

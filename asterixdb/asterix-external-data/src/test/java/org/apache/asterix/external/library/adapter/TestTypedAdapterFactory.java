@@ -24,24 +24,22 @@ import java.util.Map;
 
 import org.apache.asterix.common.api.IApplicationContext;
 import org.apache.asterix.common.cluster.ClusterPartition;
-import org.apache.asterix.common.dataflow.ICcApplicationContext;
-import org.apache.asterix.external.api.IAdapterFactory;
-import org.apache.asterix.external.api.IDataSourceAdapter;
-import org.apache.asterix.external.api.IExternalDataSourceFactory;
+import org.apache.asterix.common.external.IDataSourceAdapter;
+import org.apache.asterix.external.api.ITypedAdapterFactory;
 import org.apache.asterix.external.dataflow.TupleForwarder;
 import org.apache.asterix.external.parser.ADMDataParser;
 import org.apache.asterix.om.types.ARecordType;
 import org.apache.hyracks.algebricks.common.constraints.AlgebricksAbsolutePartitionConstraint;
-import org.apache.hyracks.algebricks.common.exceptions.AlgebricksException;
-import org.apache.hyracks.api.application.IServiceContext;
+import org.apache.hyracks.api.application.ICCServiceContext;
 import org.apache.hyracks.api.comm.IFrameWriter;
 import org.apache.hyracks.api.context.IHyracksTaskContext;
 import org.apache.hyracks.api.exceptions.HyracksDataException;
+import org.apache.hyracks.api.exceptions.IWarningCollector;
 import org.apache.hyracks.dataflow.common.comm.io.ArrayTupleBuilder;
 import org.apache.hyracks.dataflow.std.file.ITupleParser;
 import org.apache.hyracks.dataflow.std.file.ITupleParserFactory;
 
-public class TestTypedAdapterFactory implements IAdapterFactory {
+public class TestTypedAdapterFactory implements ITypedAdapterFactory {
 
     private static final long serialVersionUID = 1L;
 
@@ -51,20 +49,14 @@ public class TestTypedAdapterFactory implements IAdapterFactory {
 
     private Map<String, String> configuration;
 
-    private transient AlgebricksAbsolutePartitionConstraint clusterLocations;
-
-    private transient IServiceContext serviceContext;
-
     @Override
     public String getAlias() {
         return "test_typed";
     }
 
     @Override
-    public AlgebricksAbsolutePartitionConstraint getPartitionConstraint() throws AlgebricksException {
-        clusterLocations = IExternalDataSourceFactory.getPartitionConstraints(
-                (ICcApplicationContext) serviceContext.getApplicationContext(), clusterLocations, 1);
-        return clusterLocations;
+    public AlgebricksAbsolutePartitionConstraint getPartitionConstraint() {
+        throw new IllegalStateException(); // shouldn't be called for external adapters
     }
 
     @Override
@@ -113,8 +105,8 @@ public class TestTypedAdapterFactory implements IAdapterFactory {
     }
 
     @Override
-    public void configure(IServiceContext serviceContext, Map<String, String> configuration) {
-        this.serviceContext = serviceContext;
+    public void configure(ICCServiceContext serviceContext, Map<String, String> configuration,
+            IWarningCollector warningCollector) {
         this.configuration = configuration;
     }
 

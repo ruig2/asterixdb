@@ -18,21 +18,25 @@
  */
 package org.apache.asterix.metadata.functions;
 
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
 import org.apache.asterix.common.exceptions.AsterixException;
+import org.apache.asterix.common.exceptions.CompilationException;
 import org.apache.asterix.common.exceptions.ErrorCode;
-import org.apache.asterix.common.functions.FunctionSignature;
-import org.apache.asterix.metadata.MetadataTransactionContext;
+import org.apache.asterix.common.functions.ExternalFunctionLanguage;
+import org.apache.asterix.metadata.declared.MetadataProvider;
+import org.apache.asterix.metadata.entities.BuiltinTypeMap;
 import org.apache.asterix.metadata.entities.Function;
-import org.apache.asterix.om.functions.ExternalFunctionLanguage;
 import org.apache.asterix.om.typecomputer.base.IResultTypeComputer;
+import org.apache.asterix.om.types.BuiltinType;
 import org.apache.asterix.om.types.IAType;
+import org.apache.asterix.om.types.TypeSignature;
 import org.apache.hyracks.algebricks.common.exceptions.AlgebricksException;
 import org.apache.hyracks.algebricks.core.algebra.expressions.AbstractFunctionCallExpression.FunctionKind;
 import org.apache.hyracks.algebricks.core.algebra.functions.IFunctionInfo;
+import org.apache.hyracks.api.exceptions.SourceLocation;
 
 public class ExternalFunctionCompilerUtil {
 
@@ -40,130 +44,127 @@ public class ExternalFunctionCompilerUtil {
         // do nothing
     }
 
-    public static IFunctionInfo getExternalFunctionInfo(MetadataTransactionContext txnCtx, Function function)
+    public static IFunctionInfo getExternalFunctionInfo(MetadataProvider metadataProvider, Function function)
             throws AlgebricksException {
 
         String functionKind = function.getKind();
         IFunctionInfo finfo = null;
         if (FunctionKind.SCALAR.toString().equalsIgnoreCase(functionKind)) {
-            finfo = getScalarFunctionInfo(txnCtx, function);
+            finfo = getScalarFunctionInfo(metadataProvider, function);
         } else if (FunctionKind.AGGREGATE.toString().equalsIgnoreCase(functionKind)) {
-            finfo = getAggregateFunctionInfo(txnCtx, function);
+            finfo = getAggregateFunctionInfo(metadataProvider, function);
         } else if (FunctionKind.STATEFUL.toString().equalsIgnoreCase(functionKind)) {
-            finfo = getStatefulFunctionInfo(txnCtx, function);
+            finfo = getStatefulFunctionInfo(metadataProvider, function);
         } else if (FunctionKind.UNNEST.toString().equalsIgnoreCase(functionKind)) {
-            finfo = getUnnestFunctionInfo(txnCtx, function);
+            finfo = getUnnestFunctionInfo(metadataProvider, function);
         }
         return finfo;
     }
 
-    private static IFunctionInfo getScalarFunctionInfo(MetadataTransactionContext txnCtx, Function function)
+    private static IFunctionInfo getScalarFunctionInfo(MetadataProvider metadataProvider, Function function)
             throws AlgebricksException {
-        if (function.getDeterministic() == null) {
-            throw new AsterixException(ErrorCode.METADATA_ERROR, "");
+
+        List<IAType> paramTypes = getParameterTypes(function, metadataProvider);
+
+        IAType returnType = getType(function.getReturnType(), metadataProvider);
+
+        IResultTypeComputer typeComputer = new ExternalTypeComputer(returnType, paramTypes);
+
+        ExternalFunctionLanguage lang = getExternalFunctionLanguage(function.getLanguage());
+
+        Boolean deterministic = function.getDeterministic();
+        if (deterministic == null) {
+            // all external functions should store 'deterministic' property
+            throw new AsterixException(ErrorCode.METADATA_ERROR, function.getSignature().toString());
         }
 
-        IAType returnType = function.getReturnType();
-        IResultTypeComputer typeComputer = new ExternalTypeComputer(returnType, function.getArgTypes());
+        return new ExternalScalarFunctionInfo(function.getSignature().createFunctionIdentifier(), paramTypes,
+                returnType, typeComputer, lang, function.getLibraryDataverseName(), function.getLibraryName(),
+                function.getExternalIdentifier(), function.getResources(), deterministic);
+    }
 
-        ExternalFunctionLanguage lang;
+    private static IFunctionInfo getUnnestFunctionInfo(MetadataProvider metadataProvider, Function function) {
+        return null;
+    }
+
+    private static IFunctionInfo getStatefulFunctionInfo(MetadataProvider metadataProvider, Function function) {
+        return null;
+    }
+
+    private static IFunctionInfo getAggregateFunctionInfo(MetadataProvider metadataProvider, Function function) {
+        return null;
+    }
+
+    private static List<IAType> getParameterTypes(Function function, MetadataProvider metadataProvider)
+            throws AlgebricksException {
+        int arity = function.getArity();
+        if (arity == 0) {
+            return Collections.emptyList();
+        } else if (arity >= 0) {
+            List<IAType> types = new ArrayList<>(arity);
+            List<TypeSignature> typeSignatures = function.getParameterTypes();
+            if (typeSignatures != null) {
+                if (typeSignatures.size() != arity) {
+                    throw new AsterixException(ErrorCode.METADATA_ERROR, function.getSignature().toString());
+                }
+                for (TypeSignature ts : typeSignatures) {
+                    IAType paramType = getType(ts, metadataProvider);
+                    types.add(paramType);
+                }
+            } else {
+                for (int i = 0; i < arity; i++) {
+                    types.add(BuiltinType.ANY);
+                }
+            }
+            return types;
+        } else {
+            // we don't yet support variadic external functions
+            throw new AsterixException(ErrorCode.METADATA_ERROR, function.getSignature().toString());
+        }
+    }
+
+    private static IAType getType(TypeSignature typeSignature, MetadataProvider metadataProvider)
+            throws AlgebricksException {
+        if (typeSignature == null) {
+            return BuiltinType.ANY;
+        }
+        String typeName = typeSignature.getName();
+        // back-compat: handle "any"
+        if (BuiltinType.ANY.getTypeName().equals(typeName)) {
+            return BuiltinType.ANY;
+        }
+        IAType type = BuiltinTypeMap.getBuiltinType(typeName);
+        if (type == null) {
+            type = metadataProvider.findType(typeSignature.getDataverseName(), typeName);
+        }
+        return type;
+    }
+
+    public static ExternalFunctionLanguage getExternalFunctionLanguage(String language) throws AsterixException {
         try {
-            lang = ExternalFunctionLanguage.valueOf(function.getLanguage());
+            return ExternalFunctionLanguage.valueOf(language);
         } catch (IllegalArgumentException e) {
-            throw new AsterixException(ErrorCode.METADATA_ERROR, function.getLanguage());
-        }
-        List<String> externalIdentifier = decodeExternalIdentifier(lang, function.getFunctionBody());
-
-        return new ExternalScalarFunctionInfo(function.getSignature().createFunctionIdentifier(), returnType,
-                externalIdentifier, lang, function.getLibrary(), function.getArgTypes(), function.getParams(),
-                function.getDeterministic(), typeComputer);
-    }
-
-    private static IFunctionInfo getUnnestFunctionInfo(MetadataTransactionContext txnCtx, Function function) {
-        return null;
-    }
-
-    private static IFunctionInfo getStatefulFunctionInfo(MetadataTransactionContext txnCtx, Function function) {
-        return null;
-    }
-
-    private static IFunctionInfo getAggregateFunctionInfo(MetadataTransactionContext txnCtx, Function function) {
-        return null;
-    }
-
-    public static String encodeExternalIdentifier(FunctionSignature functionSignature,
-            ExternalFunctionLanguage language, List<String> identList) throws AlgebricksException {
-        switch (language) {
-            case JAVA:
-                // input:
-                // [0] = package.class
-                //
-                // output: package.class
-
-                return identList.get(0);
-
-            case PYTHON:
-                // input: either a method or a top-level function
-                // [0] = package.module(:class)?
-                // [1] = (function_or_method)? - if missing then defaults to declared function name
-                //
-                // output:
-                // case 1 (method): package.module:class.method
-                // case 2 (function): package.module:function
-
-                String ident0 = identList.get(0);
-                String ident1 = identList.size() > 1 ? identList.get(1) : functionSignature.getName();
-                boolean classExists = ident0.indexOf(':') > 0;
-                return ident0 + (classExists ? '.' : ':') + ident1;
-
-            default:
-                throw new AsterixException(ErrorCode.COMPILATION_ERROR, language);
+            throw new AsterixException(ErrorCode.METADATA_ERROR, language);
         }
     }
 
-    public static List<String> decodeExternalIdentifier(ExternalFunctionLanguage language, String encodedValue)
-            throws AlgebricksException {
+    public static void validateExternalIdentifier(List<String> externalIdentifier, ExternalFunctionLanguage language,
+            SourceLocation sourceLoc) throws CompilationException {
+        int expectedSize;
         switch (language) {
             case JAVA:
-                // input: class
-                //
-                // output:
-                // [0] = class
-                return Collections.singletonList(encodedValue);
-
+                expectedSize = 1;
+                break;
             case PYTHON:
-                // input:
-                //  case 1 (method): package.module:class.method
-                //  case 2 (function): package.module:function
-                //
-                // output:
-                //  case 1:
-                //    [0] = package.module
-                //    [1] = class
-                //    [2] = method
-                //  case 2:
-                //    [0] = package.module
-                //    [1] = function
-
-                int d1 = encodedValue.indexOf(':');
-                if (d1 <= 0) {
-                    throw new AsterixException(ErrorCode.COMPILATION_ERROR, encodedValue);
-                }
-                String moduleName = encodedValue.substring(0, d1);
-                int d2 = encodedValue.lastIndexOf('.');
-                if (d2 > d1) {
-                    // class.method
-                    String className = encodedValue.substring(d1 + 1, d2);
-                    String methodName = encodedValue.substring(d2 + 1);
-                    return Arrays.asList(moduleName, className, methodName);
-                } else {
-                    // function
-                    String functionName = encodedValue.substring(d1 + 1);
-                    return Arrays.asList(moduleName, functionName);
-                }
-
+                expectedSize = 2;
+                break;
             default:
-                throw new AsterixException(ErrorCode.COMPILATION_ERROR, language);
+                throw new CompilationException(ErrorCode.METADATA_ERROR, language.name());
+        }
+        int actualSize = externalIdentifier.size();
+        if (actualSize != expectedSize) {
+            throw new CompilationException(ErrorCode.INVALID_EXTERNAL_IDENTIFIER_SIZE, sourceLoc,
+                    String.valueOf(actualSize), language.name());
         }
     }
 }

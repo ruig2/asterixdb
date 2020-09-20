@@ -30,7 +30,8 @@ import org.apache.asterix.common.config.DatasetConfig.DatasetType;
 import org.apache.asterix.common.config.DatasetConfig.ExternalFilePendingOp;
 import org.apache.asterix.common.config.DatasetConfig.TransactionState;
 import org.apache.asterix.common.context.IStorageComponentProvider;
-import org.apache.asterix.external.api.IAdapterFactory;
+import org.apache.asterix.common.exceptions.NoOpWarningCollector;
+import org.apache.asterix.external.api.ITypedAdapterFactory;
 import org.apache.asterix.external.indexing.ExternalFile;
 import org.apache.asterix.external.indexing.IndexingConstants;
 import org.apache.asterix.external.operators.ExternalDatasetIndexesAbortOperatorDescriptor;
@@ -254,9 +255,9 @@ public class ExternalIndexingOperations {
             throws HyracksDataException, AlgebricksException {
         ExternalDatasetDetails externalDatasetDetails = (ExternalDatasetDetails) dataset.getDatasetDetails();
         Map<String, String> configuration = externalDatasetDetails.getProperties();
-        IAdapterFactory adapterFactory = AdapterFactoryProvider.getIndexingAdapterFactory(
+        ITypedAdapterFactory adapterFactory = AdapterFactoryProvider.getIndexingAdapterFactory(
                 metadataProvider.getApplicationContext().getServiceContext(), externalDatasetDetails.getAdapter(),
-                configuration, (ARecordType) itemType, files, true, null);
+                configuration, (ARecordType) itemType, files, true, null, NoOpWarningCollector.INSTANCE);
         ExternalScanOperatorDescriptor scanOp =
                 new ExternalScanOperatorDescriptor(jobSpec, indexerDesc, adapterFactory);
         scanOp.setSourceLocation(sourceLoc);

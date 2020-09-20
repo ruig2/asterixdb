@@ -87,7 +87,7 @@ public abstract class AbstractIntroduceGroupByCombinerRule extends AbstractIntro
             if (!newGbyLiveVars.contains(usedVar)) {
                 // Let the left-hand side of gbyOp's decoration expressions populated through the combiner group-by without
                 // any intermediate assignment.
-                newGbyOp.addDecorExpression(null, p.second.getValue());
+                newGbyOp.addDecorExpression(null, p.second.getValue().cloneExpression());
                 newGbyLiveVars.add(usedVar);
             }
         }
@@ -171,6 +171,9 @@ public abstract class AbstractIntroduceGroupByCombinerRule extends AbstractIntro
 
         // Nothing is pushed.
         if (bi.modifyGbyMap.isEmpty()) {
+            // Reset the group-by operator with original nested plans.
+            gbyNestedPlans.clear();
+            gbyNestedPlans.addAll(backupNestedPlans);
             return null;
         }
 
@@ -188,6 +191,9 @@ public abstract class AbstractIntroduceGroupByCombinerRule extends AbstractIntro
                         LogicalVariable v2 = newOpGbyList.get(i);
                         if (v != v2) {
                             // cannot linearize
+                            // Reset the group-by operator with original nested plans.
+                            gbyNestedPlans.clear();
+                            gbyNestedPlans.addAll(backupNestedPlans);
                             return null;
                         }
                     } else {

@@ -29,6 +29,7 @@ import org.apache.asterix.common.config.GlobalConfig;
 import org.apache.asterix.common.dataflow.ICcApplicationContext;
 import org.apache.asterix.common.exceptions.CompilationException;
 import org.apache.asterix.common.exceptions.ErrorCode;
+import org.apache.asterix.common.exceptions.NoOpWarningCollector;
 import org.apache.asterix.common.exceptions.WarningCollector;
 import org.apache.asterix.common.exceptions.WarningUtil;
 import org.apache.asterix.dataflow.data.common.ExpressionTypeComputer;
@@ -47,7 +48,6 @@ import org.apache.asterix.om.base.ADouble;
 import org.apache.asterix.om.base.IAObject;
 import org.apache.asterix.om.constants.AsterixConstantValue;
 import org.apache.asterix.om.functions.BuiltinFunctions;
-import org.apache.asterix.om.functions.ExternalFunctionLanguage;
 import org.apache.asterix.om.functions.IExternalFunctionInfo;
 import org.apache.asterix.om.typecomputer.impl.TypeComputeUtils;
 import org.apache.asterix.om.types.ARecordType;
@@ -71,6 +71,7 @@ import org.apache.hyracks.algebricks.core.algebra.expressions.AbstractLogicalExp
 import org.apache.hyracks.algebricks.core.algebra.expressions.AggregateFunctionCallExpression;
 import org.apache.hyracks.algebricks.core.algebra.expressions.ConstantExpression;
 import org.apache.hyracks.algebricks.core.algebra.expressions.ExpressionRuntimeProvider;
+import org.apache.hyracks.algebricks.core.algebra.expressions.IAlgebricksConstantValue;
 import org.apache.hyracks.algebricks.core.algebra.expressions.IVariableTypeEnvironment;
 import org.apache.hyracks.algebricks.core.algebra.expressions.ScalarFunctionCallExpression;
 import org.apache.hyracks.algebricks.core.algebra.expressions.StatefulFunctionCallExpression;
@@ -147,7 +148,8 @@ public class ConstantFoldingRule implements IAlgebraicRewriteRule {
                 BinaryComparatorFactoryProvider.INSTANCE, TypeTraitProvider.INSTANCE, BinaryBooleanInspector.FACTORY,
                 BinaryIntegerInspector.FACTORY, ADMPrinterFactoryProvider.INSTANCE, MissingWriterFactory.INSTANCE, null,
                 new ExpressionRuntimeProvider(new QueryLogicalExpressionJobGen(metadataProvider.getFunctionManager())),
-                ExpressionTypeComputer.INSTANCE, null, null, null, null, GlobalConfig.DEFAULT_FRAME_SIZE, null, 0);
+                ExpressionTypeComputer.INSTANCE, null, null, null, null, GlobalConfig.DEFAULT_FRAME_SIZE, null,
+                NoOpWarningCollector.INSTANCE, 0);
     }
 
     @Override
@@ -208,7 +210,21 @@ public class ConstantFoldingRule implements IAlgebraicRewriteRule {
         public Pair<Boolean, ILogicalExpression> visitScalarFunctionCallExpression(ScalarFunctionCallExpression expr,
                 Void arg) throws AlgebricksException {
             boolean changed = constantFoldArgs(expr, arg);
-            if (!allArgsConstant(expr) || !expr.isFunctional() || !canConstantFold(expr)) {
+            List<Mutable<ILogicalExpression>> argList = expr.getArguments();
+            int argConstantCount = countConstantArgs(argList);
+            if (argConstantCount != argList.size()) {
+                if (argConstantCount > 0 && expr.getFunctionIdentifier().equals(BuiltinFunctions.OR)
+                        && expr.isFunctional()) {
+                    if (foldOrArgs(expr)) {
+                        ILogicalExpression changedExpr =
+                                expr.getArguments().size() == 1 ? expr.getArguments().get(0).getValue() : expr;
+                        return new Pair<>(true, changedExpr);
+                    }
+                }
+                return new Pair<>(changed, expr);
+            }
+
+            if (!expr.isFunctional() || !canConstantFold(expr)) {
                 return new Pair<>(changed, expr);
             }
 
@@ -352,20 +368,20 @@ public class ConstantFoldingRule implements IAlgebraicRewriteRule {
             return false;
         }
 
-        private boolean allArgsConstant(AbstractFunctionCallExpression expr) {
-            for (Mutable<ILogicalExpression> r : expr.getArguments()) {
-                if (r.getValue().getExpressionTag() != LogicalExpressionTag.CONSTANT) {
-                    return false;
+        private int countConstantArgs(List<Mutable<ILogicalExpression>> argList) {
+            int n = 0;
+            for (Mutable<ILogicalExpression> r : argList) {
+                if (r.getValue().getExpressionTag() == LogicalExpressionTag.CONSTANT) {
+                    n++;
                 }
             }
-            return true;
+            return n;
         }
 
         private boolean canConstantFold(ScalarFunctionCallExpression function) throws AlgebricksException {
-            // skip external functions that are not implemented in Java
+            // skip external functions because they're not available at compile time (on CC)
             IFunctionInfo fi = function.getFunctionInfo();
-            if (fi instanceof IExternalFunctionInfo
-                    && !ExternalFunctionLanguage.JAVA.equals(((IExternalFunctionInfo) fi).getLanguage())) {
+            if (fi instanceof IExternalFunctionInfo) {
                 return false;
             }
             // skip all functions that would produce records/arrays/multisets (derived types) in their open format
@@ -400,6 +416,38 @@ public class ConstantFoldingRule implements IAlgebraicRewriteRule {
                 return canConstantFoldType(((AUnionType) returnType).getActualType());
             }
             return true;
+        }
+
+        private boolean foldOrArgs(ScalarFunctionCallExpression expr) {
+            // or(true,x,y) -> true; or(false,x,y) -> or(x,y)
+            boolean changed = false;
+            List<Mutable<ILogicalExpression>> argList = expr.getArguments();
+            Iterator<Mutable<ILogicalExpression>> argIter = argList.iterator();
+            Mutable<ILogicalExpression> argFalse = null;
+            while (argIter.hasNext()) {
+                Mutable<ILogicalExpression> argExprRef = argIter.next();
+                ILogicalExpression argExpr = argExprRef.getValue();
+                if (argExpr.getExpressionTag() != LogicalExpressionTag.CONSTANT) {
+                    continue;
+                }
+                ConstantExpression cExpr = (ConstantExpression) argExpr;
+                IAlgebricksConstantValue cValue = cExpr.getValue();
+                if (cValue.isTrue()) {
+                    // or(true,x,y) -> true;
+                    argList.clear();
+                    argList.add(argExprRef);
+                    return true;
+                } else if (cValue.isFalse()) {
+                    // remove 'false' from arg list, but save the expression.
+                    argFalse = argExprRef;
+                    argIter.remove();
+                    changed = true;
+                }
+            }
+            if (argList.isEmpty() && argFalse != null) {
+                argList.add(argFalse);
+            }
+            return changed;
         }
 
         // IEvaluatorContext

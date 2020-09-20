@@ -23,13 +23,11 @@ import java.io.IOException;
 
 import org.apache.asterix.common.exceptions.ErrorCode;
 import org.apache.asterix.common.exceptions.RuntimeDataException;
-import org.apache.asterix.common.functions.FunctionSignature;
 import org.apache.asterix.common.metadata.DataverseName;
 import org.apache.asterix.external.api.IExternalScalarFunction;
 import org.apache.asterix.external.api.IFunctionFactory;
 import org.apache.asterix.om.functions.IExternalFunctionInfo;
 import org.apache.asterix.om.types.IAType;
-import org.apache.hyracks.algebricks.common.exceptions.AlgebricksException;
 import org.apache.hyracks.algebricks.runtime.base.IEvaluatorContext;
 import org.apache.hyracks.algebricks.runtime.base.IScalarEvaluatorFactory;
 import org.apache.hyracks.api.exceptions.HyracksDataException;
@@ -40,29 +38,29 @@ import org.apache.hyracks.dataflow.common.data.accessors.IFrameTupleReference;
 
 class ExternalScalarJavaFunctionEvaluator extends ExternalScalarFunctionEvaluator {
 
-    protected final IExternalScalarFunction externalFunctionInstance;
-    protected final IPointable inputVal = VoidPointable.FACTORY.createPointable();
-    protected final ArrayBackedValueStorage resultBuffer = new ArrayBackedValueStorage();
+    private final IExternalScalarFunction externalFunctionInstance;
+    private final IPointable inputVal = VoidPointable.FACTORY.createPointable();
+    private final ArrayBackedValueStorage resultBuffer = new ArrayBackedValueStorage();
     protected final JavaFunctionHelper functionHelper;
 
-    public ExternalScalarJavaFunctionEvaluator(IExternalFunctionInfo finfo, IScalarEvaluatorFactory[] args,
-            IAType[] argTypes, IEvaluatorContext context) throws HyracksDataException {
+    ExternalScalarJavaFunctionEvaluator(IExternalFunctionInfo finfo, IScalarEvaluatorFactory[] args, IAType[] argTypes,
+            IEvaluatorContext context) throws HyracksDataException {
         super(finfo, args, argTypes, context);
 
-        DataverseName functionDataverse = FunctionSignature.getDataverseName(finfo.getFunctionIdentifier());
-        String functionLibrary = finfo.getLibrary();
+        DataverseName libraryDataverseName = finfo.getLibraryDataverseName();
+        String libraryName = finfo.getLibraryName();
+        JavaLibrary library = (JavaLibrary) libraryManager.getLibrary(libraryDataverseName, libraryName);
 
-        functionHelper = new JavaFunctionHelper(finfo, argTypes, resultBuffer);
-        ClassLoader libraryClassLoader = libraryManager.getLibraryClassLoader(functionDataverse, functionLibrary);
-        String classname = finfo.getExternalIdentifier().get(0).trim();
+        String classname = finfo.getExternalIdentifier().get(0);
         try {
-            Class<?> clazz = Class.forName(classname, true, libraryClassLoader);
+            Class<?> clazz = Class.forName(classname, true, library.getClassLoader());
             IFunctionFactory externalFunctionFactory = (IFunctionFactory) clazz.newInstance();
             externalFunctionInstance = (IExternalScalarFunction) externalFunctionFactory.getExternalFunction();
         } catch (Exception e) {
             throw new RuntimeDataException(ErrorCode.LIBRARY_EXTERNAL_FUNCTION_UNABLE_TO_LOAD_CLASS, e, classname);
         }
 
+        functionHelper = new JavaFunctionHelper(finfo, argTypes, resultBuffer);
         try {
             externalFunctionInstance.initialize(functionHelper);
         } catch (Exception e) {
@@ -86,7 +84,7 @@ class ExternalScalarJavaFunctionEvaluator extends ExternalScalarFunctionEvaluato
         }
     }
 
-    public void setArguments(IFrameTupleReference tuple) throws AlgebricksException, IOException {
+    public void setArguments(IFrameTupleReference tuple) throws IOException {
         for (int i = 0; i < argEvals.length; i++) {
             argEvals[i].evaluate(tuple, inputVal);
             functionHelper.setArgument(i, inputVal);

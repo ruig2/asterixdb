@@ -28,6 +28,8 @@ import java.util.Map;
 
 import org.apache.asterix.common.annotations.IRecordFieldDataGen;
 import org.apache.asterix.common.annotations.RecordDataGenAnnotation;
+import org.apache.asterix.common.exceptions.CompilationException;
+import org.apache.asterix.common.exceptions.ErrorCode;
 import org.apache.asterix.common.metadata.DataverseName;
 import org.apache.asterix.lang.common.expression.OrderedListTypeDefinition;
 import org.apache.asterix.lang.common.expression.RecordTypeDefinition;
@@ -41,6 +43,7 @@ import org.apache.asterix.metadata.MetadataTransactionContext;
 import org.apache.asterix.metadata.entities.BuiltinTypeMap;
 import org.apache.asterix.metadata.entities.Datatype;
 import org.apache.asterix.metadata.utils.MetadataConstants;
+import org.apache.asterix.metadata.utils.TypeUtil;
 import org.apache.asterix.om.types.AOrderedListType;
 import org.apache.asterix.om.types.ARecordType;
 import org.apache.asterix.om.types.AUnionType;
@@ -51,6 +54,7 @@ import org.apache.asterix.om.types.IAType;
 import org.apache.asterix.om.types.TypeSignature;
 import org.apache.hyracks.algebricks.common.exceptions.AlgebricksException;
 import org.apache.hyracks.algebricks.common.utils.Pair;
+import org.apache.hyracks.api.exceptions.SourceLocation;
 
 public class TypeTranslator {
 
@@ -72,9 +76,9 @@ public class TypeTranslator {
         Map<TypeSignature, List<AbstractCollectionType>> incompleteItemTypes = new HashMap<>();
         Map<TypeSignature, List<TypeSignature>> incompleteTopLevelTypeReferences = new HashMap<>();
         firstPass(typeDataverse, typeName, typeExpr, outTypeMap, incompleteFieldTypes, incompleteItemTypes,
-                incompleteTopLevelTypeReferences, defaultDataverse);
+                incompleteTopLevelTypeReferences, typeDataverse);
         secondPass(mdTxnCtx, outTypeMap, incompleteFieldTypes, incompleteItemTypes, incompleteTopLevelTypeReferences,
-                typeDataverse);
+                typeDataverse, typeExpr.getSourceLocation());
 
         for (IAType type : outTypeMap.values()) {
             if (type.getTypeTag().isDerivedType()) {
@@ -90,7 +94,8 @@ public class TypeTranslator {
             throws AlgebricksException {
 
         if (BuiltinTypeMap.getBuiltinType(typeName) != null) {
-            throw new AlgebricksException("Cannot redefine builtin type " + typeName + " .");
+            throw new CompilationException(ErrorCode.COMPILATION_ERROR, typeExpr.getSourceLocation(),
+                    "Cannot redefine builtin type " + typeName);
         }
         TypeSignature typeSignature = new TypeSignature(typeDataverse, typeName);
         switch (typeExpr.getTypeKind()) {
@@ -135,15 +140,15 @@ public class TypeTranslator {
     private static void secondPass(MetadataTransactionContext mdTxnCtx, Map<TypeSignature, IAType> typeMap,
             Map<String, Map<ARecordType, List<Integer>>> incompleteFieldTypes,
             Map<TypeSignature, List<AbstractCollectionType>> incompleteItemTypes,
-            Map<TypeSignature, List<TypeSignature>> incompleteTopLevelTypeReferences, DataverseName typeDataverse)
-            throws AlgebricksException {
+            Map<TypeSignature, List<TypeSignature>> incompleteTopLevelTypeReferences, DataverseName typeDataverse,
+            SourceLocation sourceLoc) throws AlgebricksException {
         // solve remaining top level references
         for (TypeSignature typeSignature : incompleteTopLevelTypeReferences.keySet()) {
             IAType t;
             Datatype dt = MetadataManager.INSTANCE.getDatatype(mdTxnCtx, typeSignature.getDataverseName(),
                     typeSignature.getName());
             if (dt == null) {
-                throw new AlgebricksException("Could not resolve type " + typeSignature);
+                throw new CompilationException(ErrorCode.UNKNOWN_TYPE, sourceLoc, typeSignature.getName());
             } else {
                 t = dt.getDatatype();
             }
@@ -160,7 +165,7 @@ public class TypeTranslator {
                         trefName);
             }
             if (dt == null) {
-                throw new AlgebricksException("Could not resolve type " + trefName);
+                throw new CompilationException(ErrorCode.UNKNOWN_TYPE, sourceLoc, trefName);
             } else {
                 t = dt.getDatatype();
             }
@@ -187,7 +192,7 @@ public class TypeTranslator {
                 dt = MetadataManager.INSTANCE.getDatatype(mdTxnCtx, typeSignature.getDataverseName(),
                         typeSignature.getName());
                 if (dt == null) {
-                    throw new AlgebricksException("Could not resolve type " + typeSignature);
+                    throw new CompilationException(ErrorCode.UNKNOWN_TYPE, sourceLoc, typeSignature.getName());
                 }
                 t = dt.getDatatype();
             } else {
@@ -322,48 +327,33 @@ public class TypeTranslator {
 
         for (int j = 0; j < n; j++) {
             TypeExpression texpr = rtd.getFieldTypes().get(j);
+            IAType type;
             switch (texpr.getTypeKind()) {
                 case TYPEREFERENCE: {
                     TypeReferenceExpression tre = (TypeReferenceExpression) texpr;
                     TypeSignature signature = createTypeSignature(tre, defaultDataverse);
-                    IAType tref = solveTypeReference(signature, typeMap);
-                    if (tref != null) {
-                        if (!rtd.getOptionableFields().get(j)) { // not nullable
-                            fldTypes[j] = tref;
-                        } else { // optional
-                            fldTypes[j] = AUnionType.createUnknownableType(tref);
-                        }
-                    } else {
+                    type = solveTypeReference(signature, typeMap);
+                    if (type == null) {
                         addIncompleteFieldTypeReference(recType, j, tre, incompleteFieldTypes);
-                        if (rtd.getOptionableFields().get(j)) {
-                            fldTypes[j] = AUnionType.createUnknownableType(null);
-                        }
                     }
                     break;
                 }
                 case RECORD: {
                     RecordTypeDefinition recTypeDef2 = (RecordTypeDefinition) texpr;
-                    IAType t2 = computeRecordType(null, recTypeDef2, typeMap, incompleteFieldTypes, incompleteItemTypes,
+                    type = computeRecordType(null, recTypeDef2, typeMap, incompleteFieldTypes, incompleteItemTypes,
                             defaultDataverse);
-                    if (!rtd.getOptionableFields().get(j)) { // not nullable
-                        fldTypes[j] = t2;
-                    } else { // nullable
-                        fldTypes[j] = AUnionType.createUnknownableType(t2);
-                    }
                     break;
                 }
                 case ORDEREDLIST: {
                     OrderedListTypeDefinition oltd = (OrderedListTypeDefinition) texpr;
-                    IAType t2 = computeOrderedListType(null, oltd, typeMap, incompleteItemTypes, incompleteFieldTypes,
+                    type = computeOrderedListType(null, oltd, typeMap, incompleteItemTypes, incompleteFieldTypes,
                             defaultDataverse);
-                    fldTypes[j] = rtd.getOptionableFields().get(j) ? AUnionType.createUnknownableType(t2) : t2;
                     break;
                 }
                 case UNORDEREDLIST: {
                     UnorderedListTypeDefinition ultd = (UnorderedListTypeDefinition) texpr;
-                    IAType t2 = computeUnorderedListType(null, ultd, typeMap, incompleteItemTypes, incompleteFieldTypes,
+                    type = computeUnorderedListType(null, ultd, typeMap, incompleteItemTypes, incompleteFieldTypes,
                             defaultDataverse);
-                    fldTypes[j] = rtd.getOptionableFields().get(j) ? AUnionType.createUnknownableType(t2) : t2;
                     break;
                 }
                 default: {
@@ -371,6 +361,9 @@ public class TypeTranslator {
                 }
             }
 
+            Boolean nullable = rtd.getNullableFields().get(j);
+            Boolean missable = rtd.getMissableFields().get(j);
+            fldTypes[j] = TypeUtil.createQuantifiedType(type, nullable, missable);
         }
 
         return recType;

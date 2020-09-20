@@ -132,10 +132,16 @@ public abstract class AbstractInlineUdfsVisitor extends AbstractQueryExpressionV
     }
 
     @Override
-    public Boolean visit(CallExpr pf, List<FunctionDecl> arg) throws CompilationException {
-        Pair<Boolean, List<Expression>> p = inlineUdfsInExprList(pf.getExprList(), arg);
-        pf.setExprList(p.second);
-        return p.first;
+    public Boolean visit(CallExpr callExpr, List<FunctionDecl> arg) throws CompilationException {
+        Pair<Boolean, List<Expression>> p = inlineUdfsInExprList(callExpr.getExprList(), arg);
+        callExpr.setExprList(p.second);
+        boolean changed = p.first;
+        if (callExpr.hasAggregateFilterExpr()) {
+            Pair<Boolean, Expression> be = inlineUdfsInExpr(callExpr.getAggregateFilterExpr(), arg);
+            callExpr.setAggregateFilterExpr(be.second);
+            changed |= be.first;
+        }
+        return changed;
     }
 
     @Override
@@ -289,6 +295,10 @@ public abstract class AbstractInlineUdfsVisitor extends AbstractQueryExpressionV
         if (implem == null) {
             return new Pair<>(r, expr);
         } else {
+            if (f.hasAggregateFilterExpr()) {
+                throw new CompilationException(ErrorCode.COMPILATION_ILLEGAL_USE_OF_FILTER_CLAUSE,
+                        f.getSourceLocation());
+            }
             // Rewrite the function body itself (without setting unbounded variables to dataset access).
             // TODO(buyingyi): throw an exception for recursive function definition or limit the stack depth.
             implem.setFuncBody(rewriteFunctionBody(implem));
@@ -380,14 +390,9 @@ public abstract class AbstractInlineUdfsVisitor extends AbstractQueryExpressionV
 
     private Expression rewriteFunctionBody(FunctionDecl fnDecl) throws CompilationException {
         SourceLocation sourceLoc = fnDecl.getSourceLocation();
-        Query wrappedQuery = new Query(false);
-        wrappedQuery.setSourceLocation(sourceLoc);
-        wrappedQuery.setBody(fnDecl.getFuncBody());
-        wrappedQuery.setTopLevel(false);
 
         DataverseName fnDataverseName = fnDecl.getSignature().getDataverseName();
         Dataverse defaultDataverse = metadataProvider.getDefaultDataverse();
-
         Dataverse fnDataverse;
         if (fnDataverseName == null || fnDataverseName.equals(defaultDataverse.getDataverseName())) {
             fnDataverse = defaultDataverse;
@@ -401,10 +406,17 @@ public abstract class AbstractInlineUdfsVisitor extends AbstractQueryExpressionV
 
         metadataProvider.setDefaultDataverse(fnDataverse);
         try {
+            Query wrappedQuery = new Query(false);
+            wrappedQuery.setSourceLocation(sourceLoc);
+            wrappedQuery.setBody(fnDecl.getFuncBody());
+            wrappedQuery.setTopLevel(false);
             IQueryRewriter queryRewriter = rewriterFactory.createQueryRewriter();
             queryRewriter.rewrite(declaredFunctions, wrappedQuery, metadataProvider, context, true,
                     fnDecl.getParamList());
             return wrappedQuery.getBody();
+        } catch (CompilationException e) {
+            throw new CompilationException(ErrorCode.COMPILATION_BAD_FUNCTION_DEFINITION, e, fnDecl.getSignature(),
+                    e.getMessage());
         } finally {
             metadataProvider.setDefaultDataverse(defaultDataverse);
         }

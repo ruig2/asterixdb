@@ -35,6 +35,7 @@ import org.apache.asterix.app.nc.NCAppRuntimeContext;
 import org.apache.asterix.common.api.IDatasetLifecycleManager;
 import org.apache.asterix.common.config.DatasetConfig.DatasetType;
 import org.apache.asterix.common.config.DatasetConfig.IndexType;
+import org.apache.asterix.common.config.StorageProperties.Option;
 import org.apache.asterix.common.metadata.DataverseName;
 import org.apache.asterix.common.transactions.ITransactionContext;
 import org.apache.asterix.common.transactions.ITransactionManager;
@@ -51,7 +52,9 @@ import org.apache.asterix.om.types.IAType;
 import org.apache.asterix.runtime.operators.LSMPrimaryInsertOperatorNodePushable;
 import org.apache.asterix.test.common.TestHelper;
 import org.apache.commons.lang3.mutable.MutableBoolean;
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.hyracks.api.comm.VSizeFrame;
+import org.apache.hyracks.api.config.IOption;
 import org.apache.hyracks.api.context.IHyracksTaskContext;
 import org.apache.hyracks.api.exceptions.HyracksDataException;
 import org.apache.hyracks.api.job.JobId;
@@ -65,6 +68,7 @@ import org.apache.hyracks.storage.am.lsm.btree.impl.IVirtualBufferCacheCallback;
 import org.apache.hyracks.storage.am.lsm.btree.impl.TestLsmBtree;
 import org.apache.hyracks.storage.am.lsm.common.api.ILSMDiskComponent;
 import org.apache.hyracks.storage.am.lsm.common.api.ILSMMemoryComponent;
+import org.apache.hyracks.storage.am.lsm.common.api.IVirtualBufferCache;
 import org.apache.hyracks.storage.am.lsm.common.impls.NoMergePolicyFactory;
 import org.junit.After;
 import org.junit.AfterClass;
@@ -132,6 +136,9 @@ public class MultiPartitionLSMIndexTest {
         String configPath = System.getProperty("user.dir") + File.separator + "src" + File.separator + "test"
                 + File.separator + "resources" + File.separator + "cc-multipart.conf";
         nc = new TestNodeController(configPath, false);
+        List<Pair<IOption, Object>> opts = new ArrayList<>();
+        opts.add(Pair.of(Option.STORAGE_MEMORYCOMPONENT_GLOBALBUDGET, 16 * 1024 * 1024L));
+        nc.setOpts(opts);
         nc.init();
         ncAppCtx = nc.getAppRuntimeContext();
         dsLifecycleMgr = ncAppCtx.getDatasetLifecycleManager();
@@ -148,9 +155,9 @@ public class MultiPartitionLSMIndexTest {
     public void createIndex() throws Exception {
         List<List<String>> partitioningKeys = new ArrayList<>();
         partitioningKeys.add(Collections.singletonList("key"));
-        dataset = new TestDataset(DATAVERSE_NAME, DATASET_NAME, DATAVERSE_NAME, DATA_TYPE_NAME,
-                NODE_GROUP_NAME, NoMergePolicyFactory.NAME, null, new InternalDatasetDetails(null,
-                        PartitioningStrategy.HASH, partitioningKeys, null, null, null, false, null),
+        dataset = new TestDataset(DATAVERSE_NAME, DATASET_NAME, DATAVERSE_NAME, DATA_TYPE_NAME, NODE_GROUP_NAME,
+                NoMergePolicyFactory.NAME, null, new InternalDatasetDetails(null, PartitioningStrategy.HASH,
+                        partitioningKeys, null, null, null, false, null, null),
                 null, DatasetType.INTERNAL, DATASET_ID, 0);
         secondaryIndex = new Index(DATAVERSE_NAME, DATASET_NAME, INDEX_NAME, INDEX_TYPE, INDEX_FIELD_NAMES,
                 INDEX_FIELD_INDICATORS, INDEX_FIELD_TYPES, false, false, false, 0);
@@ -262,18 +269,20 @@ public class MultiPartitionLSMIndexTest {
             MutableBoolean proceedToScheduleFlush = new MutableBoolean(false);
             primaryLsmBtrees[0].addVirtuablBufferCacheCallback(new IVirtualBufferCacheCallback() {
                 @Override
-                public void isFullChanged(boolean newValue) {
-                    synchronized (isFull) {
-                        isFull.set(newValue);
-                        isFull.notifyAll();
-                    }
-                    synchronized (proceedToScheduleFlush) {
-                        while (!proceedToScheduleFlush.booleanValue()) {
-                            try {
-                                proceedToScheduleFlush.wait();
-                            } catch (InterruptedException e) {
-                                Thread.currentThread().interrupt();
-                                return;
+                public void isFullChanged(boolean newValue, ILSMMemoryComponent memoryComponent) {
+                    if (memoryComponent != null && memoryComponent.getLsmIndex() == primaryLsmBtrees[0]) {
+                        synchronized (isFull) {
+                            isFull.set(newValue);
+                            isFull.notifyAll();
+                        }
+                        synchronized (proceedToScheduleFlush) {
+                            while (!proceedToScheduleFlush.booleanValue()) {
+                                try {
+                                    proceedToScheduleFlush.wait();
+                                } catch (InterruptedException e) {
+                                    Thread.currentThread().interrupt();
+                                    return;
+                                }
                             }
                         }
                     }
@@ -329,29 +338,35 @@ public class MultiPartitionLSMIndexTest {
                 }
             }
             // The memory component has been allocated. now we allow the first actor to proceed to schedule flush
-            MutableBoolean flushStarted = new MutableBoolean(false);
+            MutableBoolean flushCompleted = new MutableBoolean(false);
             primaryLsmBtrees[0].addFlushCallback(new ITestOpCallback<Semaphore>() {
                 @Override
                 public void before(Semaphore t) {
-                    synchronized (flushStarted) {
-                        flushStarted.setValue(true);
-                        flushStarted.notifyAll();
-                    }
                 }
 
                 @Override
                 public void after(Semaphore t) {
+                    synchronized (flushCompleted) {
+                        flushCompleted.setValue(true);
+                        flushCompleted.notifyAll();
+                    }
                 }
             });
             synchronized (proceedToScheduleFlush) {
                 proceedToScheduleFlush.setValue(true);
                 proceedToScheduleFlush.notifyAll();
             }
-            // Now we need to know that the flush has been scheduled
-            synchronized (flushStarted) {
-                while (!flushStarted.booleanValue()) {
-                    flushStarted.wait();
+            // Must wait for the flush to complete. Otherwise, the GVBC may flush partition 1
+            synchronized (flushCompleted) {
+                while (!flushCompleted.booleanValue()) {
+                    flushCompleted.wait();
                 }
+            }
+
+            IVirtualBufferCache gvbc = ncAppCtx.getVirtualBufferCache();
+            while (gvbc.getUsage() > gvbc.getPageBudget() / 2) {
+                // ensure the memory component pages of lsm tree 0 are freed
+                Thread.sleep(100);
             }
 
             // we now allow the allocation to proceed
@@ -364,6 +379,7 @@ public class MultiPartitionLSMIndexTest {
             primaryLsmBtrees[1].clearAllocateCallbacks();
             // check the Ids of the memory components of partition 1
             // This shows the bug
+            Assert.assertNotEquals(null, primaryLsmBtrees[1].getCurrentMemoryComponent().getId());
             Assert.assertEquals(primaryLsmBtrees[1].getCurrentMemoryComponent().getId(),
                     secondaryLsmBtrees[1].getCurrentMemoryComponent().getId());
         } catch (Throwable e) {
@@ -433,18 +449,20 @@ public class MultiPartitionLSMIndexTest {
             MutableBoolean proceedAfterIsFullChanged = new MutableBoolean(false);
             primaryLsmBtrees[1].addVirtuablBufferCacheCallback(new IVirtualBufferCacheCallback() {
                 @Override
-                public void isFullChanged(boolean newValue) {
-                    synchronized (isFull) {
-                        isFull.set(newValue);
-                        isFull.notifyAll();
-                    }
-                    synchronized (proceedAfterIsFullChanged) {
-                        while (!proceedAfterIsFullChanged.booleanValue()) {
-                            try {
-                                proceedAfterIsFullChanged.wait();
-                            } catch (InterruptedException e) {
-                                Thread.currentThread().interrupt();
-                                return;
+                public void isFullChanged(boolean newValue, ILSMMemoryComponent memoryComponent) {
+                    if (memoryComponent != null && memoryComponent.getLsmIndex() == primaryLsmBtrees[1]) {
+                        synchronized (isFull) {
+                            isFull.set(newValue);
+                            isFull.notifyAll();
+                        }
+                        synchronized (proceedAfterIsFullChanged) {
+                            while (!proceedAfterIsFullChanged.booleanValue()) {
+                                try {
+                                    proceedAfterIsFullChanged.wait();
+                                } catch (InterruptedException e) {
+                                    Thread.currentThread().interrupt();
+                                    return;
+                                }
                             }
                         }
                     }

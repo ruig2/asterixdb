@@ -19,6 +19,7 @@
 package org.apache.asterix.metadata.utils;
 
 import org.apache.asterix.common.api.IMetadataLockManager;
+import org.apache.asterix.common.config.DatasetConfig;
 import org.apache.asterix.common.metadata.DataverseName;
 import org.apache.asterix.common.metadata.IMetadataLockUtil;
 import org.apache.asterix.common.metadata.LockList;
@@ -40,32 +41,43 @@ public class MetadataLockUtil implements IMetadataLockUtil {
 
     @Override
     public void createDatasetBegin(IMetadataLockManager lockMgr, LockList locks, DataverseName dataverseName,
-            String datasetName, DataverseName itemTypeDataverseName, String itemTypeName,
-            DataverseName metaItemTypeDataverseName, String metaItemTypeName, String nodeGroupName,
-            String compactionPolicyName, boolean isDefaultCompactionPolicy, Object datasetDetails)
-            throws AlgebricksException {
-        createDatasetBeginPre(lockMgr, locks, dataverseName, itemTypeDataverseName, itemTypeName,
-                metaItemTypeDataverseName, metaItemTypeName, nodeGroupName, compactionPolicyName,
+            String datasetName, DataverseName itemTypeDataverseName, String itemTypeName, boolean itemTypeAnonymous,
+            DataverseName metaItemTypeDataverseName, String metaItemTypeName, boolean metaItemTypeAnonymous,
+            String nodeGroupName, String compactionPolicyName, boolean isDefaultCompactionPolicy,
+            DatasetConfig.DatasetType datasetType, Object datasetDetails) throws AlgebricksException {
+        createDatasetBeginPre(lockMgr, locks, dataverseName, itemTypeDataverseName, itemTypeName, itemTypeAnonymous,
+                metaItemTypeDataverseName, metaItemTypeName, metaItemTypeAnonymous, nodeGroupName, compactionPolicyName,
                 isDefaultCompactionPolicy);
         lockMgr.acquireDatasetWriteLock(locks, dataverseName, datasetName);
     }
 
     protected final void createDatasetBeginPre(IMetadataLockManager lockMgr, LockList locks,
             DataverseName dataverseName, DataverseName itemTypeDataverseName, String itemTypeName,
-            DataverseName metaItemTypeDataverseName, String metaItemTypeName, String nodeGroupName,
-            String compactionPolicyName, boolean isDefaultCompactionPolicy) throws AlgebricksException {
+            boolean itemTypeAnonymous, DataverseName metaItemTypeDataverseName, String metaItemTypeName,
+            boolean metaItemTypeAnonymous, String nodeGroupName, String compactionPolicyName,
+            boolean isDefaultCompactionPolicy) throws AlgebricksException {
         lockMgr.acquireDataverseReadLock(locks, dataverseName);
-        if (!dataverseName.equals(itemTypeDataverseName)) {
+        if (itemTypeDataverseName != null && !dataverseName.equals(itemTypeDataverseName)) {
             lockMgr.acquireDataverseReadLock(locks, itemTypeDataverseName);
         }
         if (metaItemTypeDataverseName != null && !metaItemTypeDataverseName.equals(dataverseName)
                 && !metaItemTypeDataverseName.equals(itemTypeDataverseName)) {
             lockMgr.acquireDataverseReadLock(locks, metaItemTypeDataverseName);
         }
-        lockMgr.acquireDataTypeReadLock(locks, itemTypeDataverseName, itemTypeName);
+        if (itemTypeAnonymous) {
+            // the datatype will be created
+            lockMgr.acquireDataTypeWriteLock(locks, itemTypeDataverseName, itemTypeName);
+        } else {
+            lockMgr.acquireDataTypeReadLock(locks, itemTypeDataverseName, itemTypeName);
+        }
         if (metaItemTypeDataverseName != null && !metaItemTypeDataverseName.equals(itemTypeDataverseName)
                 && !metaItemTypeName.equals(itemTypeName)) {
-            lockMgr.acquireDataTypeReadLock(locks, metaItemTypeDataverseName, metaItemTypeName);
+            if (metaItemTypeAnonymous) {
+                // the datatype will be created
+                lockMgr.acquireDataTypeWriteLock(locks, metaItemTypeDataverseName, metaItemTypeName);
+            } else {
+                lockMgr.acquireDataTypeReadLock(locks, metaItemTypeDataverseName, metaItemTypeName);
+            }
         }
         if (nodeGroupName != null) {
             lockMgr.acquireNodeGroupReadLock(locks, nodeGroupName);
@@ -126,11 +138,14 @@ public class MetadataLockUtil implements IMetadataLockUtil {
 
     @Override
     public void createFunctionBegin(IMetadataLockManager lockMgr, LockList locks, DataverseName dataverseName,
-            String functionName, String libraryName) throws AlgebricksException {
+            String functionName, DataverseName libraryDataverseName, String libraryName) throws AlgebricksException {
         lockMgr.acquireDataverseReadLock(locks, dataverseName);
         lockMgr.acquireFunctionWriteLock(locks, dataverseName, functionName);
         if (libraryName != null) {
-            lockMgr.acquireLibraryReadLock(locks, dataverseName, libraryName);
+            if (!dataverseName.equals(libraryDataverseName)) {
+                lockMgr.acquireDataverseReadLock(locks, libraryDataverseName);
+            }
+            lockMgr.acquireLibraryReadLock(locks, libraryDataverseName, libraryName);
         }
     }
 
@@ -143,11 +158,14 @@ public class MetadataLockUtil implements IMetadataLockUtil {
 
     @Override
     public void createAdapterBegin(IMetadataLockManager lockMgr, LockList locks, DataverseName dataverseName,
-            String adapterName, String libraryName) throws AlgebricksException {
+            String adapterName, DataverseName libraryDataverseName, String libraryName) throws AlgebricksException {
         lockMgr.acquireDataverseReadLock(locks, dataverseName);
         lockMgr.acquireAdapterWriteLock(locks, dataverseName, adapterName);
         if (libraryName != null) {
-            lockMgr.acquireLibraryReadLock(locks, dataverseName, libraryName);
+            if (!dataverseName.equals(libraryDataverseName)) {
+                lockMgr.acquireDataverseReadLock(locks, libraryDataverseName);
+            }
+            lockMgr.acquireLibraryReadLock(locks, libraryDataverseName, libraryName);
         }
     }
 

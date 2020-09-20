@@ -39,6 +39,7 @@ import org.apache.hyracks.algebricks.common.exceptions.AlgebricksException;
 import org.apache.hyracks.api.application.IServiceContext;
 import org.apache.hyracks.api.context.IHyracksTaskContext;
 import org.apache.hyracks.api.exceptions.HyracksDataException;
+import org.apache.hyracks.api.exceptions.IWarningCollector;
 
 public class StreamRecordReaderFactory implements IRecordReaderFactory<char[]> {
 
@@ -81,11 +82,11 @@ public class StreamRecordReaderFactory implements IRecordReaderFactory<char[]> {
     }
 
     @Override
-    public void configure(IServiceContext serviceCtx, Map<String, String> configuration)
-            throws HyracksDataException, AlgebricksException {
+    public void configure(IServiceContext serviceCtx, Map<String, String> configuration,
+            IWarningCollector warningCollector) throws HyracksDataException, AlgebricksException {
         this.configuration = configuration;
         configureInputStreamFactory(configuration);
-        streamFactory.configure(serviceCtx, configuration);
+        streamFactory.configure(serviceCtx, configuration, warningCollector);
         recordReaderClazz = StreamRecordReaderProvider.getRecordReaderClazz(configuration);
     }
 
@@ -95,7 +96,7 @@ public class StreamRecordReaderFactory implements IRecordReaderFactory<char[]> {
         try {
             StreamRecordReader streamRecordReader =
                     (StreamRecordReader) recordReaderClazz.getConstructor().newInstance();
-            streamRecordReader.configure(streamFactory.createInputStream(ctx, partition), configuration);
+            streamRecordReader.configure(ctx, streamFactory.createInputStream(ctx, partition), configuration);
             return streamRecordReader;
         } catch (InstantiationException | IllegalAccessException | InvocationTargetException
                 | NoSuchMethodException e) {

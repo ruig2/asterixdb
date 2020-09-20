@@ -29,7 +29,6 @@ import org.apache.hyracks.storage.am.lsm.common.api.ILSMMemoryComponent;
 import org.apache.hyracks.storage.am.lsm.common.api.IVirtualBufferCache;
 import org.apache.hyracks.storage.am.lsm.common.api.LSMOperationType;
 import org.apache.hyracks.storage.am.lsm.common.util.LSMComponentIdUtils;
-import org.apache.hyracks.storage.common.buffercache.IBufferCache;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -60,7 +59,7 @@ public abstract class AbstractLSMMemoryComponent extends AbstractLSMComponent im
      */
     @Override
     public void schedule(LSMIOOperationType ioOperationType) throws HyracksDataException {
-        activeate();
+        activate();
         if (ioOperationType == LSMIOOperationType.FLUSH) {
             if (state == ComponentState.READABLE_WRITABLE || state == ComponentState.READABLE_UNWRITABLE) {
                 if (writerCount != 0) {
@@ -79,7 +78,7 @@ public abstract class AbstractLSMMemoryComponent extends AbstractLSMComponent im
         }
     }
 
-    private void activeate() throws HyracksDataException {
+    private void activate() throws HyracksDataException {
         if (state == ComponentState.INACTIVE) {
             state = ComponentState.READABLE_WRITABLE;
             lsmIndex.getIOOperationCallback().recycled(this);
@@ -88,7 +87,7 @@ public abstract class AbstractLSMMemoryComponent extends AbstractLSMComponent im
 
     @Override
     public boolean threadEnter(LSMOperationType opType, boolean isMutableComponent) throws HyracksDataException {
-        activeate();
+        activate();
         switch (opType) {
             case FORCE_MODIFICATION:
                 if (isMutableComponent) {
@@ -108,7 +107,9 @@ public abstract class AbstractLSMMemoryComponent extends AbstractLSMComponent im
                 break;
             case MODIFICATION:
                 if (isMutableComponent) {
-                    if (state == ComponentState.READABLE_WRITABLE) {
+                    if (state == ComponentState.READABLE_WRITABLE && !vbc.isFull(this) && !vbc.isFull()) {
+                        // Even when the memory component has the writable state, vbc may be temporarily full
+                        // or this memory component may be full.
                         writerCount++;
                     } else {
                         return false;
@@ -150,8 +151,9 @@ public abstract class AbstractLSMMemoryComponent extends AbstractLSMComponent im
     }
 
     @Override
-    public void threadExit(LSMOperationType opType, boolean failedOperation, boolean isMutableComponent)
+    public boolean threadExit(LSMOperationType opType, boolean failedOperation, boolean isMutableComponent)
             throws HyracksDataException {
+        boolean cleanup = false;
         switch (opType) {
             case FORCE_MODIFICATION:
             case MODIFICATION:
@@ -159,20 +161,22 @@ public abstract class AbstractLSMMemoryComponent extends AbstractLSMComponent im
                     writerCount--;
                     // A failed operation should not change the component state since it's better for
                     // the failed operation's effect to be no-op.
-                    if (state == ComponentState.READABLE_WRITABLE && !failedOperation && isFull()) {
+                    if (state == ComponentState.READABLE_WRITABLE && !failedOperation && vbc.isFull(this)) {
+                        // only mark the component state as unwritable when this memory component
+                        // is full
                         state = ComponentState.READABLE_UNWRITABLE;
                     }
                 } else {
                     readerCount--;
                     if (state == ComponentState.UNREADABLE_UNWRITABLE && readerCount == 0) {
-                        reset();
+                        cleanup = true;
                     }
                 }
                 break;
             case SEARCH:
                 readerCount--;
                 if (state == ComponentState.UNREADABLE_UNWRITABLE && readerCount == 0) {
-                    reset();
+                    cleanup = true;
                 }
                 break;
             case FLUSH:
@@ -180,24 +184,22 @@ public abstract class AbstractLSMMemoryComponent extends AbstractLSMComponent im
                     throw new IllegalStateException("Flush sees an illegal LSM memory compoenent state: " + state);
                 }
                 readerCount--;
-                if (failedOperation) {
+                if (!failedOperation) {
                     // If flush failed, keep the component state to READABLE_UNWRITABLE_FLUSHING
-                    return;
-                }
-                // operation succeeded
-                if (readerCount == 0) {
-                    reset();
-                } else {
+                    // operation succeeded
                     state = ComponentState.UNREADABLE_UNWRITABLE;
+                    if (readerCount == 0) {
+                        cleanup = true;
+                    }
                 }
                 break;
             default:
                 throw new UnsupportedOperationException("Unsupported operation " + opType);
         }
-
         if (readerCount <= -1 || writerCount <= -1) {
             throw new IllegalStateException("Invalid reader or writer count " + readerCount + " - " + writerCount);
         }
+        return cleanup;
     }
 
     @Override
@@ -224,11 +226,6 @@ public abstract class AbstractLSMMemoryComponent extends AbstractLSMComponent im
     }
 
     @Override
-    public boolean isFull() {
-        return vbc.isFull();
-    }
-
-    @Override
     public final void reset() throws HyracksDataException {
         state = ComponentState.INACTIVE;
         isModified.set(false);
@@ -236,7 +233,6 @@ public abstract class AbstractLSMMemoryComponent extends AbstractLSMComponent im
         if (filter != null) {
             filter.reset();
         }
-        doReset();
         lsmIndex.memoryComponentsReset();
         // a flush can be pending on a component that just completed its flush... here is when this can happen:
         // primary index has 2 components, secondary index has 2 components.
@@ -249,7 +245,8 @@ public abstract class AbstractLSMMemoryComponent extends AbstractLSMComponent im
         }
     }
 
-    protected void doReset() throws HyracksDataException {
+    @Override
+    public void cleanup() throws HyracksDataException {
         getIndex().deactivate();
         getIndex().destroy();
         getIndex().create();
@@ -269,7 +266,8 @@ public abstract class AbstractLSMMemoryComponent extends AbstractLSMComponent im
     @Override
     public final void allocate() throws HyracksDataException {
         boolean allocated = false;
-        ((IVirtualBufferCache) getIndex().getBufferCache()).open();
+        vbc.open();
+        vbc.register(this);
         try {
             doAllocate();
             allocated = true;
@@ -300,6 +298,7 @@ public abstract class AbstractLSMMemoryComponent extends AbstractLSMComponent im
         try {
             state = ComponentState.INACTIVE;
             doDeallocate();
+            vbc.unregister(this);
         } finally {
             getIndex().getBufferCache().close();
         }
@@ -314,12 +313,6 @@ public abstract class AbstractLSMMemoryComponent extends AbstractLSMComponent im
     @Override
     public void validate() throws HyracksDataException {
         getIndex().validate();
-    }
-
-    @Override
-    public long getSize() {
-        IBufferCache virtualBufferCache = getIndex().getBufferCache();
-        return virtualBufferCache.getPageBudget() * (long) virtualBufferCache.getPageSize();
     }
 
     @Override
@@ -341,6 +334,11 @@ public abstract class AbstractLSMMemoryComponent extends AbstractLSMComponent im
         if (componentId != null) {
             LSMComponentIdUtils.persist(this.componentId, metadata);
         }
+    }
+
+    @Override
+    public void flushed() throws HyracksDataException {
+        vbc.flushed(this);
     }
 
     @Override

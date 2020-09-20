@@ -24,6 +24,7 @@ import java.util.List;
 
 import org.apache.asterix.common.config.DatasetConfig.DatasetType;
 import org.apache.asterix.common.exceptions.CompilationException;
+import org.apache.asterix.common.exceptions.ErrorCode;
 import org.apache.asterix.common.functions.FunctionSignature;
 import org.apache.asterix.lang.common.base.Expression;
 import org.apache.asterix.lang.common.base.Literal;
@@ -140,24 +141,30 @@ public abstract class QueryPrintVisitor extends AbstractQueryExpressionVisitor<V
     }
 
     @Override
-    public Void visit(CallExpr pf, Integer step) throws CompilationException {
-        return printFunctionCall(pf.getFunctionSignature(), pf.getFunctionSignature().getArity(), pf.getExprList(),
-                step);
+    public Void visit(CallExpr callExpr, Integer step) throws CompilationException {
+        return printFunctionCall(callExpr.getFunctionSignature(), callExpr.getFunctionSignature().getArity(),
+                callExpr.getExprList(), callExpr.getAggregateFilterExpr(), step);
     }
 
-    protected Void printFunctionCall(FunctionSignature fs, int arity, List<Expression> argList, Integer step)
-            throws CompilationException {
+    protected Void printFunctionCall(FunctionSignature fs, int arity, List<Expression> argList,
+            Expression aggFilterExpr, Integer step) throws CompilationException {
         out.print(skip(step) + "FunctionCall ");
         printFunctionSignature(out, fs, arity);
         out.println("[");
         for (Expression expr : argList) {
             expr.accept(this, step + 1);
         }
-        out.println(skip(step) + "]");
+        out.print(skip(step) + "]");
+        if (aggFilterExpr != null) {
+            out.println(" filter [");
+            aggFilterExpr.accept(this, step + 1);
+            out.print(skip(step) + "]");
+        }
+        out.println();
         return null;
     }
 
-    private static void printFunctionSignature(PrintWriter out, FunctionSignature fs, int arity) {
+    protected static void printFunctionSignature(PrintWriter out, FunctionSignature fs, int arity) {
         out.print(fs.toString(false));
         if (arity != FunctionIdentifier.VARARGS) {
             out.print("@");
@@ -285,14 +292,23 @@ public abstract class QueryPrintVisitor extends AbstractQueryExpressionVisitor<V
     }
 
     @Override
-    public Void visit(IndexAccessor fa, Integer step) throws CompilationException {
+    public Void visit(IndexAccessor ia, Integer step) throws CompilationException {
         out.println(skip(step) + "IndexAccessor [");
-        fa.getExpr().accept(this, step + 1);
+        ia.getExpr().accept(this, step + 1);
         out.print(skip(step + 1) + "Index: ");
-        if (fa.isAny()) {
-            out.println("ANY");
-        } else {
-            fa.getIndexExpr().accept(this, step + 1);
+        switch (ia.getIndexKind()) {
+            case ANY:
+                out.println("ANY");
+                break;
+            case STAR:
+                out.println("STAR");
+                break;
+            case ELEMENT:
+                ia.getIndexExpr().accept(this, step + 1);
+                break;
+            default:
+                throw new CompilationException(ErrorCode.COMPILATION_ILLEGAL_STATE, ia.getSourceLocation(),
+                        ia.getIndexKind());
         }
         out.println(skip(step) + "]");
         return null;
@@ -326,7 +342,8 @@ public abstract class QueryPrintVisitor extends AbstractQueryExpressionVisitor<V
         out.println("RecordType {");
         Iterator<String> nameIter = r.getFieldNames().iterator();
         Iterator<TypeExpression> typeIter = r.getFieldTypes().iterator();
-        Iterator<Boolean> isOptionalIter = r.getOptionableFields().iterator();
+        Iterator<Boolean> isNullableIter = r.getNullableFields().iterator();
+        Iterator<Boolean> isMissableIter = r.getMissableFields().iterator();
         boolean first = true;
         while (nameIter.hasNext()) {
             if (first) {
@@ -336,10 +353,11 @@ public abstract class QueryPrintVisitor extends AbstractQueryExpressionVisitor<V
             }
             String name = nameIter.next();
             TypeExpression texp = typeIter.next();
-            Boolean isNullable = isOptionalIter.next();
+            Boolean isNullable = isNullableIter.next();
+            Boolean isMissable = isMissableIter.next();
             out.print(skip(step + 1) + name + " : ");
             texp.accept(this, step + 2);
-            if (isNullable) {
+            if (isNullable || isMissable) {
                 out.print("?");
             }
         }
@@ -367,15 +385,18 @@ public abstract class QueryPrintVisitor extends AbstractQueryExpressionVisitor<V
     @Override
     public Void visit(DatasetDecl dd, Integer step) throws CompilationException {
         if (dd.getDatasetType() == DatasetType.INTERNAL) {
-            String line = skip(step) + "DatasetDecl " + dd.getName() + "(" + dd.getItemTypeName() + ")"
-                    + " partitioned by " + ((InternalDetailsDecl) dd.getDatasetDetailsDecl()).getPartitioningExprs();
+            out.print(skip(step) + "DatasetDecl " + dd.getName() + "(");
+            dd.getItemType().accept(this, step + 2);
+            out.print(skip(step) + ") partitioned by "
+                    + ((InternalDetailsDecl) dd.getDatasetDetailsDecl()).getPartitioningExprs());
             if (((InternalDetailsDecl) dd.getDatasetDetailsDecl()).isAutogenerated()) {
-                line += " [autogenerated]";
+                out.print(" [autogenerated]");
             }
-            out.println(line);
+            out.println();
         } else if (dd.getDatasetType() == DatasetType.EXTERNAL) {
-            out.println(skip(step) + "DatasetDecl " + dd.getName() + "(" + dd.getItemTypeName() + ")"
-                    + "is an external dataset");
+            out.print(skip(step) + "DatasetDecl " + dd.getName() + "(");
+            dd.getItemType().accept(this, step + 2);
+            out.println(skip(step) + ")is an external dataset");
         }
         return null;
     }

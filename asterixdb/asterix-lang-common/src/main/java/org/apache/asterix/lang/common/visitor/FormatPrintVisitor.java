@@ -25,16 +25,15 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.asterix.common.config.DatasetConfig.DatasetType;
 import org.apache.asterix.common.config.DatasetConfig.IndexType;
 import org.apache.asterix.common.exceptions.CompilationException;
+import org.apache.asterix.common.exceptions.ErrorCode;
 import org.apache.asterix.common.functions.FunctionSignature;
 import org.apache.asterix.common.metadata.DataverseName;
-import org.apache.asterix.external.dataset.adapter.AdapterIdentifier;
 import org.apache.asterix.lang.common.base.Expression;
 import org.apache.asterix.lang.common.base.Literal;
 import org.apache.asterix.lang.common.clause.LetClause;
@@ -75,6 +74,7 @@ import org.apache.asterix.lang.common.statement.CreateFullTextConfigStatement;
 import org.apache.asterix.lang.common.statement.CreateFullTextFilterStatement;
 import org.apache.asterix.lang.common.statement.CreateFunctionStatement;
 import org.apache.asterix.lang.common.statement.CreateIndexStatement;
+import org.apache.asterix.lang.common.statement.CreateLibraryStatement;
 import org.apache.asterix.lang.common.statement.CreateSynonymStatement;
 import org.apache.asterix.lang.common.statement.DatasetDecl;
 import org.apache.asterix.lang.common.statement.DataverseDecl;
@@ -92,6 +92,7 @@ import org.apache.asterix.lang.common.statement.FunctionDropStatement;
 import org.apache.asterix.lang.common.statement.IndexDropStatement;
 import org.apache.asterix.lang.common.statement.InsertStatement;
 import org.apache.asterix.lang.common.statement.InternalDetailsDecl;
+import org.apache.asterix.lang.common.statement.LibraryDropStatement;
 import org.apache.asterix.lang.common.statement.LoadStatement;
 import org.apache.asterix.lang.common.statement.NodeGroupDropStatement;
 import org.apache.asterix.lang.common.statement.NodegroupDecl;
@@ -230,6 +231,11 @@ public abstract class FormatPrintVisitor implements ILangVisitor<Void, Integer> 
                 callExpr.getFunctionSignature().getName()) + "(");
         printDelimitedExpressions(callExpr.getExprList(), COMMA, step);
         out.print(")");
+        if (callExpr.hasAggregateFilterExpr()) {
+            out.println(" FILTER ( WHERE ");
+            callExpr.getAggregateFilterExpr().accept(this, step + 1);
+            out.println(skip(step) + ")");
+        }
         return null;
     }
 
@@ -354,13 +360,22 @@ public abstract class FormatPrintVisitor implements ILangVisitor<Void, Integer> 
     }
 
     @Override
-    public Void visit(IndexAccessor fa, Integer step) throws CompilationException {
-        fa.getExpr().accept(this, step + 1);
+    public Void visit(IndexAccessor ia, Integer step) throws CompilationException {
+        ia.getExpr().accept(this, step + 1);
         out.print("[");
-        if (fa.isAny()) {
-            out.print("?");
-        } else {
-            fa.getIndexExpr().accept(this, step + 1);
+        switch (ia.getIndexKind()) {
+            case ANY:
+                out.print("?");
+                break;
+            case STAR:
+                out.print("*");
+                break;
+            case ELEMENT:
+                ia.getIndexExpr().accept(this, step + 1);
+                break;
+            default:
+                throw new CompilationException(ErrorCode.COMPILATION_ILLEGAL_STATE, ia.getSourceLocation(),
+                        ia.getIndexKind());
         }
         out.print("]");
         return null;
@@ -394,7 +409,8 @@ public abstract class FormatPrintVisitor implements ILangVisitor<Void, Integer> 
         out.println("{");
         Iterator<String> nameIter = r.getFieldNames().iterator();
         Iterator<TypeExpression> typeIter = r.getFieldTypes().iterator();
-        Iterator<Boolean> isOptionalIter = r.getOptionableFields().iterator();
+        Iterator<Boolean> isNullableIter = r.getNullableFields().iterator();
+        Iterator<Boolean> isMissableIter = r.getMissableFields().iterator();
         boolean first = true;
         while (nameIter.hasNext()) {
             if (first) {
@@ -404,10 +420,11 @@ public abstract class FormatPrintVisitor implements ILangVisitor<Void, Integer> 
             }
             String name = normalize(nameIter.next());
             TypeExpression texp = typeIter.next();
-            Boolean isNullable = isOptionalIter.next();
+            Boolean isNullable = isNullableIter.next();
+            Boolean isMissable = isMissableIter.next();
             out.print(skip(step) + name + " : ");
             texp.accept(this, step + 2);
-            if (isNullable) {
+            if (isNullable || isMissable) {
                 out.print("?");
             }
         }
@@ -436,24 +453,21 @@ public abstract class FormatPrintVisitor implements ILangVisitor<Void, Integer> 
     public Void visit(DatasetDecl dd, Integer step) throws CompilationException {
         if (dd.getDatasetType() == DatasetType.INTERNAL) {
             out.print(skip(step) + "create " + datasetSymbol + generateFullName(dd.getDataverse(), dd.getName())
-                    + generateIfNotExists(dd.getIfNotExists()) + "("
-                    + generateFullName(dd.getItemTypeDataverse(), dd.getItemTypeName()) + ")" + " primary key ");
+                    + generateIfNotExists(dd.getIfNotExists()) + "(");
+            dd.getItemType().accept(this, step + 2);
+            out.print(skip(step) + ") primary key ");
             printDelimitedKeys(((InternalDetailsDecl) dd.getDatasetDetailsDecl()).getPartitioningExprs(), ",");
             if (((InternalDetailsDecl) dd.getDatasetDetailsDecl()).isAutogenerated()) {
                 out.print(" autogenerated ");
             }
         } else if (dd.getDatasetType() == DatasetType.EXTERNAL) {
-            out.print(
-                    skip(step) + "create external " + datasetSymbol + generateFullName(dd.getDataverse(), dd.getName())
-                            + "(" + generateFullName(dd.getItemTypeDataverse(), dd.getItemTypeName()) + ")"
-                            + generateIfNotExists(dd.getIfNotExists()));
+            out.print(skip(step) + "create external " + datasetSymbol
+                    + generateFullName(dd.getDataverse(), dd.getName()) + "(");
+            dd.getItemType().accept(this, step + 2);
+            out.print(skip(step) + ")" + generateIfNotExists(dd.getIfNotExists()));
             ExternalDetailsDecl externalDetails = (ExternalDetailsDecl) dd.getDatasetDetailsDecl();
             out.print(" using " + revertStringToQuoted(externalDetails.getAdapter()));
             printConfiguration(externalDetails.getProperties());
-        }
-        Identifier nodeGroupName = dd.getNodegroupName();
-        if (nodeGroupName != null) {
-            out.print(" on " + nodeGroupName.getValue());
         }
         Map<String, String> hints = dd.getHints();
         if (dd.getHints().size() > 0) {
@@ -813,13 +827,13 @@ public abstract class FormatPrintVisitor implements ILangVisitor<Void, Integer> 
 
     @Override
     public Void visit(CreateFunctionStatement cfs, Integer step) throws CompilationException {
-        out.print(skip(step) + CREATE + " function ");
+        out.print(skip(step) + CREATE + generateOrReplace(cfs.getReplaceIfExists()) + " function ");
         out.print(generateIfNotExists(cfs.getIfNotExists()));
         out.print(this.generateFullName(cfs.getFunctionSignature().getDataverseName(),
                 cfs.getFunctionSignature().getName()));
         out.print("(");
-        printDelimitedStrings(cfs.getArgs().stream().map(v -> v.getFirst().getValue()).collect(Collectors.toList()),
-                COMMA);
+        printDelimitedStrings(
+                cfs.getParameters().stream().map(v -> v.getFirst().getValue()).collect(Collectors.toList()), COMMA);
         out.println(") {");
         out.println(cfs.getFunctionBody());
         out.println("}" + SEMICOLON);
@@ -839,7 +853,7 @@ public abstract class FormatPrintVisitor implements ILangVisitor<Void, Integer> 
     @Override
     public Void visit(CreateAdapterStatement cfs, Integer step) throws CompilationException {
         out.print(skip(step) + CREATE + " adapter");
-        out.print(this.generateFullName(cfs.getAdapterId().getDataverseName(), cfs.getAdapterId().getName()));
+        out.print(this.generateFullName(cfs.getDataverseName(), cfs.getAdapterName()));
         out.println(SEMICOLON);
         out.println();
         return null;
@@ -848,9 +862,8 @@ public abstract class FormatPrintVisitor implements ILangVisitor<Void, Integer> 
     @Override
     public Void visit(AdapterDropStatement del, Integer step) throws CompilationException {
         out.print(skip(step) + "drop adapter ");
-        AdapterIdentifier funcSignature = del.getAdapterIdentifier();
-        out.print(funcSignature.toString());
-        out.println(SEMICOLON);
+        out.print(generateFullName(del.getDataverseName(), del.getAdapterName()));
+        out.println(generateIfExists(del.getIfExists()) + SEMICOLON);
         return null;
     }
 
@@ -872,6 +885,18 @@ public abstract class FormatPrintVisitor implements ILangVisitor<Void, Integer> 
 
     @Override
     public Void visit(CompactStatement del, Integer step) throws CompilationException {
+        return null;
+    }
+
+    @Override
+    public Void visit(CreateLibraryStatement cls, Integer arg) throws CompilationException {
+        // this statement is internal
+        return null;
+    }
+
+    @Override
+    public Void visit(LibraryDropStatement del, Integer arg) throws CompilationException {
+        // this statement is internal
         return null;
     }
 
@@ -1031,7 +1056,7 @@ public abstract class FormatPrintVisitor implements ILangVisitor<Void, Integer> 
         dataverseName.getParts(dataverseNameParts);
         for (int i = 0, ln = dataverseNameParts.size(); i < ln; i++) {
             if (i > 0) {
-                sb.append(DataverseName.SEPARATOR_CHAR);
+                sb.append(".");
             }
             sb.append(normalize(dataverseNameParts.get(i)));
         }
@@ -1055,6 +1080,10 @@ public abstract class FormatPrintVisitor implements ILangVisitor<Void, Integer> 
 
     protected String generateIfExists(boolean ifExits) {
         return ifExits ? " if exists" : "";
+    }
+
+    protected String generateOrReplace(boolean orReplace) {
+        return orReplace ? " or replace" : "";
     }
 
     protected String generateIndexTypeString(IndexType type) {

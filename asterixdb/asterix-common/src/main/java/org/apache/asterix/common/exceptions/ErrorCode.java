@@ -81,11 +81,14 @@ public class ErrorCode {
     public static final int INVALID_LIKE_PATTERN = 46;
     public static final int INVALID_REQ_PARAM_VAL = 47;
     public static final int INVALID_REQ_JSON_VAL = 48;
-    public static final int INCOMPARABLE_TYPES = 49;
+    public static final int PARAMETERS_REQUIRED = 49;
+    public static final int INVALID_PARAM = 50;
+    public static final int INCOMPARABLE_TYPES = 51;
 
     public static final int UNSUPPORTED_JRE = 100;
 
     public static final int EXTERNAL_UDF_RESULT_TYPE_ERROR = 200;
+    public static final int EXTERNAL_UDF_EXCEPTION = 201;
 
     // Compilation errors
     public static final int PARSE_ERROR = 1001;
@@ -111,8 +114,6 @@ public class ErrorCode {
     public static final int COMPILATION_PRIMARY_KEY_CANNOT_BE_NULLABLE = 1021;
     public static final int COMPILATION_ILLEGAL_PRIMARY_KEY_TYPE = 1022;
     public static final int COMPILATION_CANT_DROP_ACTIVE_DATASET = 1023;
-    public static final int COMPILATION_AQLPLUS_IDENTIFIER_NOT_FOUND = 1024;
-    public static final int COMPILATION_AQLPLUS_NO_SUCH_JOIN_TYPE = 1025;
     public static final int COMPILATION_FUNC_EXPRESSION_CANNOT_UTILIZE_INDEX = 1026;
     public static final int COMPILATION_DATASET_TYPE_DOES_NOT_HAVE_PRIMARY_INDEX = 1027;
     public static final int COMPILATION_UNSUPPORTED_QUERY_PARAMETER = 1028;
@@ -195,12 +196,28 @@ public class ErrorCode {
     public static final int OPERATION_NOT_SUPPORTED_ON_PRIMARY_INDEX = 1105;
     public static final int EXPECTED_CONSTANT_VALUE = 1106;
     public static final int UNEXPECTED_HINT = 1107;
-    public static final int SYNONYM_EXISTS = 1108;
-    public static final int UNKNOWN_SYNONYM = 1109;
-    public static final int UNKNOWN_LIBRARY = 1110;
-    public static final int COMPILATION_GROUPING_SETS_OVERFLOW = 1111;
-    public static final int COMPILATION_GROUPING_OPERATION_INVALID_ARG = 1112;
-    public static final int COMPILATION_UNEXPECTED_ALIAS = 1113;
+    public static final int EXTERNAL_SOURCE_ERROR = 1108;
+    public static final int EXTERNAL_SOURCE_CONTAINER_NOT_FOUND = 1109;
+    public static final int PARAMETERS_NOT_ALLOWED_AT_SAME_TIME = 1110;
+    public static final int PROPERTY_INVALID_VALUE_TYPE = 1111;
+    public static final int INVALID_PROPERTY_FORMAT = 1112;
+    public static final int INVALID_REGEX_PATTERN = 1113;
+    public static final int EXTERNAL_SOURCE_CONFIGURATION_RETURNED_NO_FILES = 1114;
+    public static final int SYNONYM_EXISTS = 1115;
+    public static final int UNKNOWN_SYNONYM = 1116;
+    public static final int UNKNOWN_LIBRARY = 1117;
+    public static final int COMPILATION_GROUPING_SETS_OVERFLOW = 1118;
+    public static final int COMPILATION_GROUPING_OPERATION_INVALID_ARG = 1119;
+    public static final int COMPILATION_UNEXPECTED_ALIAS = 1120;
+    public static final int COMPILATION_ILLEGAL_USE_OF_FILTER_CLAUSE = 1121;
+    public static final int COMPILATION_BAD_FUNCTION_DEFINITION = 1122;
+    public static final int FUNCTION_EXISTS = 1123;
+    public static final int ADAPTER_EXISTS = 1124;
+    public static final int UNKNOWN_ADAPTER = 1125;
+    public static final int INVALID_EXTERNAL_IDENTIFIER_SIZE = 1126;
+    public static final int UNSUPPORTED_ADAPTER_LANGUAGE = 1127;
+    public static final int INCONSISTENT_FILTER_INDICATOR = 1128;
+    public static final int UNSUPPORTED_GBY_OBY_SELECT_COMBO = 1129;
 
     // Feed errors
     public static final int DATAFLOW_ILLEGAL_STATE = 3001;
@@ -247,9 +264,9 @@ public class ErrorCode {
     public static final int LIBRARY_JAVA_FUNCTION_HELPER_OBJ_TYPE_NOT_SUPPORTED = 3046;
     public static final int LIBRARY_EXTERNAL_FUNCTION_UNSUPPORTED_NAME = 3047;
     public static final int OPERATORS_FEED_META_OPERATOR_DESCRIPTOR_INVALID_RUNTIME = 3048;
-    public static final int PARSER_FACTORY_DELIMITED_DATA_PARSER_FACTORY_NOT_VALID_DELIMITER = 3049;
-    public static final int PARSER_FACTORY_DELIMITED_DATA_PARSER_FACTORY_NOT_VALID_QUOTE = 3050;
-    public static final int PARSER_FACTORY_DELIMITED_DATA_PARSER_FACTORY_QUOTE_DELIMITER_MISMATCH = 3051;
+    public static final int INVALID_DELIMITER = 3049;
+    public static final int INVALID_CHAR_LENGTH = 3050;
+    public static final int QUOTE_DELIMITER_MISMATCH = 3051;
     public static final int INDEXING_EXTERNAL_FILE_INDEX_ACCESSOR_UNABLE_TO_FIND_FILE_INDEX = 3052;
     public static final int PARSER_ADM_DATA_PARSER_FIELD_NOT_NULL = 3053;
     public static final int PARSER_ADM_DATA_PARSER_TYPE_MISMATCH = 3054;
@@ -305,7 +322,6 @@ public class ErrorCode {
     public static final int ACTIVE_RUNTIME_IS_ALREADY_REGISTERED = 3105;
     public static final int ACTIVE_RUNTIME_IS_NOT_REGISTERED = 3106;
     public static final int ACTIVE_EVENT_HANDLER_ALREADY_SUSPENDED = 3107;
-    public static final int METADATA_DROP_FUCTION_IN_USE = 3109;
     public static final int FEED_FAILED_WHILE_GETTING_A_NEW_RECORD = 3110;
     public static final int FEED_START_FEED_WITHOUT_CONNECTION = 3111;
     public static final int PARSER_COLLECTION_ITEM_CANNOT_BE_NULL = 3112;

@@ -52,6 +52,7 @@ import org.apache.asterix.lang.common.statement.CreateFullTextConfigStatement;
 import org.apache.asterix.lang.common.statement.CreateFullTextFilterStatement;
 import org.apache.asterix.lang.common.statement.CreateFunctionStatement;
 import org.apache.asterix.lang.common.statement.CreateIndexStatement;
+import org.apache.asterix.lang.common.statement.CreateLibraryStatement;
 import org.apache.asterix.lang.common.statement.CreateSynonymStatement;
 import org.apache.asterix.lang.common.statement.DatasetDecl;
 import org.apache.asterix.lang.common.statement.DataverseDecl;
@@ -67,6 +68,7 @@ import org.apache.asterix.lang.common.statement.FunctionDecl;
 import org.apache.asterix.lang.common.statement.FunctionDropStatement;
 import org.apache.asterix.lang.common.statement.IndexDropStatement;
 import org.apache.asterix.lang.common.statement.InsertStatement;
+import org.apache.asterix.lang.common.statement.LibraryDropStatement;
 import org.apache.asterix.lang.common.statement.LoadStatement;
 import org.apache.asterix.lang.common.statement.NodeGroupDropStatement;
 import org.apache.asterix.lang.common.statement.NodegroupDecl;
@@ -193,6 +195,10 @@ public interface ILangVisitor<R, T> {
     R visit(CreateAdapterStatement cfs, T arg) throws CompilationException;
 
     R visit(AdapterDropStatement del, T arg) throws CompilationException;
+
+    R visit(CreateLibraryStatement cls, T arg) throws CompilationException;
+
+    R visit(LibraryDropStatement del, T arg) throws CompilationException;
 
     R visit(CreateSynonymStatement css, T arg) throws CompilationException;
 

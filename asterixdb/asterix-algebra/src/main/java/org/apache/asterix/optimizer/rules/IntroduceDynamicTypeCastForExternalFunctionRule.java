@@ -19,9 +19,8 @@
 
 package org.apache.asterix.optimizer.rules;
 
-import org.apache.asterix.lang.common.util.FunctionUtil;
-import org.apache.asterix.metadata.functions.ExternalScalarFunctionInfo;
 import org.apache.asterix.om.functions.BuiltinFunctions;
+import org.apache.asterix.om.functions.ExternalFunctionInfo;
 import org.apache.asterix.om.typecomputer.base.TypeCastUtils;
 import org.apache.asterix.om.types.ARecordType;
 import org.apache.asterix.om.types.ATypeTag;
@@ -69,7 +68,7 @@ public class IntroduceDynamicTypeCastForExternalFunctionRule implements IAlgebra
             }
         }
         // if the current function is builtin function, skip the type casting
-        if (BuiltinFunctions.getBuiltinFunctionIdentifier(funcCallExpr.getFunctionIdentifier()) != null) {
+        if (BuiltinFunctions.getBuiltinFunctionInfo(funcCallExpr.getFunctionIdentifier()) != null) {
             return changed;
         }
         IAType inputType;
@@ -78,7 +77,7 @@ public class IntroduceDynamicTypeCastForExternalFunctionRule implements IAlgebra
         for (int i = 0; i < funcCallExpr.getArguments().size(); i++) {
             Mutable<ILogicalExpression> argExpr = funcCallExpr.getArguments().get(i);
             inputType = (IAType) op.computeOutputTypeEnvironment(context).getType(argExpr.getValue());
-            reqArgType = ((ExternalScalarFunctionInfo) funcCallExpr.getFunctionInfo()).getArgumentTypes().get(i);
+            reqArgType = ((ExternalFunctionInfo) funcCallExpr.getFunctionInfo()).getParameterTypes().get(i);
 
             if (reqArgType.getTypeTag() == ATypeTag.OBJECT) {
                 castFlag = !IntroduceDynamicTypeCastRule.compatible((ARecordType) reqArgType, inputType,
@@ -97,8 +96,8 @@ public class IntroduceDynamicTypeCastForExternalFunctionRule implements IAlgebra
                 checkUnknown = true;
             }
             if (castFlag || checkUnknown) {
-                AbstractFunctionCallExpression castFunc =
-                        new ScalarFunctionCallExpression(FunctionUtil.getFunctionInfo(BuiltinFunctions.CAST_TYPE));
+                AbstractFunctionCallExpression castFunc = new ScalarFunctionCallExpression(
+                        BuiltinFunctions.getBuiltinFunctionInfo(BuiltinFunctions.CAST_TYPE));
                 castFunc.setSourceLocation(argExpr.getValue().getSourceLocation());
                 castFunc.getArguments().add(argExpr);
                 TypeCastUtils.setRequiredAndInputTypes(castFunc, reqArgType, inputType);

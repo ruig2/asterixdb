@@ -18,154 +18,336 @@
  */
 package org.apache.asterix.api.http.server;
 
+import static org.apache.asterix.api.http.server.ServletConstants.HYRACKS_CONNECTION_ATTR;
+import static org.apache.asterix.api.http.server.ServletConstants.SYS_AUTH_HEADER;
+import static org.apache.asterix.common.functions.ExternalFunctionLanguage.JAVA;
+import static org.apache.asterix.common.functions.ExternalFunctionLanguage.PYTHON;
+
 import java.io.File;
-import java.io.RandomAccessFile;
-import java.nio.ByteBuffer;
-import java.nio.channels.FileChannel;
-import java.util.ArrayList;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.PrintWriter;
+import java.net.URI;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Arrays;
-import java.util.List;
+import java.util.Collections;
+import java.util.Map;
 import java.util.concurrent.ConcurrentMap;
 
-import org.apache.asterix.app.external.ExternalLibraryUtils;
-import org.apache.asterix.app.message.DeleteUdfMessage;
-import org.apache.asterix.app.message.LoadUdfMessage;
+import org.apache.asterix.app.result.ResponsePrinter;
+import org.apache.asterix.app.translator.RequestParameters;
+import org.apache.asterix.common.api.IClusterManagementWork;
+import org.apache.asterix.common.api.IReceptionist;
+import org.apache.asterix.common.api.IRequestReference;
+import org.apache.asterix.common.context.IStorageComponentProvider;
 import org.apache.asterix.common.dataflow.ICcApplicationContext;
-import org.apache.asterix.common.messaging.api.ICCMessageBroker;
-import org.apache.asterix.common.messaging.api.INcAddressedMessage;
+import org.apache.asterix.common.exceptions.ErrorCode;
+import org.apache.asterix.common.exceptions.RuntimeDataException;
+import org.apache.asterix.common.functions.ExternalFunctionLanguage;
+import org.apache.asterix.common.library.LibraryDescriptor;
 import org.apache.asterix.common.metadata.DataverseName;
+import org.apache.asterix.compiler.provider.ILangCompilationProvider;
+import org.apache.asterix.external.library.ExternalLibraryManager;
+import org.apache.asterix.lang.common.base.Statement;
+import org.apache.asterix.lang.common.statement.CreateLibraryStatement;
+import org.apache.asterix.lang.common.statement.LibraryDropStatement;
+import org.apache.asterix.metadata.MetadataManager;
+import org.apache.asterix.translator.IRequestParameters;
+import org.apache.asterix.translator.IStatementExecutor;
+import org.apache.asterix.translator.IStatementExecutorFactory;
+import org.apache.asterix.translator.ResultProperties;
+import org.apache.asterix.translator.SessionConfig;
+import org.apache.asterix.translator.SessionOutput;
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.io.output.NullWriter;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.hyracks.algebricks.common.utils.Pair;
+import org.apache.hyracks.api.application.ICCServiceContext;
 import org.apache.hyracks.api.client.IHyracksClientConnection;
-import org.apache.hyracks.api.deployment.DeploymentId;
+import org.apache.hyracks.api.exceptions.IFormattedException;
+import org.apache.hyracks.control.cc.ClusterControllerService;
+import org.apache.hyracks.control.common.context.ServerContext;
+import org.apache.hyracks.control.common.work.SynchronizableWork;
 import org.apache.hyracks.http.api.IServletRequest;
 import org.apache.hyracks.http.api.IServletResponse;
+import org.apache.hyracks.http.server.AbstractServlet;
+import org.apache.hyracks.http.server.utils.HttpUtil;
 import org.apache.hyracks.util.file.FileUtil;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import io.netty.buffer.ByteBuf;
-import io.netty.handler.codec.http.FullHttpRequest;
+import io.netty.handler.codec.http.HttpRequest;
 import io.netty.handler.codec.http.HttpResponseStatus;
-import io.netty.handler.codec.http.QueryStringDecoder;
+import io.netty.handler.codec.http.HttpScheme;
+import io.netty.handler.codec.http.multipart.FileUpload;
+import io.netty.handler.codec.http.multipart.HttpPostRequestDecoder;
+import io.netty.handler.codec.http.multipart.InterfaceHttpData;
 
-public class UdfApiServlet extends BasicAuthServlet {
+public class UdfApiServlet extends AbstractServlet {
 
     private static final Logger LOGGER = LogManager.getLogger();
-    private final ICcApplicationContext appCtx;
-    private final ICCMessageBroker broker;
-    public static final String UDF_TMP_DIR_PREFIX = "udf_temp";
-    public static final int UDF_RESPONSE_TIMEOUT = 5000;
-    public static final int URL_PREFIX_LENGTH = 3;
 
-    public UdfApiServlet(ICcApplicationContext appCtx, ConcurrentMap<String, Object> ctx, String... paths) {
+    protected final ICcApplicationContext appCtx;
+    private final ClusterControllerService ccs;
+    private final HttpScheme httpServerProtocol;
+    private final int httpServerPort;
+
+    protected final ILangCompilationProvider compilationProvider;
+    protected final IStatementExecutorFactory statementExecutorFactory;
+    protected final IStorageComponentProvider componentProvider;
+    protected final IReceptionist receptionist;
+    protected final Path workingDir;
+    protected String sysAuthHeader;
+
+    public UdfApiServlet(ConcurrentMap<String, Object> ctx, String[] paths, ICcApplicationContext appCtx,
+            ILangCompilationProvider compilationProvider, IStatementExecutorFactory statementExecutorFactory,
+            IStorageComponentProvider componentProvider, HttpScheme httpServerProtocol, int httpServerPort) {
         super(ctx, paths);
         this.appCtx = appCtx;
-        this.broker = (ICCMessageBroker) appCtx.getServiceContext().getMessageBroker();
+        ICCServiceContext srvCtx = appCtx.getServiceContext();
+        this.ccs = (ClusterControllerService) srvCtx.getControllerService();
+        this.compilationProvider = compilationProvider;
+        this.statementExecutorFactory = statementExecutorFactory;
+        this.componentProvider = componentProvider;
+        this.receptionist = appCtx.getReceptionist();
+        this.httpServerProtocol = httpServerProtocol;
+        this.httpServerPort = httpServerPort;
+        File baseDir = srvCtx.getServerCtx().getBaseDir();
+        this.workingDir = baseDir.getAbsoluteFile().toPath().normalize().resolve(
+                Paths.get(ServerContext.APP_DIR_NAME, ExternalLibraryManager.LIBRARY_MANAGER_BASE_DIR_NAME, "tmp"));
     }
 
-    private Pair<String, DataverseName> getResource(FullHttpRequest req) throws IllegalArgumentException {
-        String[] path = new QueryStringDecoder(req.uri()).path().split("/");
-        if (path.length != 5) {
-            throw new IllegalArgumentException("Invalid resource.");
+    @Override
+    public void init() throws IOException {
+        initAuth();
+        initStorage();
+    }
+
+    protected void initAuth() {
+        sysAuthHeader = (String) ctx.get(SYS_AUTH_HEADER);
+    }
+
+    protected void initStorage() throws IOException {
+        // prepare working directory
+        if (Files.isDirectory(workingDir)) {
+            try {
+                FileUtils.cleanDirectory(workingDir.toFile());
+            } catch (IOException e) {
+                LOGGER.warn("Could not clean directory: " + workingDir, e);
+            }
+        } else {
+            Files.deleteIfExists(workingDir);
+            FileUtil.forceMkdirs(workingDir.toFile());
         }
-        String resourceName = path[path.length - 1];
-        DataverseName dataverseName = DataverseName.createFromCanonicalForm(path[path.length - 2]); // TODO: use path separators instead for multiparts
-        return new Pair<>(resourceName, dataverseName);
+    }
+
+    protected Map<String, String> additionalHttpHeadersFromRequest(IServletRequest request) {
+        return Collections.emptyMap();
     }
 
     @Override
     protected void post(IServletRequest request, IServletResponse response) {
-        FullHttpRequest req = request.getHttpRequest();
-        Pair<String, DataverseName> resourceNames;
-        try {
-            resourceNames = getResource(req);
-        } catch (IllegalArgumentException e) {
+        IClusterManagementWork.ClusterState clusterState = appCtx.getClusterStateManager().getState();
+        if (clusterState != IClusterManagementWork.ClusterState.ACTIVE) {
+            response.setStatus(HttpResponseStatus.SERVICE_UNAVAILABLE);
+            return;
+        }
+        HttpRequest httpRequest = request.getHttpRequest();
+        Pair<DataverseName, String> libraryName = parseLibraryName(request);
+        if (libraryName == null) {
             response.setStatus(HttpResponseStatus.BAD_REQUEST);
             return;
         }
-        String resourceName = resourceNames.first;
-        DataverseName dataverse = resourceNames.second;
-        File udf = null;
+        Path libraryTempFile = null;
+        HttpPostRequestDecoder requestDecoder = new HttpPostRequestDecoder(httpRequest);
         try {
-            File workingDir = new File(appCtx.getServiceContext().getServerCtx().getBaseDir().getAbsolutePath(),
-                    UDF_TMP_DIR_PREFIX);
-            if (!workingDir.exists()) {
-                FileUtil.forceMkdirs(workingDir);
+            if (!requestDecoder.hasNext() || requestDecoder.getBodyHttpDatas().size() != 1) {
+                response.setStatus(HttpResponseStatus.BAD_REQUEST);
+                return;
             }
-            udf = File.createTempFile(resourceName, ".zip", workingDir);
-            try (RandomAccessFile raf = new RandomAccessFile(udf, "rw")) {
-                ByteBuf reqContent = req.content();
-                raf.setLength(reqContent.readableBytes());
-                FileChannel fc = raf.getChannel();
-                ByteBuffer content = reqContent.nioBuffer();
-                while (content.hasRemaining()) {
-                    fc.write(content);
+            InterfaceHttpData httpData = requestDecoder.getBodyHttpDatas().get(0);
+            if (!httpData.getHttpDataType().equals(InterfaceHttpData.HttpDataType.FileUpload)) {
+                response.setStatus(HttpResponseStatus.BAD_REQUEST);
+                return;
+            }
+            FileUpload fileUpload = (FileUpload) httpData;
+            String fileExt = FilenameUtils.getExtension(fileUpload.getFilename());
+            ExternalFunctionLanguage language = getLanguageByFileExtension(fileExt);
+            if (language == null) {
+                response.setStatus(HttpResponseStatus.BAD_REQUEST);
+                return;
+            }
+            try {
+                IRequestReference requestReference = receptionist.welcome(request);
+                libraryTempFile = Files.createTempFile(workingDir, "lib_", '.' + fileExt);
+                if (LOGGER.isDebugEnabled()) {
+                    LOGGER.debug("Created temporary file " + libraryTempFile + " for library " + libraryName.first + "."
+                            + libraryName.second);
+                }
+                fileUpload.renameTo(libraryTempFile.toFile());
+                URI downloadURI = createDownloadURI(libraryTempFile);
+                CreateLibraryStatement stmt = new CreateLibraryStatement(libraryName.first, libraryName.second,
+                        language, downloadURI, true, sysAuthHeader);
+                executeStatement(stmt, requestReference, request);
+                response.setStatus(HttpResponseStatus.OK);
+            } catch (Exception e) {
+                response.setStatus(toHttpErrorStatus(e));
+                PrintWriter responseWriter = response.writer();
+                responseWriter.write(e.getMessage());
+                responseWriter.flush();
+                LOGGER.error("Error creating/updating library " + libraryName.first + "." + libraryName.second, e);
+            }
+        } finally {
+            requestDecoder.destroy();
+            if (libraryTempFile != null) {
+                try {
+                    Files.deleteIfExists(libraryTempFile);
+                } catch (IOException e) {
+                    LOGGER.warn("Could not delete temporary file " + libraryTempFile, e);
                 }
             }
-            IHyracksClientConnection hcc = appCtx.getHcc();
-            DeploymentId udfName = new DeploymentId(makeDeploymentId(dataverse, resourceName));
-            ClassLoader cl = appCtx.getLibraryManager().getLibraryClassLoader(dataverse, resourceName);
-            if (cl != null) {
-                deleteUdf(dataverse, resourceName);
-            }
-            hcc.deployBinary(udfName, Arrays.asList(udf.toString()), true);
-            ExternalLibraryUtils.setUpExternaLibrary(appCtx.getLibraryManager(), false,
-                    FileUtil.joinPath(appCtx.getServiceContext().getServerCtx().getBaseDir().getAbsolutePath(),
-                            "applications", udfName.toString()));
-
-            long reqId = broker.newRequestId();
-            List<INcAddressedMessage> requests = new ArrayList<>();
-            List<String> ncs = new ArrayList<>(appCtx.getClusterStateManager().getParticipantNodes());
-            ncs.forEach(s -> requests.add(new LoadUdfMessage(dataverse, resourceName, reqId)));
-            broker.sendSyncRequestToNCs(reqId, ncs, requests, UDF_RESPONSE_TIMEOUT);
-        } catch (Exception e) {
-            response.setStatus(HttpResponseStatus.INTERNAL_SERVER_ERROR);
-            LOGGER.error(e);
-            return;
-        } finally {
-            if (udf != null) {
-                udf.delete();
-            }
         }
-        response.setStatus(HttpResponseStatus.OK);
-
     }
 
-    public static String makeDeploymentId(DataverseName dv, String resourceName) {
-        List<String> dvParts = dv.getParts();
-        dvParts.add(resourceName);
-        DataverseName dvWithLibrarySuffix = DataverseName.create(dvParts);
-        return dvWithLibrarySuffix.getCanonicalForm();
+    protected URI createDownloadURI(Path file) throws Exception {
+        String path = paths[0].substring(0, trims[0]) + '/' + file.getFileName();
+        String host = getHyracksClientConnection().getHost();
+        return new URI(httpServerProtocol.toString(), null, host, httpServerPort, path, null, null);
     }
 
-    private void deleteUdf(DataverseName dataverse, String resourceName) throws Exception {
-        long reqId = broker.newRequestId();
-        List<INcAddressedMessage> requests = new ArrayList<>();
-        List<String> ncs = new ArrayList<>(appCtx.getClusterStateManager().getParticipantNodes());
-        ncs.forEach(s -> requests.add(new DeleteUdfMessage(dataverse, resourceName, reqId)));
-        broker.sendSyncRequestToNCs(reqId, ncs, requests, UDF_RESPONSE_TIMEOUT);
-        appCtx.getLibraryManager().deregisterLibraryClassLoader(dataverse, resourceName);
-        appCtx.getHcc().unDeployBinary(new DeploymentId(makeDeploymentId(dataverse, resourceName)));
-    }
-
-    @Override
     protected void delete(IServletRequest request, IServletResponse response) {
-        Pair<String, DataverseName> resourceNames;
-        try {
-            resourceNames = getResource(request.getHttpRequest());
-        } catch (IllegalArgumentException e) {
+        IClusterManagementWork.ClusterState clusterState = appCtx.getClusterStateManager().getState();
+        if (clusterState != IClusterManagementWork.ClusterState.ACTIVE) {
+            response.setStatus(HttpResponseStatus.SERVICE_UNAVAILABLE);
+            return;
+        }
+        Pair<DataverseName, String> libraryName = parseLibraryName(request);
+        if (libraryName == null) {
             response.setStatus(HttpResponseStatus.BAD_REQUEST);
             return;
         }
-        String resourceName = resourceNames.first;
-        DataverseName dataverse = resourceNames.second;
         try {
-            deleteUdf(dataverse, resourceName);
+            IRequestReference requestReference = receptionist.welcome(request);
+            LibraryDropStatement stmt = new LibraryDropStatement(libraryName.first, libraryName.second, false);
+            executeStatement(stmt, requestReference, request);
+            response.setStatus(HttpResponseStatus.OK);
         } catch (Exception e) {
-            response.setStatus(HttpResponseStatus.INTERNAL_SERVER_ERROR);
-            LOGGER.error(e);
+            response.setStatus(toHttpErrorStatus(e));
+            PrintWriter responseWriter = response.writer();
+            responseWriter.write(e.getMessage());
+            responseWriter.flush();
+            LOGGER.error("Error deleting library " + libraryName.first + "." + libraryName.second, e);
+        }
+    }
+
+    protected void executeStatement(Statement statement, IRequestReference requestReference, IServletRequest request)
+            throws Exception {
+        SessionOutput sessionOutput = new SessionOutput(new SessionConfig(SessionConfig.OutputFormat.ADM),
+                new PrintWriter(NullWriter.NULL_WRITER));
+        ResponsePrinter printer = new ResponsePrinter(sessionOutput);
+        ResultProperties resultProperties = new ResultProperties(IStatementExecutor.ResultDelivery.IMMEDIATE, 1);
+        IRequestParameters requestParams = new RequestParameters(requestReference, "", null, resultProperties,
+                new IStatementExecutor.Stats(), new IStatementExecutor.StatementProperties(), null, null,
+                additionalHttpHeadersFromRequest(request), Collections.emptyMap(), false);
+        MetadataManager.INSTANCE.init();
+        IStatementExecutor translator = statementExecutorFactory.create(appCtx, Collections.singletonList(statement),
+                sessionOutput, compilationProvider, componentProvider, printer);
+        translator.compileAndExecute(getHyracksClientConnection(), requestParams);
+    }
+
+    protected void get(IServletRequest request, IServletResponse response) throws Exception {
+        IClusterManagementWork.ClusterState clusterState = appCtx.getClusterStateManager().getState();
+        if (clusterState != IClusterManagementWork.ClusterState.ACTIVE) {
+            response.setStatus(HttpResponseStatus.SERVICE_UNAVAILABLE);
             return;
         }
-        response.setStatus(HttpResponseStatus.OK);
+        String localPath = localPath(request);
+        while (localPath.startsWith("/")) {
+            localPath = localPath.substring(1);
+        }
+        if (localPath.isEmpty()) {
+            response.setStatus(HttpResponseStatus.BAD_REQUEST);
+            return;
+        }
+        Path filePath = workingDir.resolve(localPath).normalize();
+        if (!filePath.startsWith(workingDir)) {
+            response.setStatus(HttpResponseStatus.BAD_REQUEST);
+            return;
+        }
+        readFromFile(filePath, response);
+    }
+
+    protected IHyracksClientConnection getHyracksClientConnection() throws Exception { // NOSONAR
+        IHyracksClientConnection hcc = (IHyracksClientConnection) ctx.get(HYRACKS_CONNECTION_ATTR);
+        if (hcc == null) {
+            throw new RuntimeDataException(ErrorCode.PROPERTY_NOT_SET, HYRACKS_CONNECTION_ATTR);
+        }
+        return hcc;
+    }
+
+    protected Pair<DataverseName, String> parseLibraryName(IServletRequest request) throws IllegalArgumentException {
+        String[] path = StringUtils.split(localPath(request), '/');
+        int ln = path.length;
+        if (ln < 2) {
+            return null;
+        }
+        String libraryName = path[ln - 1];
+        DataverseName dataverseName = DataverseName.create(Arrays.asList(path), 0, ln - 1);
+        return new Pair<>(dataverseName, libraryName);
+    }
+
+    protected static ExternalFunctionLanguage getLanguageByFileExtension(String fileExtension) {
+        switch (fileExtension) {
+            case LibraryDescriptor.FILE_EXT_ZIP:
+                return JAVA;
+            case LibraryDescriptor.FILE_EXT_PYZ:
+                return PYTHON;
+            default:
+                return null;
+        }
+    }
+
+    protected HttpResponseStatus toHttpErrorStatus(Exception e) {
+        if (e instanceof IFormattedException) {
+            IFormattedException fe = (IFormattedException) e;
+            if (ErrorCode.ASTERIX.equals(fe.getComponent())) {
+                switch (fe.getErrorCode()) {
+                    case ErrorCode.UNKNOWN_DATAVERSE:
+                    case ErrorCode.UNKNOWN_LIBRARY:
+                        return HttpResponseStatus.NOT_FOUND;
+                }
+            }
+        }
+        return HttpResponseStatus.INTERNAL_SERVER_ERROR;
+    }
+
+    protected void readFromFile(Path filePath, IServletResponse response) throws Exception {
+        class InputStreamGetter extends SynchronizableWork {
+            private InputStream is;
+
+            @Override
+            protected void doRun() throws Exception {
+                is = Files.newInputStream(filePath);
+            }
+        }
+
+        InputStreamGetter r = new InputStreamGetter();
+        ccs.getWorkQueue().scheduleAndSync(r);
+
+        if (r.is == null) {
+            response.setStatus(HttpResponseStatus.NOT_FOUND);
+            return;
+        }
+        try {
+            response.setStatus(HttpResponseStatus.OK);
+            HttpUtil.setContentType(response, "application/octet-stream");
+            IOUtils.copyLarge(r.is, response.outputStream());
+        } finally {
+            r.is.close();
+        }
     }
 }

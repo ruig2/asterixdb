@@ -33,7 +33,6 @@ import org.apache.asterix.common.api.IConfigValidator;
 import org.apache.asterix.common.api.IConfigValidatorFactory;
 import org.apache.asterix.common.api.ICoordinationService;
 import org.apache.asterix.common.api.IDatasetLifecycleManager;
-import org.apache.asterix.common.api.IDatasetMemoryManager;
 import org.apache.asterix.common.api.INcApplicationContext;
 import org.apache.asterix.common.api.IPropertiesFactory;
 import org.apache.asterix.common.api.IReceptionist;
@@ -50,7 +49,7 @@ import org.apache.asterix.common.config.ReplicationProperties;
 import org.apache.asterix.common.config.StorageProperties;
 import org.apache.asterix.common.config.TransactionProperties;
 import org.apache.asterix.common.context.DatasetLifecycleManager;
-import org.apache.asterix.common.context.DatasetMemoryManager;
+import org.apache.asterix.common.context.GlobalVirtualBufferCache;
 import org.apache.asterix.common.context.IStorageComponentProvider;
 import org.apache.asterix.common.library.ILibraryManager;
 import org.apache.asterix.common.replication.IReplicationChannel;
@@ -81,6 +80,7 @@ import org.apache.hyracks.api.client.ClusterControllerInfo;
 import org.apache.hyracks.api.client.IHyracksClientConnection;
 import org.apache.hyracks.api.control.CcId;
 import org.apache.hyracks.api.exceptions.HyracksDataException;
+import org.apache.hyracks.api.io.FileReference;
 import org.apache.hyracks.api.io.IIOManager;
 import org.apache.hyracks.api.io.IPersistedResourceRegistry;
 import org.apache.hyracks.api.lifecycle.ILifeCycleComponent;
@@ -91,6 +91,7 @@ import org.apache.hyracks.control.nc.NodeControllerService;
 import org.apache.hyracks.ipc.impl.HyracksConnection;
 import org.apache.hyracks.storage.am.lsm.common.api.ILSMIOOperationScheduler;
 import org.apache.hyracks.storage.am.lsm.common.api.ILSMMergePolicyFactory;
+import org.apache.hyracks.storage.am.lsm.common.api.IVirtualBufferCache;
 import org.apache.hyracks.storage.am.lsm.common.impls.AsynchronousScheduler;
 import org.apache.hyracks.storage.am.lsm.common.impls.ConcurrentMergePolicyFactory;
 import org.apache.hyracks.storage.am.lsm.common.impls.GreedyScheduler;
@@ -130,9 +131,9 @@ public class NCAppRuntimeContext implements INcApplicationContext {
     private final MessagingProperties messagingProperties;
     private final NodeProperties nodeProperties;
     private ExecutorService threadExecutor;
-    private IDatasetMemoryManager datasetMemoryManager;
     private IDatasetLifecycleManager datasetLifecycleManager;
     private IBufferCache bufferCache;
+    private IVirtualBufferCache virtualBufferCache;
     private ITransactionSubsystem txnSubsystem;
     private IMetadataNode metadataNodeStub;
     private ILSMIOOperationScheduler lsmIOScheduler;
@@ -142,7 +143,7 @@ public class NCAppRuntimeContext implements INcApplicationContext {
     private ActiveManager activeManager;
     private IReplicationChannel replicationChannel;
     private IReplicationManager replicationManager;
-    private final ILibraryManager libraryManager;
+    private ExternalLibraryManager libraryManager;
     private final NCExtensionManager ncExtensionManager;
     private final IStorageComponentProvider componentProvider;
     private final IPersistedResourceRegistry persistedResourceRegistry;
@@ -166,7 +167,6 @@ public class NCAppRuntimeContext implements INcApplicationContext {
         replicationProperties = propertiesFactory.newReplicationProperties();
         messagingProperties = propertiesFactory.newMessagingProperties();
         nodeProperties = propertiesFactory.newNodeProperties();
-        libraryManager = new ExternalLibraryManager();
         ncExtensionManager = extensionManager;
         componentProvider = new StorageComponentProvider();
         resourceIdFactory = new GlobalResourceIdFactoryProvider(ncServiceContext).createResourceIdFactory();
@@ -197,7 +197,8 @@ public class NCAppRuntimeContext implements INcApplicationContext {
         txnSubsystem = new TransactionSubsystem(this, recoveryManagerFactory);
         IRecoveryManager recoveryMgr = txnSubsystem.getRecoveryManager();
         SystemState systemState = recoveryMgr.getSystemState();
-        if (initialRun || systemState == SystemState.PERMANENT_DATA_LOSS) {
+        boolean resetStorageData = initialRun || systemState == SystemState.PERMANENT_DATA_LOSS;
+        if (resetStorageData) {
             //delete any storage data before the resource factory is initialized
             if (LOGGER.isWarnEnabled()) {
                 LOGGER.log(Level.WARN,
@@ -205,10 +206,21 @@ public class NCAppRuntimeContext implements INcApplicationContext {
             }
             localResourceRepository.deleteStorageData();
         }
-        datasetMemoryManager = new DatasetMemoryManager(storageProperties);
+        int maxConcurrentFlushes = storageProperties.getMaxConcurrentFlushes();
+        if (maxConcurrentFlushes <= 0) {
+            maxConcurrentFlushes = ioManager.getIODevices().size();
+            if (LOGGER.isInfoEnabled()) {
+                LOGGER.info("The value of maxConcurrentFlushes is not provided. Setting maxConcurrentFlushes = {}.",
+                        maxConcurrentFlushes);
+            }
+        }
+        virtualBufferCache = new GlobalVirtualBufferCache(allocator, storageProperties, maxConcurrentFlushes);
+        // Must start vbc now instead of by life cycle component manager (lccm) because lccm happens after
+        // the metadata bootstrap task
+        ((ILifeCycleComponent) virtualBufferCache).start();
         datasetLifecycleManager =
                 new DatasetLifecycleManager(storageProperties, localResourceRepository, txnSubsystem.getLogManager(),
-                        datasetMemoryManager, indexCheckpointManagerProvider, ioManager.getIODevices().size());
+                        virtualBufferCache, indexCheckpointManagerProvider, ioManager.getIODevices().size());
         final String nodeId = getServiceContext().getNodeId();
         final ClusterPartition[] nodePartitions = metadataProperties.getNodePartitions().get(nodeId);
         final Set<Integer> nodePartitionsIds =
@@ -241,11 +253,18 @@ public class NCAppRuntimeContext implements INcApplicationContext {
                     storageProperties.getBufferCacheMaxOpenFiles(), ioQueueLen, getServiceContext().getThreadFactory());
         }
 
+        NodeControllerService ncs = (NodeControllerService) getServiceContext().getControllerService();
+        FileReference appDir =
+                ioManager.resolveAbsolutePath(getServiceContext().getServerCtx().getAppDir().getAbsolutePath());
+        libraryManager = new ExternalLibraryManager(ncs, persistedResourceRegistry, appDir);
+        libraryManager.initialize(resetStorageData);
+
         /*
          * The order of registration is important. The buffer cache must registered before recovery and transaction
          * managers. Notes: registered components are stopped in reversed order
          */
         ILifeCycleComponentManager lccm = getServiceContext().getLifeCycleComponentManager();
+        lccm.register((ILifeCycleComponent) virtualBufferCache);
         lccm.register((ILifeCycleComponent) bufferCache);
         /*
          * LogManager must be stopped after RecoveryManager, DatasetLifeCycleManager, and ReplicationManager
@@ -267,6 +286,7 @@ public class NCAppRuntimeContext implements INcApplicationContext {
         lccm.register((ILifeCycleComponent) txnSubsystem.getTransactionManager());
         lccm.register((ILifeCycleComponent) txnSubsystem.getLockManager());
         lccm.register(txnSubsystem.getCheckpointManager());
+        lccm.register(libraryManager);
     }
 
     @Override
@@ -297,6 +317,11 @@ public class NCAppRuntimeContext implements INcApplicationContext {
     }
 
     @Override
+    public IVirtualBufferCache getVirtualBufferCache() {
+        return virtualBufferCache;
+    }
+
+    @Override
     public ITransactionSubsystem getTransactionSubsystem() {
         return txnSubsystem;
     }
@@ -304,11 +329,6 @@ public class NCAppRuntimeContext implements INcApplicationContext {
     @Override
     public IDatasetLifecycleManager getDatasetLifecycleManager() {
         return datasetLifecycleManager;
-    }
-
-    @Override
-    public IDatasetMemoryManager getDatasetMemoryManager() {
-        return datasetMemoryManager;
     }
 
     @Override

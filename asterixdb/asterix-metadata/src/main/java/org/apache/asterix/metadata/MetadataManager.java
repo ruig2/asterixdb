@@ -55,7 +55,6 @@ import org.apache.asterix.metadata.entities.Library;
 import org.apache.asterix.metadata.entities.Node;
 import org.apache.asterix.metadata.entities.NodeGroup;
 import org.apache.asterix.metadata.entities.Synonym;
-import org.apache.asterix.om.types.ARecordType;
 import org.apache.asterix.transaction.management.opcallbacks.AbstractIndexModificationOperationCallback.Operation;
 import org.apache.hyracks.algebricks.common.exceptions.AlgebricksException;
 import org.apache.hyracks.api.exceptions.HyracksDataException;
@@ -180,6 +179,16 @@ public abstract class MetadataManager implements IMetadataManager {
             throw new MetadataException(ErrorCode.REMOTE_EXCEPTION_WHEN_CALLING_METADATA_NODE, e);
         }
         ctx.dropDataverse(dataverseName);
+    }
+
+    @Override
+    public boolean isDataverseNotEmpty(MetadataTransactionContext ctx, DataverseName dataverseName)
+            throws AlgebricksException {
+        try {
+            return metadataNode.isDataverseNotEmpty(ctx.getTxnId(), dataverseName);
+        } catch (RemoteException e) {
+            throw new MetadataException(ErrorCode.REMOTE_EXCEPTION_WHEN_CALLING_METADATA_NODE, e);
+        }
     }
 
     @Override
@@ -385,14 +394,7 @@ public abstract class MetadataManager implements IMetadataManager {
         datatype = cache.getDatatype(dataverseName, datatypeName);
         if (datatype != null) {
             // Datatype is already in the cache, don't add it again.
-            // create a new Datatype object with a new ARecordType object in order to avoid
-            // concurrent access to UTF8StringPointable comparator in ARecordType object.
-            // see issue 510
-            ARecordType aRecType = (ARecordType) datatype.getDatatype();
-            return new Datatype(
-                    datatype.getDataverseName(), datatype.getDatatypeName(), new ARecordType(aRecType.getTypeName(),
-                            aRecType.getFieldNames(), aRecType.getFieldTypes(), aRecType.isOpen()),
-                    datatype.getIsAnonymous());
+            return datatype;
         }
         try {
             datatype = metadataNode.getDatatype(ctx.getTxnId(), dataverseName, datatypeName);
@@ -577,7 +579,7 @@ public abstract class MetadataManager implements IMetadataManager {
     public Function getFunction(MetadataTransactionContext ctx, FunctionSignature functionSignature)
             throws AlgebricksException {
         // First look in the context to see if this transaction created the
-        // requested dataset itself (but the dataset is still uncommitted).
+        // requested function itself (but the function is still uncommitted).
         Function function = ctx.getFunction(functionSignature);
         if (function != null) {
             // Don't add this dataverse to the cache, since it is still
@@ -1063,6 +1065,42 @@ public abstract class MetadataManager implements IMetadataManager {
         // reflect the dataset into the cache
         ctx.dropDataset(dataset.getDataverseName(), dataset.getDatasetName());
         ctx.addDataset(dataset);
+    }
+
+    @Override
+    public void updateLibrary(MetadataTransactionContext ctx, Library library) throws AlgebricksException {
+        try {
+            metadataNode.updateLibrary(ctx.getTxnId(), library);
+        } catch (RemoteException e) {
+            throw new MetadataException(ErrorCode.REMOTE_EXCEPTION_WHEN_CALLING_METADATA_NODE, e);
+        }
+        // reflect the library into the cache
+        ctx.dropLibrary(library.getDataverseName(), library.getName());
+        ctx.addLibrary(library);
+    }
+
+    @Override
+    public void updateFunction(MetadataTransactionContext ctx, Function function) throws AlgebricksException {
+        try {
+            metadataNode.updateFunction(ctx.getTxnId(), function);
+        } catch (RemoteException e) {
+            throw new MetadataException(ErrorCode.REMOTE_EXCEPTION_WHEN_CALLING_METADATA_NODE, e);
+        }
+        // reflect the function into the cache
+        ctx.dropFunction(function.getSignature());
+        ctx.addFunction(function);
+    }
+
+    @Override
+    public void updateDatatype(MetadataTransactionContext ctx, Datatype datatype) throws AlgebricksException {
+        try {
+            metadataNode.updateDatatype(ctx.getTxnId(), datatype);
+        } catch (RemoteException e) {
+            throw new MetadataException(ErrorCode.REMOTE_EXCEPTION_WHEN_CALLING_METADATA_NODE, e);
+        }
+        // reflect the datatype into the cache
+        ctx.dropDataDatatype(datatype.getDataverseName(), datatype.getDatatypeName());
+        ctx.addDatatype(datatype);
     }
 
     @Override

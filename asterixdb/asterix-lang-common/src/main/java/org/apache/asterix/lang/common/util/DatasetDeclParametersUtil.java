@@ -18,6 +18,7 @@
  */
 package org.apache.asterix.lang.common.util;
 
+import org.apache.asterix.common.config.DatasetConfig;
 import org.apache.asterix.common.exceptions.CompilationException;
 import org.apache.asterix.lang.common.expression.RecordConstructor;
 import org.apache.asterix.object.base.AdmObjectNode;
@@ -51,6 +52,12 @@ public class DatasetDeclParametersUtil {
     public static final String STORAGE_BLOCK_COMPRESSION_SCHEME_PARAMETER_NAME = "scheme";
 
     /* ***********************************************
+     * Node Group Parameters
+     * ***********************************************
+     */
+    public static final String NODE_GROUP_NAME = "node-group";
+    public static final String NODE_GROUP_NAME_PARAMETER_NAME = "name";
+    /* ***********************************************
      * Private members
      * ***********************************************
      */
@@ -60,20 +67,29 @@ public class DatasetDeclParametersUtil {
     private DatasetDeclParametersUtil() {
     }
 
-    public static AdmObjectNode validateAndGetWithObjectNode(RecordConstructor withRecord) throws CompilationException {
+    public static AdmObjectNode validateAndGetWithObjectNode(RecordConstructor withRecord,
+            DatasetConfig.DatasetType datasetType) throws CompilationException {
         if (withRecord == null) {
             return EMPTY_WITH_OBJECT;
         }
-        final ConfigurationTypeValidator validator = new ConfigurationTypeValidator();
-        final AdmObjectNode node = ExpressionUtils.toNode(withRecord);
-        validator.validateType(WITH_OBJECT_TYPE, node);
-        return node;
+
+        // Handle based on dataset type
+        if (datasetType == DatasetConfig.DatasetType.INTERNAL) {
+            final ConfigurationTypeValidator validator = new ConfigurationTypeValidator();
+            final AdmObjectNode node = ExpressionUtils.toNode(withRecord);
+            validator.validateType(WITH_OBJECT_TYPE, node);
+            return node;
+        } else {
+            return ExpressionUtils.toNode(withRecord);
+        }
     }
 
     private static ARecordType getWithObjectType() {
-        final String[] withNames = { MERGE_POLICY_PARAMETER_NAME, STORAGE_BLOCK_COMPRESSION_PARAMETER_NAME };
+        final String[] withNames =
+                { MERGE_POLICY_PARAMETER_NAME, STORAGE_BLOCK_COMPRESSION_PARAMETER_NAME, NODE_GROUP_NAME };
         final IAType[] withTypes = { AUnionType.createUnknownableType(getMergePolicyType()),
-                AUnionType.createUnknownableType(getStorageBlockCompressionType()) };
+                AUnionType.createUnknownableType(getStorageBlockCompressionType()),
+                AUnionType.createUnknownableType(getNodeGroupType()) };
         return new ARecordType("withObject", withNames, withTypes, false);
     }
 
@@ -104,5 +120,11 @@ public class DatasetDeclParametersUtil {
         final String[] schemeName = { STORAGE_BLOCK_COMPRESSION_SCHEME_PARAMETER_NAME };
         final IAType[] schemeType = { BuiltinType.ASTRING };
         return new ARecordType(STORAGE_BLOCK_COMPRESSION_PARAMETER_NAME, schemeName, schemeType, false);
+    }
+
+    private static ARecordType getNodeGroupType() {
+        final String[] schemeName = { NODE_GROUP_NAME_PARAMETER_NAME };
+        final IAType[] schemeType = { BuiltinType.ASTRING };
+        return new ARecordType(NODE_GROUP_NAME, schemeName, schemeType, false);
     }
 }

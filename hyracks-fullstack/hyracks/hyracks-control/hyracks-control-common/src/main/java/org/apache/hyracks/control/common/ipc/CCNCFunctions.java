@@ -70,6 +70,7 @@ import org.apache.hyracks.control.common.job.profiling.om.JobProfile;
 import org.apache.hyracks.control.common.job.profiling.om.TaskProfile;
 import org.apache.hyracks.ipc.api.IPayloadSerializerDeserializer;
 import org.apache.hyracks.ipc.impl.JavaSerializationBasedPayloadSerializerDeserializer;
+import org.apache.hyracks.ipc.impl.Message;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -1176,14 +1177,11 @@ public class CCNCFunctions {
 
         private final List<URL> binaryURLs;
         private final DeploymentId deploymentId;
-        private final boolean extractFromArchive;
 
-        public DeployBinaryFunction(DeploymentId deploymentId, List<URL> binaryURLs, CcId ccId,
-                boolean isExtractFromArchive) {
+        public DeployBinaryFunction(DeploymentId deploymentId, List<URL> binaryURLs, CcId ccId) {
             super(ccId);
             this.binaryURLs = binaryURLs;
             this.deploymentId = deploymentId;
-            this.extractFromArchive = isExtractFromArchive;
         }
 
         @Override
@@ -1197,10 +1195,6 @@ public class CCNCFunctions {
 
         public DeploymentId getDeploymentId() {
             return deploymentId;
-        }
-
-        public boolean isExtractFromArchive() {
-            return extractFromArchive;
         }
     }
 
@@ -1438,12 +1432,12 @@ public class CCNCFunctions {
         }
 
         @Override
-        public Object deserializeObject(ByteBuffer buffer, int length) throws Exception {
+        public Object deserializeObject(ByteBuffer buffer, int length, byte flag) throws Exception {
             if (length < FID_CODE_SIZE) {
                 throw new IllegalStateException("Message size too small: " + length);
             }
             byte fid = buffer.get();
-            return deserialize(fid, buffer, length - FID_CODE_SIZE);
+            return deserialize(fid, buffer, length - FID_CODE_SIZE, flag);
         }
 
         @Override
@@ -1455,7 +1449,7 @@ public class CCNCFunctions {
             if (fid != FunctionId.OTHER.ordinal()) {
                 throw new IllegalStateException("Expected FID for OTHER, found: " + fid);
             }
-            return (Exception) deserialize(fid, buffer, length - FID_CODE_SIZE);
+            return (Exception) deserialize(fid, buffer, length - FID_CODE_SIZE, Message.ERROR);
         }
 
         @Override
@@ -1522,7 +1516,7 @@ public class CCNCFunctions {
             JavaSerializationBasedPayloadSerializerDeserializer.serialize(out, object);
         }
 
-        private Object deserialize(byte fid, ByteBuffer buffer, int length) throws Exception {
+        private Object deserialize(byte fid, ByteBuffer buffer, int length, byte flag) throws Exception {
             switch (FunctionId.values()[fid]) {
                 case REGISTER_PARTITION_PROVIDER:
                     return RegisterPartitionProviderFunction.deserialize(buffer, length);
@@ -1549,7 +1543,7 @@ public class CCNCFunctions {
                     return CleanupJobletFunction.deserialize(buffer, length);
             }
 
-            return javaSerde.deserializeObject(buffer, length);
+            return javaSerde.deserializeObject(buffer, length, flag);
         }
     }
 

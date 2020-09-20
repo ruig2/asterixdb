@@ -83,33 +83,34 @@ public class LSMPrimaryUpsertOperatorNodePushable extends LSMIndexInsertUpdateDe
     private static final Logger LOGGER = LogManager.getLogger();
     private static final ThreadLocal<DateFormat> DATE_FORMAT =
             ThreadLocal.withInitial(() -> new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS"));
-    private final PermutingFrameTupleReference key;
+    protected final PermutingFrameTupleReference key;
     private MultiComparator keySearchCmp;
     private ArrayTupleBuilder missingTupleBuilder;
     private final IMissingWriter missingWriter;
-    private ArrayTupleBuilder tb;
+    protected ArrayTupleBuilder tb;
     private DataOutput dos;
-    private RangePredicate searchPred;
-    private IIndexCursor cursor;
-    private ITupleReference prevTuple;
-    private final int numOfPrimaryKeys;
-    boolean isFiltered = false;
+    protected RangePredicate searchPred;
+    protected IIndexCursor cursor;
+    protected ITupleReference prevTuple;
+    protected final int numOfPrimaryKeys;
+    protected boolean isFiltered = false;
     private final ArrayTupleReference prevTupleWithFilter = new ArrayTupleReference();
     private ArrayTupleBuilder prevRecWithPKWithFilterValue;
-    private ARecordType recordType;
+    private Integer filterSourceIndicator = null;
+    private ARecordType filterItemType;
     private int presetFieldIndex = -1;
     private ARecordPointable recPointable;
     private DataOutput prevDos;
     private final boolean hasMeta;
     private final int filterFieldIndex;
     private final int metaFieldIndex;
-    private LockThenSearchOperationCallback searchCallback;
-    private IFrameOperationCallback frameOpCallback;
+    protected LockThenSearchOperationCallback searchCallback;
+    protected IFrameOperationCallback frameOpCallback;
     private final IFrameOperationCallbackFactory frameOpCallbackFactory;
-    private AbstractIndexModificationOperationCallback abstractModCallback;
+    protected AbstractIndexModificationOperationCallback abstractModCallback;
     private final ISearchOperationCallbackFactory searchCallbackFactory;
     private final IFrameTupleProcessor processor;
-    private LSMTreeIndexAccessor lsmAccessor;
+    protected LSMTreeIndexAccessor lsmAccessor;
     private final ITracer tracer;
     private final long traceCategory;
     private long lastRecordInTimeStamp = 0L;
@@ -117,8 +118,8 @@ public class LSMPrimaryUpsertOperatorNodePushable extends LSMIndexInsertUpdateDe
     public LSMPrimaryUpsertOperatorNodePushable(IHyracksTaskContext ctx, int partition,
             IIndexDataflowHelperFactory indexHelperFactory, int[] fieldPermutation, RecordDescriptor inputRecDesc,
             IModificationOperationCallbackFactory modCallbackFactory,
-            ISearchOperationCallbackFactory searchCallbackFactory, int numOfPrimaryKeys, ARecordType recordType,
-            int filterFieldIndex, IFrameOperationCallbackFactory frameOpCallbackFactory,
+            ISearchOperationCallbackFactory searchCallbackFactory, int numOfPrimaryKeys, Integer filterSourceIndicator,
+            ARecordType filterItemType, int filterFieldIndex, IFrameOperationCallbackFactory frameOpCallbackFactory,
             IMissingWriterFactory missingWriterFactory, final boolean hasSecondaries) throws HyracksDataException {
         super(ctx, partition, indexHelperFactory, fieldPermutation, inputRecDesc, IndexOperation.UPSERT,
                 modCallbackFactory, null);
@@ -138,13 +139,25 @@ public class LSMPrimaryUpsertOperatorNodePushable extends LSMIndexInsertUpdateDe
         this.filterFieldIndex = numOfPrimaryKeys + (hasMeta ? 2 : 1);
         if (filterFieldIndex >= 0) {
             isFiltered = true;
-            this.recordType = recordType;
+            this.filterItemType = filterItemType;
             this.presetFieldIndex = filterFieldIndex;
+            this.filterSourceIndicator = filterSourceIndicator;
             this.recPointable = ARecordPointable.FACTORY.createPointable();
             this.prevRecWithPKWithFilterValue = new ArrayTupleBuilder(fieldPermutation.length + (hasMeta ? 1 : 0));
             this.prevDos = prevRecWithPKWithFilterValue.getDataOutput();
         }
-        processor = new IFrameTupleProcessor() {
+        processor = createTupleProcessor(hasSecondaries);
+        tracer = ctx.getJobletContext().getServiceContext().getTracer();
+        traceCategory = tracer.getRegistry().get(TraceUtils.LATENCY);
+    }
+
+    protected void beforeModification(ITupleReference tuple) {
+        // this is used for extensions to modify tuples before persistence
+        // do nothing in the master branch
+    }
+
+    protected IFrameTupleProcessor createTupleProcessor(final boolean hasSecondaries) {
+        return new IFrameTupleProcessor() {
             @Override
             public void process(ITupleReference tuple, int index) throws HyracksDataException {
                 try {
@@ -176,6 +189,7 @@ public class LSMPrimaryUpsertOperatorNodePushable extends LSMIndexInsertUpdateDe
                         appendUpsertIndicator(!isDelete);
                         appendPreviousTupleAsMissing();
                     }
+                    beforeModification(tuple);
                     if (isDelete && prevTuple != null) {
                         // Only delete if it is a delete and not upsert
                         // And previous tuple with the same key was found
@@ -213,8 +227,6 @@ public class LSMPrimaryUpsertOperatorNodePushable extends LSMIndexInsertUpdateDe
                 frameOpCallback.fail(th);
             }
         };
-        tracer = ctx.getJobletContext().getServiceContext().getTracer();
-        traceCategory = tracer.getRegistry().get(TraceUtils.LATENCY);
     }
 
     // we have the permutation which has [pk locations, record location, optional:filter-location]
@@ -285,12 +297,12 @@ public class LSMPrimaryUpsertOperatorNodePushable extends LSMIndexInsertUpdateDe
         }
     }
 
-    private void resetSearchPredicate(int tupleIndex) {
+    protected void resetSearchPredicate(int tupleIndex) {
         key.reset(accessor, tupleIndex);
         searchPred.reset(key, key, true, true, keySearchCmp, keySearchCmp);
     }
 
-    private void writeOutput(int tupleIndex, boolean recordWasInserted, boolean recordWasDeleted) throws IOException {
+    protected void writeOutput(int tupleIndex, boolean recordWasInserted, boolean recordWasDeleted) throws IOException {
         if (recordWasInserted || recordWasDeleted) {
             frameTuple.reset(accessor, tupleIndex);
             for (int i = 0; i < frameTuple.getFieldCount(); i++) {
@@ -307,7 +319,7 @@ public class LSMPrimaryUpsertOperatorNodePushable extends LSMIndexInsertUpdateDe
         }
     }
 
-    private static boolean isDeleteOperation(ITupleReference t1, int field) {
+    protected static boolean isDeleteOperation(ITupleReference t1, int field) {
         return TypeTagUtil.isType(t1, field, ATypeTag.SERIALIZED_MISSING_TYPE_TAG);
     }
 
@@ -326,7 +338,7 @@ public class LSMPrimaryUpsertOperatorNodePushable extends LSMIndexInsertUpdateDe
         }
     }
 
-    private void appendFilterToOutput() throws IOException {
+    protected void appendFilterToOutput() throws IOException {
         // if with filters, append the filter
         if (isFiltered) {
             dos.write(prevTuple.getFieldData(filterFieldIndex), prevTuple.getFieldStart(filterFieldIndex),
@@ -335,18 +347,18 @@ public class LSMPrimaryUpsertOperatorNodePushable extends LSMIndexInsertUpdateDe
         }
     }
 
-    private void appendUpsertIndicator(boolean isUpsert) throws IOException {
+    protected void appendUpsertIndicator(boolean isUpsert) throws IOException {
         recordDesc.getFields()[0].serialize(isUpsert ? ABoolean.TRUE : ABoolean.FALSE, dos);
         tb.addFieldEndOffset();
     }
 
-    private void appendPrevRecord() throws IOException {
+    protected void appendPrevRecord() throws IOException {
         dos.write(prevTuple.getFieldData(numOfPrimaryKeys), prevTuple.getFieldStart(numOfPrimaryKeys),
                 prevTuple.getFieldLength(numOfPrimaryKeys));
         tb.addFieldEndOffset();
     }
 
-    private void appendPreviousMeta() throws IOException {
+    protected void appendPreviousMeta() throws IOException {
         // if has meta, then append meta
         if (hasMeta) {
             dos.write(prevTuple.getFieldData(metaFieldIndex), prevTuple.getFieldStart(metaFieldIndex),
@@ -355,7 +367,7 @@ public class LSMPrimaryUpsertOperatorNodePushable extends LSMIndexInsertUpdateDe
         }
     }
 
-    private void appendPreviousTupleAsMissing() throws IOException {
+    protected void appendPreviousTupleAsMissing() throws IOException {
         prevTuple = null;
         writeMissingField();
         if (hasMeta) {
@@ -376,20 +388,27 @@ public class LSMPrimaryUpsertOperatorNodePushable extends LSMIndexInsertUpdateDe
         appender.write(writer, true);
     }
 
-    private void appendFilterToPrevTuple() throws IOException {
+    protected void appendFilterToPrevTuple() throws IOException {
         if (isFiltered) {
             prevRecWithPKWithFilterValue.reset();
             for (int i = 0; i < prevTuple.getFieldCount(); i++) {
                 prevDos.write(prevTuple.getFieldData(i), prevTuple.getFieldStart(i), prevTuple.getFieldLength(i));
                 prevRecWithPKWithFilterValue.addFieldEndOffset();
             }
-            recPointable.set(prevTuple.getFieldData(numOfPrimaryKeys), prevTuple.getFieldStart(numOfPrimaryKeys),
-                    prevTuple.getFieldLength(numOfPrimaryKeys));
+
+            if (filterSourceIndicator == 0) {
+                recPointable.set(prevTuple.getFieldData(numOfPrimaryKeys), prevTuple.getFieldStart(numOfPrimaryKeys),
+                        prevTuple.getFieldLength(numOfPrimaryKeys));
+            } else {
+                recPointable.set(prevTuple.getFieldData(metaFieldIndex), prevTuple.getFieldStart(metaFieldIndex),
+                        prevTuple.getFieldLength(metaFieldIndex));
+            }
             // copy the field data from prevTuple
-            byte tag = recPointable.getClosedFieldType(recordType, presetFieldIndex).getTypeTag().serialize();
+            byte tag = recPointable.getClosedFieldType(filterItemType, presetFieldIndex).getTypeTag().serialize();
             prevDos.write(tag);
-            prevDos.write(recPointable.getByteArray(), recPointable.getClosedFieldOffset(recordType, presetFieldIndex),
-                    recPointable.getClosedFieldSize(recordType, presetFieldIndex));
+            prevDos.write(recPointable.getByteArray(),
+                    recPointable.getClosedFieldOffset(filterItemType, presetFieldIndex),
+                    recPointable.getClosedFieldSize(filterItemType, presetFieldIndex));
             prevRecWithPKWithFilterValue.addFieldEndOffset();
             // prepare the tuple
             prevTupleWithFilter.reset(prevRecWithPKWithFilterValue.getFieldEndOffsets(),

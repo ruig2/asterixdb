@@ -128,7 +128,7 @@ public class CheckSql92AggregateVisitor extends AbstractSqlppQueryExpressionVisi
             return true;
         }
 
-        if (!ia.isAny() && ia.getIndexExpr().accept(this, parentSelectBlock)) {
+        if (ia.getIndexExpr() != null && ia.getIndexExpr().accept(this, parentSelectBlock)) {
             return true;
         }
 
@@ -186,6 +186,9 @@ public class CheckSql92AggregateVisitor extends AbstractSqlppQueryExpressionVisi
             if (parameter.accept(this, parentSelectBlock)) {
                 return true;
             }
+        }
+        if (pf.hasAggregateFilterExpr() && pf.getAggregateFilterExpr().accept(this, parentSelectBlock)) {
+            return true;
         }
         return false;
     }
@@ -307,6 +310,7 @@ public class CheckSql92AggregateVisitor extends AbstractSqlppQueryExpressionVisi
                 || (winExpr.hasFrameStartExpr() && winExpr.getFrameStartExpr().accept(this, arg))
                 || (winExpr.hasFrameEndExpr() && winExpr.getFrameEndExpr().accept(this, arg))
                 || (winExpr.hasWindowFieldList() && visitFieldList(winExpr.getWindowFieldList(), arg))
+                || (winExpr.hasAggregateFilterExpr() && winExpr.getAggregateFilterExpr().accept(this, arg))
                 || visitExprList(winExpr.getExprList(), arg);
     }
 

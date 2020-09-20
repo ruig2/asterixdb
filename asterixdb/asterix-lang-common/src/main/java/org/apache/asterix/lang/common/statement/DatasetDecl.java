@@ -26,6 +26,7 @@ import org.apache.asterix.common.metadata.DataverseName;
 import org.apache.asterix.lang.common.base.AbstractStatement;
 import org.apache.asterix.lang.common.base.Statement;
 import org.apache.asterix.lang.common.expression.RecordConstructor;
+import org.apache.asterix.lang.common.expression.TypeExpression;
 import org.apache.asterix.lang.common.struct.Identifier;
 import org.apache.asterix.lang.common.util.ConfigurationUtil;
 import org.apache.asterix.lang.common.util.DatasetDeclParametersUtil;
@@ -37,30 +38,23 @@ import org.apache.asterix.runtime.compression.CompressionManager;
 public class DatasetDecl extends AbstractStatement {
     protected final Identifier name;
     protected final DataverseName dataverse;
-    protected final DataverseName itemTypeDataverse;
-    protected final Identifier itemTypeName;
-    protected final DataverseName metaItemTypeDataverse;
-    protected final Identifier metaItemTypeName;
-    protected final Identifier nodegroupName;
+    protected final TypeExpression itemType;
+    protected final TypeExpression metaItemType;
     protected final DatasetType datasetType;
     protected final IDatasetDetailsDecl datasetDetailsDecl;
     protected final Map<String, String> hints;
-    private final AdmObjectNode withObjectNode;
+    private AdmObjectNode withObjectNode;
     protected final boolean ifNotExists;
 
-    public DatasetDecl(DataverseName dataverse, Identifier name, DataverseName itemTypeDataverse,
-            Identifier itemTypeName, DataverseName metaItemTypeDataverse, Identifier metaItemTypeName,
-            Identifier nodeGroupName, Map<String, String> hints, DatasetType datasetType, IDatasetDetailsDecl idd,
-            RecordConstructor withRecord, boolean ifNotExists) throws CompilationException {
+    public DatasetDecl(DataverseName dataverse, Identifier name, TypeExpression itemType, TypeExpression metaItemType,
+            Map<String, String> hints, DatasetType datasetType, IDatasetDetailsDecl idd, RecordConstructor withRecord,
+            boolean ifNotExists) throws CompilationException {
         this.dataverse = dataverse;
         this.name = name;
-        this.itemTypeName = itemTypeName;
-        this.itemTypeDataverse = itemTypeDataverse == null ? dataverse : itemTypeDataverse;
-        this.metaItemTypeName = metaItemTypeName;
-        this.metaItemTypeDataverse = metaItemTypeDataverse == null ? dataverse : metaItemTypeDataverse;
-        this.nodegroupName = nodeGroupName;
+        this.itemType = itemType;
+        this.metaItemType = metaItemType;
         this.hints = hints;
-        this.withObjectNode = DatasetDeclParametersUtil.validateAndGetWithObjectNode(withRecord);
+        this.withObjectNode = DatasetDeclParametersUtil.validateAndGetWithObjectNode(withRecord, datasetType);
         this.ifNotExists = ifNotExists;
         this.datasetType = datasetType;
         this.datasetDetailsDecl = idd;
@@ -82,24 +76,20 @@ public class DatasetDecl extends AbstractStatement {
         return dataverse;
     }
 
-    public Identifier getItemTypeName() {
-        return itemTypeName;
+    public TypeExpression getItemType() {
+        return itemType;
     }
 
-    public DataverseName getItemTypeDataverse() {
-        return itemTypeDataverse;
+    public TypeExpression getMetaItemType() {
+        return metaItemType;
     }
 
-    public Identifier getMetaItemTypeName() {
-        return metaItemTypeName;
-    }
-
-    public DataverseName getMetaItemTypeDataverse() {
-        return metaItemTypeDataverse;
-    }
-
-    public Identifier getNodegroupName() {
-        return nodegroupName;
+    public String getNodegroupName() {
+        AdmObjectNode nodeGroupObj = (AdmObjectNode) withObjectNode.get(DatasetDeclParametersUtil.NODE_GROUP_NAME);
+        if (nodeGroupObj == null) {
+            return null;
+        }
+        return nodeGroupObj.getOptionalString(DatasetDeclParametersUtil.NODE_GROUP_NAME_PARAMETER_NAME);
     }
 
     private AdmObjectNode getMergePolicyObject() {
