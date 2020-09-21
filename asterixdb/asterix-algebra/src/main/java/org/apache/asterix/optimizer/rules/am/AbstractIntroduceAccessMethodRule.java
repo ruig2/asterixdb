@@ -272,19 +272,13 @@ public abstract class AbstractIntroduceAccessMethodRule implements IAlgebraicRew
 
     private boolean isFullTextFuncAndConfigDiffersFromExpected(AccessMethodAnalysisContext analysisCtx,
             String indexFullTextConfig) {
-        try {
-            // What if more than 1 func expr? Is it possible in ftcontains()?
-            IOptimizableFuncExpr expr = analysisCtx.getMatchedFuncExpr(0);
-            if (FullTextUtil.isFullTextFunctionExpr(expr)) {
-                String expectedConfig = FullTextUtil.getFullTextConfigNameFromExpr(expr);
-                if (expectedConfig.equalsIgnoreCase(indexFullTextConfig) == false) {
-                    return true;
-                }
+        // What if more than 1 func expr? Is it possible in ftcontains()?
+        IOptimizableFuncExpr expr = analysisCtx.getMatchedFuncExpr(0);
+        if (FullTextUtil.isFullTextFunctionExpr(expr)) {
+            String expectedConfig = FullTextUtil.getFullTextConfigNameFromExpr(expr);
+            if (expectedConfig.equalsIgnoreCase(indexFullTextConfig) == false) {
+                return true;
             }
-        } catch (Exception e) {
-            LOGGER.info("Unexpected behavior when checking full-text config", e);
-            // If something wrong, skip this index and do a full-scan
-            return true;
         }
         return false;
     }
