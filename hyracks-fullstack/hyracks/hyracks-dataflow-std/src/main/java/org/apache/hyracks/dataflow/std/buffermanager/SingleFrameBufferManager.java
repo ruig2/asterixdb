@@ -56,7 +56,7 @@ public class SingleFrameBufferManager implements ISimpleFrameBufferManager {
 
     @Override
     public void releaseFrame(ByteBuffer frame) {
-        isAcquired = false;
         buffer.clear();
+        isAcquired = false;
     }
 }
