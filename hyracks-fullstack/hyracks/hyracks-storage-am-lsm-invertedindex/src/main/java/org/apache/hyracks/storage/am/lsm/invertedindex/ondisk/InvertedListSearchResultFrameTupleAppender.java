@@ -23,7 +23,7 @@ import java.nio.ByteBuffer;
 import java.util.Arrays;
 
 import org.apache.hyracks.api.comm.FrameHelper;
-import org.apache.hyracks.storage.am.lsm.invertedindex.api.IInvertedListFrameTupleAppender;
+import org.apache.hyracks.storage.am.lsm.invertedindex.api.IInvertedListSearchResultFrameTupleAppender;
 
 /**
  * This class is mainly to write the intermediate results in the inverted-index **search** operation.
@@ -37,7 +37,7 @@ import org.apache.hyracks.storage.am.lsm.invertedindex.api.IInvertedListFrameTup
  * Note that this appender is not aware of the tuple element type, and the length of the tuple is given by the caller
  * at run time.
  */
-public class InvertedListFrameTupleAppender implements IInvertedListFrameTupleAppender {
+public class InvertedListSearchResultFrameTupleAppender implements IInvertedListSearchResultFrameTupleAppender {
 
     // At the end of a frame, an integer value is written to keep the tuple count in this frame.
     public static final int TUPLE_COUNT_SIZE = 4;
@@ -50,7 +50,7 @@ public class InvertedListFrameTupleAppender implements IInvertedListFrameTupleAp
     private int tupleCount;
     private int tupleDataEndOffset;
 
-    public InvertedListFrameTupleAppender(int frameSize) {
+    public InvertedListSearchResultFrameTupleAppender(int frameSize) {
         this.frameSize = frameSize;
     }
 

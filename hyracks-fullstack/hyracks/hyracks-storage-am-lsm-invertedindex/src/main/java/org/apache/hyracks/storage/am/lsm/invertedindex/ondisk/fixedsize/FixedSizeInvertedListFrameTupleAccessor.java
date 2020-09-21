@@ -21,7 +21,7 @@ package org.apache.hyracks.storage.am.lsm.invertedindex.ondisk.fixedsize;
 
 import org.apache.hyracks.api.dataflow.value.ITypeTraits;
 import org.apache.hyracks.storage.am.lsm.invertedindex.ondisk.AbstractInvertedListFrameTupleAccessor;
-import org.apache.hyracks.storage.am.lsm.invertedindex.ondisk.InvertedListFrameTupleAppender;
+import org.apache.hyracks.storage.am.lsm.invertedindex.ondisk.InvertedListSearchResultFrameTupleAppender;
 import org.apache.hyracks.storage.am.lsm.invertedindex.util.InvertedIndexUtils;
 
 /**
@@ -89,7 +89,7 @@ public class FixedSizeInvertedListFrameTupleAccessor extends AbstractInvertedLis
 
     @Override
     public int getTupleStartOffset(int tupleIndex) {
-        return InvertedListFrameTupleAppender.MINFRAME_COUNT_SIZE + tupleIndex * tupleSize;
+        return InvertedListSearchResultFrameTupleAppender.MINFRAME_COUNT_SIZE + tupleIndex * tupleSize;
     }
 
     @Override

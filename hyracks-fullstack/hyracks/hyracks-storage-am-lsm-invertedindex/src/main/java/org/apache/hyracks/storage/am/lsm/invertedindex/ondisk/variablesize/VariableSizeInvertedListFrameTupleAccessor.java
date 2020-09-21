@@ -26,7 +26,7 @@ import org.apache.hyracks.storage.am.common.api.ITreeIndexTupleWriter;
 import org.apache.hyracks.storage.am.common.tuples.TypeAwareTupleWriter;
 import org.apache.hyracks.storage.am.lsm.invertedindex.api.IInvertedListTupleReference;
 import org.apache.hyracks.storage.am.lsm.invertedindex.ondisk.AbstractInvertedListFrameTupleAccessor;
-import org.apache.hyracks.storage.am.lsm.invertedindex.ondisk.InvertedListFrameTupleAppender;
+import org.apache.hyracks.storage.am.lsm.invertedindex.ondisk.InvertedListSearchResultFrameTupleAppender;
 import org.apache.hyracks.storage.am.lsm.invertedindex.util.InvertedIndexUtils;
 
 /**
@@ -77,7 +77,7 @@ public class VariableSizeInvertedListFrameTupleAccessor extends AbstractInverted
         tupleStartOffsets = new int[tupleCount];
 
         if (tupleCount > 0) {
-            int startOff = InvertedListFrameTupleAppender.MINFRAME_COUNT_SIZE;
+            int startOff = InvertedListSearchResultFrameTupleAppender.MINFRAME_COUNT_SIZE;
             int pos = startOff;
             tupleStartOffsets[0] = 0;
             int firstTupleLen = getTupleLengthAtPos(pos);
@@ -97,17 +97,18 @@ public class VariableSizeInvertedListFrameTupleAccessor extends AbstractInverted
 
     @Override
     public int getTupleStartOffset(int tupleIndex) {
-        return InvertedListFrameTupleAppender.MINFRAME_COUNT_SIZE + tupleStartOffsets[tupleIndex];
+        return InvertedListSearchResultFrameTupleAppender.MINFRAME_COUNT_SIZE + tupleStartOffsets[tupleIndex];
     }
 
     @Override
     public int getTupleEndOffset(int tupleIndex) {
         if (tupleIndex == fields.length - 1) {
-            return InvertedListFrameTupleAppender.MINFRAME_COUNT_SIZE + tupleStartOffsets[tupleIndex] + lastTupleLen;
+            return InvertedListSearchResultFrameTupleAppender.MINFRAME_COUNT_SIZE + tupleStartOffsets[tupleIndex]
+                    + lastTupleLen;
         } else if (tupleIndex < 0) {
-            return InvertedListFrameTupleAppender.MINFRAME_COUNT_SIZE;
+            return InvertedListSearchResultFrameTupleAppender.MINFRAME_COUNT_SIZE;
         }
-        return InvertedListFrameTupleAppender.MINFRAME_COUNT_SIZE + tupleStartOffsets[tupleIndex + 1];
+        return InvertedListSearchResultFrameTupleAppender.MINFRAME_COUNT_SIZE + tupleStartOffsets[tupleIndex + 1];
     }
 
     @Override

@@ -49,7 +49,7 @@ public class InvertedListTupleFrameTupleTest {
         ITypeTraits[] fields = new ITypeTraits[1];
         fields[0] = IntegerPointable.TYPE_TRAITS;
 
-        InvertedListFrameTupleAppender ftapp = new InvertedListFrameTupleAppender(FRAME_SIZE);
+        InvertedListSearchResultFrameTupleAppender ftapp = new InvertedListSearchResultFrameTupleAppender(FRAME_SIZE);
         FixedSizeInvertedListFrameTupleAccessor ftacc = new FixedSizeInvertedListFrameTupleAccessor(FRAME_SIZE, fields);
 
         boolean frameHasSpace = true;

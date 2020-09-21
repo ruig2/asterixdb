@@ -21,7 +21,7 @@ package org.apache.hyracks.storage.am.lsm.invertedindex.api;
 
 import java.nio.ByteBuffer;
 
-public interface IInvertedListFrameTupleAppender {
+public interface IInvertedListSearchResultFrameTupleAppender {
 
     public void reset(ByteBuffer buffer);
 
