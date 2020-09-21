@@ -36,9 +36,11 @@ import org.apache.hyracks.storage.common.IIndexCursor;
 public class TOccurrenceSearcher extends AbstractTOccurrenceSearcher {
 
     protected final ArrayList<IInvertedListCursor> invListCursors = new ArrayList<>();
+    protected InvertedListCursorFactory invertedListCursorFactory;
 
     public TOccurrenceSearcher(IInPlaceInvertedIndex invIndex, IHyracksTaskContext ctx) throws HyracksDataException {
         super(invIndex, ctx);
+        invertedListCursorFactory = new InvertedListCursorFactory(invIndex, ctx);
     }
 
     @Override
@@ -52,7 +54,7 @@ public class TOccurrenceSearcher extends AbstractTOccurrenceSearcher {
         invListCursorCache.reset();
         for (int i = 0; i < numQueryTokens; i++) {
             searchKey.reset(queryTokenAppender, i);
-            IInvertedListCursor invListCursor = new InvertedListCursorFactory(invIndex, ctx).create();
+            IInvertedListCursor invListCursor = invertedListCursorFactory.create();
             invIndex.openInvertedListCursor(invListCursor, searchKey, ictx);
             invListCursors.add(invListCursor);
         }
