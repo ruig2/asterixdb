@@ -387,6 +387,19 @@ public class InvertedIndexSearchResult {
 
         boolean allBufferAllocated = true;
         while (buffers.size() < numExpectedPages) {
+            // Currently, the buffers (optional, needs multiple pages, for in-memory mode)
+            // and the ioBuffer (must-have, needs one page only, for disk IO, related code is in the above prepareIOBuffer())
+            // are both acquired from the same bufferManager.
+            // It may be possible that one search result acquires all the frame for its in-memory usage,
+            // and then the next search result cannot even get one frame for its disk IO usage.
+            // In this case, the second search result will exit with an out-of-memory error.
+            //
+            // To avoid the above issue, maybe we need to create **two** buffer managers, one to manage in-memory frame usage,
+            // and the other to manage on-disk frame usage to guarantee that every search result has at least one disk IO frame.
+            // Or, to make things simpler, we can let the search result manage its own disk IO frame,
+            // i.e. create the frame on its own rather than acquire from the buffer manager.
+            // In this case, we cannot reuse frames, but each search result needs only one IO frame,
+            // and the number of search result is pretty limited (e.g. one result per query keyword).
             ByteBuffer tmpBuffer = bufferManager.acquireFrame(ctx.getInitialFrameSize());
             if (tmpBuffer == null) {
                 // Budget exhausted

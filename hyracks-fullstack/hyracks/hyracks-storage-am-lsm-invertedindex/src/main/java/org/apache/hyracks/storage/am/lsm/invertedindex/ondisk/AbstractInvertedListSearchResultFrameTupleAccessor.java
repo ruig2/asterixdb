@@ -33,7 +33,7 @@ import org.apache.hyracks.api.dataflow.value.ITypeTraits;
  * The tuples can be fixed-size or variable-size.
  * This class is mainly used to merge two inverted lists, e.g. searching the conjunction of two keywords "abc" AND "xyz"
  */
-public abstract class AbstractInvertedListFrameTupleAccessor implements IFrameTupleAccessor {
+public abstract class AbstractInvertedListSearchResultFrameTupleAccessor implements IFrameTupleAccessor {
 
     protected final int frameSize;
     protected ByteBuffer buffer;
@@ -42,7 +42,7 @@ public abstract class AbstractInvertedListFrameTupleAccessor implements IFrameTu
 
     protected abstract void verifyTypeTraits();
 
-    public AbstractInvertedListFrameTupleAccessor(int frameSize, ITypeTraits[] fields) {
+    public AbstractInvertedListSearchResultFrameTupleAccessor(int frameSize, ITypeTraits[] fields) {
         this.frameSize = frameSize;
         this.fields = fields;
 

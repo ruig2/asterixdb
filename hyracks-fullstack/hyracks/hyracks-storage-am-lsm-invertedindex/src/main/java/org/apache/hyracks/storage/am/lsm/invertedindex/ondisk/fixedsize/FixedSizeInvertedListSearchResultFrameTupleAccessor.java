@@ -20,7 +20,7 @@
 package org.apache.hyracks.storage.am.lsm.invertedindex.ondisk.fixedsize;
 
 import org.apache.hyracks.api.dataflow.value.ITypeTraits;
-import org.apache.hyracks.storage.am.lsm.invertedindex.ondisk.AbstractInvertedListFrameTupleAccessor;
+import org.apache.hyracks.storage.am.lsm.invertedindex.ondisk.AbstractInvertedListSearchResultFrameTupleAccessor;
 import org.apache.hyracks.storage.am.lsm.invertedindex.ondisk.InvertedListSearchResultFrameTupleAppender;
 import org.apache.hyracks.storage.am.lsm.invertedindex.util.InvertedIndexUtils;
 
@@ -29,12 +29,12 @@ import org.apache.hyracks.storage.am.lsm.invertedindex.util.InvertedIndexUtils;
  * The frame structure: [4 bytes for minimum Hyracks frame count] [fixed-size tuple 1] ... [fixed-size tuple n] ...
  * [4 bytes for the tuple count in a frame]
  */
-public class FixedSizeInvertedListFrameTupleAccessor extends AbstractInvertedListFrameTupleAccessor {
+public class FixedSizeInvertedListSearchResultFrameTupleAccessor extends AbstractInvertedListSearchResultFrameTupleAccessor {
 
     private final int tupleSize;
     private final int[] fieldStartOffsets;
 
-    public FixedSizeInvertedListFrameTupleAccessor(int frameSize, ITypeTraits[] fields) {
+    public FixedSizeInvertedListSearchResultFrameTupleAccessor(int frameSize, ITypeTraits[] fields) {
         super(frameSize, fields);
 
         this.fieldStartOffsets = new int[fields.length];

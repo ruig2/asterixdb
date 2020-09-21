@@ -63,9 +63,9 @@ import org.apache.hyracks.storage.am.lsm.invertedindex.ondisk.OnDiskInvertedInde
 import org.apache.hyracks.storage.am.lsm.invertedindex.ondisk.PartitionedOnDiskInvertedIndex;
 import org.apache.hyracks.storage.am.lsm.invertedindex.ondisk.PartitionedOnDiskInvertedIndexFactory;
 import org.apache.hyracks.storage.am.lsm.invertedindex.ondisk.fixedsize.FixedSizeElementInvertedListBuilder;
-import org.apache.hyracks.storage.am.lsm.invertedindex.ondisk.fixedsize.FixedSizeInvertedListFrameTupleAccessor;
+import org.apache.hyracks.storage.am.lsm.invertedindex.ondisk.fixedsize.FixedSizeInvertedListSearchResultFrameTupleAccessor;
 import org.apache.hyracks.storage.am.lsm.invertedindex.ondisk.fixedsize.FixedSizeInvertedListTupleReference;
-import org.apache.hyracks.storage.am.lsm.invertedindex.ondisk.variablesize.VariableSizeInvertedListFrameTupleAccessor;
+import org.apache.hyracks.storage.am.lsm.invertedindex.ondisk.variablesize.VariableSizeInvertedListSearchResultFrameTupleAccessor;
 import org.apache.hyracks.storage.am.lsm.invertedindex.ondisk.variablesize.VariableSizeInvertedListTupleReference;
 import org.apache.hyracks.storage.am.lsm.invertedindex.tokenizers.IBinaryTokenizerFactory;
 import org.apache.hyracks.storage.common.buffercache.IBufferCache;
@@ -263,9 +263,9 @@ public class InvertedIndexUtils {
 
     public static IFrameTupleAccessor createInvertedListFrameTupleAccessor(int frameSize, ITypeTraits[] typeTraits) {
         if (checkTypeTraitsAllFixed(typeTraits)) {
-            return new FixedSizeInvertedListFrameTupleAccessor(frameSize, typeTraits);
+            return new FixedSizeInvertedListSearchResultFrameTupleAccessor(frameSize, typeTraits);
         } else {
-            return new VariableSizeInvertedListFrameTupleAccessor(frameSize, typeTraits);
+            return new VariableSizeInvertedListSearchResultFrameTupleAccessor(frameSize, typeTraits);
         }
     }
 

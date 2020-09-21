@@ -25,7 +25,7 @@ import org.apache.hyracks.api.dataflow.value.ITypeTraits;
 import org.apache.hyracks.storage.am.common.api.ITreeIndexTupleWriter;
 import org.apache.hyracks.storage.am.common.tuples.TypeAwareTupleWriter;
 import org.apache.hyracks.storage.am.lsm.invertedindex.api.IInvertedListTupleReference;
-import org.apache.hyracks.storage.am.lsm.invertedindex.ondisk.AbstractInvertedListFrameTupleAccessor;
+import org.apache.hyracks.storage.am.lsm.invertedindex.ondisk.AbstractInvertedListSearchResultFrameTupleAccessor;
 import org.apache.hyracks.storage.am.lsm.invertedindex.ondisk.InvertedListSearchResultFrameTupleAppender;
 import org.apache.hyracks.storage.am.lsm.invertedindex.util.InvertedIndexUtils;
 
@@ -40,7 +40,7 @@ import org.apache.hyracks.storage.am.lsm.invertedindex.util.InvertedIndexUtils;
  * i.e. supports iteration instead of random access to the tuples
  * because the in-page tuple offsets are not available (not stored on disk) until we scan the tuples one by one
  */
-public class VariableSizeInvertedListFrameTupleAccessor extends AbstractInvertedListFrameTupleAccessor {
+public class VariableSizeInvertedListSearchResultFrameTupleAccessor extends AbstractInvertedListSearchResultFrameTupleAccessor {
     // ToDo: use a scanner model to read tuples one by one.
     // It is not necessary to support random access because it is used only when merging lists
     // In fact, now we need to scan the frame twice to get the tupleStartOffsets
@@ -52,7 +52,7 @@ public class VariableSizeInvertedListFrameTupleAccessor extends AbstractInverted
     private IInvertedListTupleReference tupleReference;
     private ITreeIndexTupleWriter tupleWriter;
 
-    public VariableSizeInvertedListFrameTupleAccessor(int frameSize, ITypeTraits[] fields) {
+    public VariableSizeInvertedListSearchResultFrameTupleAccessor(int frameSize, ITypeTraits[] fields) {
         super(frameSize, fields);
 
         this.tupleWriter = new TypeAwareTupleWriter(fields);
