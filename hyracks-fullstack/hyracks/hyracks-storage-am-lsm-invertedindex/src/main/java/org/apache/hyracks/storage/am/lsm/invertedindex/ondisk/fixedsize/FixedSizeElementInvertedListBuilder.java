@@ -21,10 +21,10 @@ package org.apache.hyracks.storage.am.lsm.invertedindex.ondisk.fixedsize;
 
 import org.apache.hyracks.api.dataflow.value.ITypeTraits;
 import org.apache.hyracks.dataflow.common.data.accessors.ITupleReference;
-import org.apache.hyracks.storage.am.lsm.invertedindex.ondisk.AbstracInvertedListBuilder;
+import org.apache.hyracks.storage.am.lsm.invertedindex.ondisk.AbstractInvertedListBuilder;
 import org.apache.hyracks.storage.am.lsm.invertedindex.util.InvertedIndexUtils;
 
-public class FixedSizeElementInvertedListBuilder extends AbstracInvertedListBuilder {
+public class FixedSizeElementInvertedListBuilder extends AbstractInvertedListBuilder {
     private final int listElementSize;
 
     public FixedSizeElementInvertedListBuilder(ITypeTraits[] invListFields) {
