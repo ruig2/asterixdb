@@ -25,13 +25,13 @@ import org.apache.hyracks.storage.am.lsm.invertedindex.api.IInvertedListBuilder;
 
 // ToDo: Intellij Idea doesn't allow me to rename it to AbstractInvertedListBuilder
 // Maybe this name is reserved for an Intellij Idea built-in class?
-public abstract class AbstractInvertedListBuilder implements IInvertedListBuilder {
+public abstract class AbstracInvertedListBuilder implements IInvertedListBuilder {
     protected byte[] targetBuf;
     protected int pos;
     protected ITypeTraits[] invListFields;
     protected int listSize = 0;
 
-    public AbstractInvertedListBuilder(ITypeTraits[] invListFields) {
+    public AbstracInvertedListBuilder(ITypeTraits[] invListFields) {
         this.invListFields = invListFields;
     }
 

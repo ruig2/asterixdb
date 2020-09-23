@@ -23,11 +23,12 @@ import org.apache.hyracks.api.dataflow.value.ITypeTraits;
 import org.apache.hyracks.dataflow.common.data.accessors.ITupleReference;
 import org.apache.hyracks.storage.am.common.api.ITreeIndexTupleWriter;
 import org.apache.hyracks.storage.am.common.tuples.TypeAwareTupleWriter;
+import org.apache.hyracks.storage.am.lsm.invertedindex.ondisk.AbstracInvertedListBuilder;
 import org.apache.hyracks.storage.am.lsm.invertedindex.util.InvertedIndexUtils;
 
 // The last 4 bytes in the frame is reserved for the end offset (exclusive) of the last record in the current frame
 // i.e. the trailing space after the last record and before the last 4 bytes will be treated as empty
-public class VariableSizeElementInvertedListBuilder extends AbstractInvertedListBuilder {
+public class VariableSizeElementInvertedListBuilder extends AbstracInvertedListBuilder {
     private ITreeIndexTupleWriter writer;
     protected final ITypeTraits[] allFields;
 
