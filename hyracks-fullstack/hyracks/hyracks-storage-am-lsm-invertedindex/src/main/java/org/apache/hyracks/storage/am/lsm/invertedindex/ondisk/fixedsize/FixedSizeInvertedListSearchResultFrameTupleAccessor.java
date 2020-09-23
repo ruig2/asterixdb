@@ -29,7 +29,8 @@ import org.apache.hyracks.storage.am.lsm.invertedindex.util.InvertedIndexUtils;
  * The frame structure: [4 bytes for minimum Hyracks frame count] [fixed-size tuple 1] ... [fixed-size tuple n] ...
  * [4 bytes for the tuple count in a frame]
  */
-public class FixedSizeInvertedListSearchResultFrameTupleAccessor extends AbstractInvertedListSearchResultFrameTupleAccessor {
+public class FixedSizeInvertedListSearchResultFrameTupleAccessor
+        extends AbstractInvertedListSearchResultFrameTupleAccessor {
 
     private final int tupleSize;
     private final int[] fieldStartOffsets;

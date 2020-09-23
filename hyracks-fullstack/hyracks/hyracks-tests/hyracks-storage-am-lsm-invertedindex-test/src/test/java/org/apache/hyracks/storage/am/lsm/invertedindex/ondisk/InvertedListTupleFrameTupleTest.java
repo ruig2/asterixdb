@@ -50,8 +50,8 @@ public class InvertedListTupleFrameTupleTest {
         fields[0] = IntegerPointable.TYPE_TRAITS;
 
         InvertedListSearchResultFrameTupleAppender ftapp = new InvertedListSearchResultFrameTupleAppender(FRAME_SIZE);
-        FixedSizeInvertedListSearchResultFrameTupleAccessor
-                ftacc = new FixedSizeInvertedListSearchResultFrameTupleAccessor(FRAME_SIZE, fields);
+        FixedSizeInvertedListSearchResultFrameTupleAccessor ftacc =
+                new FixedSizeInvertedListSearchResultFrameTupleAccessor(FRAME_SIZE, fields);
 
         boolean frameHasSpace = true;
 
