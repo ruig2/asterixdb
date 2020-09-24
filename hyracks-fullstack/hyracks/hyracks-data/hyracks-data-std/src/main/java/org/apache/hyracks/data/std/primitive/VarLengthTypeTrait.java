@@ -39,7 +39,12 @@ public class VarLengthTypeTrait implements ITypeTraits {
 
     @Override
     public int getFixedLength() {
-        throw new UnsupportedOperationException("try to get the fixed length of a variable length type trait");
+        // This method should never be called: here we are getting the fixed length of a variable length field
+        // A better way to handle this method is to throw an exception
+        // such as UnsupportedOperationException("try to get the fixed length of a variable length type trait"),
+        // however, since this method is somehow fundamental and pretty old, we want to keep it this way
+        // to avoid potential issues.
+        return 0;
     }
 
     @Override
