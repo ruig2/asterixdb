@@ -59,7 +59,8 @@ public class FixedSizeInvertedListSearchResultFrameTupleAccessor
         InvertedIndexUtils.verifyAllFixedSizeTypeTrait(fields);
 
         if (InvertedIndexUtils.checkTypeTraitsAllFixed(fields) == false) {
-            throw HyracksDataException.create(ErrorCode.INVALID_INVERTED_LIST_TYPE_TRAITS, InvertedIndexUtils.EXPECT_ALL_FIX_GET_VAR_SIZE);
+            throw HyracksDataException.create(ErrorCode.INVALID_INVERTED_LIST_TYPE_TRAITS,
+                    InvertedIndexUtils.EXPECT_ALL_FIX_GET_VAR_SIZE);
         }
     }
 

@@ -244,13 +244,15 @@ public class InvertedIndexUtils {
 
     public static void verifyAllFixedSizeTypeTrait(ITypeTraits[] typeTraits) throws HyracksDataException {
         if (InvertedIndexUtils.checkTypeTraitsAllFixed(typeTraits) == false) {
-            throw HyracksDataException.create(ErrorCode.INVALID_INVERTED_LIST_TYPE_TRAITS, InvertedIndexUtils.EXPECT_ALL_FIX_GET_VAR_SIZE);
+            throw HyracksDataException.create(ErrorCode.INVALID_INVERTED_LIST_TYPE_TRAITS,
+                    InvertedIndexUtils.EXPECT_ALL_FIX_GET_VAR_SIZE);
         }
     }
 
     public static void verifyHasVarSizeTypeTrait(ITypeTraits[] typeTraits) throws HyracksDataException {
         if (InvertedIndexUtils.checkTypeTraitsAllFixed(typeTraits) == true) {
-            throw HyracksDataException.create(ErrorCode.INVALID_INVERTED_LIST_TYPE_TRAITS, InvertedIndexUtils.EXPECT_VAR_GET_ALL_FIX_SIZE);
+            throw HyracksDataException.create(ErrorCode.INVALID_INVERTED_LIST_TYPE_TRAITS,
+                    InvertedIndexUtils.EXPECT_VAR_GET_ALL_FIX_SIZE);
         }
     }
 

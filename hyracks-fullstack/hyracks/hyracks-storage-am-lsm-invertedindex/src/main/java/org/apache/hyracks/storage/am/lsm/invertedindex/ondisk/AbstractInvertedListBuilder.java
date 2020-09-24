@@ -18,8 +18,6 @@
  */
 package org.apache.hyracks.storage.am.lsm.invertedindex.ondisk;
 
-import java.util.Arrays;
-
 import org.apache.hyracks.api.dataflow.value.ITypeTraits;
 import org.apache.hyracks.storage.am.lsm.invertedindex.api.IInvertedListBuilder;
 
