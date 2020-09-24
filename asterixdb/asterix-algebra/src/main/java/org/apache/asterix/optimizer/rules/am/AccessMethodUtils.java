@@ -287,7 +287,7 @@ public class AccessMethodUtils {
     public static void checkAndGenerateFTSearchExceptionForStringPhrase(String value) throws AlgebricksException {
         for (int j = 0; j < value.length(); j++) {
             if (DelimitedUTF8StringBinaryTokenizer.isSeparator(value.charAt(j))) {
-                // throw new CompilationException(ErrorCode.COMPILATION_FULLTEXT_PHRASE_FOUND);
+                throw new CompilationException(ErrorCode.COMPILATION_FULLTEXT_PHRASE_FOUND);
             }
         }
     }

@@ -927,12 +927,13 @@ public class InvertedIndexAccessMethod implements IAccessMethod {
         }
     }
 
-    private static SearchModifierType getFullTextOption(AbstractFunctionCallExpression funcExpr) {
-        if (funcExpr.getArguments().size() < 3 || funcExpr.getArguments().size() % 2 != 0) {
-            // Should it return an error here?
-            // If no parameters or incorrect number of parameters are given, the default search type is returned.
-            return SearchModifierType.CONJUNCTIVE;
+    private static SearchModifierType getFullTextOption(AbstractFunctionCallExpression funcExpr)
+            throws CompilationException {
+
+        if (funcExpr.getArguments().size() % 2 != 0) {
+            throw new CompilationException(ErrorCode.TYPE_MISMATCH_FUNCTION, "Number of full-text function arguments should be even");
         }
+
         // From the third argument, it contains full-text search options.
         for (int i = 2; i < funcExpr.getArguments().size(); i = i + 2) {
             String optionName = ConstantExpressionUtil.getStringArgument(funcExpr, i);
@@ -945,7 +946,9 @@ public class InvertedIndexAccessMethod implements IAccessMethod {
                 }
             }
         }
-        return null;
+
+        // Use CONJUNCTIVE by default
+        return SearchModifierType.CONJUNCTIVE;
     }
 
     private void addKeyVarsAndExprs(IOptimizableFuncExpr optFuncExpr, ArrayList<LogicalVariable> keyVarList,
