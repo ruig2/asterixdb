@@ -20,6 +20,7 @@
 package org.apache.hyracks.storage.am.lsm.invertedindex.ondisk.variablesize;
 
 import org.apache.hyracks.api.dataflow.value.ITypeTraits;
+import org.apache.hyracks.api.exceptions.HyracksDataException;
 import org.apache.hyracks.storage.am.common.api.ITreeIndexTupleReference;
 import org.apache.hyracks.storage.am.common.tuples.TypeAwareTupleReference;
 import org.apache.hyracks.storage.am.lsm.invertedindex.ondisk.AbstractInvertedListTupleReference;
@@ -30,11 +31,11 @@ public class VariableSizeInvertedListTupleReference extends AbstractInvertedList
     private ITreeIndexTupleReference tupleReference;
 
     @Override
-    protected void verifyTypeTrait() {
+    protected void verifyTypeTrait() throws HyracksDataException {
         InvertedIndexUtils.verifyHasVarSizeTypeTrait(typeTraits);
     }
 
-    public VariableSizeInvertedListTupleReference(ITypeTraits[] typeTraits) {
+    public VariableSizeInvertedListTupleReference(ITypeTraits[] typeTraits) throws HyracksDataException {
         super(typeTraits);
 
         this.tupleReference = new TypeAwareTupleReference(typeTraits);

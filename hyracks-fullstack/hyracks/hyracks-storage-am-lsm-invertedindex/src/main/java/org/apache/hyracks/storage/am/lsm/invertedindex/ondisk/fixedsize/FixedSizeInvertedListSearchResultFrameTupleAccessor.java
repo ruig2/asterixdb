@@ -20,6 +20,8 @@
 package org.apache.hyracks.storage.am.lsm.invertedindex.ondisk.fixedsize;
 
 import org.apache.hyracks.api.dataflow.value.ITypeTraits;
+import org.apache.hyracks.api.exceptions.ErrorCode;
+import org.apache.hyracks.api.exceptions.HyracksDataException;
 import org.apache.hyracks.storage.am.lsm.invertedindex.ondisk.AbstractInvertedListSearchResultFrameTupleAccessor;
 import org.apache.hyracks.storage.am.lsm.invertedindex.ondisk.InvertedListSearchResultFrameTupleAppender;
 import org.apache.hyracks.storage.am.lsm.invertedindex.util.InvertedIndexUtils;
@@ -35,7 +37,8 @@ public class FixedSizeInvertedListSearchResultFrameTupleAccessor
     private final int tupleSize;
     private final int[] fieldStartOffsets;
 
-    public FixedSizeInvertedListSearchResultFrameTupleAccessor(int frameSize, ITypeTraits[] fields) {
+    public FixedSizeInvertedListSearchResultFrameTupleAccessor(int frameSize, ITypeTraits[] fields)
+            throws HyracksDataException {
         super(frameSize, fields);
 
         this.fieldStartOffsets = new int[fields.length];
@@ -52,9 +55,11 @@ public class FixedSizeInvertedListSearchResultFrameTupleAccessor
     }
 
     @Override
-    protected void verifyTypeTraits() {
+    protected void verifyTypeTraits() throws HyracksDataException {
+        InvertedIndexUtils.verifyAllFixedSizeTypeTrait(fields);
+
         if (InvertedIndexUtils.checkTypeTraitsAllFixed(fields) == false) {
-            throw new IllegalArgumentException(InvertedIndexUtils.EXPECT_ALL_FIX_GET_VAR_SIZE);
+            throw HyracksDataException.create(ErrorCode.INVALID_INVERTED_LIST_TYPE_TRAITS, InvertedIndexUtils.EXPECT_ALL_FIX_GET_VAR_SIZE);
         }
     }
 

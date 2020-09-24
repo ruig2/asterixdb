@@ -20,17 +20,18 @@
 package org.apache.hyracks.storage.am.lsm.invertedindex.ondisk.fixedsize;
 
 import org.apache.hyracks.api.dataflow.value.ITypeTraits;
+import org.apache.hyracks.api.exceptions.HyracksDataException;
 import org.apache.hyracks.storage.am.lsm.invertedindex.ondisk.AbstractInvertedListTupleReference;
 import org.apache.hyracks.storage.am.lsm.invertedindex.util.InvertedIndexUtils;
 
 public class FixedSizeInvertedListTupleReference extends AbstractInvertedListTupleReference {
 
-    public FixedSizeInvertedListTupleReference(ITypeTraits[] typeTraits) {
+    public FixedSizeInvertedListTupleReference(ITypeTraits[] typeTraits) throws HyracksDataException {
         super(typeTraits);
     }
 
     @Override
-    protected void verifyTypeTrait() {
+    protected void verifyTypeTrait() throws HyracksDataException {
         InvertedIndexUtils.verifyAllFixedSizeTypeTrait(typeTraits);
     }
 

@@ -19,6 +19,7 @@
 package org.apache.hyracks.storage.am.lsm.invertedindex.ondisk;
 
 import org.apache.hyracks.api.dataflow.value.ITypeTraits;
+import org.apache.hyracks.api.exceptions.HyracksDataException;
 import org.apache.hyracks.storage.am.lsm.invertedindex.api.IInvertedListBuilder;
 import org.apache.hyracks.storage.am.lsm.invertedindex.api.IInvertedListBuilderFactory;
 import org.apache.hyracks.storage.am.lsm.invertedindex.ondisk.fixedsize.FixedSizeElementInvertedListBuilder;
@@ -39,7 +40,7 @@ public class InvertedListBuilderFactory implements IInvertedListBuilderFactory {
     }
 
     @Override
-    public IInvertedListBuilder create() {
+    public IInvertedListBuilder create() throws HyracksDataException {
         if (isFixedSize) {
             return new FixedSizeElementInvertedListBuilder(invListFields);
         } else {

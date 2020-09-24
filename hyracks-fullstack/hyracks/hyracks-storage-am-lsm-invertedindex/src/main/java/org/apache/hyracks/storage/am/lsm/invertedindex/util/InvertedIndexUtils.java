@@ -24,6 +24,7 @@ import java.util.List;
 import org.apache.hyracks.api.comm.IFrameTupleAccessor;
 import org.apache.hyracks.api.dataflow.value.IBinaryComparatorFactory;
 import org.apache.hyracks.api.dataflow.value.ITypeTraits;
+import org.apache.hyracks.api.exceptions.ErrorCode;
 import org.apache.hyracks.api.exceptions.HyracksDataException;
 import org.apache.hyracks.api.io.FileReference;
 import org.apache.hyracks.api.io.IIOManager;
@@ -74,7 +75,7 @@ import org.apache.hyracks.util.trace.ITracer;
 public class InvertedIndexUtils {
 
     public static final String EXPECT_ALL_FIX_GET_VAR_SIZE =
-            "expecting all type trait to be fixed-size while getting at least one variable-length one";
+            "expecting all type traits to be fixed-size while getting at least one variable-length one";
     public static final String EXPECT_VAR_GET_ALL_FIX_SIZE =
             "expecting at least one variable-size type trait while all are fixed-size";
 
@@ -241,19 +242,20 @@ public class InvertedIndexUtils {
         return true;
     }
 
-    public static void verifyAllFixedSizeTypeTrait(ITypeTraits[] typeTraits) {
+    public static void verifyAllFixedSizeTypeTrait(ITypeTraits[] typeTraits) throws HyracksDataException {
         if (InvertedIndexUtils.checkTypeTraitsAllFixed(typeTraits) == false) {
-            throw new IllegalArgumentException(InvertedIndexUtils.EXPECT_ALL_FIX_GET_VAR_SIZE);
+            throw HyracksDataException.create(ErrorCode.INVALID_INVERTED_LIST_TYPE_TRAITS, InvertedIndexUtils.EXPECT_ALL_FIX_GET_VAR_SIZE);
         }
     }
 
-    public static void verifyHasVarSizeTypeTrait(ITypeTraits[] typeTraits) {
+    public static void verifyHasVarSizeTypeTrait(ITypeTraits[] typeTraits) throws HyracksDataException {
         if (InvertedIndexUtils.checkTypeTraitsAllFixed(typeTraits) == true) {
-            throw new IllegalArgumentException(InvertedIndexUtils.EXPECT_VAR_GET_ALL_FIX_SIZE);
+            throw HyracksDataException.create(ErrorCode.INVALID_INVERTED_LIST_TYPE_TRAITS, InvertedIndexUtils.EXPECT_VAR_GET_ALL_FIX_SIZE);
         }
     }
 
-    public static IInvertedListTupleReference createInvertedListTupleReference(ITypeTraits[] typeTraits) {
+    public static IInvertedListTupleReference createInvertedListTupleReference(ITypeTraits[] typeTraits)
+            throws HyracksDataException {
         if (checkTypeTraitsAllFixed(typeTraits)) {
             return new FixedSizeInvertedListTupleReference(typeTraits);
         } else {
@@ -261,7 +263,8 @@ public class InvertedIndexUtils {
         }
     }
 
-    public static IFrameTupleAccessor createInvertedListFrameTupleAccessor(int frameSize, ITypeTraits[] typeTraits) {
+    public static IFrameTupleAccessor createInvertedListFrameTupleAccessor(int frameSize, ITypeTraits[] typeTraits)
+            throws HyracksDataException {
         if (checkTypeTraitsAllFixed(typeTraits)) {
             return new FixedSizeInvertedListSearchResultFrameTupleAccessor(frameSize, typeTraits);
         } else {

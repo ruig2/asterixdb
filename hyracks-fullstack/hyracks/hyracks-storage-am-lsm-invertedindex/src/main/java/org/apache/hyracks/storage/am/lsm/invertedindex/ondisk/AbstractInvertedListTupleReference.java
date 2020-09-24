@@ -20,6 +20,7 @@
 package org.apache.hyracks.storage.am.lsm.invertedindex.ondisk;
 
 import org.apache.hyracks.api.dataflow.value.ITypeTraits;
+import org.apache.hyracks.api.exceptions.HyracksDataException;
 import org.apache.hyracks.storage.am.lsm.invertedindex.api.IInvertedListTupleReference;
 
 public abstract class AbstractInvertedListTupleReference implements IInvertedListTupleReference {
@@ -31,9 +32,9 @@ public abstract class AbstractInvertedListTupleReference implements IInvertedLis
 
     // check if the type trait is fixed-size or variable-size
     // throws an IllegalArgument exception if get unexpected traits
-    protected abstract void verifyTypeTrait();
+    protected abstract void verifyTypeTrait() throws HyracksDataException;
 
-    public AbstractInvertedListTupleReference(ITypeTraits[] typeTraits) {
+    public AbstractInvertedListTupleReference(ITypeTraits[] typeTraits) throws HyracksDataException {
         this.typeTraits = typeTraits;
         this.fieldStartOffsets = new int[typeTraits.length];
         this.fieldStartOffsets[0] = 0;

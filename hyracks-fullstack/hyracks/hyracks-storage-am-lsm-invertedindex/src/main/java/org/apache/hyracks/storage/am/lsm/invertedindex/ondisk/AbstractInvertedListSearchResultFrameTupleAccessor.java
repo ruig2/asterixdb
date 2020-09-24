@@ -24,6 +24,7 @@ import java.nio.ByteBuffer;
 import org.apache.hyracks.api.comm.FrameHelper;
 import org.apache.hyracks.api.comm.IFrameTupleAccessor;
 import org.apache.hyracks.api.dataflow.value.ITypeTraits;
+import org.apache.hyracks.api.exceptions.HyracksDataException;
 
 /**
  * This is a frame tuple accessor class for inverted list.
@@ -40,9 +41,10 @@ public abstract class AbstractInvertedListSearchResultFrameTupleAccessor impleme
 
     protected final ITypeTraits[] fields;
 
-    protected abstract void verifyTypeTraits();
+    protected abstract void verifyTypeTraits() throws HyracksDataException;
 
-    public AbstractInvertedListSearchResultFrameTupleAccessor(int frameSize, ITypeTraits[] fields) {
+    public AbstractInvertedListSearchResultFrameTupleAccessor(int frameSize, ITypeTraits[] fields)
+            throws HyracksDataException {
         this.frameSize = frameSize;
         this.fields = fields;
 
