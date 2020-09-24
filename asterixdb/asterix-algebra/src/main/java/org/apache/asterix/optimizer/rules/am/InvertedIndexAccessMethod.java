@@ -886,7 +886,8 @@ public class InvertedIndexAccessMethod implements IAccessMethod {
         jobGenParams.setSearchKeyType(typeTag);
     }
 
-    private void addFunctionSpecificArgs(IOptimizableFuncExpr optFuncExpr, InvertedIndexJobGenParams jobGenParams) {
+    private void addFunctionSpecificArgs(IOptimizableFuncExpr optFuncExpr, InvertedIndexJobGenParams jobGenParams)
+            throws CompilationException {
         if (optFuncExpr.getFuncExpr().getFunctionIdentifier() == BuiltinFunctions.STRING_CONTAINS) {
             jobGenParams.setSearchModifierType(SearchModifierType.CONJUNCTIVE);
             jobGenParams.setSimilarityThreshold(new AsterixConstantValue(AMissing.MISSING));
