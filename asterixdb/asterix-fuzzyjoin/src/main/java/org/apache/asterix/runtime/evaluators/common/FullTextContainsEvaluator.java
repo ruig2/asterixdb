@@ -58,7 +58,9 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 public class FullTextContainsEvaluator implements IScalarEvaluator {
-    private static final Logger LOGGER = LogManager.getLogger();
+
+    // assuming type indicator in serde format
+    protected static final int TYPE_INDICATOR_SIZE = 1;
 
     protected final ArrayBackedValueStorage resultStorage = new ArrayBackedValueStorage();
     protected final DataOutput out = resultStorage.getDataOutput();

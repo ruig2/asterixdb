@@ -1219,7 +1219,7 @@ public class QueryTranslator extends AbstractLangTranslator implements IStatemen
         List<FieldBinding> fbs = rc.getFbList();
 
         if (fbs.size() < 2) {
-            throw new IllegalStateException("number of parameters for the filter is less than expected");
+            throw CompilationException.create(ErrorCode.TYPE_UNSUPPORTED, "number of parameters for the filter is less than expected");
         }
 
         String leftStr = ((LiteralExpr) fbs.get(0).getLeftExpr()).getValue().getStringValue().toLowerCase();
@@ -1293,19 +1293,18 @@ public class QueryTranslator extends AbstractLangTranslator implements IStatemen
         return;
     }
 
+    /* Example of SQLPP DDL to create config:
+    CREATE FULLTEXT CONFIG my_first_stopword_config IF NOT EXISTS AS {
+        "Tokenizer": "Word", // built-in tokenizers: "Word" or "NGram"
+                "FilterPipeline": ["my_first_stopword_filter"]
+    };
+     */
     public void handleCreateFullTextConfigStatement(MetadataProvider metadataProvider, Statement stmt)
             throws Exception {
         CreateFullTextConfigStatement.checkExpression(stmt);
 
         CreateFullTextConfigStatement stmtCreateFilter = (CreateFullTextConfigStatement) stmt;
         RecordConstructor rc = (RecordConstructor) stmtCreateFilter.getExpression();
-
-        /* Example of SQLPP DDL to create config:
-        CREATE FULLTEXT CONFIG my_first_stopword_config IF NOT EXISTS AS {
-            "Tokenizer": "Word", // built-in tokenizers: "Word" or "NGram"
-                    "FilterPipeline": ["my_first_stopword_filter"]
-        };
-         */
 
         List<FieldBinding> fb = rc.getFbList();
         if (fb.size() < 2) {

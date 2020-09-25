@@ -38,6 +38,7 @@ public class CreateFullTextConfigStatement extends AbstractStatement {
     }
 
     public static void checkExpression(Statement stmt) throws Exception {
+        // Do nothing for now
         return;
     }
 
