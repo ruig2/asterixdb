@@ -39,7 +39,6 @@ public class PermutingFrameTupleReference extends FrameTupleReference {
     }
 
     @Override
-    // Why fIdx is not used?
     public byte[] getFieldData(int fIdx) {
         return fta.getBuffer().array();
     }

@@ -65,8 +65,6 @@ public class BinaryTokenizerOperatorNodePushable extends AbstractUnaryInputUnary
             int docField, int[] keyFields, boolean addNumTokensKey, boolean writeKeyFieldsFirst, boolean writeMissing,
             IMissingWriterFactory missingWriterFactory) {
         this.ctx = ctx;
-        // ToDo: check the codes in upper layer to see if we can remove tokenizer to use fullTextConfig instead
-        // How is this tokenizer configured? Does it ignoreTokenCount and hasTypeTag?
         this.fullTextAnalyzer = fullTextAnalyzer;
         // Need to use the tokenizer created in the upper-layer when:
         // 1. The tokenizer is of TokenizerCategory.NGram rather than Word
