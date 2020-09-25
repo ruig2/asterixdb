@@ -632,9 +632,6 @@ public abstract class MetadataManager implements IMetadataManager {
         } catch (RemoteException | HyracksDataException e) {
             throw new MetadataException(ErrorCode.REMOTE_EXCEPTION_WHEN_CALLING_METADATA_NODE, e);
         }
-
-        // in progress...
-        //mdTxnCtx.addFilter(filter);
     }
 
     @Override
@@ -643,11 +640,8 @@ public abstract class MetadataManager implements IMetadataManager {
         try {
             metadataNode.dropFullTextFilter(mdTxnCtx.getTxnId(), filterName, ifExists);
         } catch (RemoteException e) {
-            e.printStackTrace();
+            throw new MetadataException(ErrorCode.REMOTE_EXCEPTION_WHEN_CALLING_METADATA_NODE, e);
         }
-
-        // in progress...
-        //mdTxnCtx.dropFilter(filter);
     }
 
     @Override

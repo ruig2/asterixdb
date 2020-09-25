@@ -351,9 +351,6 @@ public class MetadataNode implements IMetadataNode {
             ITupleReference datasetTuple = tupleReaderWriter.getTupleFromMetadataEntity(dataset);
             insertTupleIntoIndex(txnId, MetadataPrimaryIndexes.DATASET_DATASET, datasetTuple);
 
-            LOGGER.error("!!! adding dataset and let's see if index will be created !!!");
-            LOGGER.error("!!! dataset type: " + dataset.getDatasetType().toString() + " !!!");
-
             if (dataset.getDatasetType() == DatasetType.INTERNAL) {
                 // Add the primary index for the dataset.
                 InternalDatasetDetails id = (InternalDatasetDetails) dataset.getDatasetDetails();
@@ -361,9 +358,7 @@ public class MetadataNode implements IMetadataNode {
                         dataset.getDatasetName(), IndexType.BTREE, id.getPrimaryKey(), id.getKeySourceIndicator(),
                         id.getPrimaryKeyType(), false, false, true, dataset.getPendingOp());
 
-                LOGGER.error("!!! creating index for dataset !!!");
                 addIndex(txnId, primaryIndex);
-                LOGGER.error("!!! done creating index for dataset !!!");
             }
         } catch (HyracksDataException e) {
             if (e.getComponent().equals(ErrorCode.HYRACKS) && e.getErrorCode() == ErrorCode.DUPLICATE_KEY) {
@@ -379,8 +374,6 @@ public class MetadataNode implements IMetadataNode {
     public void addIndex(TxnId txnId, Index index) throws AlgebricksException {
         try {
             IndexTupleTranslator tupleWriter = tupleTranslatorProvider.getIndexTupleTranslator(txnId, this, true);
-            LOGGER.error("!!! adding index; dataverse name: " + index.getDataverseName() + " dataset name: "
-                    + index.getDatasetName());
             ITupleReference tuple = tupleWriter.getTupleFromMetadataEntity(index);
             insertTupleIntoIndex(txnId, MetadataPrimaryIndexes.INDEX_DATASET, tuple);
         } catch (HyracksDataException e) {

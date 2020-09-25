@@ -86,6 +86,9 @@ public class FullTextContainsEvaluator implements IScalarEvaluator {
     private final IBinaryComparator strLowerCaseCmp =
             BinaryComparatorFactoryProvider.UTF8STRING_LOWERCASE_POINTABLE_INSTANCE.createBinaryComparator();
 
+    private IFullTextAnalyzer analyzerLeft = null;
+    private IFullTextAnalyzer analyzerRight = null;
+
     // Case insensitive hash for full-text search
     private IBinaryHashFunction hashFunc = null;
 
@@ -104,9 +107,6 @@ public class FullTextContainsEvaluator implements IScalarEvaluator {
     // If the following is 1, then we will do a disjunctive search.
     // Else if it is equal to the number of tokens, then we will do a conjunctive search.
     private int occurrenceThreshold = 1;
-
-    private IFullTextAnalyzer analyzerLeft = null;
-    private IFullTextAnalyzer analyzerRight = null;
 
     static final int HASH_SET_SLOT_SIZE = 101;
     static final int HASH_SET_FRAME_SIZE = 32768;
@@ -333,9 +333,6 @@ public class FullTextContainsEvaluator implements IScalarEvaluator {
             }
             keyEntry.set(tokenOffset, tokenLength);
 
-            // String rightTokenStr = getUTF8StringInArray(token.getData(), tokenOffset, tokenLength);
-            // LOGGER.info("Right token: " + rightTokenStr);
-
             // Check whether the given token is a phrase.
             // Currently, for the full-text search, we don't support a phrase search yet.
             // So, each query predicate should have only one token.
@@ -377,11 +374,9 @@ public class FullTextContainsEvaluator implements IScalarEvaluator {
             case MULTISET:
                 for (int j = 0; j < tokenLength; j++) {
                     if (DelimitedUTF8StringBinaryTokenizer.isSeparator((char) refArray[tokenOffset + j])) {
-                        /*
                         throw new HyracksDataException(
                                 "Phrase in Full-text is not supported. An expression should include only one word."
                                         + (char) refArray[tokenOffset + j] + " " + refArray[tokenOffset + j]);
-                         */
                     }
                 }
                 break;
@@ -432,8 +427,6 @@ public class FullTextContainsEvaluator implements IScalarEvaluator {
             analyzerLeft.next();
 
             IToken token = analyzerLeft.getToken();
-            // String leftTokenStr = getUTF8StringInArray(token.getData(), token.getStartOffset(), token.getTokenLength());
-
             // Records the starting position and the length of the current token.
             keyEntry.set(token.getStartOffset(), token.getTokenLength());
 
