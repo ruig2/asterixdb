@@ -420,7 +420,7 @@ public interface IMetadataManager extends IMetadataBootstrap {
             throws AlgebricksException;
 
     void addFullTextFilterDescriptor(MetadataTransactionContext mdTxnCtx, IFullTextFilterDescriptor filterDescriptor)
-            throws AlgebricksException;
+            throws AlgebricksException, RemoteException;
 
     IFullTextFilterDescriptor getFullTextFilterDescriptor(MetadataTransactionContext mdTxnCtx, String name)
             throws RemoteException, AlgebricksException;

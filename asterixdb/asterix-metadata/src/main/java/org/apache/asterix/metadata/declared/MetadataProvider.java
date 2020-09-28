@@ -1653,7 +1653,6 @@ public class MetadataProvider implements IMetadataProvider<DataSourceId, String>
                     secondaryKeyType.getTypeTag(), indexType, secondaryIndex.getGramLength());
             IFullTextConfigDescriptor configDescriptor =
                     findFullTextConfigDescriptor(secondaryIndex.getFullTextConfigName());
-            IFullTextAnalyzerFactory fullTextAnalyzerFactory = new FullTextAnalyzerFactory(configDescriptor);
 
             Pair<IFileSplitProvider, AlgebricksPartitionConstraint> splitsAndConstraint =
                     getSplitProviderAndConstraints(dataset, secondaryIndex.getIndexName());
@@ -1696,7 +1695,7 @@ public class MetadataProvider implements IMetadataProvider<DataSourceId, String>
             }
 
             tokenizerOp = new BinaryTokenizerOperatorDescriptor(spec, tokenKeyPairRecDesc, tokenizerFactory,
-                    fullTextAnalyzerFactory, docField, keyFields, isPartitioned, true, false,
+                    configDescriptor, docField, keyFields, isPartitioned, true, false,
                     MissingWriterFactory.INSTANCE);
             return new Pair<>(tokenizerOp, splitsAndConstraint.second);
         } catch (Exception e) {

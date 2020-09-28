@@ -30,8 +30,8 @@ import com.fasterxml.jackson.databind.JsonNode;
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 public class AbstractFullTextFilterDescriptor implements IFullTextFilterDescriptor {
-    final String name;
-    List<String> usedByConfigs;
+    protected final String name;
+    protected List<String> usedByConfigs;
 
     public AbstractFullTextFilterDescriptor(String name, List<String> usedByConfigs) {
         this.name = name;
@@ -43,9 +43,13 @@ public class AbstractFullTextFilterDescriptor implements IFullTextFilterDescript
         return name;
     }
 
+    @Override public IFullTextFilter.FullTextFilterType getFilterType() {
+        throw new NotImplementedException();
+    }
+
     @Override
     public List<String> getUsedByConfigs() {
-        return null;
+        return usedByConfigs;
     }
 
     @Override

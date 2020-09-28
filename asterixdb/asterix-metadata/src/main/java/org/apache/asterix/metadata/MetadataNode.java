@@ -455,7 +455,7 @@ public class MetadataNode implements IMetadataNode {
 
     @Override
     public void addFullTextFilterDescriptor(TxnId txnId, IFullTextFilterDescriptor filterDescriptor)
-            throws AlgebricksException {
+            throws RemoteException, AlgebricksException {
         insertFullTextEntityDescriptorToCatalog(txnId, filterDescriptor);
         return;
     }
@@ -487,8 +487,8 @@ public class MetadataNode implements IMetadataNode {
         List<IFullTextEntityDescriptor> entities = getAllFullTextEntityDescriptors(txnId);
         for (IFullTextEntityDescriptor e : entities) {
             if (e.getCategory() == IFullTextEntity.FullTextEntityCategory.CONFIG
-                    && ((IFullTextConfig) e).getUsedByIndices().contains(indexName)) {
-                ((IFullTextConfig) e).getUsedByIndices().remove(indexName);
+                    && ((IFullTextConfigDescriptor) e).getUsedByIndices().contains(indexName)) {
+                ((IFullTextConfigDescriptor) e).getUsedByIndices().remove(indexName);
                 try {
                     modifyExistingFullTextEntityToCatalog(txnId, e);
                 } catch (HyracksDataException ex) {

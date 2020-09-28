@@ -59,11 +59,11 @@ import org.apache.hyracks.dataflow.common.data.accessors.ITupleReference;
 import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.AbstractStemmerFullTextFilter;
 import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.FullTextConfigDescriptor;
 import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextConfig;
+import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextConfigDescriptor;
 import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextEntity.FullTextEntityCategory;
 import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextEntityDescriptor;
 import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextFilter;
 import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextFilterDescriptor;
-import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.StopwordsFullTextFilter;
 import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.StopwordsFullTextFilterDescriptor;
 
 import com.google.common.collect.ImmutableList;
@@ -235,30 +235,34 @@ public class FulltextEntityDescriptorTupleTranslator extends AbstractTupleTransl
         recordBuilder.addField(fieldName, fieldValue);
     }
 
-    private void writeFilterBasic(IFullTextFilter filter) throws HyracksDataException {
-        writeFilterType2RecordBuilder(filter.getFilterType());
-        writeOrderedList2RecordBuilder(FIELD_NAME_FULLTEXT_USED_BY_CONFIGS, filter.getUsedByFTConfigs());
+    private void writeFilterDescriptorBasic(IFullTextFilterDescriptor filterDescriptor) throws HyracksDataException {
+        writeFilterType2RecordBuilder(filterDescriptor.getFilterType());
+        writeOrderedList2RecordBuilder(FIELD_NAME_FULLTEXT_USED_BY_CONFIGS, filterDescriptor.getUsedByConfigs());
     }
 
-    private void writeStopwordFilter(StopwordsFullTextFilter stopwordFilter) throws HyracksDataException {
-        writeFilterBasic(stopwordFilter);
-        writeOrderedList2RecordBuilder(FIELD_NAME_FULLTEXT_STOPWORD_LIST, stopwordFilter.getStopwordList());
+    private void writeStopwordFilterDescriptor(StopwordsFullTextFilterDescriptor stopwordsFullTextFilterDescriptor) throws HyracksDataException {
+        writeFilterDescriptorBasic(stopwordsFullTextFilterDescriptor);
+        writeOrderedList2RecordBuilder(FIELD_NAME_FULLTEXT_STOPWORD_LIST, stopwordsFullTextFilterDescriptor.getStopwordList());
     }
 
     private void writeStemmerFilter(AbstractStemmerFullTextFilter stemmerFilter) throws HyracksDataException {
-        writeFilterBasic(stemmerFilter);
+        throw new NotImplementedException();
+
+        /*
+        writeFilterDescriptorBasic(stemmerFilter);
 
         writeKeyAndValue2FieldVariables(FIELD_NAME_FULLTEXT_STEMMER_LANGUAGE, stemmerFilter.getLanguage().toString());
         recordBuilder.addField(fieldName, fieldValue);
+         */
     }
 
-    private void writeFulltextFilter(IFullTextFilter filter) throws HyracksDataException {
-        switch (filter.getFilterType()) {
+    private void writeFulltextFilter(IFullTextFilterDescriptor filterDescriptor) throws HyracksDataException {
+        switch (filterDescriptor.getFilterType()) {
             case STOPWORDS:
-                writeStopwordFilter((StopwordsFullTextFilter) filter);
+                writeStopwordFilterDescriptor((StopwordsFullTextFilterDescriptor) filterDescriptor);
                 break;
             case STEMMER:
-                writeStemmerFilter((AbstractStemmerFullTextFilter) filter);
+                writeStemmerFilter((AbstractStemmerFullTextFilter) filterDescriptor);
                 break;
             case SYNONYM:
             default:
@@ -268,18 +272,18 @@ public class FulltextEntityDescriptorTupleTranslator extends AbstractTupleTransl
         return;
     }
 
-    private void writeFulltextConfig(IFullTextConfig config) throws HyracksDataException {
-        writeKeyAndValue2FieldVariables(FIELD_NAME_FULLTEXT_TOKENIZER, config.getTokenizerCategory().name());
+    private void writeFulltextConfig(IFullTextConfigDescriptor configDescriptor) throws HyracksDataException {
+        writeKeyAndValue2FieldVariables(FIELD_NAME_FULLTEXT_TOKENIZER, configDescriptor.getTokenizerCategory().name());
         recordBuilder.addField(fieldName, fieldValue);
 
         List<String> filterNames = new ArrayList<>();
-        for (IFullTextFilter f : config.getFilters()) {
+        for (IFullTextFilterDescriptor f : configDescriptor.getFilterDescriptors()) {
             filterNames.add(f.getName());
         }
         writeOrderedList2RecordBuilder(FIELD_NAME_FULLTEXT_FILTER_PIPELINE, filterNames);
 
         List<String> indexNames = new ArrayList<>();
-        for (String s : config.getUsedByIndices()) {
+        for (String s : configDescriptor.getUsedByIndices()) {
             // include the dataverse and dataset name into the index name?
             indexNames.add(s);
         }
@@ -321,10 +325,10 @@ public class FulltextEntityDescriptorTupleTranslator extends AbstractTupleTransl
 
         switch (fullTextEntityDescriptor.getCategory()) {
             case FILTER:
-                writeFulltextFilter((IFullTextFilter) fullTextEntityDescriptor);
+                writeFulltextFilter((IFullTextFilterDescriptor) fullTextEntityDescriptor);
                 break;
             case CONFIG:
-                writeFulltextConfig((IFullTextConfig) fullTextEntityDescriptor);
+                writeFulltextConfig((IFullTextConfigDescriptor) fullTextEntityDescriptor);
                 break;
             default:
                 break;

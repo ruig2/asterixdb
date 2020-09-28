@@ -61,6 +61,7 @@ import org.apache.hyracks.storage.am.lsm.invertedindex.api.IInvertedIndexSearchM
 import org.apache.hyracks.storage.am.lsm.invertedindex.dataflow.LSMInvertedIndexSearchOperatorDescriptor;
 import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.FullTextAnalyzerFactory;
 import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextAnalyzerFactory;
+import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextConfigDescriptor;
 import org.apache.hyracks.storage.am.lsm.invertedindex.tokenizers.IBinaryTokenizerFactory;
 
 /**
@@ -170,14 +171,13 @@ public class InvertedIndexPOperator extends IndexSearchPOperator {
                 InvertedIndexAccessMethod.getSearchModifierFactory(searchModifierType, simThresh, secondaryIndex);
         IBinaryTokenizerFactory queryTokenizerFactory =
                 InvertedIndexAccessMethod.getBinaryTokenizerFactory(searchModifierType, searchKeyType, secondaryIndex);
-        IFullTextAnalyzerFactory fullTextAnalyzerFactory = new FullTextAnalyzerFactory(
-                metadataProvider.findFullTextConfigDescriptor(secondaryIndex.getFullTextConfigName()));
+        IFullTextConfigDescriptor fullTextConfigDescriptor = metadataProvider.findFullTextConfigDescriptor(secondaryIndex.getFullTextConfigName());
         IIndexDataflowHelperFactory dataflowHelperFactory = new IndexDataflowHelperFactory(
                 metadataProvider.getStorageComponentProvider().getStorageManager(), secondarySplitsAndConstraint.first);
 
         LSMInvertedIndexSearchOperatorDescriptor invIndexSearchOp =
                 new LSMInvertedIndexSearchOperatorDescriptor(jobSpec, outputRecDesc, queryField, dataflowHelperFactory,
-                        queryTokenizerFactory, fullTextAnalyzerFactory, searchModifierFactory, retainInput,
+                        queryTokenizerFactory, fullTextConfigDescriptor, searchModifierFactory, retainInput,
                         retainMissing, context.getMissingWriterFactory(),
                         dataset.getSearchCallbackFactory(metadataProvider.getStorageComponentProvider(), secondaryIndex,
                                 IndexOperation.SEARCH, null),

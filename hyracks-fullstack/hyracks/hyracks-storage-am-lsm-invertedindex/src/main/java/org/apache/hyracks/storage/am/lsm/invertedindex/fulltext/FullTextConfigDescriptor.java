@@ -43,15 +43,15 @@ public class FullTextConfigDescriptor implements IFullTextConfigDescriptor {
 
     public FullTextConfigDescriptor(String name, IFullTextConfig.TokenizerCategory tokenizerCategory,
             ImmutableList<IFullTextFilterDescriptor> filterDescriptors) {
-        this.name = name;
-        this.tokenizerCategory = tokenizerCategory;
-        this.filterDescriptors = filterDescriptors;
+        this(name, tokenizerCategory, filterDescriptors, new ArrayList<>());
     }
 
     // For usage in fromJson() only where usedByIndices of an existing full-text config written on disk may not be null.
     public FullTextConfigDescriptor(String name, IFullTextConfig.TokenizerCategory tokenizerCategory,
             ImmutableList<IFullTextFilterDescriptor> filterDescriptors, List<String> usedByIndices) {
-        this(name, tokenizerCategory, filterDescriptors);
+        this.name = name;
+        this.tokenizerCategory = tokenizerCategory;
+        this.filterDescriptors = filterDescriptors;
         this.usedByIndices = usedByIndices;
     }
 

@@ -60,6 +60,7 @@ import org.apache.hyracks.storage.am.common.dataflow.IndexDataflowHelperFactory;
 import org.apache.hyracks.storage.am.lsm.invertedindex.dataflow.BinaryTokenizerOperatorDescriptor;
 import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.FullTextAnalyzerFactory;
 import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextAnalyzerFactory;
+import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextConfigDescriptor;
 import org.apache.hyracks.storage.am.lsm.invertedindex.tokenizers.IBinaryTokenizerFactory;
 
 public class SecondaryInvertedIndexOperationsHelper extends SecondaryTreeIndexOperationsHelper {
@@ -69,7 +70,7 @@ public class SecondaryInvertedIndexOperationsHelper extends SecondaryTreeIndexOp
     private IBinaryComparatorFactory[] tokenComparatorFactories;
     private ITypeTraits[] tokenTypeTraits;
     private IBinaryTokenizerFactory tokenizerFactory;
-    private IFullTextAnalyzerFactory fullTextAnalyzerFactory;
+    private IFullTextConfigDescriptor fullTextConfigDescriptor;
     // For tokenization, sorting and loading. Represents <token, primary keys>.
     private int numTokenKeyPairFields;
     private IBinaryComparatorFactory[] tokenKeyPairComparatorFactories;
@@ -82,8 +83,7 @@ public class SecondaryInvertedIndexOperationsHelper extends SecondaryTreeIndexOp
     protected SecondaryInvertedIndexOperationsHelper(Dataset dataset, Index index, MetadataProvider metadataProvider,
             SourceLocation sourceLoc) throws AlgebricksException {
         super(dataset, index, metadataProvider, sourceLoc);
-        this.fullTextAnalyzerFactory = new FullTextAnalyzerFactory(
-                metadataProvider.findFullTextConfigDescriptor(index.getFullTextConfigName()));
+        this.fullTextConfigDescriptor = metadataProvider.findFullTextConfigDescriptor(index.getFullTextConfigName());
     }
 
     @Override
@@ -281,7 +281,7 @@ public class SecondaryInvertedIndexOperationsHelper extends SecondaryTreeIndexOp
             primaryKeyFields[i] = numSecondaryKeys + i;
         }
         BinaryTokenizerOperatorDescriptor tokenizerOp = new BinaryTokenizerOperatorDescriptor(spec, tokenKeyPairRecDesc,
-                tokenizerFactory, fullTextAnalyzerFactory, docField, primaryKeyFields, isPartitioned, false, false,
+                tokenizerFactory, fullTextConfigDescriptor, docField, primaryKeyFields, isPartitioned, false, false,
                 MissingWriterFactory.INSTANCE);
         tokenizerOp.setSourceLocation(sourceLoc);
         AlgebricksPartitionConstraintHelper.setPartitionConstraintInJobSpec(spec, tokenizerOp,

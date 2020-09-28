@@ -33,15 +33,20 @@ import com.google.common.collect.ImmutableList;
 public class StopwordsFullTextFilterDescriptor extends AbstractFullTextFilterDescriptor {
     private static final long serialVersionUID = 1L;
 
-    public final String name;
     public ImmutableList<String> stopwordList;
-    public List<String> usedByConfigs;
 
     public StopwordsFullTextFilterDescriptor(String name, ImmutableList<String> stopwordList,
             List<String> usedByConfigs) {
         super(name, usedByConfigs);
-        this.name = name;
         this.stopwordList = stopwordList;
+    }
+
+    @Override public IFullTextFilter.FullTextFilterType getFilterType() {
+        return IFullTextFilter.FullTextFilterType.STOPWORDS;
+    }
+
+    public List<String> getStopwordList() {
+        return this.stopwordList;
     }
 
     @Override

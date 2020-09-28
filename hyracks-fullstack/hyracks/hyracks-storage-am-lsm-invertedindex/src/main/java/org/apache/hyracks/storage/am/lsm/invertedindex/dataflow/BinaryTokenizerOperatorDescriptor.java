@@ -27,7 +27,10 @@ import org.apache.hyracks.api.dataflow.value.RecordDescriptor;
 import org.apache.hyracks.api.exceptions.HyracksDataException;
 import org.apache.hyracks.api.job.IOperatorDescriptorRegistry;
 import org.apache.hyracks.dataflow.std.base.AbstractSingleActivityOperatorDescriptor;
+import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.FullTextAnalyzer;
+import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextAnalyzer;
 import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextAnalyzerFactory;
+import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextConfigDescriptor;
 import org.apache.hyracks.storage.am.lsm.invertedindex.tokenizers.IBinaryTokenizerFactory;
 
 public class BinaryTokenizerOperatorDescriptor extends AbstractSingleActivityOperatorDescriptor {
@@ -35,7 +38,7 @@ public class BinaryTokenizerOperatorDescriptor extends AbstractSingleActivityOpe
     private static final long serialVersionUID = 1L;
 
     private final IBinaryTokenizerFactory tokenizerFactory;
-    private final IFullTextAnalyzerFactory fullTextAnalyzerFactory;
+    private final IFullTextConfigDescriptor fullTextConfigDescriptor;
     // Field that will be tokenized.
     private final int docField;
     // operator will append these key fields to each token, e.g., as
@@ -55,12 +58,12 @@ public class BinaryTokenizerOperatorDescriptor extends AbstractSingleActivityOpe
     private final IMissingWriterFactory missingWriterFactory;
 
     public BinaryTokenizerOperatorDescriptor(IOperatorDescriptorRegistry spec, RecordDescriptor recDesc,
-            IBinaryTokenizerFactory tokenizerFactory, IFullTextAnalyzerFactory fullTextAnalyzerFactory, int docField,
+            IBinaryTokenizerFactory tokenizerFactory, IFullTextConfigDescriptor fullTextConfigDescriptor, int docField,
             int[] keyFields, boolean addNumTokensKey, boolean writeKeyFieldsFirst, boolean writeMissing,
             IMissingWriterFactory missingWriterFactory) {
         super(spec, 1, 1);
         this.tokenizerFactory = tokenizerFactory;
-        this.fullTextAnalyzerFactory = fullTextAnalyzerFactory;
+        this.fullTextConfigDescriptor = fullTextConfigDescriptor;
         this.docField = docField;
         this.keyFields = keyFields;
         this.addNumTokensKey = addNumTokensKey;
@@ -73,9 +76,11 @@ public class BinaryTokenizerOperatorDescriptor extends AbstractSingleActivityOpe
     @Override
     public IOperatorNodePushable createPushRuntime(IHyracksTaskContext ctx,
             IRecordDescriptorProvider recordDescProvider, int partition, int nPartitions) throws HyracksDataException {
+        IFullTextAnalyzer analyzer = new FullTextAnalyzer(fullTextConfigDescriptor);
+
         return new BinaryTokenizerOperatorNodePushable(ctx,
                 recordDescProvider.getInputRecordDescriptor(getActivityId(), 0), outRecDescs[0],
-                tokenizerFactory.createTokenizer(), fullTextAnalyzerFactory.createFullTextAnalyzer(), docField,
+                tokenizerFactory.createTokenizer(), analyzer, docField,
                 keyFields, addNumTokensKey, writeKeyFieldsFirst, writeMissing, missingWriterFactory);
     }
 
