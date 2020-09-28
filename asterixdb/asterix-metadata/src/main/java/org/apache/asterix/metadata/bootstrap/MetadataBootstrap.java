@@ -90,6 +90,7 @@ import org.apache.hyracks.storage.am.lsm.common.impls.ConstantMergePolicyFactory
 import org.apache.hyracks.storage.am.lsm.common.impls.NoMergePolicyFactory;
 import org.apache.hyracks.storage.am.lsm.common.impls.PrefixMergePolicyFactory;
 import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.FullTextConfig;
+import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.FullTextConfigDescriptor;
 import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextConfig;
 import org.apache.hyracks.storage.common.ILocalResourceRepository;
 import org.apache.hyracks.storage.common.LocalResource;
@@ -280,9 +281,9 @@ public class MetadataBootstrap {
     }
 
     private static void insertInitialFullTextConfig(MetadataTransactionContext mdTxnCtx) throws AlgebricksException {
-        MetadataManager.INSTANCE.addFulltextConfig(mdTxnCtx,
-                new FullTextConfig(FullTextConfig.DEFAULT_FULL_TEXT_CONFIG_NAME, IFullTextConfig.TokenizerCategory.WORD,
-                        ImmutableList.of()));
+        MetadataManager.INSTANCE.addFulltextConfigDescriptor(mdTxnCtx,
+                new FullTextConfigDescriptor(FullTextConfig.DEFAULT_FULL_TEXT_CONFIG_NAME,
+                        IFullTextConfig.TokenizerCategory.WORD, ImmutableList.of()));
         if (LOGGER.isInfoEnabled()) {
             LOGGER.info("Finished inserting built-in full-text config.");
         }
@@ -334,7 +335,7 @@ public class MetadataBootstrap {
             insertMetadataDatasets(mdTxnCtx, new IMetadataIndex[] { MetadataPrimaryIndexes.FULLTEXT_ENTITY_DATASET });
         }
 
-        if (MetadataManager.INSTANCE.getFullTextConfig(mdTxnCtx,
+        if (MetadataManager.INSTANCE.getFullTextConfigDescriptor(mdTxnCtx,
                 FullTextConfig.DEFAULT_FULL_TEXT_CONFIG_NAME) == null) {
             insertInitialFullTextConfig(mdTxnCtx);
         }

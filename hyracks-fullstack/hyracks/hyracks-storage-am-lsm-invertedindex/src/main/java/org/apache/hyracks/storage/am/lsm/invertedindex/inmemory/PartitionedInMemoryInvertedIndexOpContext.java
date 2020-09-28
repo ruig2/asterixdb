@@ -22,7 +22,7 @@ package org.apache.hyracks.storage.am.lsm.invertedindex.inmemory;
 import org.apache.hyracks.api.dataflow.value.IBinaryComparatorFactory;
 import org.apache.hyracks.storage.am.btree.impls.BTree;
 import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextAnalyzer;
-import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextAnalyzerFactory;
+import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextConfigDescriptor;
 import org.apache.hyracks.storage.am.lsm.invertedindex.tokenizers.IBinaryTokenizer;
 import org.apache.hyracks.storage.am.lsm.invertedindex.tokenizers.IBinaryTokenizerFactory;
 import org.apache.hyracks.storage.am.lsm.invertedindex.util.PartitionedInvertedIndexTokenizingTupleIterator;
@@ -30,8 +30,8 @@ import org.apache.hyracks.storage.am.lsm.invertedindex.util.PartitionedInvertedI
 public class PartitionedInMemoryInvertedIndexOpContext extends InMemoryInvertedIndexOpContext {
 
     public PartitionedInMemoryInvertedIndexOpContext(BTree btree, IBinaryComparatorFactory[] tokenCmpFactories,
-            IBinaryTokenizerFactory tokenizerFactory, IFullTextAnalyzerFactory fullTextAnalyzerFactory) {
-        super(btree, tokenCmpFactories, tokenizerFactory, fullTextAnalyzerFactory);
+            IBinaryTokenizerFactory tokenizerFactory, IFullTextConfigDescriptor fullTextConfigDescriptor) {
+        super(btree, tokenCmpFactories, tokenizerFactory, fullTextConfigDescriptor);
     }
 
     protected void setTokenizingTupleIterator() {

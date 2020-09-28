@@ -19,10 +19,16 @@
 
 package org.apache.hyracks.storage.am.lsm.invertedindex.fulltext;
 
-import java.io.Serializable;
+import java.util.List;
 
-import org.apache.hyracks.api.io.IJsonSerializable;
+import com.google.common.collect.ImmutableList;
 
-public interface IFullTextConfigFactory extends Serializable, IJsonSerializable {
-    IFullTextConfig createFullTextConfig();
+public interface IFullTextConfigDescriptor extends IFullTextEntityDescriptor {
+    IFullTextConfig.TokenizerCategory getTokenizerCategory();
+
+    ImmutableList<IFullTextFilterDescriptor> getFilterDescriptors();
+
+    List<String> getUsedByIndices();
+
+    void addUsedByIndex(String indexName);
 }

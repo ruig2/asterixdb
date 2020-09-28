@@ -43,7 +43,7 @@ import org.apache.asterix.om.types.IAType;
 import org.apache.hyracks.algebricks.common.exceptions.AlgebricksException;
 import org.apache.hyracks.algebricks.core.algebra.properties.DefaultNodeGroupDomain;
 import org.apache.hyracks.algebricks.core.algebra.properties.INodeDomain;
-import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextConfig;
+import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextConfigDescriptor;
 
 public class MetadataManagerUtil {
 
@@ -149,9 +149,9 @@ public class MetadataManagerUtil {
         return MetadataManager.INSTANCE.getSynonym(mdTxnCtx, dataverseName, synonymName);
     }
 
-    public static IFullTextConfig findFullTextConfig(MetadataTransactionContext mdTxnCtx, String ftConfigName)
-            throws AlgebricksException {
-        return MetadataManager.INSTANCE.getFullTextConfig(mdTxnCtx, ftConfigName);
+    public static IFullTextConfigDescriptor findFullTextConfigDescriptor(MetadataTransactionContext mdTxnCtx,
+            String ftConfigName) throws AlgebricksException {
+        return MetadataManager.INSTANCE.getFullTextConfigDescriptor(mdTxnCtx, ftConfigName);
     }
 
     public static List<Index> getDatasetIndexes(MetadataTransactionContext mdTxnCtx, DataverseName dataverseName,

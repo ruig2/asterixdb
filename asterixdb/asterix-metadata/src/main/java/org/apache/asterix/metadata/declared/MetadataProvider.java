@@ -155,11 +155,9 @@ import org.apache.hyracks.storage.am.common.dataflow.IndexDataflowHelperFactory;
 import org.apache.hyracks.storage.am.common.ophelpers.IndexOperation;
 import org.apache.hyracks.storage.am.lsm.btree.dataflow.LSMBTreeBatchPointSearchOperatorDescriptor;
 import org.apache.hyracks.storage.am.lsm.invertedindex.dataflow.BinaryTokenizerOperatorDescriptor;
-import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.FullTextAnalyzer;
 import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.FullTextAnalyzerFactory;
-import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextAnalyzer;
 import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextAnalyzerFactory;
-import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextConfig;
+import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextConfigDescriptor;
 import org.apache.hyracks.storage.am.lsm.invertedindex.tokenizers.IBinaryTokenizerFactory;
 import org.apache.hyracks.storage.am.rtree.dataflow.RTreeSearchOperatorDescriptor;
 import org.apache.hyracks.storage.common.IStorageManager;
@@ -449,8 +447,8 @@ public class MetadataProvider implements IMetadataProvider<DataSourceId, String>
         return MetadataManagerUtil.findSynonym(mdTxnCtx, dataverseName, synonymName);
     }
 
-    public IFullTextConfig findFullTextConfig(String ftConfigName) throws AlgebricksException {
-        return MetadataManagerUtil.findFullTextConfig(mdTxnCtx, ftConfigName);
+    public IFullTextConfigDescriptor findFullTextConfigDescriptor(String ftConfigName) throws AlgebricksException {
+        return MetadataManagerUtil.findFullTextConfigDescriptor(mdTxnCtx, ftConfigName);
     }
 
     @Override
@@ -1653,9 +1651,9 @@ public class MetadataProvider implements IMetadataProvider<DataSourceId, String>
 
             IBinaryTokenizerFactory tokenizerFactory = NonTaggedFormatUtil.getBinaryTokenizerFactory(
                     secondaryKeyType.getTypeTag(), indexType, secondaryIndex.getGramLength());
-            IFullTextAnalyzer analyzer =
-                    new FullTextAnalyzer(findFullTextConfig(secondaryIndex.getFullTextConfigName()));
-            IFullTextAnalyzerFactory fullTextAnalyzerFactory = new FullTextAnalyzerFactory(analyzer);
+            IFullTextConfigDescriptor configDescriptor =
+                    findFullTextConfigDescriptor(secondaryIndex.getFullTextConfigName());
+            IFullTextAnalyzerFactory fullTextAnalyzerFactory = new FullTextAnalyzerFactory(configDescriptor);
 
             Pair<IFileSplitProvider, AlgebricksPartitionConstraint> splitsAndConstraint =
                     getSplitProviderAndConstraints(dataset, secondaryIndex.getIndexName());

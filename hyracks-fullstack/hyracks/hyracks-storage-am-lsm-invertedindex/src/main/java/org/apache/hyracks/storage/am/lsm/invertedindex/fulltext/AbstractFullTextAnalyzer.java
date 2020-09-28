@@ -31,6 +31,7 @@ import com.google.common.collect.ImmutableList;
 public class AbstractFullTextAnalyzer implements IFullTextAnalyzer {
 
     protected IBinaryTokenizer tokenizer;
+    protected ImmutableList<IFullTextFilterDescriptor> filterDescriptors;
     protected ImmutableList<IFullTextFilter> filters;
 
     private IToken currentToken = null;
@@ -47,8 +48,8 @@ public class AbstractFullTextAnalyzer implements IFullTextAnalyzer {
     }
 
     @Override
-    public ImmutableList<IFullTextFilter> getFilters() {
-        return filters;
+    public ImmutableList<IFullTextFilterDescriptor> getFilterDescriptors() {
+        return filterDescriptors;
     }
 
     @Override

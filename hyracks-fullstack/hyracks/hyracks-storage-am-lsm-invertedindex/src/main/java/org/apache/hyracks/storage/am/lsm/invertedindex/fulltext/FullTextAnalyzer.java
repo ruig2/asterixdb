@@ -19,21 +19,11 @@
 
 package org.apache.hyracks.storage.am.lsm.invertedindex.fulltext;
 
-import static org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.AbstractFullTextConfig.OBJECT_MAPPER;
-
 import java.security.InvalidParameterException;
-import java.util.ArrayList;
-import java.util.List;
 
-import org.apache.hyracks.api.exceptions.HyracksDataException;
-import org.apache.hyracks.api.io.IJsonSerializable;
-import org.apache.hyracks.api.io.IPersistedResourceRegistry;
 import org.apache.hyracks.storage.am.lsm.invertedindex.tokenizers.DelimitedUTF8StringBinaryTokenizerFactory;
 import org.apache.hyracks.storage.am.lsm.invertedindex.tokenizers.UTF8WordTokenFactory;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.collect.ImmutableList;
 
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
@@ -41,9 +31,17 @@ import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 public class FullTextAnalyzer extends AbstractFullTextAnalyzer {
     private static final long serialVersionUID = 1L;
 
-    public FullTextAnalyzer(IFullTextConfig.TokenizerCategory tokenizerCategory,
-            ImmutableList<IFullTextFilter> filters) {
-        this.filters = filters;
+    public FullTextAnalyzer(IFullTextConfigDescriptor configDescriptor) {
+        IFullTextConfig.TokenizerCategory tokenizerCategory = configDescriptor.getTokenizerCategory();
+        ImmutableList<IFullTextFilterDescriptor> filterDescriptors = configDescriptor.getFilterDescriptors();
+
+        this.filterDescriptors = filterDescriptors;
+
+        ImmutableList.Builder filtersBuilder = ImmutableList.<IFullTextFilter> builder();
+        for (IFullTextFilterDescriptor d : filterDescriptors) {
+            filtersBuilder.add(d.getEntity());
+        }
+        this.filters = filtersBuilder.build();
 
         switch (tokenizerCategory) {
             case WORD:
@@ -68,38 +66,40 @@ public class FullTextAnalyzer extends AbstractFullTextAnalyzer {
     // to avoid serializing and passing the filters from compile-time nodes to run-time nodes
     // The idea is similar to the descriptor and evaluator of a SQLPP built-in function: descriptor is used at compile-time,
     // and evaluator is used in run-time, and the descriptor contains enough information for the evaluator to run
+    /*
     public FullTextAnalyzer(IFullTextConfig config) {
         this(config.getTokenizerCategory(), config.getFilters());
     }
-
+    
     @Override
     public JsonNode toJson(IPersistedResourceRegistry registry) throws HyracksDataException {
         final ObjectNode json = registry.getClassIdentifier(getClass(), serialVersionUID);
         json.put("tokenizerCategory", tokenizer.getTokenizerCategory().toString());
-
+    
         final ArrayNode filterArray = OBJECT_MAPPER.createArrayNode();
-        for (IFullTextFilter filter : filters) {
+        for (IFullTextFilter filter : filterDescriptors) {
             filterArray.add(filter.toJson(registry));
         }
         json.set("filters", filterArray);
-
+    
         return json;
     }
-
+    
     public static IJsonSerializable fromJson(IPersistedResourceRegistry registry, JsonNode json)
             throws HyracksDataException {
         final String tokenizerCategoryStr = json.get("tokenizerCategory").asText();
         IFullTextConfig.TokenizerCategory tc =
                 IFullTextConfig.TokenizerCategory.getEnumIgnoreCase(tokenizerCategoryStr);
-
+    
         ArrayNode filtersJsonNode = (ArrayNode) json.get("filters");
         List<IFullTextFilter> filterList = new ArrayList<>();
         for (int i = 0; i < filtersJsonNode.size(); i++) {
             filterList.add((IFullTextFilter) registry.deserialize(filtersJsonNode.get(i)));
         }
         ImmutableList<IFullTextFilter> filters = ImmutableList.copyOf(filterList);
-
+    
         return new FullTextAnalyzer(new FullTextConfig(null, tc, filters));
     }
+     */
 
 }

@@ -19,28 +19,14 @@
 
 package org.apache.hyracks.storage.am.lsm.invertedindex.fulltext;
 
-import org.apache.hyracks.storage.am.lsm.invertedindex.tokenizers.IBinaryTokenizer;
-import org.apache.hyracks.storage.am.lsm.invertedindex.tokenizers.IToken;
+import java.io.Serializable;
 
-import com.google.common.collect.ImmutableList;
+import org.apache.hyracks.api.io.IJsonSerializable;
 
-public interface IFullTextAnalyzer {
+public interface IFullTextEntityDescriptor extends Serializable, IJsonSerializable {
+    String getName();
 
-    IBinaryTokenizer getTokenizer();
+    IFullTextEntity getEntity();
 
-    void setTokenizer(IBinaryTokenizer tokenizer);
-
-    ImmutableList<IFullTextFilterDescriptor> getFilterDescriptors();
-
-    void reset(byte[] data, int start, int length);
-
-    IToken getToken();
-
-    boolean hasNext();
-
-    void next();
-
-    // Get the total number of tokens
-    // Currently, it returns the number of tokens in the original text, that means stopwords are still counted
-    int getTokensCount();
+    IFullTextEntity.FullTextEntityCategory getCategory();
 }

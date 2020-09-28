@@ -43,8 +43,8 @@ import org.apache.asterix.metadata.entities.Node;
 import org.apache.asterix.metadata.entities.NodeGroup;
 import org.apache.asterix.metadata.entities.Synonym;
 import org.apache.hyracks.algebricks.common.exceptions.AlgebricksException;
-import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextConfig;
-import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextFilter;
+import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextConfigDescriptor;
+import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextFilterDescriptor;
 
 /**
  * A metadata manager provides user access to Asterix metadata (e.g., types,
@@ -419,21 +419,25 @@ public interface IMetadataManager extends IMetadataBootstrap {
     List<Function> getDataverseFunctions(MetadataTransactionContext ctx, DataverseName dataverseName)
             throws AlgebricksException;
 
-    void addFullTextFilter(MetadataTransactionContext mdTxnCtx, IFullTextFilter filter) throws AlgebricksException;
-
-    IFullTextFilter getFullTextFilter(MetadataTransactionContext mdTxnCtx, String name)
-            throws RemoteException, AlgebricksException;
-
-    void dropFullTextFilter(MetadataTransactionContext mdTxnCtx, String filterName, boolean ifExists)
+    void addFullTextFilterDescriptor(MetadataTransactionContext mdTxnCtx, IFullTextFilterDescriptor filterDescriptor)
             throws AlgebricksException;
 
-    void addFulltextConfig(MetadataTransactionContext mdTxnCtx, IFullTextConfig config) throws AlgebricksException;
+    IFullTextFilterDescriptor getFullTextFilterDescriptor(MetadataTransactionContext mdTxnCtx, String name)
+            throws RemoteException, AlgebricksException;
 
-    void updateFulltextConfig(MetadataTransactionContext mdTxnCtx, IFullTextConfig config) throws AlgebricksException;
+    void dropFullTextFilterDescriptor(MetadataTransactionContext mdTxnCtx, String filterName, boolean ifExists)
+            throws AlgebricksException;
 
-    IFullTextConfig getFullTextConfig(MetadataTransactionContext mdTxnCtx, String name) throws AlgebricksException;
+    void addFulltextConfigDescriptor(MetadataTransactionContext mdTxnCtx, IFullTextConfigDescriptor configDescriptor)
+            throws AlgebricksException;
 
-    void dropFullTextConfig(MetadataTransactionContext mdTxnCtx, String configName, boolean ifExists)
+    void updateFulltextConfigDescriptor(MetadataTransactionContext mdTxnCtx, IFullTextConfigDescriptor configDescriptor)
+            throws AlgebricksException;
+
+    IFullTextConfigDescriptor getFullTextConfigDescriptor(MetadataTransactionContext mdTxnCtx, String name)
+            throws AlgebricksException;
+
+    void dropFullTextConfigDescriptor(MetadataTransactionContext mdTxnCtx, String configName, boolean ifExists)
             throws AlgebricksException;
 
     /**

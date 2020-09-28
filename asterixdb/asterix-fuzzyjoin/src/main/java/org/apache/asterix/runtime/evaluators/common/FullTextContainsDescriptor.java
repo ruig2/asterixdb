@@ -33,10 +33,9 @@ import org.apache.hyracks.algebricks.runtime.base.IEvaluatorContext;
 import org.apache.hyracks.algebricks.runtime.base.IScalarEvaluator;
 import org.apache.hyracks.algebricks.runtime.base.IScalarEvaluatorFactory;
 import org.apache.hyracks.api.exceptions.HyracksDataException;
-import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.FullTextAnalyzer;
 import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.FullTextAnalyzerFactory;
 import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextAnalyzerFactory;
-import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextConfig;
+import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextConfigDescriptor;
 import org.apache.hyracks.util.string.UTF8StringUtil;
 
 @MissingNullInOutFunction
@@ -63,19 +62,19 @@ public class FullTextContainsDescriptor extends AbstractScalarFunctionDynamicDes
     public static final String FULLTEXT_CONFIG_OPTION = "config";
     private static final byte[] FULLTEXT_CONFIG_OPTION_ARRAY =
             UTF8StringUtil.writeStringToBytes(FULLTEXT_CONFIG_OPTION);
-    private IFullTextConfig config;
+    private IFullTextConfigDescriptor configDescriptor;
 
     static {
         paramTypeMap.put(SEARCH_MODE_OPTION, ATypeTag.STRING);
         paramTypeMap.put(FULLTEXT_CONFIG_OPTION, ATypeTag.STRING);
     }
 
-    public FullTextContainsDescriptor(IFullTextConfig config) {
-        this.config = config;
+    public FullTextContainsDescriptor(IFullTextConfigDescriptor configDescriptor) {
+        this.configDescriptor = configDescriptor;
     }
 
-    public static IFunctionDescriptor createFunctionDescriptor(IFullTextConfig config) {
-        return new FullTextContainsDescriptor(config);
+    public static IFunctionDescriptor createFunctionDescriptor(IFullTextConfigDescriptor configDescriptor) {
+        return new FullTextContainsDescriptor(configDescriptor);
     }
 
     /**
@@ -92,8 +91,7 @@ public class FullTextContainsDescriptor extends AbstractScalarFunctionDynamicDes
 
             @Override
             public IScalarEvaluator createScalarEvaluator(IEvaluatorContext ctx) throws HyracksDataException {
-                IFullTextAnalyzerFactory analyzerFactory = new FullTextAnalyzerFactory(
-                        new FullTextAnalyzer(config));
+                IFullTextAnalyzerFactory analyzerFactory = new FullTextAnalyzerFactory(configDescriptor);
 
                 return new FullTextContainsEvaluator(args, ctx, analyzerFactory);
             }

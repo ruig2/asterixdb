@@ -21,20 +21,13 @@ package org.apache.hyracks.storage.am.lsm.invertedindex.fulltext;
 
 import java.util.List;
 
-import org.apache.hyracks.api.exceptions.HyracksDataException;
-import org.apache.hyracks.api.io.IJsonSerializable;
-import org.apache.hyracks.api.io.IPersistedResourceRegistry;
 import org.apache.hyracks.storage.am.lsm.invertedindex.tokenizers.IToken;
 import org.apache.hyracks.storage.am.lsm.invertedindex.tokenizers.TokenizerInfo;
 import org.apache.hyracks.util.string.UTF8StringUtil;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.collect.ImmutableList;
 
 public class StopwordsFullTextFilter extends AbstractFullTextFilter {
-    private static final long serialVersionUID = 1L;
 
     ImmutableList<String> stopwordList;
 
@@ -70,31 +63,4 @@ public class StopwordsFullTextFilter extends AbstractFullTextFilter {
         return token;
     }
 
-    @Override
-    public JsonNode toJson(IPersistedResourceRegistry registry) throws HyracksDataException {
-        final ObjectNode json = registry.getClassIdentifier(getClass(), serialVersionUID);
-        json.put("stopwordsFilterName", name);
-
-        ArrayNode stopwordsArrayNode = AbstractFullTextConfig.OBJECT_MAPPER.createArrayNode();
-        for (String s : stopwordList) {
-            stopwordsArrayNode.add(s);
-        }
-        json.set("stopwordsList", stopwordsArrayNode);
-
-        return json;
-    }
-
-    public static IJsonSerializable fromJson(IPersistedResourceRegistry registry, JsonNode json)
-            throws HyracksDataException {
-        final String name = json.get("stopwordsFilterName").asText();
-
-        ImmutableList.Builder<String> stopwordsBuilder = ImmutableList.<String> builder();
-        JsonNode stopwordsArrayNode = json.get("stopwordsList");
-        for (int i = 0; i < stopwordsArrayNode.size(); i++) {
-            stopwordsBuilder.add(stopwordsArrayNode.get(i).asText());
-        }
-        ImmutableList stopwords = stopwordsBuilder.build();
-
-        return new StopwordsFullTextFilter(name, stopwords);
-    }
 }

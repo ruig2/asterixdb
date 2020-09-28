@@ -31,7 +31,7 @@ import org.apache.hyracks.storage.am.common.api.IPageManager;
 import org.apache.hyracks.storage.am.common.ophelpers.IndexOperation;
 import org.apache.hyracks.storage.am.lsm.invertedindex.api.IInvertedIndexSearcher;
 import org.apache.hyracks.storage.am.lsm.invertedindex.api.IPartitionedInvertedIndex;
-import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextAnalyzerFactory;
+import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextConfigDescriptor;
 import org.apache.hyracks.storage.am.lsm.invertedindex.search.InvertedListPartitions;
 import org.apache.hyracks.storage.am.lsm.invertedindex.search.PartitionedTOccurrenceSearcher;
 import org.apache.hyracks.storage.am.lsm.invertedindex.tokenizers.IBinaryTokenizerFactory;
@@ -48,10 +48,10 @@ public class PartitionedInMemoryInvertedIndex extends InMemoryInvertedIndex impl
     public PartitionedInMemoryInvertedIndex(IBufferCache memBufferCache, IPageManager memFreePageManager,
             ITypeTraits[] invListTypeTraits, IBinaryComparatorFactory[] invListCmpFactories,
             ITypeTraits[] tokenTypeTraits, IBinaryComparatorFactory[] tokenCmpFactories,
-            IBinaryTokenizerFactory tokenizerFactory, IFullTextAnalyzerFactory fullTextAnalyzerFactory,
+            IBinaryTokenizerFactory tokenizerFactory, IFullTextConfigDescriptor fullTextConfigDescriptor,
             FileReference btreeFileRef) throws HyracksDataException {
         super(memBufferCache, memFreePageManager, invListTypeTraits, invListCmpFactories, tokenTypeTraits,
-                tokenCmpFactories, tokenizerFactory, fullTextAnalyzerFactory, btreeFileRef);
+                tokenCmpFactories, tokenizerFactory, fullTextConfigDescriptor, btreeFileRef);
     }
 
     @Override
@@ -89,7 +89,7 @@ public class PartitionedInMemoryInvertedIndex extends InMemoryInvertedIndex impl
     public PartitionedInMemoryInvertedIndexAccessor createAccessor(IIndexAccessParameters iap)
             throws HyracksDataException {
         return new PartitionedInMemoryInvertedIndexAccessor(this, new PartitionedInMemoryInvertedIndexOpContext(btree,
-                tokenCmpFactories, tokenizerFactory, fullTextAnalyzerFactory), iap);
+                tokenCmpFactories, tokenizerFactory, fullTextConfigDescriptor), iap);
     }
 
     @Override

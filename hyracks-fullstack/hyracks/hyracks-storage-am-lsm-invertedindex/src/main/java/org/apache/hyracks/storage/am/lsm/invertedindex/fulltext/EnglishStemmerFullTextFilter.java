@@ -19,13 +19,6 @@
 
 package org.apache.hyracks.storage.am.lsm.invertedindex.fulltext;
 
-import org.apache.hyracks.api.exceptions.HyracksDataException;
-import org.apache.hyracks.api.io.IJsonSerializable;
-import org.apache.hyracks.api.io.IPersistedResourceRegistry;
-
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-
 public class EnglishStemmerFullTextFilter extends AbstractStemmerFullTextFilter {
     private static final long serialVersionUID = 1L;
 
@@ -34,16 +27,18 @@ public class EnglishStemmerFullTextFilter extends AbstractStemmerFullTextFilter 
         this.language = StemmerLanguage.ENGLISH;
     }
 
+    /*
     @Override
     public JsonNode toJson(IPersistedResourceRegistry registry) throws HyracksDataException {
         final ObjectNode json = registry.getClassIdentifier(getClass(), serialVersionUID);
         json.put("englishStemmerFullTextFilterName", name);
         return json;
     }
-
+    
     public static IJsonSerializable fromJson(IPersistedResourceRegistry registry, JsonNode json)
             throws HyracksDataException {
         final String name = json.get("englishStemmerFullTextFilterName").asText();
         return new EnglishStemmerFullTextFilter(name);
     }
+     */
 }

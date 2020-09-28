@@ -18,7 +18,6 @@
  */
 package org.apache.asterix.app.translator;
 
-import static org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.AbstractStemmerFullTextFilter.StemmerLanguage.ENGLISH;
 import static org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextFilter.*;
 
 import java.io.File;
@@ -240,11 +239,12 @@ import org.apache.hyracks.control.cc.ClusterControllerService;
 import org.apache.hyracks.control.common.controllers.CCConfig;
 import org.apache.hyracks.storage.am.lsm.common.api.ILSMMergePolicyFactory;
 import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.AbstractStemmerFullTextFilter;
-import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.EnglishStemmerFullTextFilter;
 import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.FullTextConfig;
+import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.FullTextConfigDescriptor;
 import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextConfig;
-import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextFilter;
-import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.StopwordsFullTextFilter;
+import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextConfigDescriptor;
+import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextFilterDescriptor;
+import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.StopwordsFullTextFilterDescriptor;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -1148,9 +1148,10 @@ public class QueryTranslator extends AbstractLangTranslator implements IStatemen
                     fullTextConfigName = FullTextConfig.DEFAULT_FULL_TEXT_CONFIG_NAME;
                 }
 
-                IFullTextConfig config = MetadataManager.INSTANCE.getFullTextConfig(mdTxnCtx, fullTextConfigName);
-                config.addUsedByIndices(indexName);
-                MetadataManager.INSTANCE.updateFulltextConfig(mdTxnCtx, config);
+                IFullTextConfigDescriptor configDescriptor =
+                        MetadataManager.INSTANCE.getFullTextConfigDescriptor(mdTxnCtx, fullTextConfigName);
+                configDescriptor.addUsedByIndex(indexName);
+                MetadataManager.INSTANCE.updateFulltextConfigDescriptor(mdTxnCtx, configDescriptor);
                 // The transaction should not be committed here, instead, it should be committed after the index created successfully
                 // If the index fails to be created, then the ft config shouldn't be updated
             }
@@ -1188,7 +1189,7 @@ public class QueryTranslator extends AbstractLangTranslator implements IStatemen
         CreateFullTextFilterStatement stmtCreateFilter = (CreateFullTextFilterStatement) stmt;
         RecordConstructor rc = (RecordConstructor) stmtCreateFilter.getExpression();
 
-        IFullTextFilter filter = null;
+        IFullTextFilterDescriptor filterDescriptor = null;
         List<FieldBinding> fbs = rc.getFbList();
 
         if (fbs.size() < 2) {
@@ -1218,7 +1219,8 @@ public class QueryTranslator extends AbstractLangTranslator implements IStatemen
                     stopwordsBuilder.add(((LiteralExpr) l).getValue().getStringValue());
                 }
 
-                filter = new StopwordsFullTextFilter(stmtCreateFilter.getFilterName(), stopwordsBuilder.build());
+                filterDescriptor = new StopwordsFullTextFilterDescriptor(stmtCreateFilter.getFilterName(),
+                        stopwordsBuilder.build(), new ArrayList<String>());
                 break;
             }
 
@@ -1236,7 +1238,7 @@ public class QueryTranslator extends AbstractLangTranslator implements IStatemen
                         AbstractStemmerFullTextFilter.StemmerLanguage.getEnumIgnoreCase(languageStr);
                 switch (language) {
                     case ENGLISH: {
-                        filter = new EnglishStemmerFullTextFilter(stmtCreateFilter.getFilterName());
+                        //filterDescriptor = new EnglishStemmerFullTextFilter(stmtCreateFilter.getFilterName());
                         break;
                     }
 
@@ -1255,7 +1257,7 @@ public class QueryTranslator extends AbstractLangTranslator implements IStatemen
         try {
             mdTxnCtx = MetadataManager.INSTANCE.beginTransaction();
             metadataProvider.setMetadataTxnContext(mdTxnCtx);
-            MetadataManager.INSTANCE.addFullTextFilter(mdTxnCtx, filter);
+            MetadataManager.INSTANCE.addFullTextFilterDescriptor(mdTxnCtx, filterDescriptor);
         } catch (AlgebricksException | RemoteException e) {
             // e.printStackTrace();
             // abort(e, e, mdTxnCtx);
@@ -1310,16 +1312,18 @@ public class QueryTranslator extends AbstractLangTranslator implements IStatemen
             mdTxnCtx = MetadataManager.INSTANCE.beginTransaction();
             metadataProvider.setMetadataTxnContext(mdTxnCtx);
 
-            ImmutableList.Builder<IFullTextFilter> filtersBuilder = ImmutableList.<IFullTextFilter> builder();
+            ImmutableList.Builder<IFullTextFilterDescriptor> filterDescriptorsBuilder =
+                    ImmutableList.<IFullTextFilterDescriptor> builder();
             for (String name : filterNames) {
-                IFullTextFilter filter = MetadataManager.INSTANCE.getFullTextFilter(mdTxnCtx, name);
-                filtersBuilder.add(filter);
+                IFullTextFilterDescriptor filterDescriptor =
+                        MetadataManager.INSTANCE.getFullTextFilterDescriptor(mdTxnCtx, name);
+                filterDescriptorsBuilder.add(filterDescriptor);
             }
 
-            IFullTextConfig config =
-                    new FullTextConfig(stmtCreateFilter.getConfigName(), tokenizerCategory, filtersBuilder.build());
+            IFullTextConfigDescriptor configDescriptor = new FullTextConfigDescriptor(stmtCreateFilter.getConfigName(),
+                    tokenizerCategory, filterDescriptorsBuilder.build());
 
-            MetadataManager.INSTANCE.addFulltextConfig(mdTxnCtx, config);
+            MetadataManager.INSTANCE.addFulltextConfigDescriptor(mdTxnCtx, configDescriptor);
 
             MetadataManager.INSTANCE.commitTransaction(mdTxnCtx);
         } catch (RemoteException e) {
@@ -2110,7 +2114,7 @@ public class QueryTranslator extends AbstractLangTranslator implements IStatemen
         try {
             mdTxnCtx = MetadataManager.INSTANCE.beginTransaction();
             metadataProvider.setMetadataTxnContext(mdTxnCtx);
-            MetadataManager.INSTANCE.dropFullTextFilter(mdTxnCtx, stmtFilterDrop.getFilterName(),
+            MetadataManager.INSTANCE.dropFullTextFilterDescriptor(mdTxnCtx, stmtFilterDrop.getFilterName(),
                     stmtFilterDrop.getIfExists());
             MetadataManager.INSTANCE.commitTransaction(mdTxnCtx);
         } catch (RemoteException e) {
@@ -2133,7 +2137,7 @@ public class QueryTranslator extends AbstractLangTranslator implements IStatemen
         try {
             mdTxnCtx = MetadataManager.INSTANCE.beginTransaction();
             metadataProvider.setMetadataTxnContext(mdTxnCtx);
-            MetadataManager.INSTANCE.dropFullTextConfig(mdTxnCtx, stmtConfigDrop.getConfigName(),
+            MetadataManager.INSTANCE.dropFullTextConfigDescriptor(mdTxnCtx, stmtConfigDrop.getConfigName(),
                     stmtConfigDrop.getIfExists());
             MetadataManager.INSTANCE.commitTransaction(mdTxnCtx);
         } catch (RemoteException e) {

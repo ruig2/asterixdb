@@ -51,7 +51,8 @@ import org.apache.hyracks.storage.am.config.AccessMethodTestsConfig;
 import org.apache.hyracks.storage.am.lsm.common.freepage.VirtualFreePageManager;
 import org.apache.hyracks.storage.am.lsm.invertedindex.api.IInvertedIndex;
 import org.apache.hyracks.storage.am.lsm.invertedindex.common.LSMInvertedIndexTestHarness;
-import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextAnalyzerFactory;
+import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.FullTextAnalyzer;
+import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextConfigDescriptor;
 import org.apache.hyracks.storage.am.lsm.invertedindex.tokenizers.IBinaryTokenizerFactory;
 import org.apache.hyracks.storage.am.lsm.invertedindex.util.LSMInvertedIndexTestUtils.HyracksTaskTestContext;
 import org.apache.hyracks.storage.common.IIndex;
@@ -128,9 +129,9 @@ public class LSMInvertedIndexTestContext extends OrderedIndexTestContext {
 
     public static LSMInvertedIndexTestContext create(LSMInvertedIndexTestHarness harness,
             ISerializerDeserializer[] fieldSerdes, int tokenFieldCount, IBinaryTokenizerFactory tokenizerFactory,
-            IFullTextAnalyzerFactory fullTextAnalyzerFactory, InvertedIndexType invIndexType, int[] invertedIndexFields,
-            ITypeTraits[] filterTypeTraits, IBinaryComparatorFactory[] filterCmpFactories, int[] filterFields,
-            int[] filterFieldsForNonBulkLoadOps, int[] invertedIndexFieldsForNonBulkLoadOps)
+            IFullTextConfigDescriptor fullTextConfigDescriptor, InvertedIndexType invIndexType,
+            int[] invertedIndexFields, ITypeTraits[] filterTypeTraits, IBinaryComparatorFactory[] filterCmpFactories,
+            int[] filterFields, int[] filterFieldsForNonBulkLoadOps, int[] invertedIndexFieldsForNonBulkLoadOps)
             throws HyracksDataException {
         ITypeTraits[] allTypeTraits = SerdeUtils.serdesToTypeTraits(fieldSerdes);
         IOManager ioManager = harness.getIOManager();
@@ -159,7 +160,7 @@ public class LSMInvertedIndexTestContext extends OrderedIndexTestContext {
                 invIndex = InvertedIndexUtils.createInMemoryBTreeInvertedindex(harness.getVirtualBufferCaches().get(0),
                         new VirtualFreePageManager(harness.getVirtualBufferCaches().get(0)), invListTypeTraits,
                         invListCmpFactories, tokenTypeTraits, tokenCmpFactories, tokenizerFactory,
-                        fullTextAnalyzerFactory, ioManager.resolveAbsolutePath(harness.getOnDiskDir()));
+                        fullTextConfigDescriptor, ioManager.resolveAbsolutePath(harness.getOnDiskDir()));
                 break;
             }
             case PARTITIONED_INMEMORY: {
@@ -167,7 +168,7 @@ public class LSMInvertedIndexTestContext extends OrderedIndexTestContext {
                         harness.getVirtualBufferCaches().get(0),
                         new VirtualFreePageManager(harness.getVirtualBufferCaches().get(0)), invListTypeTraits,
                         invListCmpFactories, tokenTypeTraits, tokenCmpFactories, tokenizerFactory,
-                        fullTextAnalyzerFactory, ioManager.resolveAbsolutePath(harness.getOnDiskDir()));
+                        fullTextConfigDescriptor, ioManager.resolveAbsolutePath(harness.getOnDiskDir()));
                 break;
             }
             case ONDISK: {
@@ -185,7 +186,7 @@ public class LSMInvertedIndexTestContext extends OrderedIndexTestContext {
             case LSM: {
                 invIndex = InvertedIndexUtils.createLSMInvertedIndex(ioManager, harness.getVirtualBufferCaches(),
                         invListTypeTraits, invListCmpFactories, tokenTypeTraits, tokenCmpFactories, tokenizerFactory,
-                        fullTextAnalyzerFactory, harness.getDiskBufferCache(), harness.getOnDiskDir(),
+                        fullTextConfigDescriptor, harness.getDiskBufferCache(), harness.getOnDiskDir(),
                         harness.getBoomFilterFalsePositiveRate(), harness.getMergePolicy(),
                         harness.getOperationTracker(), harness.getIOScheduler(),
                         harness.getIOOperationCallbackFactory(), harness.getPageWriteCallbackFactory(),
@@ -199,7 +200,7 @@ public class LSMInvertedIndexTestContext extends OrderedIndexTestContext {
             case PARTITIONED_LSM: {
                 invIndex = InvertedIndexUtils.createPartitionedLSMInvertedIndex(ioManager,
                         harness.getVirtualBufferCaches(), invListTypeTraits, invListCmpFactories, tokenTypeTraits,
-                        tokenCmpFactories, tokenizerFactory, fullTextAnalyzerFactory, harness.getDiskBufferCache(),
+                        tokenCmpFactories, tokenizerFactory, fullTextConfigDescriptor, harness.getDiskBufferCache(),
                         harness.getOnDiskDir(), harness.getBoomFilterFalsePositiveRate(), harness.getMergePolicy(),
                         harness.getOperationTracker(), harness.getIOScheduler(),
                         harness.getIOOperationCallbackFactory(), harness.getPageWriteCallbackFactory(),
@@ -219,17 +220,18 @@ public class LSMInvertedIndexTestContext extends OrderedIndexTestContext {
             case INMEMORY:
             case ONDISK:
             case LSM: {
+                FullTextAnalyzer analyzer = new FullTextAnalyzer(fullTextConfigDescriptor);
                 indexTupleIter = new InvertedIndexTokenizingTupleIterator(invIndex.getTokenTypeTraits().length,
-                        invIndex.getInvListTypeTraits().length, tokenizerFactory.createTokenizer(),
-                        fullTextAnalyzerFactory.createFullTextAnalyzer());
+                        invIndex.getInvListTypeTraits().length, tokenizerFactory.createTokenizer(), analyzer);
                 break;
             }
             case PARTITIONED_INMEMORY:
             case PARTITIONED_ONDISK:
             case PARTITIONED_LSM: {
-                indexTupleIter = new PartitionedInvertedIndexTokenizingTupleIterator(
-                        invIndex.getTokenTypeTraits().length, invIndex.getInvListTypeTraits().length,
-                        tokenizerFactory.createTokenizer(), fullTextAnalyzerFactory.createFullTextAnalyzer());
+                FullTextAnalyzer analyzer = new FullTextAnalyzer(fullTextConfigDescriptor);
+                indexTupleIter =
+                        new PartitionedInvertedIndexTokenizingTupleIterator(invIndex.getTokenTypeTraits().length,
+                                invIndex.getInvListTypeTraits().length, tokenizerFactory.createTokenizer(), analyzer);
                 break;
             }
             default: {

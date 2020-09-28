@@ -58,7 +58,6 @@ import org.apache.hyracks.dataflow.std.sort.ExternalSortOperatorDescriptor;
 import org.apache.hyracks.storage.am.common.dataflow.IIndexDataflowHelperFactory;
 import org.apache.hyracks.storage.am.common.dataflow.IndexDataflowHelperFactory;
 import org.apache.hyracks.storage.am.lsm.invertedindex.dataflow.BinaryTokenizerOperatorDescriptor;
-import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.FullTextAnalyzer;
 import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.FullTextAnalyzerFactory;
 import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextAnalyzerFactory;
 import org.apache.hyracks.storage.am.lsm.invertedindex.tokenizers.IBinaryTokenizerFactory;
@@ -84,7 +83,7 @@ public class SecondaryInvertedIndexOperationsHelper extends SecondaryTreeIndexOp
             SourceLocation sourceLoc) throws AlgebricksException {
         super(dataset, index, metadataProvider, sourceLoc);
         this.fullTextAnalyzerFactory = new FullTextAnalyzerFactory(
-                new FullTextAnalyzer(metadataProvider.findFullTextConfig(index.getFullTextConfigName())));
+                metadataProvider.findFullTextConfigDescriptor(index.getFullTextConfigName()));
     }
 
     @Override

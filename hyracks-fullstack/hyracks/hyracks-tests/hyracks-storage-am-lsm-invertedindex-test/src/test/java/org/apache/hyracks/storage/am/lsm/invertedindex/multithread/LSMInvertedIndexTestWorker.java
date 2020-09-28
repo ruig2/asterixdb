@@ -44,6 +44,7 @@ import org.apache.hyracks.storage.am.common.impls.IndexAccessParameters;
 import org.apache.hyracks.storage.am.config.AccessMethodTestsConfig;
 import org.apache.hyracks.storage.am.lsm.invertedindex.api.IInvertedIndexSearchModifier;
 import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.FullTextAnalyzer;
+import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.FullTextConfigDescriptor;
 import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextConfig;
 import org.apache.hyracks.storage.am.lsm.invertedindex.impls.LSMInvertedIndex;
 import org.apache.hyracks.storage.am.lsm.invertedindex.impls.LSMInvertedIndexAccessor;
@@ -93,8 +94,9 @@ public class LSMInvertedIndexTestWorker extends AbstractIndexTestWorker {
         RangePredicate rangePred = new RangePredicate(null, null, true, true, null, null);
         IBinaryTokenizerFactory tokenizerFactory = invIndex.getTokenizerFactory();
         int searchModifierIndex = Math.abs(rnd.nextInt()) % TEST_SEARCH_MODIFIERS.length;
-        InvertedIndexSearchPredicate searchPred = new InvertedIndexSearchPredicate(tokenizerFactory.createTokenizer(),
-                new FullTextAnalyzer(IFullTextConfig.TokenizerCategory.WORD, ImmutableList.of()),
+        InvertedIndexSearchPredicate searchPred = new InvertedIndexSearchPredicate(
+                tokenizerFactory.createTokenizer(), new FullTextAnalyzer(new FullTextConfigDescriptor("",
+                        IFullTextConfig.TokenizerCategory.WORD, ImmutableList.of(), null)),
                 TEST_SEARCH_MODIFIERS[searchModifierIndex]);
 
         switch (op) {

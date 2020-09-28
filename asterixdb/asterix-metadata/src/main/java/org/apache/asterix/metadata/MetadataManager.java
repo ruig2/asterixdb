@@ -58,8 +58,8 @@ import org.apache.asterix.metadata.entities.Synonym;
 import org.apache.asterix.transaction.management.opcallbacks.AbstractIndexModificationOperationCallback.Operation;
 import org.apache.hyracks.algebricks.common.exceptions.AlgebricksException;
 import org.apache.hyracks.api.exceptions.HyracksDataException;
-import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextConfig;
-import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextFilter;
+import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextConfigDescriptor;
+import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextFilterDescriptor;
 import org.apache.hyracks.util.ExitUtil;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -625,63 +625,59 @@ public abstract class MetadataManager implements IMetadataManager {
     }
 
     @Override
-    public void addFullTextFilter(MetadataTransactionContext mdTxnCtx, IFullTextFilter filter)
+    public void addFullTextFilterDescriptor(MetadataTransactionContext mdTxnCtx, IFullTextFilterDescriptor filter)
             throws AlgebricksException {
-        try {
-            metadataNode.addFulltextFilter(mdTxnCtx.getTxnId(), filter);
-        } catch (RemoteException | HyracksDataException e) {
-            throw new MetadataException(ErrorCode.REMOTE_EXCEPTION_WHEN_CALLING_METADATA_NODE, e);
-        }
+        metadataNode.addFullTextFilterDescriptor(mdTxnCtx.getTxnId(), filter);
     }
 
     @Override
-    public void dropFullTextFilter(MetadataTransactionContext mdTxnCtx, String filterName, boolean ifExists)
+    public void dropFullTextFilterDescriptor(MetadataTransactionContext mdTxnCtx, String filterName, boolean ifExists)
             throws AlgebricksException {
         try {
-            metadataNode.dropFullTextFilter(mdTxnCtx.getTxnId(), filterName, ifExists);
+            metadataNode.dropFullTextFilterDescriptor(mdTxnCtx.getTxnId(), filterName, ifExists);
         } catch (RemoteException e) {
             throw new MetadataException(ErrorCode.REMOTE_EXCEPTION_WHEN_CALLING_METADATA_NODE, e);
         }
     }
 
     @Override
-    public IFullTextFilter getFullTextFilter(MetadataTransactionContext mdTxnCtx, String filterName)
+    public IFullTextFilterDescriptor getFullTextFilterDescriptor(MetadataTransactionContext mdTxnCtx, String filterName)
             throws AlgebricksException {
         // in progress...
         // Support ctx.getFulltextFilter() and cache.getFulltextFilter() similar to the getIndex() logic
 
         try {
-            return metadataNode.getFulltextFilter(mdTxnCtx.getTxnId(), filterName);
-        } catch (AlgebricksException | RemoteException e) {
+            return metadataNode.getFulltextFilterDescriptor(mdTxnCtx.getTxnId(), filterName);
+        } catch (AlgebricksException e) {
             throw new MetadataException(ErrorCode.REMOTE_EXCEPTION_WHEN_CALLING_METADATA_NODE, e);
         }
     }
 
     @Override
-    public void addFulltextConfig(MetadataTransactionContext mdTxnCtx, IFullTextConfig config)
-            throws AlgebricksException {
+    public void addFulltextConfigDescriptor(MetadataTransactionContext mdTxnCtx,
+            IFullTextConfigDescriptor configDescriptor) throws AlgebricksException {
         try {
-            metadataNode.addFullTextConfig(mdTxnCtx.getTxnId(), config);
+            metadataNode.addFullTextConfigDescriptor(mdTxnCtx.getTxnId(), configDescriptor);
         } catch (RemoteException e) {
             throw new MetadataException(ErrorCode.REMOTE_EXCEPTION_WHEN_CALLING_METADATA_NODE, e);
         }
     }
 
     @Override
-    public IFullTextConfig getFullTextConfig(MetadataTransactionContext mdTxnCtx, String configName)
+    public IFullTextConfigDescriptor getFullTextConfigDescriptor(MetadataTransactionContext mdTxnCtx, String configName)
             throws AlgebricksException {
         try {
-            return metadataNode.getFullTextConfig(mdTxnCtx.getTxnId(), configName);
+            return metadataNode.getFullTextConfigDescriptor(mdTxnCtx.getTxnId(), configName);
         } catch (AlgebricksException | RemoteException e) {
             throw new MetadataException(ErrorCode.REMOTE_EXCEPTION_WHEN_CALLING_METADATA_NODE, e);
         }
     }
 
     @Override
-    public void updateFulltextConfig(MetadataTransactionContext mdTxnCtx, IFullTextConfig config)
-            throws AlgebricksException {
+    public void updateFulltextConfigDescriptor(MetadataTransactionContext mdTxnCtx,
+            IFullTextConfigDescriptor configDescriptor) throws AlgebricksException {
         try {
-            metadataNode.updateFullTextConfig(mdTxnCtx.getTxnId(), config);
+            metadataNode.updateFullTextConfigDescriptor(mdTxnCtx.getTxnId(), configDescriptor);
         } catch (HyracksDataException | RemoteException e) {
             throw new MetadataException(e);
         }
@@ -695,17 +691,17 @@ public abstract class MetadataManager implements IMetadataManager {
     private void removeUsedByIndicesFromFullTextConfig(MetadataTransactionContext mdTxnCtx, String indexName)
             throws AlgebricksException {
         try {
-            metadataNode.removeUsedByIndicesFromFullTextConfig(mdTxnCtx.getTxnId(), indexName);
+            metadataNode.removeUsedByIndicesFromFullTextConfigDescriptor(mdTxnCtx.getTxnId(), indexName);
         } catch (RemoteException e) {
             throw new AlgebricksException(e);
         }
     }
 
     @Override
-    public void dropFullTextConfig(MetadataTransactionContext mdTxnCtx, String configName, boolean ifExists)
+    public void dropFullTextConfigDescriptor(MetadataTransactionContext mdTxnCtx, String configName, boolean ifExists)
             throws AlgebricksException {
         try {
-            metadataNode.dropFullTextConfig(mdTxnCtx.getTxnId(), configName, ifExists);
+            metadataNode.dropFullTextConfigDescriptor(mdTxnCtx.getTxnId(), configName, ifExists);
         } catch (RemoteException e) {
             throw new AlgebricksException(e);
         }

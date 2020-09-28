@@ -89,8 +89,7 @@ import org.apache.hyracks.storage.am.lsm.invertedindex.api.IInvertedIndexSearchM
 import org.apache.hyracks.storage.am.lsm.invertedindex.api.IInvertedListCursor;
 import org.apache.hyracks.storage.am.lsm.invertedindex.common.LSMInvertedIndexTestHarness;
 import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.FullTextAnalyzer;
-import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.FullTextAnalyzerFactory;
-import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextAnalyzerFactory;
+import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.FullTextConfigDescriptor;
 import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextConfig;
 import org.apache.hyracks.storage.am.lsm.invertedindex.impls.LSMInvertedIndexAccessor;
 import org.apache.hyracks.storage.am.lsm.invertedindex.impls.LSMInvertedIndexMergeCursor;
@@ -124,8 +123,8 @@ public class LSMInvertedIndexTestUtils {
 
     public static final int TEST_GRAM_LENGTH = 3;
 
-    public static IFullTextAnalyzerFactory ftFactory = new FullTextAnalyzerFactory(
-            new FullTextAnalyzer(IFullTextConfig.TokenizerCategory.WORD, ImmutableList.of()));
+    public static FullTextConfigDescriptor ftFactory =
+            new FullTextConfigDescriptor("", IFullTextConfig.TokenizerCategory.WORD, ImmutableList.of(), null);
 
     public static TupleGenerator createStringDocumentTupleGen(Random rnd) throws IOException {
         IFieldValueGenerator[] fieldGens = new IFieldValueGenerator[2];
@@ -570,8 +569,9 @@ public class LSMInvertedIndexTestUtils {
         iap.getParameters().put(HyracksConstants.HYRACKS_TASK_CONTEXT, ctx);
         IInvertedIndexAccessor accessor = (IInvertedIndexAccessor) invIndex.createAccessor(iap);
         IBinaryTokenizer tokenizer = testCtx.getTokenizerFactory().createTokenizer();
-        InvertedIndexSearchPredicate searchPred = new InvertedIndexSearchPredicate(tokenizer,
-                new FullTextAnalyzer(IFullTextConfig.TokenizerCategory.WORD, ImmutableList.of()), searchModifier);
+        InvertedIndexSearchPredicate searchPred = new InvertedIndexSearchPredicate(tokenizer, new FullTextAnalyzer(
+                new FullTextConfigDescriptor("", IFullTextConfig.TokenizerCategory.WORD, ImmutableList.of(), null)),
+                searchModifier);
         List<ITupleReference> documentCorpus = testCtx.getDocumentCorpus();
         // Project away the primary-key field.
         int[] fieldPermutation = new int[] { 0 };

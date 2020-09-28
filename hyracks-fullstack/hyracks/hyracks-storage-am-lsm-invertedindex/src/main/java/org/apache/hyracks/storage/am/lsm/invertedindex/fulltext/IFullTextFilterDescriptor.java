@@ -19,28 +19,12 @@
 
 package org.apache.hyracks.storage.am.lsm.invertedindex.fulltext;
 
-import org.apache.hyracks.storage.am.lsm.invertedindex.tokenizers.IBinaryTokenizer;
-import org.apache.hyracks.storage.am.lsm.invertedindex.tokenizers.IToken;
+import java.util.List;
 
-import com.google.common.collect.ImmutableList;
+public interface IFullTextFilterDescriptor extends IFullTextEntityDescriptor {
+    List<String> getUsedByConfigs();
 
-public interface IFullTextAnalyzer {
+    void addUsedByConfig(String usedByConfig);
 
-    IBinaryTokenizer getTokenizer();
-
-    void setTokenizer(IBinaryTokenizer tokenizer);
-
-    ImmutableList<IFullTextFilterDescriptor> getFilterDescriptors();
-
-    void reset(byte[] data, int start, int length);
-
-    IToken getToken();
-
-    boolean hasNext();
-
-    void next();
-
-    // Get the total number of tokens
-    // Currently, it returns the number of tokens in the original text, that means stopwords are still counted
-    int getTokensCount();
+    List<String> deleteUsedByConfig(String usedByConfig);
 }

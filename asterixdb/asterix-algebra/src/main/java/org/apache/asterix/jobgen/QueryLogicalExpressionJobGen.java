@@ -55,7 +55,7 @@ import org.apache.hyracks.algebricks.runtime.base.ISerializedAggregateEvaluatorF
 import org.apache.hyracks.algebricks.runtime.base.IUnnestingEvaluatorFactory;
 import org.apache.hyracks.algebricks.runtime.evaluators.ColumnAccessEvalFactory;
 import org.apache.hyracks.api.exceptions.SourceLocation;
-import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextConfig;
+import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextConfigDescriptor;
 
 public class QueryLogicalExpressionJobGen implements ILogicalExpressionJobGen {
 
@@ -156,9 +156,9 @@ public class QueryLogicalExpressionJobGen implements ILogicalExpressionJobGen {
                 // 2. the query keywords in the function arguments need to be proceeded by the full-text config
                 //    and then used to lookup full-text index
                 String fullTextConfigName = FullTextUtil.getFullTextConfigNameFromExpr(expr);
-                IFullTextConfig config =
-                        ((MetadataProvider) context.getMetadataProvider()).findFullTextConfig(fullTextConfigName);
-                fd = FullTextContainsDescriptor.createFunctionDescriptor(config);
+                IFullTextConfigDescriptor configDescriptor = ((MetadataProvider) context.getMetadataProvider())
+                        .findFullTextConfigDescriptor(fullTextConfigName);
+                fd = FullTextContainsDescriptor.createFunctionDescriptor(configDescriptor);
                 fd.setSourceLocation(expr.getSourceLocation());
             } else {
                 // Expr is an internal (built-in) function

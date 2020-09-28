@@ -111,12 +111,8 @@ import org.apache.hyracks.storage.am.lsm.common.impls.NoMergePolicyFactory;
 import org.apache.hyracks.storage.am.lsm.common.impls.NoOpIOOperationCallbackFactory;
 import org.apache.hyracks.storage.am.lsm.common.impls.PrefixMergePolicyFactory;
 import org.apache.hyracks.storage.am.lsm.invertedindex.dataflow.LSMInvertedIndexLocalResource;
-import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.EnglishStemmerFullTextFilter;
-import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.FullTextAnalyzer;
-import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.FullTextAnalyzerFactory;
-import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.FullTextConfig;
-import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.FullTextConfigFactory;
-import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.StopwordsFullTextFilter;
+import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.FullTextConfigDescriptor;
+import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.StopwordsFullTextFilterDescriptor;
 import org.apache.hyracks.storage.am.lsm.invertedindex.tokenizers.DelimitedUTF8StringBinaryTokenizerFactory;
 import org.apache.hyracks.storage.am.lsm.invertedindex.tokenizers.HashedUTF8NGramTokenFactory;
 import org.apache.hyracks.storage.am.lsm.invertedindex.tokenizers.HashedUTF8WordTokenFactory;
@@ -280,12 +276,14 @@ public class PersistedResourceRegistry implements IPersistedResourceRegistry {
                 DelimitedUTF8StringBinaryTokenizerFactory.class);
 
         // IFullTextConfigFactory
-        registeredClasses.put("FullTextConfigFactory", FullTextConfigFactory.class);
-        registeredClasses.put("FullTextConfig", FullTextConfig.class);
+        registeredClasses.put("FullTextConfigDescriptor", FullTextConfigDescriptor.class);
+        registeredClasses.put("StopwordsFullTextFilterDescriptor", StopwordsFullTextFilterDescriptor.class);
+        /*
         registeredClasses.put("FullTextAnalyzerFactory", FullTextAnalyzerFactory.class);
         registeredClasses.put("FullTextAnalyzer", FullTextAnalyzer.class);
         registeredClasses.put("StopwordsFullTextFilter", StopwordsFullTextFilter.class);
         registeredClasses.put("EnglishStemmerFullTextFilter", EnglishStemmerFullTextFilter.class);
+         */
 
         // ITokenFactory
         registeredClasses.put("AListElementTokenFactory", AListElementTokenFactory.class);

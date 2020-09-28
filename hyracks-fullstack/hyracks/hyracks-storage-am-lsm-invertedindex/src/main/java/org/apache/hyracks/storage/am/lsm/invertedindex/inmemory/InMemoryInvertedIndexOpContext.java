@@ -27,8 +27,10 @@ import org.apache.hyracks.storage.am.btree.impls.RangePredicate;
 import org.apache.hyracks.storage.am.common.api.IIndexOperationContext;
 import org.apache.hyracks.storage.am.common.impls.NoOpIndexAccessParameters;
 import org.apache.hyracks.storage.am.common.ophelpers.IndexOperation;
+import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.FullTextAnalyzerFactory;
 import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextAnalyzer;
 import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextAnalyzerFactory;
+import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextConfigDescriptor;
 import org.apache.hyracks.storage.am.lsm.invertedindex.tokenizers.IBinaryTokenizer;
 import org.apache.hyracks.storage.am.lsm.invertedindex.tokenizers.IBinaryTokenizerFactory;
 import org.apache.hyracks.storage.am.lsm.invertedindex.util.InvertedIndexTokenizingTupleIterator;
@@ -48,16 +50,19 @@ public class InMemoryInvertedIndexOpContext implements IIndexOperationContext {
 
     // To generate in-memory BTree tuples for insertions.
     private final IBinaryTokenizerFactory tokenizerFactory;
+    private final IFullTextConfigDescriptor fullTextConfigDescriptor;
     private final IFullTextAnalyzerFactory fullTextAnalyzerFactory;
     private InvertedIndexTokenizingTupleIterator tupleIter;
     private boolean destroyed = false;
 
     InMemoryInvertedIndexOpContext(BTree btree, IBinaryComparatorFactory[] tokenCmpFactories,
-            IBinaryTokenizerFactory tokenizerFactory, IFullTextAnalyzerFactory fullTextAnalyzerFactory) {
+            IBinaryTokenizerFactory tokenizerFactory, IFullTextConfigDescriptor fullTextConfigDescriptor) {
         this.btree = btree;
         this.tokenCmpFactories = tokenCmpFactories;
         this.tokenizerFactory = tokenizerFactory;
-        this.fullTextAnalyzerFactory = fullTextAnalyzerFactory;
+        this.fullTextConfigDescriptor = fullTextConfigDescriptor;
+
+        this.fullTextAnalyzerFactory = new FullTextAnalyzerFactory(fullTextConfigDescriptor);
     }
 
     @Override

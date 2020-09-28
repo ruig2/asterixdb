@@ -45,8 +45,8 @@ import org.apache.asterix.metadata.entities.Synonym;
 import org.apache.asterix.transaction.management.opcallbacks.AbstractIndexModificationOperationCallback;
 import org.apache.hyracks.algebricks.common.exceptions.AlgebricksException;
 import org.apache.hyracks.api.exceptions.HyracksDataException;
-import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextConfig;
-import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextFilter;
+import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextConfigDescriptor;
+import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextFilterDescriptor;
 
 /**
  * A metadata node stores metadata in its local storage structures (currently
@@ -448,25 +448,27 @@ public interface IMetadataNode extends Remote, Serializable {
      */
     void addFunction(TxnId txnId, Function function) throws AlgebricksException, RemoteException;
 
-    void addFulltextFilter(TxnId txnId, IFullTextFilter filter)
-            throws AlgebricksException, RemoteException, HyracksDataException;
+    void addFullTextFilterDescriptor(TxnId txnId, IFullTextFilterDescriptor filterDescriptor)
+            throws AlgebricksException;
 
-    IFullTextFilter getFulltextFilter(TxnId txnId, String filterName) throws RemoteException, AlgebricksException;
+    IFullTextFilterDescriptor getFulltextFilterDescriptor(TxnId txnId, String filterName) throws AlgebricksException;
 
-    void removeUsedByIndicesFromFullTextConfig(TxnId txnId, String indexName)
+    void removeUsedByIndicesFromFullTextConfigDescriptor(TxnId txnId, String indexName)
             throws RemoteException, AlgebricksException;
 
-    void dropFullTextFilter(TxnId txnId, String filterName, boolean ifExists)
+    void dropFullTextFilterDescriptor(TxnId txnId, String filterName, boolean ifExists)
             throws RemoteException, AlgebricksException;
 
-    void addFullTextConfig(TxnId txnId, IFullTextConfig config) throws AlgebricksException, RemoteException;
+    void addFullTextConfigDescriptor(TxnId txnId, IFullTextConfigDescriptor config)
+            throws AlgebricksException, RemoteException;
 
-    IFullTextConfig getFullTextConfig(TxnId txnId, String name) throws AlgebricksException, RemoteException;
+    IFullTextConfigDescriptor getFullTextConfigDescriptor(TxnId txnId, String name)
+            throws AlgebricksException, RemoteException;
 
-    void updateFullTextConfig(TxnId txnId, IFullTextConfig config)
+    void updateFullTextConfigDescriptor(TxnId txnId, IFullTextConfigDescriptor config)
             throws HyracksDataException, AlgebricksException, RemoteException;
 
-    void dropFullTextConfig(TxnId txnId, String configName, boolean ifExists)
+    void dropFullTextConfigDescriptor(TxnId txnId, String configName, boolean ifExists)
             throws RemoteException, AlgebricksException;
 
     /**
