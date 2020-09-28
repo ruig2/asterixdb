@@ -79,7 +79,8 @@ public class Index implements IMetadataEntity<Index>, Comparable<Index> {
         this.keyFieldSourceIndicators = keyFieldSourceIndicators;
         this.keyFieldTypes = keyFieldTypes;
         this.gramLength = gramLength;
-        if ((indexType == IndexType.SINGLE_PARTITION_WORD_INVIX || indexType == IndexType.LENGTH_PARTITIONED_WORD_INVIX) && Strings.isNullOrEmpty(fullTextConfigName)) {
+        if ((indexType == IndexType.SINGLE_PARTITION_WORD_INVIX || indexType == IndexType.LENGTH_PARTITIONED_WORD_INVIX)
+                && Strings.isNullOrEmpty(fullTextConfigName)) {
             this.fullTextConfigName = DEFAULT_FULL_TEXT_CONFIG_NAME;
         } else {
             this.fullTextConfigName = fullTextConfigName;

@@ -54,6 +54,7 @@ public class FullTextContainsDescriptor extends AbstractScalarFunctionDynamicDes
             UTF8StringUtil.writeStringToBytes(DISJUNCTIVE_SEARCH_MODE_OPTION);
     private static final byte[] CONJUNCTIVE_SEARCH_MODE_OPTION_ARRAY =
             UTF8StringUtil.writeStringToBytes(CONJUNCTIVE_SEARCH_MODE_OPTION);
+
     public enum SEARCH_MODE {
         ANY,
         ALL;
@@ -92,7 +93,7 @@ public class FullTextContainsDescriptor extends AbstractScalarFunctionDynamicDes
             @Override
             public IScalarEvaluator createScalarEvaluator(IEvaluatorContext ctx) throws HyracksDataException {
                 IFullTextAnalyzerFactory analyzerFactory = new FullTextAnalyzerFactory(
-                        new FullTextAnalyzer(config.getTokenizerCategory(), config.getFilters()));
+                        new FullTextAnalyzer(config));
 
                 return new FullTextContainsEvaluator(args, ctx, analyzerFactory);
             }

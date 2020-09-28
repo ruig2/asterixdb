@@ -19,15 +19,13 @@
 
 package org.apache.hyracks.storage.am.lsm.invertedindex.fulltext;
 
-import java.io.Serializable;
-
 import org.apache.hyracks.api.io.IJsonSerializable;
 import org.apache.hyracks.storage.am.lsm.invertedindex.tokenizers.IBinaryTokenizer;
 import org.apache.hyracks.storage.am.lsm.invertedindex.tokenizers.IToken;
 
 import com.google.common.collect.ImmutableList;
 
-public interface IFullTextAnalyzer extends Serializable, IJsonSerializable {
+public interface IFullTextAnalyzer extends IJsonSerializable {
 
     IBinaryTokenizer getTokenizer();
 

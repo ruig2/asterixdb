@@ -96,7 +96,6 @@ import org.apache.asterix.external.indexing.IndexingConstants;
 import org.apache.asterix.external.operators.FeedIntakeOperatorNodePushable;
 import org.apache.asterix.external.util.ExternalDataConstants;
 import org.apache.asterix.external.util.ExternalDataUtils;
-import org.apache.asterix.formats.nontagged.TypeTraitProvider;
 import org.apache.asterix.lang.common.base.Expression;
 import org.apache.asterix.lang.common.base.IReturningStatement;
 import org.apache.asterix.lang.common.base.IRewriterFactory;
@@ -227,7 +226,6 @@ import org.apache.hyracks.algebricks.runtime.serializer.ResultSerializerFactoryP
 import org.apache.hyracks.algebricks.runtime.writers.PrinterBasedWriterFactory;
 import org.apache.hyracks.api.client.IClusterInfoCollector;
 import org.apache.hyracks.api.client.IHyracksClientConnection;
-import org.apache.hyracks.api.dataflow.value.ITypeTraits;
 import org.apache.hyracks.api.exceptions.HyracksDataException;
 import org.apache.hyracks.api.exceptions.SourceLocation;
 import org.apache.hyracks.api.exceptions.Warning;
@@ -1194,7 +1192,8 @@ public class QueryTranslator extends AbstractLangTranslator implements IStatemen
         List<FieldBinding> fbs = rc.getFbList();
 
         if (fbs.size() < 2) {
-            throw CompilationException.create(ErrorCode.TYPE_UNSUPPORTED, "number of parameters for the filter is less than expected");
+            throw CompilationException.create(ErrorCode.TYPE_UNSUPPORTED,
+                    "number of parameters for the filter is less than expected");
         }
 
         String leftStr = ((LiteralExpr) fbs.get(0).getLeftExpr()).getValue().getStringValue().toLowerCase();

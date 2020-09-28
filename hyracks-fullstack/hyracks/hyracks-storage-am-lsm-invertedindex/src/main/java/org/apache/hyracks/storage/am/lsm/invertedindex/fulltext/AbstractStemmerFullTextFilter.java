@@ -19,8 +19,6 @@
 
 package org.apache.hyracks.storage.am.lsm.invertedindex.fulltext;
 
-import java.io.IOException;
-
 import org.apache.commons.lang3.EnumUtils;
 import org.apache.hyracks.data.std.util.GrowableArray;
 import org.apache.hyracks.data.std.util.UTF8StringBuilder;
@@ -30,6 +28,8 @@ import org.apache.hyracks.storage.am.lsm.invertedindex.tokenizers.UTF8WordToken;
 import org.apache.hyracks.util.string.UTF8StringUtil;
 
 import opennlp.tools.stemmer.snowball.SnowballStemmer;
+
+import java.io.IOException;
 
 public abstract class AbstractStemmerFullTextFilter extends AbstractFullTextFilter {
     private static final long serialVersionUID = 1L;
@@ -105,8 +105,8 @@ public abstract class AbstractStemmerFullTextFilter extends AbstractFullTextFilt
                     (byte) 3 // ATypeTag.SERIALIZED_INT32_TYPE_TAG
             );
 
-            UTF8StringBuilder stringBuilder = new UTF8StringBuilder();
             GrowableArray array = new GrowableArray();
+            UTF8StringBuilder stringBuilder = new UTF8StringBuilder();
             try {
                 stringBuilder.reset(array, stemmedStr.length());
                 stringBuilder.appendString(stemmedStr);

@@ -19,10 +19,8 @@
 
 package org.apache.hyracks.storage.am.lsm.invertedindex.fulltext;
 
-import java.io.Serializable;
-
 import org.apache.hyracks.api.io.IJsonSerializable;
 
-public interface IFullTextAnalyzerFactory extends Serializable, IJsonSerializable {
+public interface IFullTextAnalyzerFactory extends IJsonSerializable {
     IFullTextAnalyzer createFullTextAnalyzer();
 }

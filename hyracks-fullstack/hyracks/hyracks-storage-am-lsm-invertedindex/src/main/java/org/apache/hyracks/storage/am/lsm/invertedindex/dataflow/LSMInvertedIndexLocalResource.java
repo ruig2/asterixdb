@@ -44,6 +44,7 @@ import org.apache.hyracks.storage.am.lsm.common.api.IVirtualBufferCacheProvider;
 import org.apache.hyracks.storage.am.lsm.common.dataflow.LsmResource;
 import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.FullTextAnalyzer;
 import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.FullTextAnalyzerFactory;
+import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.FullTextConfig;
 import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextAnalyzerFactory;
 import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextConfig;
 import org.apache.hyracks.storage.am.lsm.invertedindex.tokenizers.IBinaryTokenizerFactory;

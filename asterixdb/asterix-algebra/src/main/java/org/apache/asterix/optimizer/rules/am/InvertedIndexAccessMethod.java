@@ -932,7 +932,8 @@ public class InvertedIndexAccessMethod implements IAccessMethod {
             throws CompilationException {
 
         if (funcExpr.getArguments().size() % 2 != 0) {
-            throw new CompilationException(ErrorCode.TYPE_MISMATCH_FUNCTION, "Number of full-text function arguments should be even");
+            throw new CompilationException(ErrorCode.TYPE_MISMATCH_FUNCTION,
+                    "Number of full-text function arguments should be even");
         }
 
         // From the third argument, it contains full-text search options.

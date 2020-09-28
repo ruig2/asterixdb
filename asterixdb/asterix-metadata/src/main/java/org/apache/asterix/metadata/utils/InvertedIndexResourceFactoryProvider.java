@@ -125,7 +125,7 @@ public class InvertedIndexResourceFactoryProvider implements IResourceFactoryPro
         IBinaryTokenizerFactory tokenizerFactory = getTokenizerFactory(dataset, index, recordType, metaType);
         IFullTextConfig fullTextConfig = mdProvider.findFullTextConfig(index.getFullTextConfigName());
         IFullTextAnalyzerFactory fullTextAnalyzerFactory = new FullTextAnalyzerFactory(
-                new FullTextAnalyzer(fullTextConfig.getTokenizerCategory(), fullTextConfig.getFilters()));
+                new FullTextAnalyzer(fullTextConfig));
 
         return new LSMInvertedIndexLocalResourceFactory(storageManager, typeTraits, cmpFactories, filterTypeTraits,
                 filterCmpFactories, secondaryFilterFields, opTrackerFactory, ioOpCallbackFactory,

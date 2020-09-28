@@ -54,8 +54,6 @@ import org.apache.hyracks.storage.am.lsm.invertedindex.tokenizers.DelimitedUTF8S
 import org.apache.hyracks.storage.am.lsm.invertedindex.tokenizers.IBinaryTokenizer;
 import org.apache.hyracks.storage.am.lsm.invertedindex.tokenizers.IToken;
 import org.apache.hyracks.util.string.UTF8StringUtil;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 public class FullTextContainsEvaluator implements IScalarEvaluator {
 

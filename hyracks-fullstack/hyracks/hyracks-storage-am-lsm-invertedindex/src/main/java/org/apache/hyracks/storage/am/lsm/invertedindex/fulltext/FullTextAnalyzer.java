@@ -43,10 +43,6 @@ public class FullTextAnalyzer extends AbstractFullTextAnalyzer {
 
     public FullTextAnalyzer(IFullTextConfig.TokenizerCategory tokenizerCategory,
             ImmutableList<IFullTextFilter> filters) {
-        // ToDo: similar to tokenizerCategory, pass a few descriptors of the filters instead of the entire filters when constructing an analyzer
-        // to avoid serializing and passing the filters from compile-time nodes to run-time nodes
-        // The idea is similar to the descriptor and evaluator of a SQLPP built-in function: descriptor is used at compile-time,
-        // and evaluator is used in run-time, and the descriptor contains enough information for the evaluator to run
         this.filters = filters;
 
         switch (tokenizerCategory) {
@@ -68,6 +64,10 @@ public class FullTextAnalyzer extends AbstractFullTextAnalyzer {
         }
     }
 
+    // ToDo: similar to tokenizerCategory, pass a few descriptors of the filters instead of the entire filters when constructing an analyzer
+    // to avoid serializing and passing the filters from compile-time nodes to run-time nodes
+    // The idea is similar to the descriptor and evaluator of a SQLPP built-in function: descriptor is used at compile-time,
+    // and evaluator is used in run-time, and the descriptor contains enough information for the evaluator to run
     public FullTextAnalyzer(IFullTextConfig config) {
         this(config.getTokenizerCategory(), config.getFilters());
     }
@@ -99,7 +99,7 @@ public class FullTextAnalyzer extends AbstractFullTextAnalyzer {
         }
         ImmutableList<IFullTextFilter> filters = ImmutableList.copyOf(filterList);
 
-        return new FullTextAnalyzer(tc, filters);
+        return new FullTextAnalyzer(new FullTextConfig(null, tc, filters));
     }
 
 }
