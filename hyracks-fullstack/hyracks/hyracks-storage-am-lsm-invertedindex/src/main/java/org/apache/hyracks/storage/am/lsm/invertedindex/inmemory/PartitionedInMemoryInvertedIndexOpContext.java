@@ -21,6 +21,7 @@ package org.apache.hyracks.storage.am.lsm.invertedindex.inmemory;
 
 import org.apache.hyracks.api.dataflow.value.IBinaryComparatorFactory;
 import org.apache.hyracks.storage.am.btree.impls.BTree;
+import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.FullTextAnalyzer;
 import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextAnalyzer;
 import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextConfigDescriptor;
 import org.apache.hyracks.storage.am.lsm.invertedindex.tokenizers.IBinaryTokenizer;
@@ -36,7 +37,7 @@ public class PartitionedInMemoryInvertedIndexOpContext extends InMemoryInvertedI
 
     protected void setTokenizingTupleIterator() {
         IBinaryTokenizer tokenizer = getTokenizerFactory().createTokenizer();
-        IFullTextAnalyzer fullTextAnalyzer = getFullTextAnalyzerFactory().createFullTextAnalyzer();
+        IFullTextAnalyzer fullTextAnalyzer = new FullTextAnalyzer(getFullTextConfigDescriptor());
         setTupleIter(new PartitionedInvertedIndexTokenizingTupleIterator(tokenCmpFactories.length,
                 btree.getFieldCount() - tokenCmpFactories.length, tokenizer, fullTextAnalyzer));
     }

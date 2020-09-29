@@ -27,9 +27,8 @@ import org.apache.hyracks.storage.am.btree.impls.RangePredicate;
 import org.apache.hyracks.storage.am.common.api.IIndexOperationContext;
 import org.apache.hyracks.storage.am.common.impls.NoOpIndexAccessParameters;
 import org.apache.hyracks.storage.am.common.ophelpers.IndexOperation;
-import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.FullTextAnalyzerFactory;
+import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.FullTextAnalyzer;
 import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextAnalyzer;
-import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextAnalyzerFactory;
 import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextConfigDescriptor;
 import org.apache.hyracks.storage.am.lsm.invertedindex.tokenizers.IBinaryTokenizer;
 import org.apache.hyracks.storage.am.lsm.invertedindex.tokenizers.IBinaryTokenizerFactory;
@@ -51,7 +50,6 @@ public class InMemoryInvertedIndexOpContext implements IIndexOperationContext {
     // To generate in-memory BTree tuples for insertions.
     private final IBinaryTokenizerFactory tokenizerFactory;
     private final IFullTextConfigDescriptor fullTextConfigDescriptor;
-    private final IFullTextAnalyzerFactory fullTextAnalyzerFactory;
     private InvertedIndexTokenizingTupleIterator tupleIter;
     private boolean destroyed = false;
 
@@ -61,8 +59,6 @@ public class InMemoryInvertedIndexOpContext implements IIndexOperationContext {
         this.tokenCmpFactories = tokenCmpFactories;
         this.tokenizerFactory = tokenizerFactory;
         this.fullTextConfigDescriptor = fullTextConfigDescriptor;
-
-        this.fullTextAnalyzerFactory = new FullTextAnalyzerFactory(fullTextConfigDescriptor);
     }
 
     @Override
@@ -103,7 +99,7 @@ public class InMemoryInvertedIndexOpContext implements IIndexOperationContext {
 
     protected void setTokenizingTupleIterator() {
         IBinaryTokenizer tokenizer = tokenizerFactory.createTokenizer();
-        IFullTextAnalyzer fullTextAnalyzer = fullTextAnalyzerFactory.createFullTextAnalyzer();
+        IFullTextAnalyzer fullTextAnalyzer = new FullTextAnalyzer(fullTextConfigDescriptor);
         tupleIter = new InvertedIndexTokenizingTupleIterator(tokenCmpFactories.length,
                 btree.getFieldCount() - tokenCmpFactories.length, tokenizer, fullTextAnalyzer);
     }
@@ -132,8 +128,8 @@ public class InMemoryInvertedIndexOpContext implements IIndexOperationContext {
         return tokenizerFactory;
     }
 
-    public IFullTextAnalyzerFactory getFullTextAnalyzerFactory() {
-        return fullTextAnalyzerFactory;
+    public IFullTextConfigDescriptor getFullTextConfigDescriptor() {
+        return fullTextConfigDescriptor;
     }
 
     public void setTupleIter(InvertedIndexTokenizingTupleIterator tupleIter) {

@@ -33,8 +33,6 @@ import org.apache.hyracks.algebricks.runtime.base.IEvaluatorContext;
 import org.apache.hyracks.algebricks.runtime.base.IScalarEvaluator;
 import org.apache.hyracks.algebricks.runtime.base.IScalarEvaluatorFactory;
 import org.apache.hyracks.api.exceptions.HyracksDataException;
-import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.FullTextAnalyzerFactory;
-import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextAnalyzerFactory;
 import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextConfigDescriptor;
 import org.apache.hyracks.util.string.UTF8StringUtil;
 
@@ -91,9 +89,7 @@ public class FullTextContainsDescriptor extends AbstractScalarFunctionDynamicDes
 
             @Override
             public IScalarEvaluator createScalarEvaluator(IEvaluatorContext ctx) throws HyracksDataException {
-                IFullTextAnalyzerFactory analyzerFactory = new FullTextAnalyzerFactory(configDescriptor);
-
-                return new FullTextContainsEvaluator(args, ctx, analyzerFactory);
+                return new FullTextContainsEvaluator(args, ctx, configDescriptor);
             }
         };
     }

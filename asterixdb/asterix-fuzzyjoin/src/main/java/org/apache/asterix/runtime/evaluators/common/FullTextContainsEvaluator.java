@@ -48,8 +48,9 @@ import org.apache.hyracks.data.std.util.ArrayBackedValueStorage;
 import org.apache.hyracks.data.std.util.BinaryEntry;
 import org.apache.hyracks.data.std.util.BinaryHashSet;
 import org.apache.hyracks.dataflow.common.data.accessors.IFrameTupleReference;
+import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.FullTextAnalyzer;
 import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextAnalyzer;
-import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextAnalyzerFactory;
+import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextConfigDescriptor;
 import org.apache.hyracks.storage.am.lsm.invertedindex.tokenizers.DelimitedUTF8StringBinaryTokenizer;
 import org.apache.hyracks.storage.am.lsm.invertedindex.tokenizers.IBinaryTokenizer;
 import org.apache.hyracks.storage.am.lsm.invertedindex.tokenizers.IToken;
@@ -117,7 +118,7 @@ public class FullTextContainsEvaluator implements IScalarEvaluator {
             SerializerDeserializerProvider.INSTANCE.getSerializerDeserializer(BuiltinType.ANULL);
 
     public FullTextContainsEvaluator(IScalarEvaluatorFactory[] args, IEvaluatorContext context,
-            IFullTextAnalyzerFactory analyzerFactory) throws HyracksDataException {
+            IFullTextConfigDescriptor fullTextConfigDescriptor) throws HyracksDataException {
 
         evalLeft = args[0].createScalarEvaluator(context);
         evalRight = args[1].createScalarEvaluator(context);
@@ -127,8 +128,8 @@ public class FullTextContainsEvaluator implements IScalarEvaluator {
         this.argOptions = new TaggedValuePointable[optionArgsLength];
 
         // fullTextConfig is shared by multiple threads on the NC node, so each thread needs a local copy
-        this.analyzerLeft = analyzerFactory.createFullTextAnalyzer();
-        this.analyzerRight = analyzerFactory.createFullTextAnalyzer();
+        this.analyzerLeft = new FullTextAnalyzer(fullTextConfigDescriptor);
+        this.analyzerRight = new FullTextAnalyzer(fullTextConfigDescriptor);
 
         for (int i = 0; i < optionArgsLength; i++) {
             this.evalOptions[i] = args[i + 2].createScalarEvaluator(context);
