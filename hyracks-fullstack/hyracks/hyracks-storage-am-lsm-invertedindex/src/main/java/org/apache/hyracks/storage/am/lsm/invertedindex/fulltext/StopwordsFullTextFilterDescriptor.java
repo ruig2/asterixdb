@@ -55,40 +55,45 @@ public class StopwordsFullTextFilterDescriptor extends AbstractFullTextFilterDes
         return new StopwordsFullTextFilter(name, stopwordList);
     }
 
+    private static final String STOPWORDS_FILTER_NAME = "stopwordsFilterName";
+    private static final String STOPWORDS_LIST = "stopwordsList";
+    private static final String USED_BY_CONFIGS = "usedByConfigs";
+
+    // ToDo: extract the common logics to a dedicated helper or utilization class after more filters are implemented
     @Override
     public JsonNode toJson(IPersistedResourceRegistry registry) throws HyracksDataException {
         final ObjectNode json = registry.getClassIdentifier(getClass(), this.serialVersionUID);
-        json.put("stopwordsFilterName", name);
+        json.put(STOPWORDS_FILTER_NAME, name);
 
         ArrayNode stopwordsArrayNode = AbstractFullTextConfig.OBJECT_MAPPER.createArrayNode();
         for (String s : stopwordList) {
             stopwordsArrayNode.add(s);
         }
-        json.set("stopwordsList", stopwordsArrayNode);
+        json.set(STOPWORDS_LIST, stopwordsArrayNode);
 
         ArrayNode usedByConfigsArrayNode = AbstractFullTextConfig.OBJECT_MAPPER.createArrayNode();
         for (String s : usedByConfigs) {
             usedByConfigsArrayNode.add(s);
         }
-        json.set("usedByConfigs", usedByConfigsArrayNode);
+        json.set(USED_BY_CONFIGS, usedByConfigsArrayNode);
         return json;
     }
 
     public static IJsonSerializable fromJson(IPersistedResourceRegistry registry, JsonNode json)
             throws HyracksDataException {
-        final String name = json.get("stopwordsFilterName").asText();
+        final String name = json.get(STOPWORDS_FILTER_NAME).asText();
 
         // ToDo: create a new function to extract a list from json
         ImmutableList.Builder<String> stopwordsBuilder = ImmutableList.<String> builder();
-        JsonNode stopwordsArrayNode = json.get("stopwordsList");
+        JsonNode stopwordsArrayNode = json.get(STOPWORDS_LIST);
         for (int i = 0; i < stopwordsArrayNode.size(); i++) {
             stopwordsBuilder.add(stopwordsArrayNode.get(i).asText());
         }
         ImmutableList<String> stopwords = stopwordsBuilder.build();
 
         ImmutableList.Builder<String> usedByIndicesBuilder = ImmutableList.<String> builder();
-        JsonNode usedByIndicesArrayNode = json.get("usedByConfigs");
-        for (int i = 0; i < stopwordsArrayNode.size(); i++) {
+        JsonNode usedByIndicesArrayNode = json.get(USED_BY_CONFIGS);
+        for (int i = 0; i < usedByIndicesArrayNode.size(); i++) {
             usedByIndicesBuilder.add(usedByIndicesArrayNode.get(i).asText());
         }
         ImmutableList<String> usedByIndices = usedByIndicesBuilder.build();

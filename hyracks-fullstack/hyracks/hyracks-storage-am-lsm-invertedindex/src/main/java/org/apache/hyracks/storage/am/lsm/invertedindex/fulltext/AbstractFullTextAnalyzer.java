@@ -59,23 +59,8 @@ public class AbstractFullTextAnalyzer implements IFullTextAnalyzer {
         tokenizer.reset(data, start, length);
     }
 
-    // For debug usage
-    private void printCurrentToken() {
-        // ToDo: wrap the following logic into a function
-        int start = currentToken.getStartOffset();
-        int length = currentToken.getTokenLength();
-        if (tokenizer.getTokenizerType() == TokenizerInfo.TokenizerType.LIST) {
-            int numBytesToStoreLength = UTF8StringUtil.getNumBytesToStoreLength(
-                    UTF8StringUtil.getUTFLength(currentToken.getData(), currentToken.getStartOffset()));
-            start += numBytesToStoreLength;
-            length -= numBytesToStoreLength;
-        }
-    }
-
     @Override
     public IToken getToken() {
-        printCurrentToken();
-
         return currentToken;
     }
 
