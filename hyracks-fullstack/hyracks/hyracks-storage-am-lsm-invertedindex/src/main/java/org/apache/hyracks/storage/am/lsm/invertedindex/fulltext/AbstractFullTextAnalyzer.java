@@ -70,9 +70,6 @@ public class AbstractFullTextAnalyzer implements IFullTextAnalyzer {
             start += numBytesToStoreLength;
             length -= numBytesToStoreLength;
         }
-
-        String s = getUTF8StringInArray(currentToken.getData(), start, length);
-        System.out.println("current token: " + s);
     }
 
     @Override

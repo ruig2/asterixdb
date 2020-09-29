@@ -21,7 +21,6 @@ package org.apache.asterix.metadata.entitytupletranslators;
 
 import static org.apache.asterix.metadata.bootstrap.MetadataRecordTypes.FIELD_NAME_FULLTEXT_FILTER_CATEGORY;
 import static org.apache.asterix.metadata.bootstrap.MetadataRecordTypes.FIELD_NAME_FULLTEXT_FILTER_PIPELINE;
-import static org.apache.asterix.metadata.bootstrap.MetadataRecordTypes.FIELD_NAME_FULLTEXT_STEMMER_LANGUAGE;
 import static org.apache.asterix.metadata.bootstrap.MetadataRecordTypes.FIELD_NAME_FULLTEXT_STOPWORD_LIST;
 import static org.apache.asterix.metadata.bootstrap.MetadataRecordTypes.FIELD_NAME_FULLTEXT_TOKENIZER;
 import static org.apache.asterix.metadata.bootstrap.MetadataRecordTypes.FIELD_NAME_FULLTEXT_USED_BY_CONFIGS;
@@ -240,9 +239,11 @@ public class FulltextEntityDescriptorTupleTranslator extends AbstractTupleTransl
         writeOrderedList2RecordBuilder(FIELD_NAME_FULLTEXT_USED_BY_CONFIGS, filterDescriptor.getUsedByConfigs());
     }
 
-    private void writeStopwordFilterDescriptor(StopwordsFullTextFilterDescriptor stopwordsFullTextFilterDescriptor) throws HyracksDataException {
+    private void writeStopwordFilterDescriptor(StopwordsFullTextFilterDescriptor stopwordsFullTextFilterDescriptor)
+            throws HyracksDataException {
         writeFilterDescriptorBasic(stopwordsFullTextFilterDescriptor);
-        writeOrderedList2RecordBuilder(FIELD_NAME_FULLTEXT_STOPWORD_LIST, stopwordsFullTextFilterDescriptor.getStopwordList());
+        writeOrderedList2RecordBuilder(FIELD_NAME_FULLTEXT_STOPWORD_LIST,
+                stopwordsFullTextFilterDescriptor.getStopwordList());
     }
 
     private void writeStemmerFilter(AbstractStemmerFullTextFilter stemmerFilter) throws HyracksDataException {
@@ -250,7 +251,7 @@ public class FulltextEntityDescriptorTupleTranslator extends AbstractTupleTransl
 
         /*
         writeFilterDescriptorBasic(stemmerFilter);
-
+        
         writeKeyAndValue2FieldVariables(FIELD_NAME_FULLTEXT_STEMMER_LANGUAGE, stemmerFilter.getLanguage().toString());
         recordBuilder.addField(fieldName, fieldValue);
          */

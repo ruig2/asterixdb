@@ -85,9 +85,8 @@ public class LSMInvertedIndexSearchOperatorNodePushable extends IndexSearchOpera
     protected ISearchPredicate createSearchPredicate() {
         FullTextAnalyzer analyzer = new FullTextAnalyzer(fullTextConfigDescriptor);
 
-        return new InvertedIndexSearchPredicate(binaryTokenizerFactory.createTokenizer(),
-                analyzer, searchModifier, minFilterKey, maxFilterKey,
-                isFullTextSearchQuery);
+        return new InvertedIndexSearchPredicate(binaryTokenizerFactory.createTokenizer(), analyzer, searchModifier,
+                minFilterKey, maxFilterKey, isFullTextSearchQuery);
     }
 
     @Override

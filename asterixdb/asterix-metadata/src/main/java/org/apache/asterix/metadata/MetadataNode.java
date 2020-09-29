@@ -121,7 +121,6 @@ import org.apache.hyracks.storage.am.common.impls.NoOpOperationCallback;
 import org.apache.hyracks.storage.am.lsm.common.api.ILSMIndex;
 import org.apache.hyracks.storage.am.lsm.common.api.ILSMIndexAccessor;
 import org.apache.hyracks.storage.am.lsm.common.impls.AbstractLSMIndex;
-import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextConfig;
 import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextConfigDescriptor;
 import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextEntity;
 import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextEntityDescriptor;
@@ -1381,8 +1380,6 @@ public class MetadataNode implements IMetadataNode {
     @Override
     public List<Index> getDatasetIndexes(TxnId txnId, DataverseName dataverseName, String datasetName)
             throws AlgebricksException {
-        LOGGER.error("!!! getting dataset index dataverse name " + dataverseName + " !!!");
-        LOGGER.error("!!! getting dataset index dataset name" + datasetName + " !!!");
         try {
             ITupleReference searchKey = createTuple(dataverseName, datasetName);
             IndexTupleTranslator tupleReaderWriter =

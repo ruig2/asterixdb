@@ -41,7 +41,8 @@ public class StopwordsFullTextFilterDescriptor extends AbstractFullTextFilterDes
         this.stopwordList = stopwordList;
     }
 
-    @Override public IFullTextFilter.FullTextFilterType getFilterType() {
+    @Override
+    public IFullTextFilter.FullTextFilterType getFilterType() {
         return IFullTextFilter.FullTextFilterType.STOPWORDS;
     }
 

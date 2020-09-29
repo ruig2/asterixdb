@@ -79,8 +79,8 @@ public class BinaryTokenizerOperatorDescriptor extends AbstractSingleActivityOpe
 
         return new BinaryTokenizerOperatorNodePushable(ctx,
                 recordDescProvider.getInputRecordDescriptor(getActivityId(), 0), outRecDescs[0],
-                tokenizerFactory.createTokenizer(), analyzer, docField,
-                keyFields, addNumTokensKey, writeKeyFieldsFirst, writeMissing, missingWriterFactory);
+                tokenizerFactory.createTokenizer(), analyzer, docField, keyFields, addNumTokensKey, writeKeyFieldsFirst,
+                writeMissing, missingWriterFactory);
     }
 
 }

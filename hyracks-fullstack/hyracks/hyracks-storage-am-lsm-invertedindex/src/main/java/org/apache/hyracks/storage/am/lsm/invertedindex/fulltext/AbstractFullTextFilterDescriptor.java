@@ -43,7 +43,8 @@ public class AbstractFullTextFilterDescriptor implements IFullTextFilterDescript
         return name;
     }
 
-    @Override public IFullTextFilter.FullTextFilterType getFilterType() {
+    @Override
+    public IFullTextFilter.FullTextFilterType getFilterType() {
         throw new NotImplementedException();
     }
 

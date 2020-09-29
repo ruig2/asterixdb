@@ -1693,8 +1693,7 @@ public class MetadataProvider implements IMetadataProvider<DataSourceId, String>
             }
 
             tokenizerOp = new BinaryTokenizerOperatorDescriptor(spec, tokenKeyPairRecDesc, tokenizerFactory,
-                    configDescriptor, docField, keyFields, isPartitioned, true, false,
-                    MissingWriterFactory.INSTANCE);
+                    configDescriptor, docField, keyFields, isPartitioned, true, false, MissingWriterFactory.INSTANCE);
             return new Pair<>(tokenizerOp, splitsAndConstraint.second);
         } catch (Exception e) {
             throw new AlgebricksException(e);
