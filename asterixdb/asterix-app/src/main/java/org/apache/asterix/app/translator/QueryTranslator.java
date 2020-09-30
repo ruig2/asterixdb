@@ -238,7 +238,6 @@ import org.apache.hyracks.api.result.ResultSetId;
 import org.apache.hyracks.control.cc.ClusterControllerService;
 import org.apache.hyracks.control.common.controllers.CCConfig;
 import org.apache.hyracks.storage.am.lsm.common.api.ILSMMergePolicyFactory;
-import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.AbstractStemmerFullTextFilter;
 import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.FullTextConfig;
 import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.FullTextConfigDescriptor;
 import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextConfig;
@@ -1224,31 +1223,7 @@ public class QueryTranslator extends AbstractLangTranslator implements IStatemen
                 break;
             }
 
-            case FIELD_NAME_STEMMER: {
-                String leftStemmerLanguageStr =
-                        ((LiteralExpr) fbs.get(1).getLeftExpr()).getValue().getStringValue().toLowerCase();
-                if (leftStemmerLanguageStr.equalsIgnoreCase(FIELD_NAME_STEMMER_LANGUAGE) == false) {
-                    throw new IllegalStateException(
-                            "expect language of the stemmer in the second row; get " + leftStemmerLanguageStr);
-                }
-
-                String languageStr =
-                        ((LiteralExpr) fbs.get(1).getRightExpr()).getValue().getStringValue().toLowerCase();
-                AbstractStemmerFullTextFilter.StemmerLanguage language =
-                        AbstractStemmerFullTextFilter.StemmerLanguage.getEnumIgnoreCase(languageStr);
-                switch (language) {
-                    case ENGLISH: {
-                        //filterDescriptor = new EnglishStemmerFullTextFilter(stmtCreateFilter.getFilterName());
-                        break;
-                    }
-
-                    default:
-                        throw new IllegalArgumentException("Language not supported to stem");
-                }
-
-                break;
-            }
-
+            case FIELD_NAME_STEMMER:
             default:
                 throw new IllegalStateException("Unexpected value: " + rightStr.toLowerCase());
         }

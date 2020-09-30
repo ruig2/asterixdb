@@ -55,7 +55,6 @@ import org.apache.hyracks.data.std.util.ArrayBackedValueStorage;
 import org.apache.hyracks.dataflow.common.comm.io.ArrayTupleBuilder;
 import org.apache.hyracks.dataflow.common.comm.io.ArrayTupleReference;
 import org.apache.hyracks.dataflow.common.data.accessors.ITupleReference;
-import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.AbstractStemmerFullTextFilter;
 import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.FullTextConfigDescriptor;
 import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextConfig;
 import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextConfigDescriptor;
@@ -99,9 +98,8 @@ public class FulltextEntityDescriptorTupleTranslator extends AbstractTupleTransl
                 switch (kind) {
                     case STOPWORDS:
                         return createStopwordsFilterDescriptorFromARecord(aRecord);
-                    // case STEMMER:
-                    //     return createStemmerFilterFromARecord(aRecord);
-                    // case SYNONYM:
+                    case STEMMER:
+                    case SYNONYM:
                     default:
                         throw new AlgebricksException("Not supported yet");
                 }
@@ -134,21 +132,6 @@ public class FulltextEntityDescriptorTupleTranslator extends AbstractTupleTransl
         StopwordsFullTextFilterDescriptor descriptor =
                 new StopwordsFullTextFilterDescriptor(name, stopwordsBuilder.build(), usedByConfigs);
         return descriptor;
-    }
-
-    public AbstractStemmerFullTextFilter createStemmerFilterFromARecord(ARecord aRecord) {
-        String name = ((AString) aRecord
-                .getValueByPos(MetadataRecordTypes.FULLTEXT_ENTITY_ARECORD_FULLTEXT_ENTITY_NAME_FIELD_INDEX))
-                        .getStringValue();
-        String languageStr = ((AString) aRecord
-                .getValueByPos(MetadataRecordTypes.FULLTEXT_ENTITY_ARECORD_STEMMER_LANGUAGE_FIELD_INDEX))
-                        .getStringValue();
-        AbstractStemmerFullTextFilter.StemmerLanguage language =
-                AbstractStemmerFullTextFilter.StemmerLanguage.getEnumIgnoreCase(languageStr);
-        AbstractStemmerFullTextFilter stemmer =
-                AbstractStemmerFullTextFilter.createStemmerFullTextFilter(name, language);
-
-        return stemmer;
     }
 
     public FullTextConfigDescriptor createConfigDescriptorFromARecord(ARecord aRecord) {
@@ -246,25 +229,12 @@ public class FulltextEntityDescriptorTupleTranslator extends AbstractTupleTransl
                 stopwordsFullTextFilterDescriptor.getStopwordList());
     }
 
-    private void writeStemmerFilter(AbstractStemmerFullTextFilter stemmerFilter) throws HyracksDataException {
-        throw new NotImplementedException();
-
-        /*
-        writeFilterDescriptorBasic(stemmerFilter);
-        
-        writeKeyAndValue2FieldVariables(FIELD_NAME_FULLTEXT_STEMMER_LANGUAGE, stemmerFilter.getLanguage().toString());
-        recordBuilder.addField(fieldName, fieldValue);
-         */
-    }
-
     private void writeFulltextFilter(IFullTextFilterDescriptor filterDescriptor) throws HyracksDataException {
         switch (filterDescriptor.getFilterType()) {
             case STOPWORDS:
                 writeStopwordFilterDescriptor((StopwordsFullTextFilterDescriptor) filterDescriptor);
                 break;
             case STEMMER:
-                writeStemmerFilter((AbstractStemmerFullTextFilter) filterDescriptor);
-                break;
             case SYNONYM:
             default:
                 throw new NotImplementedException();
