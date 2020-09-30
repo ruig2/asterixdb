@@ -74,52 +74,6 @@ public class FullTextConfigDescriptor implements IFullTextConfigDescriptor {
     public IFullTextEntity.FullTextEntityCategory getCategory() {
         return IFullTextEntity.FullTextEntityCategory.CONFIG;
     }
-
-    @Override
-    public JsonNode toJson(IPersistedResourceRegistry registry) throws HyracksDataException {
-        final ObjectNode json = registry.getClassIdentifier(getClass(), serialVersionUID);
-        json.put("name", name);
-        json.put("tokenizerCategory", tokenizerCategory.toString());
-
-        final ArrayNode filterArray = OBJECT_MAPPER.createArrayNode();
-        for (IFullTextEntityDescriptor filterDescriptor : filterDescriptors) {
-            filterArray.add(filterDescriptor.toJson(registry));
-        }
-        json.set("filters", filterArray);
-
-        ArrayNode usedByIndicesArrayNode = AbstractFullTextConfig.OBJECT_MAPPER.createArrayNode();
-        for (String indexName : usedByIndices) {
-            usedByIndicesArrayNode.add(indexName);
-        }
-        json.set("usedByIndices", usedByIndicesArrayNode);
-
-        return json;
-    }
-
-    public static IJsonSerializable fromJson(IPersistedResourceRegistry registry, JsonNode json)
-            throws HyracksDataException {
-        final String name = json.get("name").asText();
-        final String tokenizerCategoryStr = json.get("tokenizerCategory").asText();
-        IFullTextConfig.TokenizerCategory tc =
-                IFullTextConfig.TokenizerCategory.getEnumIgnoreCase(tokenizerCategoryStr);
-
-        ArrayNode filtersJsonNode = (ArrayNode) json.get("filters");
-        List<IFullTextFilterDescriptor> filterDescriptors = new ArrayList<>();
-        for (int i = 0; i < filtersJsonNode.size(); i++) {
-            filterDescriptors.add((IFullTextFilterDescriptor) registry.deserialize(filtersJsonNode.get(i)));
-        }
-        ImmutableList<IFullTextFilterDescriptor> filters = ImmutableList.copyOf(filterDescriptors);
-
-        ImmutableList.Builder<String> usedByIndicesBuilder = ImmutableList.<String> builder();
-        JsonNode usedByIndicesArrayNode = json.get("usedByIndices");
-        for (int i = 0; i < usedByIndicesArrayNode.size(); i++) {
-            usedByIndicesBuilder.add(usedByIndicesArrayNode.get(i).asText());
-        }
-        ImmutableList usedByIndices = usedByIndicesBuilder.build();
-
-        return new FullTextConfigDescriptor(name, tc, filters, usedByIndices);
-    }
-
     @Override
     public IFullTextConfig.TokenizerCategory getTokenizerCategory() {
         return tokenizerCategory;
@@ -138,6 +92,56 @@ public class FullTextConfigDescriptor implements IFullTextConfigDescriptor {
     @Override
     public void addUsedByIndex(String indexName) {
         this.usedByIndices.add(indexName);
+    }
+
+
+    private static final String FIELD_NAME = "name";
+    private static final String FIELD_TOKENIZER_CATEGORY = "tokenizerCategory";
+    private static final String FIELD_FILTERS = "filters";
+    private static final String FIELD_USED_BY_INDICES = "usedByIndices";
+    @Override
+    public JsonNode toJson(IPersistedResourceRegistry registry) throws HyracksDataException {
+        final ObjectNode json = registry.getClassIdentifier(getClass(), serialVersionUID);
+        json.put(FIELD_NAME, name);
+        json.put(FIELD_TOKENIZER_CATEGORY, tokenizerCategory.toString());
+
+        final ArrayNode filterArray = OBJECT_MAPPER.createArrayNode();
+        for (IFullTextEntityDescriptor filterDescriptor : filterDescriptors) {
+            filterArray.add(filterDescriptor.toJson(registry));
+        }
+        json.set(FIELD_FILTERS, filterArray);
+
+        ArrayNode usedByIndicesArrayNode = AbstractFullTextConfig.OBJECT_MAPPER.createArrayNode();
+        for (String indexName : usedByIndices) {
+            usedByIndicesArrayNode.add(indexName);
+        }
+        json.set(FIELD_USED_BY_INDICES, usedByIndicesArrayNode);
+
+        return json;
+    }
+
+    public static IJsonSerializable fromJson(IPersistedResourceRegistry registry, JsonNode json)
+            throws HyracksDataException {
+        final String name = json.get(FIELD_NAME).asText();
+        final String tokenizerCategoryStr = json.get(FIELD_TOKENIZER_CATEGORY).asText();
+        IFullTextConfig.TokenizerCategory tc =
+                IFullTextConfig.TokenizerCategory.getEnumIgnoreCase(tokenizerCategoryStr);
+
+        ArrayNode filtersJsonNode = (ArrayNode) json.get(FIELD_FILTERS);
+        List<IFullTextFilterDescriptor> filterDescriptors = new ArrayList<>();
+        for (int i = 0; i < filtersJsonNode.size(); i++) {
+            filterDescriptors.add((IFullTextFilterDescriptor) registry.deserialize(filtersJsonNode.get(i)));
+        }
+        ImmutableList<IFullTextFilterDescriptor> filters = ImmutableList.copyOf(filterDescriptors);
+
+        ImmutableList.Builder<String> usedByIndicesBuilder = ImmutableList.<String> builder();
+        JsonNode usedByIndicesArrayNode = json.get(FIELD_USED_BY_INDICES);
+        for (int i = 0; i < usedByIndicesArrayNode.size(); i++) {
+            usedByIndicesBuilder.add(usedByIndicesArrayNode.get(i).asText());
+        }
+        ImmutableList usedByIndices = usedByIndicesBuilder.build();
+
+        return new FullTextConfigDescriptor(name, tc, filters, usedByIndices);
     }
 
 }

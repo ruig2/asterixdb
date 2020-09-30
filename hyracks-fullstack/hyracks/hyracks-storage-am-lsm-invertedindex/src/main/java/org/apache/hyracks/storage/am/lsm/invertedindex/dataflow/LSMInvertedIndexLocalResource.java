@@ -66,6 +66,7 @@ public class LSMInvertedIndexLocalResource extends LsmResource {
     // Currently, the configuration of tokenizer is complicated and the parameters
     // (e.g. whether the string contains a ATypeTag.AString at the beginning),
     // as a first step, we set the tokenizer of the full-text config on-the-fly
+    // See comments in FullTextAnalyzer
     private final IBinaryTokenizerFactory tokenizerFactory;
     private final IFullTextConfigDescriptor fullTextConfigDescriptor;
     private final boolean isPartitioned;

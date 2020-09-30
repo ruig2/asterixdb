@@ -49,15 +49,17 @@ public class FullTextAnalyzer extends AbstractFullTextAnalyzer {
 
         switch (tokenizerCategory) {
             case WORD:
-                // Similar to aqlStringTokenizerFactory which is in the upper Asterix layer
-                // ToDo: should we move aqlStringTokenizerFactory so that it can be called in the Hyracks layer?
-                // If so, we need to move ATypeTag to Hyracks as well
-                // Another way to do so is to pass the tokenizer instance instead of the tokenizer category from Asterix to Hyracks
-                // However, this may make the serializing part tricky because only the tokenizer category will be written to disk
-                this.tokenizer =
-                        new DelimitedUTF8StringBinaryTokenizerFactory(true, true, new UTF8WordTokenFactory((byte) 13, // ATypeTag.SERIALIZED_STRING_TYPE_TAG
-                                (byte) 3) // ATypeTag.SERIALIZED_INT32_TYPE_TAG
-                        ).createTokenizer();
+                // Currently, the tokenizer will be set later after the analyzer created
+                // This is because the tokenizer logic is complex,
+                // and we are already using a dedicated tokenizer factory to create tokenizer.
+                // One tricky part of tokenizer is that it can be call-site specific, e.g. the string in some call-site
+                // has the ATypeTag.String in the beginning of its byte array, and some doesn't,
+                // so if we only know the category of the tokenizer, e.g. a WORD tokenizer,
+                // we still cannot create a suitable tokenizer here as the tokenizer factory does.
+                //
+                // Finally we should get rid of the dedicated tokenizer factory and put its related logic
+                // in the full-text descriptor and analyzer
+                this.tokenizer = null;
                 break;
             case NGRAM:
                 throw new NotImplementedException();

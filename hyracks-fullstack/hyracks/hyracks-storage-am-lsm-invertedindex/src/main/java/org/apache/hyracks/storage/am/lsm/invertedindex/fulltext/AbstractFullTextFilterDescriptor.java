@@ -60,7 +60,7 @@ public class AbstractFullTextFilterDescriptor implements IFullTextFilterDescript
 
     @Override
     public void addUsedByConfig(String usedByConfig) {
-        throw new NotImplementedException();
+        this.usedByConfigs.add(usedByConfig);
     }
 
     @Override
