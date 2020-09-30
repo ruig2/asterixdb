@@ -115,8 +115,7 @@ public class LSMSecondaryUpsertOperatorNodePushable extends LSMIndexInsertUpdate
                     // For a secondary index, if the secondary key values do not change, we can skip upserting it.
                     // However, for a primary key index, we cannot do this because it only contains primary keys
                     // which are always the same
-                    // in progress... uncomment next line when merging code
-                    // continue;
+                    continue;
                 }
                 // if all old fields are known values, then delete. skip deleting if any is null or missing
                 if (!oldTupleHasNullOrMissing) {

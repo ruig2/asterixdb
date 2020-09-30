@@ -28,6 +28,10 @@ import com.google.common.collect.ImmutableList;
 
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
+// FullTextAnalyzer is a run-time analyzer while the IFullTextConfigDescriptor is a compile-time descriptor
+//
+// The descriptor is responsible for serialization and Metadata translator (i.e. be written to the metadata catalog)
+// And the analyzer is to process the tokens in each NC at run-time
 public class FullTextAnalyzer extends AbstractFullTextAnalyzer {
     private static final long serialVersionUID = 1L;
 
@@ -61,45 +65,5 @@ public class FullTextAnalyzer extends AbstractFullTextAnalyzer {
                 throw new InvalidParameterException();
         }
     }
-
-    // ToDo: similar to tokenizerCategory, pass a few descriptors of the filters instead of the entire filters when constructing an analyzer
-    // to avoid serializing and passing the filters from compile-time nodes to run-time nodes
-    // The idea is similar to the descriptor and evaluator of a SQLPP built-in function: descriptor is used at compile-time,
-    // and evaluator is used in run-time, and the descriptor contains enough information for the evaluator to run
-    /*
-    public FullTextAnalyzer(IFullTextConfig config) {
-        this(config.getTokenizerCategory(), config.getFilters());
-    }
-    
-    @Override
-    public JsonNode toJson(IPersistedResourceRegistry registry) throws HyracksDataException {
-        final ObjectNode json = registry.getClassIdentifier(getClass(), serialVersionUID);
-        json.put("tokenizerCategory", tokenizer.getTokenizerCategory().toString());
-    
-        final ArrayNode filterArray = OBJECT_MAPPER.createArrayNode();
-        for (IFullTextFilter filter : filterDescriptors) {
-            filterArray.add(filter.toJson(registry));
-        }
-        json.set("filters", filterArray);
-    
-        return json;
-    }
-    
-    public static IJsonSerializable fromJson(IPersistedResourceRegistry registry, JsonNode json)
-            throws HyracksDataException {
-        final String tokenizerCategoryStr = json.get("tokenizerCategory").asText();
-        IFullTextConfig.TokenizerCategory tc =
-                IFullTextConfig.TokenizerCategory.getEnumIgnoreCase(tokenizerCategoryStr);
-    
-        ArrayNode filtersJsonNode = (ArrayNode) json.get("filters");
-        List<IFullTextFilter> filterList = new ArrayList<>();
-        for (int i = 0; i < filtersJsonNode.size(); i++) {
-            filterList.add((IFullTextFilter) registry.deserialize(filtersJsonNode.get(i)));
-        }
-        ImmutableList<IFullTextFilter> filters = ImmutableList.copyOf(filterList);
-    
-        return new FullTextAnalyzer(new FullTextConfig(null, tc, filters));
-    }
-     */
 
 }

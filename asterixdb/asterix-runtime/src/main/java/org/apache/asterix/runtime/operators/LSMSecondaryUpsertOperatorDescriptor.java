@@ -38,8 +38,6 @@ public class LSMSecondaryUpsertOperatorDescriptor extends LSMTreeInsertDeleteOpe
     private final int upsertIndiatorFieldIndex;
     private final IBinaryBooleanInspectorFactory upsertIndicatorInspectorFactory;
 
-    // ToDo: for full-text index, pass the corresponding full-text config into the descriptor
-    // We may need to create a new descriptor based on this one
     public LSMSecondaryUpsertOperatorDescriptor(IOperatorDescriptorRegistry spec, RecordDescriptor outRecDesc,
             int[] fieldPermutation, IIndexDataflowHelperFactory indexHelperFactory,
             ITupleFilterFactory tupleFilterFactory, IModificationOperationCallbackFactory modificationOpCallbackFactory,

@@ -63,6 +63,9 @@ public class LSMInvertedIndexLocalResource extends LsmResource {
     private final ITypeTraits[] tokenTypeTraits;
     private final IBinaryComparatorFactory[] tokenCmpFactories;
     // ToDo: totally replace tokenizer with fullTextConfig
+    // Currently, the configuration of tokenizer is complicated and the parameters
+    // (e.g. whether the string contains a ATypeTag.AString at the beginning),
+    // as a first step, we set the tokenizer of the full-text config on-the-fly
     private final IBinaryTokenizerFactory tokenizerFactory;
     private final IFullTextConfigDescriptor fullTextConfigDescriptor;
     private final boolean isPartitioned;

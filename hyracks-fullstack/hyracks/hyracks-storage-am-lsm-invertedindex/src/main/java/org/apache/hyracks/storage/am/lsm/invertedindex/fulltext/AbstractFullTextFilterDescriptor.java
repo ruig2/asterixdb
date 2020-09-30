@@ -54,32 +54,27 @@ public class AbstractFullTextFilterDescriptor implements IFullTextFilterDescript
     }
 
     @Override
-    public void addUsedByConfig(String usedByConfig) {
-    }
-
-    @Override
-    public List<String> deleteUsedByConfig(String usedByConfig) {
-        return null;
-    }
-
-    @Override
-    public IFullTextEntity getEntity() {
-        return null;
-    }
-
-    @Override
     public IFullTextEntity.FullTextEntityCategory getCategory() {
         return IFullTextEntity.FullTextEntityCategory.FILTER;
     }
 
     @Override
-    public JsonNode toJson(IPersistedResourceRegistry registry) throws HyracksDataException {
+    public void addUsedByConfig(String usedByConfig) {
         throw new NotImplementedException();
     }
 
-    public static IJsonSerializable fromJson(IPersistedResourceRegistry registry, JsonNode json)
-            throws HyracksDataException {
-        // ToDo: how to extract the common logic of full-text filters fromJson() here, e.g. deserialize filter name and so on?
+    @Override
+    public List<String> deleteUsedByConfig(String usedByConfig) {
+        throw new NotImplementedException();
+    }
+
+    @Override
+    public IFullTextEntity getEntity() {
+        throw new NotImplementedException();
+    }
+
+    @Override
+    public JsonNode toJson(IPersistedResourceRegistry registry) throws HyracksDataException {
         throw new NotImplementedException();
     }
 
