@@ -48,7 +48,6 @@ public class InvertedIndexTokenizingTupleIterator {
         this.fullTextAnalyzer = fullTextAnalyzer;
 
         // ToDo: check the codes in upper layer to see if we can remove tokenizer to use fullTextConfig instead
-        // How is this tokenizer configured? Does it ignoreTokenCount and hasTypeTag?
         this.fullTextAnalyzer.setTokenizer(tokenizer);
     }
 

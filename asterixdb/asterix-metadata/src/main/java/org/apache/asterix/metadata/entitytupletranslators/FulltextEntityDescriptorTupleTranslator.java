@@ -280,7 +280,6 @@ public class FulltextEntityDescriptorTupleTranslator extends AbstractTupleTransl
 
         writeIndex(fullTextEntityDescriptor.getCategory(), fullTextEntityDescriptor.getName(), tupleBuilder);
 
-        /////////////////////////////////////////////////////////
         // Write the record
         recordBuilder.reset(MetadataRecordTypes.FULLTEXT_ENTITY_RECORDTYPE);
 

@@ -1200,7 +1200,7 @@ public class QueryTranslator extends AbstractLangTranslator implements IStatemen
         String rightStr = ((LiteralExpr) fbs.get(0).getRightExpr()).getValue().getStringValue().toLowerCase();
 
         if (leftStr.equalsIgnoreCase(FIELD_NAME_TYPE) == false) {
-            throw new IllegalStateException("expect filter type in the first row");
+            throw CompilationException.create(ErrorCode.COMPILATION_INVALID_EXPRESSION, "expect filter type in the first row");
         }
 
         switch (rightStr.toLowerCase()) {
@@ -1210,8 +1210,7 @@ public class QueryTranslator extends AbstractLangTranslator implements IStatemen
                 String leftStopwordListStr =
                         ((LiteralExpr) fbs.get(1).getLeftExpr()).getValue().getStringValue().toLowerCase();
                 if (leftStopwordListStr.equalsIgnoreCase(FIELD_NAME_STOPWORDS_LIST) == false) {
-                    throw new IllegalStateException(
-                            "expect StopwordsList in the second row; get " + leftStopwordListStr);
+                    throw CompilationException.create(ErrorCode.COMPILATION_INVALID_EXPRESSION, "expect StopwordsList in the second row; get " + leftStopwordListStr);
                 }
 
                 for (Expression l : ((ListConstructor) (fbs.get(1).getRightExpr())).getExprList()) {
@@ -1225,7 +1224,7 @@ public class QueryTranslator extends AbstractLangTranslator implements IStatemen
 
             case FIELD_NAME_STEMMER:
             default:
-                throw new IllegalStateException("Unexpected value: " + rightStr.toLowerCase());
+                throw CompilationException.create(ErrorCode.COMPILATION_INVALID_EXPRESSION, "Unexpected value: " + rightStr.toLowerCase());
         }
 
         MetadataTransactionContext mdTxnCtx = null;
@@ -1234,8 +1233,6 @@ public class QueryTranslator extends AbstractLangTranslator implements IStatemen
             metadataProvider.setMetadataTxnContext(mdTxnCtx);
             MetadataManager.INSTANCE.addFullTextFilterDescriptor(mdTxnCtx, filterDescriptor);
         } catch (AlgebricksException | RemoteException e) {
-            // e.printStackTrace();
-            // abort(e, e, mdTxnCtx);
             throw e;
         } finally {
             MetadataManager.INSTANCE.commitTransaction(mdTxnCtx);
@@ -1259,13 +1256,13 @@ public class QueryTranslator extends AbstractLangTranslator implements IStatemen
 
         List<FieldBinding> fb = rc.getFbList();
         if (fb.size() < 2) {
-            throw new UnexpectedException("number of parameter less than expected");
+            throw CompilationException.create(ErrorCode.COMPILATION_INVALID_EXPRESSION, "number of parameter less than expected");
         }
 
         String tokenizerTupleKeyStr =
                 ((LiteralExpr) (fb.get(0).getLeftExpr())).getValue().getStringValue().toLowerCase();
         if (tokenizerTupleKeyStr.equalsIgnoreCase(IFullTextConfig.FIELD_NAME_TOKENIZER) == false) {
-            throw new UnexpectedException("expect tokenizer in the first row");
+            throw CompilationException.create(ErrorCode.COMPILATION_INVALID_EXPRESSION, "expect tokenizer in the first row");
         }
         String tokenizerTupleValueStr =
                 ((LiteralExpr) (fb.get(0).getRightExpr())).getValue().getStringValue().toLowerCase();
@@ -1275,7 +1272,7 @@ public class QueryTranslator extends AbstractLangTranslator implements IStatemen
         String filterPipelineTupleKeyStr =
                 ((LiteralExpr) (fb.get(1).getLeftExpr())).getValue().getStringValue().toLowerCase();
         if (filterPipelineTupleKeyStr.equalsIgnoreCase(IFullTextConfig.FIELD_NAME_FILTER_PIPELINE) == false) {
-            throw new UnexpectedException("expect filter pipeline in the second row");
+            throw CompilationException.create(ErrorCode.COMPILATION_INVALID_EXPRESSION, "expect filter pipeline in the second row");
         }
         List<String> filterNames = new ArrayList<>();
         for (Expression l : ((ListConstructor) (fb.get(1).getRightExpr())).getExprList()) {
@@ -2090,9 +2087,7 @@ public class QueryTranslator extends AbstractLangTranslator implements IStatemen
             MetadataManager.INSTANCE.dropFullTextFilterDescriptor(mdTxnCtx, stmtFilterDrop.getFilterName(),
                     stmtFilterDrop.getIfExists());
             MetadataManager.INSTANCE.commitTransaction(mdTxnCtx);
-        } catch (RemoteException e) {
-            throw e;
-        } catch (AlgebricksException e) {
+        } catch (RemoteException | AlgebricksException e) {
             throw e;
         }
         return;
@@ -2103,7 +2098,7 @@ public class QueryTranslator extends AbstractLangTranslator implements IStatemen
             throws RemoteException, AlgebricksException {
         FullTextConfigDropStatement stmtConfigDrop = (FullTextConfigDropStatement) stmt;
         if (stmtConfigDrop.getConfigName().equalsIgnoreCase(FullTextConfig.DEFAULT_FULL_TEXT_CONFIG_NAME)) {
-            throw new AlgebricksException("Not allowed to drop the default full-text config");
+            throw CompilationException.create(ErrorCode.COMPILATION_ERROR, "Not allowed to drop the default full-text config");
         }
 
         MetadataTransactionContext mdTxnCtx = null;
@@ -2114,7 +2109,7 @@ public class QueryTranslator extends AbstractLangTranslator implements IStatemen
                     stmtConfigDrop.getIfExists());
             MetadataManager.INSTANCE.commitTransaction(mdTxnCtx);
         } catch (RemoteException e) {
-            throw new AlgebricksException(e);
+            throw e;
         }
 
         return;
