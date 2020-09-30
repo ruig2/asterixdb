@@ -74,6 +74,7 @@ public class FullTextConfigDescriptor implements IFullTextConfigDescriptor {
     public IFullTextEntity.FullTextEntityCategory getCategory() {
         return IFullTextEntity.FullTextEntityCategory.CONFIG;
     }
+
     @Override
     public IFullTextConfig.TokenizerCategory getTokenizerCategory() {
         return tokenizerCategory;
@@ -94,11 +95,11 @@ public class FullTextConfigDescriptor implements IFullTextConfigDescriptor {
         this.usedByIndices.add(indexName);
     }
 
-
     private static final String FIELD_NAME = "name";
     private static final String FIELD_TOKENIZER_CATEGORY = "tokenizerCategory";
     private static final String FIELD_FILTERS = "filters";
     private static final String FIELD_USED_BY_INDICES = "usedByIndices";
+
     @Override
     public JsonNode toJson(IPersistedResourceRegistry registry) throws HyracksDataException {
         final ObjectNode json = registry.getClassIdentifier(getClass(), serialVersionUID);

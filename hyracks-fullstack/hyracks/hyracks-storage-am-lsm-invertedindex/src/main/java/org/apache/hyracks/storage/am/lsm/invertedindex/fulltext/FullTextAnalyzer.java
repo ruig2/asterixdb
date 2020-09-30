@@ -21,9 +21,6 @@ package org.apache.hyracks.storage.am.lsm.invertedindex.fulltext;
 
 import java.security.InvalidParameterException;
 
-import org.apache.hyracks.storage.am.lsm.invertedindex.tokenizers.DelimitedUTF8StringBinaryTokenizerFactory;
-import org.apache.hyracks.storage.am.lsm.invertedindex.tokenizers.UTF8WordTokenFactory;
-
 import com.google.common.collect.ImmutableList;
 
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
