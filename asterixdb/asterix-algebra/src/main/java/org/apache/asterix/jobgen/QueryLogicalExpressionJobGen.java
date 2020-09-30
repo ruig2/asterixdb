@@ -151,10 +151,15 @@ public class QueryLogicalExpressionJobGen implements ILogicalExpressionJobGen {
         } else {
             if (FullTextUtil.isFullTextFunctionExpr(expr)) {
                 // Expr is a special internal (built-in) function: ftcontains()
-                // it is different from a general built-in function in two ways:
-                // 1. a full-text config should be loaded from metadata and used to create func descriptor during compile time
-                // 2. the query keywords in the function arguments need to be proceeded by the full-text config
-                //    and then used to lookup full-text index
+                // it is different from a general built-in function because it needs a parameter from the metadataProvider
+                // The parameter is the full-text configuration which will be used to tokenize and process tokens,
+                // e.g. via a stopwords full-text filter to discard stopwords
+                // If the user didn't specify a full-text config name, then a default one will be used
+                //
+                // Currently, this is the only function that needs a parameter from metadataProvider,
+                // so let's treat it differently and exclude it from the following resolveFunction() case
+                // In the future, if we have more functions that need to be parameterized,
+                // then maybe we can create a more general interface for those parameterize-able functions.
                 String fullTextConfigName = FullTextUtil.getFullTextConfigNameFromExpr(expr);
                 IFullTextConfigDescriptor configDescriptor = ((MetadataProvider) context.getMetadataProvider())
                         .findFullTextConfigDescriptor(fullTextConfigName);

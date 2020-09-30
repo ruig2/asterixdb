@@ -38,6 +38,7 @@ import org.apache.hyracks.algebricks.runtime.base.IScalarEvaluatorFactory;
 import org.apache.hyracks.api.dataflow.value.IBinaryComparator;
 import org.apache.hyracks.api.dataflow.value.IBinaryHashFunction;
 import org.apache.hyracks.api.dataflow.value.ISerializerDeserializer;
+import org.apache.hyracks.api.exceptions.ErrorCode;
 import org.apache.hyracks.api.exceptions.HyracksDataException;
 import org.apache.hyracks.data.std.accessors.PointableBinaryHashFunctionFactory;
 import org.apache.hyracks.data.std.api.IPointable;
@@ -195,11 +196,8 @@ public class FullTextContainsEvaluator implements IScalarEvaluator {
         try {
             ABoolean b = fullTextContainsWithArg(typeTag2, argLeft, argRight) ? ABoolean.TRUE : ABoolean.FALSE;
             serde.serialize(b, out);
-        } catch (AlgebricksException e) {
-            // ToDo: handle the exception gracefully
-            e.printStackTrace();
-        } catch (RemoteException e) {
-            e.printStackTrace();
+        } catch (AlgebricksException | RemoteException e) {
+            throw new HyracksDataException(e, ErrorCode.ERROR_PROCESSING_TUPLE);
         }
 
         result.set(resultStorage);
@@ -403,9 +401,6 @@ public class FullTextContainsEvaluator implements IScalarEvaluator {
                     // ALL
                     mode = FullTextContainsDescriptor.SEARCH_MODE.ALL;
                 }
-            } else if (compareStrInByteArrayAndPointable(FullTextContainsDescriptor.getFulltextConfigOptionArray(),
-                    argOptions[i], true) == 0) {
-                // ToDo: \r is added in front of the arg, how to solve this gracefully?
             }
         }
     }
