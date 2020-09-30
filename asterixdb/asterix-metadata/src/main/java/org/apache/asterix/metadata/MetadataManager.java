@@ -441,6 +441,21 @@ public abstract class MetadataManager implements IMetadataManager {
         ctx.dropIndex(dataverseName, datasetName, indexName);
     }
 
+    // Since dropIndex() only takes the index name instead of the entire index object as the argument,
+    // we don't know the full text configs that is used by the index
+    // And the call sites of dropIndex() are complex,
+    // for a full-text config that used by this index,
+    // it is not practical to remove the index from the usedByIndices field of the corresponding full-text config.
+    // Let's do a full-scan here to remove the index name from related fullTextConfig.usedByIndices
+    private void removeUsedByIndicesFromFullTextConfig(MetadataTransactionContext mdTxnCtx, String indexName)
+            throws AlgebricksException {
+        try {
+            metadataNode.removeUsedByIndicesFromFullTextConfigDescriptor(mdTxnCtx.getTxnId(), indexName);
+        } catch (RemoteException e) {
+            throw new AlgebricksException(e);
+        }
+    }
+
     @Override
     public Index getIndex(MetadataTransactionContext ctx, DataverseName dataverseName, String datasetName,
             String indexName) throws AlgebricksException {
@@ -643,9 +658,6 @@ public abstract class MetadataManager implements IMetadataManager {
     @Override
     public IFullTextFilterDescriptor getFullTextFilterDescriptor(MetadataTransactionContext mdTxnCtx, String filterName)
             throws AlgebricksException {
-        // in progress...
-        // Support ctx.getFulltextFilter() and cache.getFulltextFilter() similar to the getIndex() logic
-
         try {
             return metadataNode.getFulltextFilterDescriptor(mdTxnCtx.getTxnId(), filterName);
         } catch (AlgebricksException | RemoteException e) {
@@ -680,20 +692,6 @@ public abstract class MetadataManager implements IMetadataManager {
             metadataNode.updateFullTextConfigDescriptor(mdTxnCtx.getTxnId(), configDescriptor);
         } catch (HyracksDataException | RemoteException e) {
             throw new MetadataException(e);
-        }
-    }
-
-    // Since dropIndex() only takes the index name instead of the entire index object as the argument,
-    // we don't know the full text configs that is used by the index
-    // And the call sites of dropIndex() are complex,
-    // it is not practical to pass the related full text config name into dropIndex()
-    // Let's do a full-scan here to remove the index name from related fullTextConfig.usedByIndices
-    private void removeUsedByIndicesFromFullTextConfig(MetadataTransactionContext mdTxnCtx, String indexName)
-            throws AlgebricksException {
-        try {
-            metadataNode.removeUsedByIndicesFromFullTextConfigDescriptor(mdTxnCtx.getTxnId(), indexName);
-        } catch (RemoteException e) {
-            throw new AlgebricksException(e);
         }
     }
 

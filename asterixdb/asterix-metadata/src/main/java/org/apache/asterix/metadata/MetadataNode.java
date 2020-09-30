@@ -351,7 +351,6 @@ public class MetadataNode implements IMetadataNode {
             DatasetTupleTranslator tupleReaderWriter = tupleTranslatorProvider.getDatasetTupleTranslator(true);
             ITupleReference datasetTuple = tupleReaderWriter.getTupleFromMetadataEntity(dataset);
             insertTupleIntoIndex(txnId, MetadataPrimaryIndexes.DATASET_DATASET, datasetTuple);
-
             if (dataset.getDatasetType() == DatasetType.INTERNAL) {
                 // Add the primary index for the dataset.
                 InternalDatasetDetails id = (InternalDatasetDetails) dataset.getDatasetDetails();
@@ -508,7 +507,6 @@ public class MetadataNode implements IMetadataNode {
                     translator.createTupleAsIndex(IFullTextEntity.FullTextEntityCategory.FILTER, filterName);
             deleteTupleFromIndex(txnId, MetadataPrimaryIndexes.FULLTEXT_ENTITY_DATASET, key);
         } catch (HyracksDataException e) {
-            // debug: UPDATE_OR_DELETE_NON_EXISTENT_KEY never triggered?
             if (e.getComponent().equals(ErrorCode.HYRACKS)
                     && e.getErrorCode() == ErrorCode.UPDATE_OR_DELETE_NON_EXISTENT_KEY && ifExists) {
                 return;
@@ -549,9 +547,7 @@ public class MetadataNode implements IMetadataNode {
                 modifyExistingFullTextEntityToCatalog(txnId, f);
             }
         } catch (AlgebricksException | HyracksDataException e) {
-            // ToDo: Handle duplicated key error
-            e.printStackTrace();
-            throw new AlgebricksException(e);
+            throw new AlgebricksException(e, ErrorCode.ERROR_PROCESSING_TUPLE);
         }
 
         return;
@@ -608,7 +604,6 @@ public class MetadataNode implements IMetadataNode {
                     translator.createTupleAsIndex(IFullTextEntity.FullTextEntityCategory.CONFIG, configName);
             deleteTupleFromIndex(txnId, MetadataPrimaryIndexes.FULLTEXT_ENTITY_DATASET, key);
         } catch (HyracksDataException e) {
-            // debug: UPDATE_OR_DELETE_NON_EXISTENT_KEY never triggered?
             if (e.getComponent().equals(ErrorCode.HYRACKS)
                     && e.getErrorCode() == ErrorCode.UPDATE_OR_DELETE_NON_EXISTENT_KEY && ifExists) {
                 return;

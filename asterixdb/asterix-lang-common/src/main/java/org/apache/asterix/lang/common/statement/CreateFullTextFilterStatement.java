@@ -69,7 +69,7 @@ public class CreateFullTextFilterStatement extends AbstractStatement {
     }
 
     public static boolean checkExpression(Statement stmt) {
-        // todo
+        // Currently, we don't check the expression at compile-time
         return true;
     }
 }
