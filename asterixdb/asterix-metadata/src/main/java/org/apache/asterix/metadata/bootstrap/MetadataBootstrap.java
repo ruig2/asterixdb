@@ -546,7 +546,8 @@ public class MetadataBootstrap {
 
     private static void ensureCatalogUpgradability(IMetadataIndex index) {
         if (index != MetadataPrimaryIndexes.SYNONYM_DATASET
-                // Full-text indexes with the same name but different full-text config can co-exist
+                // Backward-compatibility: FULLTEXT_ENTITY_DATASET is added to AsterixDB recently
+                // and may not exist in an older dataverse
                 && index != MetadataPrimaryIndexes.FULLTEXT_ENTITY_DATASET) {
             throw new IllegalStateException(
                     "attempt to create metadata index " + index.getIndexName() + ". Index should already exist");
