@@ -20,15 +20,13 @@ package org.apache.asterix.optimizer.rules.util;
 
 import java.util.List;
 
-import org.apache.asterix.om.base.AString;
-import org.apache.asterix.om.constants.AsterixConstantValue;
 import org.apache.asterix.om.functions.BuiltinFunctions;
+import org.apache.asterix.om.utils.ConstantExpressionUtil;
 import org.apache.asterix.optimizer.rules.am.IOptimizableFuncExpr;
 import org.apache.asterix.runtime.evaluators.common.FullTextContainsDescriptor;
 import org.apache.commons.lang3.mutable.Mutable;
 import org.apache.hyracks.algebricks.core.algebra.base.ILogicalExpression;
 import org.apache.hyracks.algebricks.core.algebra.expressions.AbstractFunctionCallExpression;
-import org.apache.hyracks.algebricks.core.algebra.expressions.ConstantExpression;
 import org.apache.hyracks.algebricks.core.algebra.functions.FunctionIdentifier;
 import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.FullTextConfig;
 import org.apache.logging.log4j.LogManager;
@@ -62,21 +60,23 @@ public class FullTextUtil {
 
         String configName = FullTextConfig.DEFAULT_FULL_TEXT_CONFIG_NAME;
         List<Mutable<ILogicalExpression>> arguments = funcExpr.getArguments();
-        for (int i = 0; i < arguments.size() - 1; i += 2) {
-            String optionName = "";
-            try {
-                // ToDo: wrap the expressions in a ftcontains() function into a dedicated Java object
-                // so that we don't cast the types many times
-                ConstantExpression ce = (ConstantExpression) arguments.get(i).getValue();
-                optionName = ((AString) ((AsterixConstantValue) (ce.getValue())).getObject()).getStringValue();
-            } catch (Exception e) {
-                // LOGGER.info("Fail to get full-text config name", e);
-                continue;
-            }
+
+        // The first two arguments are
+        // 1) the full-text record field to be queried,
+        // 2) the query keyword array
+        // The next fields are the list of full-text search options,
+        // say, the next 4 fields can be "mode", "all", "config", "DEFAULT_FULL_TEXT_CONFIG"
+        //
+        // Originally, the full-text search option is an Asterix record such as
+        //     {"mode": "all", "config": "DEFAULT_FULL_TEXT_CONFIG"},
+        // and it is transformed to dedicated fields in the
+        // RemoveDuplicateFieldsRule.transform()
+        for (int i = 2; i < arguments.size(); i += 2) {
+            // The the full-text search option arguments are already checked in FullTextContainsParameterCheckRule,
+            String optionName = ConstantExpressionUtil.getStringConstant(arguments.get(i).getValue());
 
             if (optionName.equalsIgnoreCase(FullTextContainsDescriptor.FULLTEXT_CONFIG_OPTION)) {
-                ConstantExpression nextCe = (ConstantExpression) arguments.get(i + 1).getValue();
-                configName = ((AString) ((AsterixConstantValue) (nextCe.getValue())).getObject()).getStringValue();
+                configName = ConstantExpressionUtil.getStringConstant(arguments.get(i + 1).getValue());
                 break;
             }
         }

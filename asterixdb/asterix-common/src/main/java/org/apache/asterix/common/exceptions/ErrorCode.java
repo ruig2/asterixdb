@@ -218,6 +218,7 @@ public class ErrorCode {
     public static final int UNSUPPORTED_ADAPTER_LANGUAGE = 1127;
     public static final int INCONSISTENT_FILTER_INDICATOR = 1128;
     public static final int UNSUPPORTED_GBY_OBY_SELECT_COMBO = 1129;
+    public static final int FULL_TEXT_CONFIG_NOT_FOUND = 1129;
 
     // Feed errors
     public static final int DATAFLOW_ILLEGAL_STATE = 3001;

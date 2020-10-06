@@ -160,8 +160,8 @@ public class QueryLogicalExpressionJobGen implements ILogicalExpressionJobGen {
             // In the future, if we have more functions that need to be parameterized,
             // then maybe we can create a more general interface for those parameterize-able functions.
             String fullTextConfigName = FullTextUtil.getFullTextConfigNameFromExpr(expr);
-            IFullTextConfigDescriptor configDescriptor = ((MetadataProvider) context.getMetadataProvider())
-                    .findFullTextConfigDescriptor(fullTextConfigName);
+            IFullTextConfigDescriptor configDescriptor =
+                    ((MetadataProvider) context.getMetadataProvider()).findFullTextConfigDescriptor(fullTextConfigName);
             fd = FullTextContainsDescriptor.createFunctionDescriptor(configDescriptor);
             fd.setSourceLocation(expr.getSourceLocation());
         } else {

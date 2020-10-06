@@ -247,8 +247,6 @@ public class FullTextContainsParameterCheckRule implements IAlgebraicRewriteRule
                 }
 
                 String optionTypeStringVal = null;
-                String fullTextConfigStringVal = null;
-
                 // If the option value is a constant, then we can check here.
                 if (optionExprVal.getExpressionTag() == LogicalExpressionTag.CONSTANT) {
                     switch (FullTextContainsDescriptor.getParamTypeMap().get(option)) {
