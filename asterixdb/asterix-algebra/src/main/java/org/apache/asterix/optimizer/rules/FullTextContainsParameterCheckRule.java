@@ -229,6 +229,11 @@ public class FullTextContainsParameterCheckRule implements IAlgebraicRewriteRule
                         openRecConsExpr.getSourceLocation(), functionName);
             }
 
+            if (openRecConsExpr.getArguments().size() % 2 != 0) {
+                throw CompilationException.create(ErrorCode.COMPILATION_INVALID_PARAMETER_NUMBER,
+                        openRecConsExpr.getSourceLocation(), functionName);
+            }
+
             for (int i = 0; i < openRecConsExpr.getArguments().size(); i = i + 2) {
                 ILogicalExpression optionExpr = openRecConsExpr.getArguments().get(i).getValue();
                 ILogicalExpression optionExprVal = openRecConsExpr.getArguments().get(i + 1).getValue();

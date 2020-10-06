@@ -20,9 +20,11 @@ package org.apache.asterix.optimizer.rules.util;
 
 import java.util.List;
 
+import org.apache.asterix.common.exceptions.CompilationException;
 import org.apache.asterix.om.functions.BuiltinFunctions;
 import org.apache.asterix.om.utils.ConstantExpressionUtil;
 import org.apache.asterix.optimizer.rules.am.IOptimizableFuncExpr;
+import org.apache.asterix.optimizer.rules.am.InvertedIndexAccessMethod;
 import org.apache.asterix.runtime.evaluators.common.FullTextContainsDescriptor;
 import org.apache.commons.lang3.mutable.Mutable;
 import org.apache.hyracks.algebricks.core.algebra.base.ILogicalExpression;
@@ -83,4 +85,26 @@ public class FullTextUtil {
 
         return configName;
     }
+
+    public static InvertedIndexAccessMethod.SearchModifierType getFullTextSearchModeFromExpr(AbstractFunctionCallExpression funcExpr) {
+
+        // After the third argument, the following arguments are full-text search options.
+        for (int i = 2; i < funcExpr.getArguments().size(); i = i + 2) {
+            String optionName = ConstantExpressionUtil.getStringArgument(funcExpr, i);
+
+            if (optionName.equals(FullTextContainsDescriptor.SEARCH_MODE_OPTION)) {
+                String searchType = ConstantExpressionUtil.getStringArgument(funcExpr, i + 1);
+
+                if (searchType.equals(FullTextContainsDescriptor.CONJUNCTIVE_SEARCH_MODE_OPTION)) {
+                    return InvertedIndexAccessMethod.SearchModifierType.CONJUNCTIVE;
+                } else {
+                    return InvertedIndexAccessMethod.SearchModifierType.DISJUNCTIVE;
+                }
+            }
+        }
+
+        // Use CONJUNCTIVE by default
+        return InvertedIndexAccessMethod.SearchModifierType.CONJUNCTIVE;
+    }
+
 }

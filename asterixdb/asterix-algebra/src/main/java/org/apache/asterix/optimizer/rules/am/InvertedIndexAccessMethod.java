@@ -50,8 +50,7 @@ import org.apache.asterix.om.types.ATypeTag;
 import org.apache.asterix.om.types.AUnionType;
 import org.apache.asterix.om.types.IAType;
 import org.apache.asterix.om.types.hierachy.ATypeHierarchy;
-import org.apache.asterix.om.utils.ConstantExpressionUtil;
-import org.apache.asterix.runtime.evaluators.common.FullTextContainsDescriptor;
+import org.apache.asterix.optimizer.rules.util.FullTextUtil;
 import org.apache.commons.lang3.mutable.Mutable;
 import org.apache.commons.lang3.mutable.MutableObject;
 import org.apache.hyracks.algebricks.common.exceptions.AlgebricksException;
@@ -922,35 +921,10 @@ public class InvertedIndexAccessMethod implements IAccessMethod {
             // We check the last argument of the given full-text search to see whether conjunctive or disjunctive
             // search parameter is given. This is the last argument of the function call expression.
             AbstractFunctionCallExpression funcExpr = optFuncExpr.getFuncExpr();
-            jobGenParams.setSearchModifierType(getFullTextOption(funcExpr));
+            jobGenParams.setSearchModifierType(FullTextUtil.getFullTextSearchModeFromExpr(funcExpr));
 
             jobGenParams.setSimilarityThreshold(new AsterixConstantValue(ANull.NULL));
         }
-    }
-
-    private static SearchModifierType getFullTextOption(AbstractFunctionCallExpression funcExpr)
-            throws CompilationException {
-
-        if (funcExpr.getArguments().size() % 2 != 0) {
-            throw new CompilationException(ErrorCode.TYPE_MISMATCH_FUNCTION,
-                    "Number of full-text function arguments should be even");
-        }
-
-        // From the third argument, it contains full-text search options.
-        for (int i = 2; i < funcExpr.getArguments().size(); i = i + 2) {
-            String optionName = ConstantExpressionUtil.getStringArgument(funcExpr, i);
-            if (optionName.equals(FullTextContainsDescriptor.SEARCH_MODE_OPTION)) {
-                String searchType = ConstantExpressionUtil.getStringArgument(funcExpr, i + 1);
-                if (searchType.equals(FullTextContainsDescriptor.CONJUNCTIVE_SEARCH_MODE_OPTION)) {
-                    return SearchModifierType.CONJUNCTIVE;
-                } else {
-                    return SearchModifierType.DISJUNCTIVE;
-                }
-            }
-        }
-
-        // Use CONJUNCTIVE by default
-        return SearchModifierType.CONJUNCTIVE;
     }
 
     private void addKeyVarsAndExprs(IOptimizableFuncExpr optFuncExpr, ArrayList<LogicalVariable> keyVarList,

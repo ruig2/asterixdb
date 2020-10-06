@@ -18,8 +18,6 @@
  */
 package org.apache.asterix.app.translator;
 
-import static org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextFilter.*;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
@@ -242,6 +240,7 @@ import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.FullTextConfig;
 import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.FullTextConfigDescriptor;
 import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextConfig;
 import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextConfigDescriptor;
+import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextFilter;
 import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextFilterDescriptor;
 import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.StopwordsFullTextFilterDescriptor;
 import org.apache.logging.log4j.Level;
@@ -1201,18 +1200,18 @@ public class QueryTranslator extends AbstractLangTranslator implements IStatemen
         String leftStr = ((LiteralExpr) fbs.get(0).getLeftExpr()).getValue().getStringValue().toLowerCase();
         String rightStr = ((LiteralExpr) fbs.get(0).getRightExpr()).getValue().getStringValue().toLowerCase();
 
-        if (leftStr.equalsIgnoreCase(FIELD_NAME_TYPE) == false) {
+        if (leftStr.equalsIgnoreCase(IFullTextFilter.FIELD_NAME_TYPE) == false) {
             throw CompilationException.create(ErrorCode.COMPILATION_INVALID_EXPRESSION,
                     "expect filter type in the first row");
         }
 
         switch (rightStr.toLowerCase()) {
-            case FIELD_NAME_STOPWORDS: {
+            case IFullTextFilter.FIELD_NAME_STOPWORDS: {
                 ImmutableList.Builder stopwordsBuilder = ImmutableList.<String> builder();
 
                 String leftStopwordListStr =
                         ((LiteralExpr) fbs.get(1).getLeftExpr()).getValue().getStringValue().toLowerCase();
-                if (leftStopwordListStr.equalsIgnoreCase(FIELD_NAME_STOPWORDS_LIST) == false) {
+                if (leftStopwordListStr.equalsIgnoreCase(IFullTextFilter.FIELD_NAME_STOPWORDS_LIST) == false) {
                     throw CompilationException.create(ErrorCode.COMPILATION_INVALID_EXPRESSION,
                             "expect StopwordsList in the second row; get " + leftStopwordListStr);
                 }
@@ -1226,7 +1225,7 @@ public class QueryTranslator extends AbstractLangTranslator implements IStatemen
                 break;
             }
 
-            case FIELD_NAME_STEMMER:
+            case IFullTextFilter.FIELD_NAME_STEMMER:
             default:
                 throw CompilationException.create(ErrorCode.COMPILATION_INVALID_EXPRESSION,
                         "Unexpected value: " + rightStr.toLowerCase());
