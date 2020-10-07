@@ -20,7 +20,6 @@ package org.apache.asterix.optimizer.rules.util;
 
 import java.util.List;
 
-import org.apache.asterix.common.exceptions.CompilationException;
 import org.apache.asterix.om.functions.BuiltinFunctions;
 import org.apache.asterix.om.utils.ConstantExpressionUtil;
 import org.apache.asterix.optimizer.rules.am.IOptimizableFuncExpr;
@@ -86,7 +85,8 @@ public class FullTextUtil {
         return configName;
     }
 
-    public static InvertedIndexAccessMethod.SearchModifierType getFullTextSearchModeFromExpr(AbstractFunctionCallExpression funcExpr) {
+    public static InvertedIndexAccessMethod.SearchModifierType getFullTextSearchModeFromExpr(
+            AbstractFunctionCallExpression funcExpr) {
 
         // After the third argument, the following arguments are full-text search options.
         for (int i = 2; i < funcExpr.getArguments().size(); i = i + 2) {
