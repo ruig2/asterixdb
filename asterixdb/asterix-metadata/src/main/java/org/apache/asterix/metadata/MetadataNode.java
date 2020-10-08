@@ -26,11 +26,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.sun.tools.javac.code.Attribute;
 import org.apache.asterix.common.api.IDatasetLifecycleManager;
 import org.apache.asterix.common.api.INcApplicationContext;
 import org.apache.asterix.common.config.DatasetConfig.DatasetType;
 import org.apache.asterix.common.config.DatasetConfig.IndexType;
 import org.apache.asterix.common.dataflow.LSMIndexUtil;
+import org.apache.asterix.common.exceptions.AsterixException;
 import org.apache.asterix.common.functions.FunctionSignature;
 import org.apache.asterix.common.metadata.DataverseName;
 import org.apache.asterix.common.metadata.MetadataIndexImmutableProperties;
@@ -556,25 +558,26 @@ public class MetadataNode implements IMetadataNode {
     @Override
     public IFullTextConfigDescriptor getFullTextConfigDescriptor(TxnId txnId, String configName)
             throws AlgebricksException {
-        try {
             FulltextEntityDescriptorTupleTranslator translator =
                     tupleTranslatorProvider.getFulltextEntityTupleTranslator(true);
 
-            ITupleReference searchKey =
-                    translator.createTupleAsIndex(IFullTextEntity.FullTextEntityCategory.CONFIG, configName);
+        ITupleReference searchKey = null;
+        List<IFullTextEntityDescriptor> results = new ArrayList<>();
+        try {
+            searchKey = translator.createTupleAsIndex(IFullTextEntity.FullTextEntityCategory.CONFIG, configName);
             IValueExtractor<IFullTextEntityDescriptor> valueExtractor = new MetadataEntityValueExtractor<>(translator);
-            List<IFullTextEntityDescriptor> results = new ArrayList<>();
             searchIndex(txnId, MetadataPrimaryIndexes.FULLTEXT_ENTITY_DATASET, searchKey, valueExtractor, results);
-            if (results.isEmpty()) {
-                return null;
-            }
-            IFullTextConfigDescriptor result = (IFullTextConfigDescriptor) results.get(0);
-
-            assert result.getCategory() == IFullTextEntity.FullTextEntityCategory.CONFIG;
-            return result;
         } catch (HyracksDataException e) {
             throw new AlgebricksException(e);
         }
+
+        if (results.isEmpty()) {
+            throw new AlgebricksException("Full-text config not found", org.apache.asterix.common.exceptions.ErrorCode.FULL_TEXT_CONFIG_NOT_FOUND, configName);
+        }
+        IFullTextConfigDescriptor result = (IFullTextConfigDescriptor) results.get(0);
+
+        assert result.getCategory() == IFullTextEntity.FullTextEntityCategory.CONFIG;
+        return result;
     }
 
     @Override

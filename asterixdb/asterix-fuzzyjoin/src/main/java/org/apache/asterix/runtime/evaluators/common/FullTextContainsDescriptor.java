@@ -22,7 +22,9 @@ package org.apache.asterix.runtime.evaluators.common;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import com.sun.org.apache.xalan.internal.xsltc.compiler.CompilerException;
 import org.apache.asterix.common.annotations.MissingNullInOutFunction;
+import org.apache.asterix.common.exceptions.ErrorCode;
 import org.apache.asterix.om.functions.BuiltinFunctions;
 import org.apache.asterix.om.functions.IFunctionDescriptor;
 import org.apache.asterix.om.types.ATypeTag;
@@ -67,11 +69,16 @@ public class FullTextContainsDescriptor extends AbstractScalarFunctionDynamicDes
         paramTypeMap.put(FULLTEXT_CONFIG_OPTION, ATypeTag.STRING);
     }
 
-    public FullTextContainsDescriptor(IFullTextConfigDescriptor configDescriptor) {
+    public FullTextContainsDescriptor(IFullTextConfigDescriptor configDescriptor) throws AlgebricksException {
+        if (configDescriptor == null) {
+            throw new AlgebricksException("full-text config is null", ErrorCode.FULL_TEXT_CONFIG_NOT_FOUND);
+        }
+
         this.configDescriptor = configDescriptor;
     }
 
-    public static IFunctionDescriptor createFunctionDescriptor(IFullTextConfigDescriptor configDescriptor) {
+    public static IFunctionDescriptor createFunctionDescriptor(IFullTextConfigDescriptor configDescriptor)
+            throws AlgebricksException {
         return new FullTextContainsDescriptor(configDescriptor);
     }
 
