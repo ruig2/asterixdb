@@ -67,11 +67,8 @@ public class FullTextUtil {
         // 2) the query keyword array
         // The next fields are the list of full-text search options,
         // say, the next 4 fields can be "mode", "all", "config", "DEFAULT_FULL_TEXT_CONFIG"
-        //
         // Originally, the full-text search option is an Asterix record such as
-        //     {"mode": "all", "config": "DEFAULT_FULL_TEXT_CONFIG"},
-        // and it is transformed to dedicated fields in the
-        // RemoveDuplicateFieldsRule.transform()
+        //     {"mode": "all", "config": "DEFAULT_FULL_TEXT_CONFIG"}
         for (int i = 2; i < arguments.size(); i += 2) {
             // The the full-text search option arguments are already checked in FullTextContainsParameterCheckRule,
             String optionName = ConstantExpressionUtil.getStringConstant(arguments.get(i).getValue());

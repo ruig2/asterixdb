@@ -22,7 +22,6 @@ package org.apache.asterix.runtime.evaluators.common;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import com.sun.org.apache.xalan.internal.xsltc.compiler.CompilerException;
 import org.apache.asterix.common.annotations.MissingNullInOutFunction;
 import org.apache.asterix.common.exceptions.ErrorCode;
 import org.apache.asterix.om.functions.BuiltinFunctions;

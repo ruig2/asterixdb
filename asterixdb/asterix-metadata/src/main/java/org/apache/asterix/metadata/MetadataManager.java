@@ -681,7 +681,8 @@ public abstract class MetadataManager implements IMetadataManager {
         try {
             return metadataNode.getFullTextConfigDescriptor(mdTxnCtx.getTxnId(), configName);
         } catch (AlgebricksException | RemoteException e) {
-            throw new AlgebricksException("Error when getting full-text config " + configName, ErrorCode.FULL_TEXT_CONFIG_NOT_FOUND, e);
+            throw new AlgebricksException("Error when getting full-text config " + configName,
+                    ErrorCode.FULL_TEXT_CONFIG_NOT_FOUND, e);
         }
     }
 
