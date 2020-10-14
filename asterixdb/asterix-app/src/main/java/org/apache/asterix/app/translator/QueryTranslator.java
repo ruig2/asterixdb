@@ -1236,10 +1236,10 @@ public class QueryTranslator extends AbstractLangTranslator implements IStatemen
             mdTxnCtx = MetadataManager.INSTANCE.beginTransaction();
             metadataProvider.setMetadataTxnContext(mdTxnCtx);
             MetadataManager.INSTANCE.addFullTextFilterDescriptor(mdTxnCtx, filterDescriptor);
-        } catch (AlgebricksException | RemoteException e) {
-            throw e;
-        } finally {
             MetadataManager.INSTANCE.commitTransaction(mdTxnCtx);
+        } catch (AlgebricksException | RemoteException e) {
+            abort(e, e, mdTxnCtx);
+            throw e;
         }
 
         return;
@@ -1306,6 +1306,7 @@ public class QueryTranslator extends AbstractLangTranslator implements IStatemen
 
             MetadataManager.INSTANCE.commitTransaction(mdTxnCtx);
         } catch (RemoteException e) {
+            abort(e, e, mdTxnCtx);
             throw e;
         }
 
@@ -2099,6 +2100,7 @@ public class QueryTranslator extends AbstractLangTranslator implements IStatemen
                     stmtFilterDrop.getIfExists());
             MetadataManager.INSTANCE.commitTransaction(mdTxnCtx);
         } catch (RemoteException | AlgebricksException e) {
+            abort(e, e, mdTxnCtx);
             throw e;
         }
         return;
@@ -2121,6 +2123,7 @@ public class QueryTranslator extends AbstractLangTranslator implements IStatemen
                     stmtConfigDrop.getIfExists());
             MetadataManager.INSTANCE.commitTransaction(mdTxnCtx);
         } catch (RemoteException e) {
+            abort(e, e, mdTxnCtx);
             throw e;
         }
 
