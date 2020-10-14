@@ -1418,7 +1418,7 @@ CreateFullTextFilterStatement CreateFullTextFilterSpec(Token startStmtToken) thr
     expr = RecordConstructor()
   )
   {
-    stmt = new org.apache.asterix.lang.common.statement.CreateFullTextFilterStatement(filterName, ifNotExists, expr);
+    stmt = new CreateFullTextFilterStatement(filterName, ifNotExists, expr);
     return stmt;
   }
 }

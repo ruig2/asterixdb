@@ -92,7 +92,7 @@ public class FullTextUtil {
             if (optionName.equals(FullTextContainsDescriptor.SEARCH_MODE_OPTION)) {
                 String searchType = ConstantExpressionUtil.getStringArgument(funcExpr, i + 1);
 
-                if (searchType.equals(FullTextContainsDescriptor.CONJUNCTIVE_SEARCH_MODE_OPTION)) {
+                if (searchType.equals(FullTextContainsDescriptor.SEARCH_MODE.ALL.getValue())) {
                     return InvertedIndexAccessMethod.SearchModifierType.CONJUNCTIVE;
                 } else {
                     return InvertedIndexAccessMethod.SearchModifierType.DISJUNCTIVE;

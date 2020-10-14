@@ -19,6 +19,8 @@
 
 package org.apache.asterix.metadata.entitytupletranslators;
 
+import org.apache.asterix.common.exceptions.ErrorCode;
+import org.apache.asterix.common.exceptions.MetadataException;
 import static org.apache.asterix.metadata.bootstrap.MetadataRecordTypes.FIELD_NAME_FULLTEXT_FILTER_CATEGORY;
 import static org.apache.asterix.metadata.bootstrap.MetadataRecordTypes.FIELD_NAME_FULLTEXT_FILTER_PIPELINE;
 import static org.apache.asterix.metadata.bootstrap.MetadataRecordTypes.FIELD_NAME_FULLTEXT_STOPWORD_LIST;
@@ -134,7 +136,7 @@ public class FulltextEntityDescriptorTupleTranslator extends AbstractTupleTransl
         return descriptor;
     }
 
-    public FullTextConfigDescriptor createConfigDescriptorFromARecord(ARecord aRecord) {
+    public FullTextConfigDescriptor createConfigDescriptorFromARecord(ARecord aRecord) throws MetadataException {
         String name = ((AString) aRecord
                 .getValueByPos(MetadataRecordTypes.FULLTEXT_ENTITY_ARECORD_FULLTEXT_ENTITY_NAME_FIELD_INDEX))
                         .getStringValue();
@@ -165,7 +167,11 @@ public class FulltextEntityDescriptorTupleTranslator extends AbstractTupleTransl
             }
             MetadataManager.INSTANCE.commitTransaction(mdTxnCtx);
         } catch (RemoteException | AlgebricksException e) {
-            e.printStackTrace();
+            try {
+                MetadataManager.INSTANCE.abortTransaction(mdTxnCtx);
+            } catch (RemoteException remoteException) {
+                throw new MetadataException(ErrorCode.FULL_TEXT_FAIL_TO_GET_FILTER_FROM_METADATA, remoteException);
+            }
         }
 
         List<String> usedByIndices = new ArrayList<>();

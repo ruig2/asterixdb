@@ -276,7 +276,7 @@ public abstract class AbstractIntroduceAccessMethodRule implements IAlgebraicRew
         IOptimizableFuncExpr expr = analysisCtx.getMatchedFuncExpr(0);
         if (FullTextUtil.isFullTextFunctionExpr(expr)) {
             String expectedConfig = FullTextUtil.getFullTextConfigNameFromExpr(expr);
-            if (expectedConfig.equalsIgnoreCase(indexFullTextConfig) == false) {
+            if (expectedConfig.equals(indexFullTextConfig) == false) {
                 return true;
             }
         }

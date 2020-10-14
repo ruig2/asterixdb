@@ -45,17 +45,25 @@ public class FullTextContainsDescriptor extends AbstractScalarFunctionDynamicDes
     private static final Map<String, ATypeTag> paramTypeMap = new LinkedHashMap<>();
 
     public static final String SEARCH_MODE_OPTION = "mode";
-    public static final String DISJUNCTIVE_SEARCH_MODE_OPTION = "any";
-    public static final String CONJUNCTIVE_SEARCH_MODE_OPTION = "all";
     private static final byte[] SEARCH_MODE_OPTION_ARRAY = UTF8StringUtil.writeStringToBytes(SEARCH_MODE_OPTION);
     private static final byte[] DISJUNCTIVE_SEARCH_MODE_OPTION_ARRAY =
-            UTF8StringUtil.writeStringToBytes(DISJUNCTIVE_SEARCH_MODE_OPTION);
+            UTF8StringUtil.writeStringToBytes(SEARCH_MODE.ANY.getValue());
     private static final byte[] CONJUNCTIVE_SEARCH_MODE_OPTION_ARRAY =
-            UTF8StringUtil.writeStringToBytes(CONJUNCTIVE_SEARCH_MODE_OPTION);
+            UTF8StringUtil.writeStringToBytes(SEARCH_MODE.ALL.getValue());
 
     public enum SEARCH_MODE {
-        ANY,
-        ALL;
+        ANY("any"),
+        ALL("all");
+
+        private String value;
+
+        SEARCH_MODE(String value) {
+            this.value = value;
+        }
+
+        public String getValue() {
+            return value;
+        }
     }
 
     public static final String FULLTEXT_CONFIG_OPTION = "config";

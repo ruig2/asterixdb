@@ -292,8 +292,8 @@ public class FullTextContainsParameterCheckRule implements IAlgebraicRewriteRule
 
         private void checkSearchModeOption(String optionVal, String functionName, SourceLocation sourceLoc)
                 throws AlgebricksException {
-            if (optionVal.equals(FullTextContainsDescriptor.CONJUNCTIVE_SEARCH_MODE_OPTION)
-                    || optionVal.equals(FullTextContainsDescriptor.DISJUNCTIVE_SEARCH_MODE_OPTION)) {
+            if (optionVal.equals(FullTextContainsDescriptor.SEARCH_MODE.ALL.getValue())
+                    || optionVal.equals(FullTextContainsDescriptor.SEARCH_MODE.ANY.getValue())) {
                 return;
             } else {
                 throw CompilationException.create(ErrorCode.TYPE_UNSUPPORTED, sourceLoc, functionName, optionVal);
@@ -319,7 +319,7 @@ public class FullTextContainsParameterCheckRule implements IAlgebraicRewriteRule
             ILogicalExpression searchModeOptionExpr = new ConstantExpression(
                     new AsterixConstantValue(new AString(FullTextContainsDescriptor.SEARCH_MODE_OPTION)));
             ILogicalExpression searchModeValExpr = new ConstantExpression(
-                    new AsterixConstantValue(new AString(FullTextContainsDescriptor.CONJUNCTIVE_SEARCH_MODE_OPTION)));
+                    new AsterixConstantValue(new AString(FullTextContainsDescriptor.SEARCH_MODE.ALL.getValue())));
 
             // Add this option as arguments to the ftcontains().
             newArgs.add(new MutableObject<ILogicalExpression>(searchModeOptionExpr));
