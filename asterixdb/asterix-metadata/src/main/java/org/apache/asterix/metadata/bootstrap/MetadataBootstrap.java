@@ -127,7 +127,7 @@ public class MetadataBootstrap {
                     MetadataPrimaryIndexes.FEED_DATASET, MetadataPrimaryIndexes.FEED_POLICY_DATASET,
                     MetadataPrimaryIndexes.LIBRARY_DATASET, MetadataPrimaryIndexes.COMPACTION_POLICY_DATASET,
                     MetadataPrimaryIndexes.EXTERNAL_FILE_DATASET, MetadataPrimaryIndexes.FEED_CONNECTION_DATASET,
-                    MetadataPrimaryIndexes.SYNONYM_DATASET, MetadataPrimaryIndexes.FULLTEXT_ENTITY_DATASET };
+                    MetadataPrimaryIndexes.SYNONYM_DATASET, MetadataPrimaryIndexes.FULL_TEXT_CONFIG_DATASET, MetadataPrimaryIndexes.FULL_TEXT_FILTER_DATASET };
 
     private MetadataBootstrap() {
     }
@@ -169,16 +169,16 @@ public class MetadataBootstrap {
                 insertNodes(mdTxnCtx);
                 insertInitialGroups(mdTxnCtx);
                 insertInitialAdapters(mdTxnCtx);
-                insertInitialFullTextConfig(mdTxnCtx);
                 BuiltinFeedPolicies.insertInitialFeedPolicies(mdTxnCtx);
                 insertInitialCompactionPolicies(mdTxnCtx);
+                // insertInitialFullTextConfig(mdTxnCtx);
                 if (LOGGER.isInfoEnabled()) {
                     LOGGER.info("Finished creating metadata B-trees.");
                 }
             } else {
                 insertNewCompactionPoliciesIfNotExist(mdTxnCtx);
                 insertSynonymEntitiesIfNotExist(mdTxnCtx);
-                insertFullTextEntityIfNotExist(mdTxnCtx);
+                insertFullTextConfigAndFilterIfNotExist(mdTxnCtx);
             }
             // #. initialize datasetIdFactory
             MetadataManager.INSTANCE.initializeDatasetIdFactory(mdTxnCtx);
@@ -329,22 +329,37 @@ public class MetadataBootstrap {
         }
     }
 
-    private static void insertFullTextEntityIfNotExist(MetadataTransactionContext mdTxnCtx) throws AlgebricksException {
+    // For backward-compatibility: for old datasets created by an older version of AsterixDB, they
+    // 1) may not have such a full-text config dataset in the metadata catalog,
+    // 2) may not have the default full-text config as an entry in the metadata catalog
+    // So here, let's try to insert if not exists
+    private static void insertFullTextConfigAndFilterIfNotExist(MetadataTransactionContext mdTxnCtx) throws AlgebricksException {
         if (MetadataManager.INSTANCE.getDataset(mdTxnCtx, MetadataConstants.METADATA_DATAVERSE_NAME,
-                MetadataConstants.FULLTEXT_CONFIG_DATASET_NAME) == null) {
-            insertMetadataDatasets(mdTxnCtx, new IMetadataIndex[] { MetadataPrimaryIndexes.FULLTEXT_ENTITY_DATASET });
+                MetadataConstants.FULL_TEXT_CONFIG_DATASET_NAME) == null) {
+            insertMetadataDatasets(mdTxnCtx, new IMetadataIndex[] { MetadataPrimaryIndexes.FULL_TEXT_CONFIG_DATASET });
+        }
+        if (MetadataManager.INSTANCE.getDataset(mdTxnCtx, MetadataConstants.METADATA_DATAVERSE_NAME,
+                MetadataConstants.FULL_TEXT_FILTER_DATASET_NAME) == null) {
+            insertMetadataDatasets(mdTxnCtx, new IMetadataIndex[] { MetadataPrimaryIndexes.FULL_TEXT_FILTER_DATASET });
+        }
+
+        // ToDo: create a new function to reduce duplicated code here: addDatatypeIfNotExist()
+        IAType fullTextConfigRecordType = MetadataPrimaryIndexes.FULL_TEXT_CONFIG_DATASET.getPayloadRecordType();
+        if (MetadataManager.INSTANCE.getDatatype(mdTxnCtx, MetadataConstants.METADATA_DATAVERSE_NAME,
+                fullTextConfigRecordType.getTypeName()) == null) {
+            MetadataManager.INSTANCE.addDatatype(mdTxnCtx, new Datatype(MetadataConstants.METADATA_DATAVERSE_NAME,
+                    fullTextConfigRecordType.getTypeName(), fullTextConfigRecordType, false));
+        }
+        IAType fullTextFilterRecordType = MetadataPrimaryIndexes.FULL_TEXT_FILTER_DATASET.getPayloadRecordType();
+        if (MetadataManager.INSTANCE.getDatatype(mdTxnCtx, MetadataConstants.METADATA_DATAVERSE_NAME,
+                fullTextFilterRecordType.getTypeName()) == null) {
+            MetadataManager.INSTANCE.addDatatype(mdTxnCtx, new Datatype(MetadataConstants.METADATA_DATAVERSE_NAME,
+                    fullTextFilterRecordType.getTypeName(), fullTextFilterRecordType, false));
         }
 
         if (MetadataManager.INSTANCE.getFullTextConfigDescriptor(mdTxnCtx,
                 FullTextConfig.DEFAULT_FULL_TEXT_CONFIG_NAME) == null) {
             insertInitialFullTextConfig(mdTxnCtx);
-        }
-
-        IAType fullTextEntityRecordType = MetadataPrimaryIndexes.FULLTEXT_ENTITY_DATASET.getPayloadRecordType();
-        if (MetadataManager.INSTANCE.getDatatype(mdTxnCtx, MetadataConstants.METADATA_DATAVERSE_NAME,
-                fullTextEntityRecordType.getTypeName()) == null) {
-            MetadataManager.INSTANCE.addDatatype(mdTxnCtx, new Datatype(MetadataConstants.METADATA_DATAVERSE_NAME,
-                    fullTextEntityRecordType.getTypeName(), fullTextEntityRecordType, false));
         }
     }
 
@@ -548,7 +563,8 @@ public class MetadataBootstrap {
         if (index != MetadataPrimaryIndexes.SYNONYM_DATASET
                 // Backward-compatibility: FULLTEXT_ENTITY_DATASET is added to AsterixDB recently
                 // and may not exist in an older dataverse
-                && index != MetadataPrimaryIndexes.FULLTEXT_ENTITY_DATASET) {
+                && index != MetadataPrimaryIndexes.FULL_TEXT_CONFIG_DATASET
+                && index != MetadataPrimaryIndexes.FULL_TEXT_FILTER_DATASET ) {
             throw new IllegalStateException(
                     "attempt to create metadata index " + index.getIndexName() + ". Index should already exist");
         }

@@ -19,19 +19,7 @@
 
 package org.apache.asterix.metadata.entitytupletranslators;
 
-import static org.apache.asterix.metadata.bootstrap.MetadataRecordTypes.FIELD_NAME_FULLTEXT_FILTER_CATEGORY;
-import static org.apache.asterix.metadata.bootstrap.MetadataRecordTypes.FIELD_NAME_FULLTEXT_STOPWORD_LIST;
-import static org.apache.asterix.metadata.bootstrap.MetadataRecordTypes.FIELD_NAME_FULLTEXT_TOKENIZER;
-import static org.apache.asterix.metadata.bootstrap.MetadataRecordTypes.FIELD_NAME_FULLTEXT_USED_BY_CONFIGS;
-import static org.apache.asterix.metadata.bootstrap.MetadataRecordTypes.FIELD_NAME_FULLTEXT_USED_BY_INDICES;
-import static org.apache.asterix.metadata.bootstrap.MetadataRecordTypes.FULLTEXT_ENTITY_ARECORD_FULLTEXT_ENTITY_CATEGORY_FIELD_INDEX;
-import static org.apache.asterix.metadata.bootstrap.MetadataRecordTypes.FULLTEXT_ENTITY_ARECORD_FULLTEXT_ENTITY_NAME_FIELD_INDEX;
-import static org.apache.asterix.metadata.bootstrap.MetadataRecordTypes.FULLTEXT_ENTITY_ARECORD_FULLTEXT_FILTER_KIND_FIELD_INDEX;
-
-import java.rmi.RemoteException;
-import java.util.ArrayList;
-import java.util.List;
-
+import com.google.common.collect.ImmutableList;
 import org.apache.asterix.builders.OrderedListBuilder;
 import org.apache.asterix.common.exceptions.ErrorCode;
 import org.apache.asterix.common.exceptions.MetadataException;
@@ -40,6 +28,15 @@ import org.apache.asterix.metadata.MetadataManager;
 import org.apache.asterix.metadata.MetadataTransactionContext;
 import org.apache.asterix.metadata.bootstrap.MetadataPrimaryIndexes;
 import org.apache.asterix.metadata.bootstrap.MetadataRecordTypes;
+import static org.apache.asterix.metadata.bootstrap.MetadataRecordTypes.FIELD_NAME_FULLTEXT_FILTER_CATEGORY;
+import static org.apache.asterix.metadata.bootstrap.MetadataRecordTypes.FIELD_NAME_FULLTEXT_STOPWORD_LIST;
+import static org.apache.asterix.metadata.bootstrap.MetadataRecordTypes.FIELD_NAME_FULLTEXT_TOKENIZER;
+import static org.apache.asterix.metadata.bootstrap.MetadataRecordTypes.FIELD_NAME_FULLTEXT_USED_BY_CONFIGS;
+import static org.apache.asterix.metadata.bootstrap.MetadataRecordTypes.FIELD_NAME_FULLTEXT_USED_BY_INDICES;
+import static org.apache.asterix.metadata.bootstrap.MetadataRecordTypes.FIELD_NAME_FULL_TEXT_CONFIG_NAME;
+import static org.apache.asterix.metadata.bootstrap.MetadataRecordTypes.FULLTEXT_ENTITY_ARECORD_FULLTEXT_ENTITY_CATEGORY_FIELD_INDEX;
+import static org.apache.asterix.metadata.bootstrap.MetadataRecordTypes.FULLTEXT_ENTITY_ARECORD_FULLTEXT_ENTITY_NAME_FIELD_INDEX;
+import static org.apache.asterix.metadata.bootstrap.MetadataRecordTypes.FULLTEXT_ENTITY_ARECORD_FULLTEXT_FILTER_KIND_FIELD_INDEX;
 import org.apache.asterix.om.base.AInt8;
 import org.apache.asterix.om.base.AOrderedList;
 import org.apache.asterix.om.base.ARecord;
@@ -65,16 +62,18 @@ import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextFilter;
 import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextFilterDescriptor;
 import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.StopwordsFullTextFilterDescriptor;
 
-import com.google.common.collect.ImmutableList;
+import java.rmi.RemoteException;
+import java.util.ArrayList;
+import java.util.List;
 
-public class FulltextEntityDescriptorTupleTranslator extends AbstractTupleTranslator<IFullTextEntityDescriptor> {
+public class FulltextConfigDescriptorTupleTranslator extends AbstractTupleTranslator<IFullTextEntityDescriptor> {
 
     private static final int FULLTEXT_FILTER_PAYLOAD_TUPLE_FIELD_INDEX = 2;
     protected final ArrayTupleReference tuple;
     protected final ISerializerDeserializer<AInt8> int8Serde =
             SerializerDeserializerProvider.INSTANCE.getSerializerDeserializer(BuiltinType.AINT8);
 
-    protected FulltextEntityDescriptorTupleTranslator(boolean getTuple) {
+    protected FulltextConfigDescriptorTupleTranslator(boolean getTuple) {
         super(getTuple, MetadataPrimaryIndexes.FULL_TEXT_CONFIG_DATASET, FULLTEXT_FILTER_PAYLOAD_TUPLE_FIELD_INDEX);
         if (getTuple) {
             tuple = new ArrayTupleReference();
@@ -256,7 +255,7 @@ public class FulltextEntityDescriptorTupleTranslator extends AbstractTupleTransl
         for (IFullTextFilterDescriptor f : configDescriptor.getFilterDescriptors()) {
             filterNames.add(f.getName());
         }
-        writeOrderedList2RecordBuilder(MetadataRecordTypes.FIELD_NAME_FULL_TEXT_FILTER_PIPELINE, filterNames);
+        writeOrderedList2RecordBuilder(FIELD_NAME_FULL_TEXT_CONFIG_NAME, filterNames);
 
         List<String> indexNames = new ArrayList<>();
         for (String s : configDescriptor.getUsedByIndices()) {

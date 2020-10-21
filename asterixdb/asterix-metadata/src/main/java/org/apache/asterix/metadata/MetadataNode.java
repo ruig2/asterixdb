@@ -469,7 +469,7 @@ public class MetadataNode implements IMetadataNode {
                     translator.createTupleAsIndex(IFullTextEntity.FullTextEntityCategory.FILTER, filterName);
             IValueExtractor<IFullTextEntityDescriptor> valueExtractor = new MetadataEntityValueExtractor<>(translator);
             List<IFullTextEntityDescriptor> results = new ArrayList<>();
-            searchIndex(txnId, MetadataPrimaryIndexes.FULLTEXT_ENTITY_DATASET, searchKey, valueExtractor, results);
+            searchIndex(txnId, MetadataPrimaryIndexes.FULL_TEXT_FILTER_DATASET, searchKey, valueExtractor, results);
             if (results.isEmpty()) {
                 return null;
             }
@@ -505,7 +505,7 @@ public class MetadataNode implements IMetadataNode {
 
             ITupleReference key =
                     translator.createTupleAsIndex(IFullTextEntity.FullTextEntityCategory.FILTER, filterName);
-            deleteTupleFromIndex(txnId, MetadataPrimaryIndexes.FULLTEXT_ENTITY_DATASET, key);
+            deleteTupleFromIndex(txnId, MetadataPrimaryIndexes.FULL_TEXT_FILTER_DATASET, key);
         } catch (HyracksDataException e) {
             if (e.getComponent().equals(ErrorCode.HYRACKS)
                     && e.getErrorCode() == ErrorCode.UPDATE_OR_DELETE_NON_EXISTENT_KEY && ifExists) {
@@ -522,18 +522,17 @@ public class MetadataNode implements IMetadataNode {
             FulltextEntityDescriptorTupleTranslator tupleReaderWriter =
                     tupleTranslatorProvider.getFulltextEntityTupleTranslator(true);
             ITupleReference filterTuple = tupleReaderWriter.getTupleFromMetadataEntity(entityDescriptor);
-            insertTupleIntoIndex(txnId, MetadataPrimaryIndexes.FULLTEXT_ENTITY_DATASET, filterTuple);
+            // insertTupleIntoIndex(txnId, MetadataPrimaryIndexes.FULL_TEXT, filterTuple);
         } catch (HyracksDataException e) {
             throw new AlgebricksException(e);
         }
     }
-
     private void modifyExistingFullTextEntityToCatalog(TxnId txnId, IFullTextEntityDescriptor entityDescriptor)
             throws AlgebricksException, HyracksDataException {
         FulltextEntityDescriptorTupleTranslator tupleReaderWriter =
                 tupleTranslatorProvider.getFulltextEntityTupleTranslator(true);
         ITupleReference filterTuple = tupleReaderWriter.getTupleFromMetadataEntity(entityDescriptor);
-        upsertTupleIntoIndex(txnId, MetadataPrimaryIndexes.FULLTEXT_ENTITY_DATASET, filterTuple);
+        // upsertTupleIntoIndex(txnId, MetadataPrimaryIndexes.FULLTEXT_ENTITY_DATASET, filterTuple);
     }
 
     @Override
@@ -564,7 +563,7 @@ public class MetadataNode implements IMetadataNode {
         try {
             searchKey = translator.createTupleAsIndex(IFullTextEntity.FullTextEntityCategory.CONFIG, configName);
             IValueExtractor<IFullTextEntityDescriptor> valueExtractor = new MetadataEntityValueExtractor<>(translator);
-            searchIndex(txnId, MetadataPrimaryIndexes.FULLTEXT_ENTITY_DATASET, searchKey, valueExtractor, results);
+            // searchIndex(txnId, MetadataPrimaryIndexes.FULLTEXT_ENTITY_DATASET, searchKey, valueExtractor, results);
         } catch (HyracksDataException e) {
             throw new AlgebricksException(e);
         }
@@ -604,7 +603,7 @@ public class MetadataNode implements IMetadataNode {
 
             ITupleReference key =
                     translator.createTupleAsIndex(IFullTextEntity.FullTextEntityCategory.CONFIG, configName);
-            deleteTupleFromIndex(txnId, MetadataPrimaryIndexes.FULLTEXT_ENTITY_DATASET, key);
+            // deleteTupleFromIndex(txnId, MetadataPrimaryIndexes.FULLTEXT_ENTITY_DATASET, key);
         } catch (HyracksDataException e) {
             if (e.getComponent().equals(ErrorCode.HYRACKS)
                     && e.getErrorCode() == ErrorCode.UPDATE_OR_DELETE_NON_EXISTENT_KEY && ifExists) {
@@ -1103,17 +1102,13 @@ public class MetadataNode implements IMetadataNode {
     }
 
     private List<IFullTextEntityDescriptor> getAllFullTextEntityDescriptors(TxnId txnId) throws AlgebricksException {
-        try {
-            FulltextEntityDescriptorTupleTranslator tupleReaderWriter =
-                    tupleTranslatorProvider.getFulltextEntityTupleTranslator(true);
-            IValueExtractor<IFullTextEntityDescriptor> valueExtractor =
-                    new MetadataEntityValueExtractor<>(tupleReaderWriter);
-            List<IFullTextEntityDescriptor> results = new ArrayList<>();
-            searchIndex(txnId, MetadataPrimaryIndexes.FULLTEXT_ENTITY_DATASET, null, valueExtractor, results);
-            return results;
-        } catch (HyracksDataException e) {
-            throw new AlgebricksException(e);
-        }
+        FulltextEntityDescriptorTupleTranslator tupleReaderWriter =
+                tupleTranslatorProvider.getFulltextEntityTupleTranslator(true);
+        IValueExtractor<IFullTextEntityDescriptor> valueExtractor =
+                new MetadataEntityValueExtractor<>(tupleReaderWriter);
+        List<IFullTextEntityDescriptor> results = new ArrayList<>();
+        // searchIndex(txnId, MetadataPrimaryIndexes.FULLTEXT_ENTITY_DATASET, null, valueExtractor, results);
+        return results;
     }
 
     private void confirmDataverseCanBeDeleted(TxnId txnId, DataverseName dataverseName) throws AlgebricksException {

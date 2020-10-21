@@ -61,8 +61,10 @@ public class MetadataPrimaryIndexes {
             new MetadataIndexImmutableProperties(MetadataConstants.EXTERNAL_FILE_DATASET_NAME, 14, 14);
     public static final MetadataIndexImmutableProperties PROPERTIES_SYNONYM =
             new MetadataIndexImmutableProperties(MetadataConstants.SYNONYM_DATASET_NAME, 15, 15);
-    public static final MetadataIndexImmutableProperties PROPERTIES_FULLTEXT_ENTITY =
-            new MetadataIndexImmutableProperties(MetadataConstants.FULLTEXT_CONFIG_DATASET_NAME, 16, 16);
+    public static final MetadataIndexImmutableProperties PROPERTIES_FULL_TEXT_CONFIG =
+            new MetadataIndexImmutableProperties(MetadataConstants.FULL_TEXT_CONFIG_DATASET_NAME, 16, 16);
+    public static final MetadataIndexImmutableProperties PROPERTIES_FULL_TEXT_FILTER =
+            new MetadataIndexImmutableProperties(MetadataConstants.FULL_TEXT_FILTER_DATASET_NAME, 17, 17);
 
     public static final IMetadataIndex DATAVERSE_DATASET =
             new MetadataIndex(PROPERTIES_DATAVERSE, 2, new IAType[] { BuiltinType.ASTRING },
@@ -144,13 +146,14 @@ public class MetadataPrimaryIndexes {
                             Arrays.asList(MetadataRecordTypes.FIELD_NAME_SYNONYM_NAME)),
                     0, MetadataRecordTypes.SYNONYM_RECORDTYPE, true, new int[] { 0, 1 });
 
-    // ToDo: create a dedicated class for the metadata index field to avoid unmatched information
-    // (e.g. numbers of field names and types) and get rid of numFields in MetadataIndex.
-    public static final IMetadataIndex FULLTEXT_ENTITY_DATASET =
-            new MetadataIndex(PROPERTIES_FULLTEXT_ENTITY, 3, new IAType[] { BuiltinType.ASTRING, BuiltinType.ASTRING },
-                    Arrays.asList(Arrays.asList(MetadataRecordTypes.FIELD_NAME_FULLTEXT_CATEGORY),
-                            Arrays.asList(MetadataRecordTypes.FIELD_NAME_FULLTEXT_ENTITY_NAME)),
-                    0, MetadataRecordTypes.FULLTEXT_ENTITY_RECORDTYPE, true, new int[] { 0, 1 });
+    public static final IMetadataIndex FULL_TEXT_CONFIG_DATASET =
+            new MetadataIndex(PROPERTIES_FULL_TEXT_CONFIG, 2, new IAType[] { BuiltinType.ASTRING },
+                    Arrays.asList(Arrays.asList(MetadataRecordTypes.FIELD_NAME_FULL_TEXT_CONFIG_NAME)),
+                    0, MetadataRecordTypes.FULL_TEXT_CONFIG_RECORDTYPE, true, new int[] { 0, 1 });
+    public static final IMetadataIndex FULL_TEXT_FILTER_DATASET =
+            new MetadataIndex(PROPERTIES_FULL_TEXT_FILTER, 2, new IAType[] { BuiltinType.ASTRING },
+                    Arrays.asList(Arrays.asList(MetadataRecordTypes.FIELD_NAME_FULL_TEXT_FILTER_NAME)),
+                    0, MetadataRecordTypes.FULL_TEXT_FILTER_RECORDTYPE, true, new int[] { 0, 1 });
 
     private MetadataPrimaryIndexes() {
     }
