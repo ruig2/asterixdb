@@ -10341,6 +10341,12 @@
         <output-dir compare="Text">synonym-01</output-dir>
       </compilation-unit>
     </test-case>
+    <test-case FilePath="synonym">
+      <compilation-unit name="synonym-02-negative">
+        <output-dir compare="Text">none</output-dir>
+        <expected-error>ASX1063: Cannot find dataverse with name UNKNOWN_DATAVERSE</expected-error>
+      </compilation-unit>
+    </test-case>
   </test-group>
   <test-group name="tokenizers">
     <test-case FilePath="tokenizers">
@@ -12843,6 +12849,24 @@
     <test-case FilePath="distinct">
       <compilation-unit name="query-issue443-2">
         <output-dir compare="Text">query-issue443-2</output-dir>
+      </compilation-unit>
+    </test-case>
+  </test-group>
+  <test-group name="rightouterjoin">
+    <test-case FilePath="rightouterjoin">
+      <compilation-unit name="roj-01-core">
+        <output-dir compare="Text">roj-01-core</output-dir>
+      </compilation-unit>
+    </test-case>
+    <test-case FilePath="rightouterjoin">
+      <compilation-unit name="roj-02-core">
+        <output-dir compare="Text">roj-02-core</output-dir>
+      </compilation-unit>
+    </test-case>
+    <test-case FilePath="rightouterjoin">
+      <compilation-unit name="roj-03-negative">
+        <output-dir compare="Text">none</output-dir>
+        <expected-error>ASX1130: Illegal use of RIGHT OUTER JOIN</expected-error>
       </compilation-unit>
     </test-case>
   </test-group>

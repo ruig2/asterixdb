@@ -579,11 +579,6 @@
       <artifactId>commons-io</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.apache.asterix</groupId>
-      <artifactId>asterix-lang-aql</artifactId>
-      <version>${project.version}</version>
-    </dependency>
-    <dependency>
       <groupId>org.apache.hyracks</groupId>
       <artifactId>hyracks-storage-am-lsm-btree</artifactId>
     </dependency>
@@ -852,6 +847,11 @@
       <groupId>com.typesafe.akka</groupId>
       <artifactId>akka-http-core_2.12</artifactId>
       <scope>test</scope>
+    </dependency>
+    <!-- Azure -->
+    <dependency>
+      <groupId>com.azure</groupId>
+      <artifactId>azure-storage-blob</artifactId>
     </dependency>
     <dependency>
       <groupId>org.apache.logging.log4j</groupId>
