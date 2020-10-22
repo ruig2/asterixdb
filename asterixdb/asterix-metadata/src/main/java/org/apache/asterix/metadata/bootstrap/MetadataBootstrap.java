@@ -171,7 +171,7 @@ public class MetadataBootstrap {
                 insertInitialAdapters(mdTxnCtx);
                 BuiltinFeedPolicies.insertInitialFeedPolicies(mdTxnCtx);
                 insertInitialCompactionPolicies(mdTxnCtx);
-                // insertInitialFullTextConfig(mdTxnCtx);
+                insertInitialFullTextConfig(mdTxnCtx);
                 if (LOGGER.isInfoEnabled()) {
                     LOGGER.info("Finished creating metadata B-trees.");
                 }

@@ -1140,6 +1140,7 @@ public class QueryTranslator extends AbstractLangTranslator implements IStatemen
             validateIndexKeyFields(stmtCreateIndex, keySourceIndicators, aRecordType, metaRecordType, indexFields,
                     indexFieldTypes);
 
+            // ToDo: polish here
             String fullTextConfigName = stmtCreateIndex.getFullTextConfigName();
             // The index is of TYPE FULLTEXT in SQLPP
             if (stmtCreateIndex.getIndexType() == IndexType.SINGLE_PARTITION_WORD_INVIX
@@ -1147,13 +1148,6 @@ public class QueryTranslator extends AbstractLangTranslator implements IStatemen
                 if (Strings.isNullOrEmpty(fullTextConfigName)) {
                     fullTextConfigName = FullTextConfig.DEFAULT_FULL_TEXT_CONFIG_NAME;
                 }
-
-                IFullTextConfigDescriptor configDescriptor =
-                        MetadataManager.INSTANCE.getFullTextConfigDescriptor(mdTxnCtx, fullTextConfigName);
-                configDescriptor.addUsedByIndex(indexName);
-                MetadataManager.INSTANCE.updateFulltextConfigDescriptor(mdTxnCtx, configDescriptor);
-                // The transaction should not be committed here, instead, it should be committed after the index created successfully
-                // If the index fails to be created, then the ft config shouldn't be updated
             }
 
             if (stmtCreateIndex.getIndexType() == IndexType.SINGLE_PARTITION_NGRAM_INVIX

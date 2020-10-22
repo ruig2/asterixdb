@@ -27,8 +27,4 @@ public interface IFullTextConfigDescriptor extends IFullTextEntityDescriptor {
     IFullTextConfig.TokenizerCategory getTokenizerCategory();
 
     ImmutableList<IFullTextFilterDescriptor> getFilterDescriptors();
-
-    List<String> getUsedByIndices();
-
-    void addUsedByIndex(String indexName);
 }

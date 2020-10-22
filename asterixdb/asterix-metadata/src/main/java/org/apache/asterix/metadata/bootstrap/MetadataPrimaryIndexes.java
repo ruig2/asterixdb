@@ -148,12 +148,12 @@ public class MetadataPrimaryIndexes {
 
     public static final IMetadataIndex FULL_TEXT_CONFIG_DATASET =
             new MetadataIndex(PROPERTIES_FULL_TEXT_CONFIG, 2, new IAType[] { BuiltinType.ASTRING },
-                    Arrays.asList(Arrays.asList(MetadataRecordTypes.FIELD_NAME_FULL_TEXT_CONFIG_NAME)),
-                    0, MetadataRecordTypes.FULL_TEXT_CONFIG_RECORDTYPE, true, new int[] { 0, 1 });
+                    Arrays.asList( Arrays.asList(MetadataRecordTypes.FIELD_NAME_FULL_TEXT_CONFIG_NAME) ),
+                    0, MetadataRecordTypes.FULL_TEXT_CONFIG_RECORDTYPE, true, new int[] { 0 });
     public static final IMetadataIndex FULL_TEXT_FILTER_DATASET =
             new MetadataIndex(PROPERTIES_FULL_TEXT_FILTER, 2, new IAType[] { BuiltinType.ASTRING },
                     Arrays.asList(Arrays.asList(MetadataRecordTypes.FIELD_NAME_FULL_TEXT_FILTER_NAME)),
-                    0, MetadataRecordTypes.FULL_TEXT_FILTER_RECORDTYPE, true, new int[] { 0, 1 });
+                    0, MetadataRecordTypes.FULL_TEXT_FILTER_RECORDTYPE, true, new int[] { 0 });
 
     private MetadataPrimaryIndexes() {
     }

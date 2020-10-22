@@ -78,7 +78,8 @@ import org.apache.asterix.metadata.entitytupletranslators.ExternalFileTupleTrans
 import org.apache.asterix.metadata.entitytupletranslators.FeedConnectionTupleTranslator;
 import org.apache.asterix.metadata.entitytupletranslators.FeedPolicyTupleTranslator;
 import org.apache.asterix.metadata.entitytupletranslators.FeedTupleTranslator;
-import org.apache.asterix.metadata.entitytupletranslators.FulltextEntityDescriptorTupleTranslator;
+import org.apache.asterix.metadata.entitytupletranslators.FullTextConfigDescriptorTupleTranslator;
+import org.apache.asterix.metadata.entitytupletranslators.FullTextFilterDescriptorTupleTranslator;
 import org.apache.asterix.metadata.entitytupletranslators.FunctionTupleTranslator;
 import org.apache.asterix.metadata.entitytupletranslators.IndexTupleTranslator;
 import org.apache.asterix.metadata.entitytupletranslators.LibraryTupleTranslator;
@@ -104,6 +105,7 @@ import org.apache.asterix.transaction.management.opcallbacks.SecondaryIndexModif
 import org.apache.asterix.transaction.management.opcallbacks.UpsertOperationCallback;
 import org.apache.asterix.transaction.management.service.transaction.DatasetIdFactory;
 import org.apache.hyracks.algebricks.common.exceptions.AlgebricksException;
+import org.apache.hyracks.algebricks.common.exceptions.NotImplementedException;
 import org.apache.hyracks.algebricks.common.utils.Triple;
 import org.apache.hyracks.api.dataflow.value.IBinaryComparator;
 import org.apache.hyracks.api.dataflow.value.IBinaryComparatorFactory;
@@ -454,7 +456,7 @@ public class MetadataNode implements IMetadataNode {
     @Override
     public void addFullTextFilterDescriptor(TxnId txnId, IFullTextFilterDescriptor filterDescriptor)
             throws RemoteException, AlgebricksException {
-        insertFullTextEntityDescriptorToCatalog(txnId, filterDescriptor);
+        insertFullTextFilterDescriptorToCatalog(txnId, filterDescriptor);
         return;
     }
 
@@ -462,8 +464,8 @@ public class MetadataNode implements IMetadataNode {
     public IFullTextFilterDescriptor getFulltextFilterDescriptor(TxnId txnId, String filterName)
             throws AlgebricksException {
         try {
-            FulltextEntityDescriptorTupleTranslator translator =
-                    tupleTranslatorProvider.getFulltextEntityTupleTranslator(true);
+            FullTextFilterDescriptorTupleTranslator translator =
+                    tupleTranslatorProvider.getFullTextFilterTupleTranslator(true);
 
             ITupleReference searchKey =
                     translator.createTupleAsIndex(IFullTextEntity.FullTextEntityCategory.FILTER, filterName);
@@ -480,28 +482,11 @@ public class MetadataNode implements IMetadataNode {
     }
 
     @Override
-    public void removeUsedByIndicesFromFullTextConfigDescriptor(TxnId txnId, String indexName)
-            throws RemoteException, AlgebricksException {
-        List<IFullTextEntityDescriptor> entities = getAllFullTextEntityDescriptors(txnId);
-        for (IFullTextEntityDescriptor e : entities) {
-            if (e.getCategory() == IFullTextEntity.FullTextEntityCategory.CONFIG
-                    && ((IFullTextConfigDescriptor) e).getUsedByIndices().contains(indexName)) {
-                ((IFullTextConfigDescriptor) e).getUsedByIndices().remove(indexName);
-                try {
-                    modifyExistingFullTextEntityToCatalog(txnId, e);
-                } catch (HyracksDataException ex) {
-                    throw new AlgebricksException(ex);
-                }
-            }
-        }
-    }
-
-    @Override
     public void dropFullTextFilterDescriptor(TxnId txnId, String filterName, boolean ifExists)
             throws AlgebricksException {
         try {
-            FulltextEntityDescriptorTupleTranslator translator =
-                    tupleTranslatorProvider.getFulltextEntityTupleTranslator(true);
+            FullTextFilterDescriptorTupleTranslator translator =
+                    tupleTranslatorProvider.getFullTextFilterTupleTranslator(true);
 
             ITupleReference key =
                     translator.createTupleAsIndex(IFullTextEntity.FullTextEntityCategory.FILTER, filterName);
@@ -516,17 +501,31 @@ public class MetadataNode implements IMetadataNode {
         return;
     }
 
-    private void insertFullTextEntityDescriptorToCatalog(TxnId txnId, IFullTextEntityDescriptor entityDescriptor)
+    private void insertFullTextConfigDescriptorToCatalog(TxnId txnId, IFullTextConfigDescriptor configDescriptor)
             throws AlgebricksException {
         try {
-            FulltextEntityDescriptorTupleTranslator tupleReaderWriter =
-                    tupleTranslatorProvider.getFulltextEntityTupleTranslator(true);
-            ITupleReference filterTuple = tupleReaderWriter.getTupleFromMetadataEntity(entityDescriptor);
-            // insertTupleIntoIndex(txnId, MetadataPrimaryIndexes.FULL_TEXT, filterTuple);
+            FullTextConfigDescriptorTupleTranslator tupleReaderWriter =
+                    tupleTranslatorProvider.getFullTextConfigTupleTranslator(true);
+            ITupleReference configTuple = tupleReaderWriter.getTupleFromMetadataEntity(configDescriptor);
+            insertTupleIntoIndex(txnId, MetadataPrimaryIndexes.FULL_TEXT_CONFIG_DATASET, configTuple);
         } catch (HyracksDataException e) {
             throw new AlgebricksException(e);
         }
     }
+
+    private void insertFullTextFilterDescriptorToCatalog(TxnId txnId, IFullTextFilterDescriptor filterDescriptor)
+            throws AlgebricksException {
+        try {
+            FullTextFilterDescriptorTupleTranslator tupleReaderWriter =
+                    tupleTranslatorProvider.getFullTextFilterTupleTranslator(true);
+            ITupleReference filterTuple = tupleReaderWriter.getTupleFromMetadataEntity(filterDescriptor);
+            insertTupleIntoIndex(txnId, MetadataPrimaryIndexes.FULL_TEXT_FILTER_DATASET, filterTuple);
+        } catch (HyracksDataException e) {
+            throw new AlgebricksException(e);
+        }
+    }
+
+    /*
     private void modifyExistingFullTextEntityToCatalog(TxnId txnId, IFullTextEntityDescriptor entityDescriptor)
             throws AlgebricksException, HyracksDataException {
         FulltextEntityDescriptorTupleTranslator tupleReaderWriter =
@@ -535,17 +534,15 @@ public class MetadataNode implements IMetadataNode {
         // upsertTupleIntoIndex(txnId, MetadataPrimaryIndexes.FULLTEXT_ENTITY_DATASET, filterTuple);
     }
 
+     */
+
     @Override
     public void addFullTextConfigDescriptor(TxnId txnId, IFullTextConfigDescriptor configDescriptor)
             throws AlgebricksException, RemoteException {
         try {
             // Make the following a transaction to avoid data corruption, e.g. , config is updated but filters not
-            insertFullTextEntityDescriptorToCatalog(txnId, configDescriptor);
-            for (IFullTextFilterDescriptor f : configDescriptor.getFilterDescriptors()) {
-                f.addUsedByConfig(configDescriptor.getName());
-                modifyExistingFullTextEntityToCatalog(txnId, f);
-            }
-        } catch (AlgebricksException | HyracksDataException e) {
+            insertFullTextConfigDescriptorToCatalog(txnId, configDescriptor);
+        } catch (AlgebricksException e) {
             throw new AlgebricksException(e, ErrorCode.ERROR_PROCESSING_TUPLE);
         }
 
@@ -555,15 +552,15 @@ public class MetadataNode implements IMetadataNode {
     @Override
     public IFullTextConfigDescriptor getFullTextConfigDescriptor(TxnId txnId, String configName)
             throws AlgebricksException {
-        FulltextEntityDescriptorTupleTranslator translator =
-                tupleTranslatorProvider.getFulltextEntityTupleTranslator(true);
+        FullTextConfigDescriptorTupleTranslator translator =
+                tupleTranslatorProvider.getFullTextConfigTupleTranslator(true);
 
         ITupleReference searchKey = null;
-        List<IFullTextEntityDescriptor> results = new ArrayList<>();
+        List<IFullTextConfigDescriptor> results = new ArrayList<>();
         try {
-            searchKey = translator.createTupleAsIndex(IFullTextEntity.FullTextEntityCategory.CONFIG, configName);
-            IValueExtractor<IFullTextEntityDescriptor> valueExtractor = new MetadataEntityValueExtractor<>(translator);
-            // searchIndex(txnId, MetadataPrimaryIndexes.FULLTEXT_ENTITY_DATASET, searchKey, valueExtractor, results);
+            searchKey = translator.createTupleAsIndex(configName);
+            IValueExtractor<IFullTextConfigDescriptor> valueExtractor = new MetadataEntityValueExtractor<>(translator);
+            searchIndex(txnId, MetadataPrimaryIndexes.FULL_TEXT_CONFIG_DATASET, searchKey, valueExtractor, results);
         } catch (HyracksDataException e) {
             throw new AlgebricksException(e);
         }
@@ -572,21 +569,15 @@ public class MetadataNode implements IMetadataNode {
             return null;
         }
 
-        IFullTextConfigDescriptor result = (IFullTextConfigDescriptor) results.get(0);
-
-        assert result.getCategory() == IFullTextEntity.FullTextEntityCategory.CONFIG;
+        IFullTextConfigDescriptor result = results.get(0);
         return result;
-    }
-
-    @Override
-    public void updateFullTextConfigDescriptor(TxnId txnId, IFullTextConfigDescriptor config)
-            throws HyracksDataException, AlgebricksException, RemoteException {
-        modifyExistingFullTextEntityToCatalog(txnId, config);
     }
 
     @Override
     public void dropFullTextConfigDescriptor(TxnId txnId, String configName, boolean ifExists)
             throws AlgebricksException {
+        throw new NotImplementedException();
+        /*
         IFullTextConfigDescriptor config = getFullTextConfigDescriptor(txnId, configName);
         if (config != null && config.getUsedByIndices().size() > 0) {
             String indexNames = "";
@@ -612,7 +603,7 @@ public class MetadataNode implements IMetadataNode {
             throw new AlgebricksException(e);
         }
         return;
-
+         */
     }
 
     private void insertTupleIntoIndex(TxnId txnId, IMetadataIndex metadataIndex, ITupleReference tuple)
@@ -1101,6 +1092,7 @@ public class MetadataNode implements IMetadataNode {
         }
     }
 
+    /*
     private List<IFullTextEntityDescriptor> getAllFullTextEntityDescriptors(TxnId txnId) throws AlgebricksException {
         FulltextEntityDescriptorTupleTranslator tupleReaderWriter =
                 tupleTranslatorProvider.getFulltextEntityTupleTranslator(true);
@@ -1110,6 +1102,7 @@ public class MetadataNode implements IMetadataNode {
         // searchIndex(txnId, MetadataPrimaryIndexes.FULLTEXT_ENTITY_DATASET, null, valueExtractor, results);
         return results;
     }
+     */
 
     private void confirmDataverseCanBeDeleted(TxnId txnId, DataverseName dataverseName) throws AlgebricksException {
         // If a dataset from a DIFFERENT dataverse

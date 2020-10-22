@@ -454,9 +454,6 @@ public interface IMetadataNode extends Remote, Serializable {
     IFullTextFilterDescriptor getFulltextFilterDescriptor(TxnId txnId, String filterName)
             throws RemoteException, AlgebricksException;
 
-    void removeUsedByIndicesFromFullTextConfigDescriptor(TxnId txnId, String indexName)
-            throws RemoteException, AlgebricksException;
-
     void dropFullTextFilterDescriptor(TxnId txnId, String filterName, boolean ifExists)
             throws RemoteException, AlgebricksException;
 
@@ -465,9 +462,6 @@ public interface IMetadataNode extends Remote, Serializable {
 
     IFullTextConfigDescriptor getFullTextConfigDescriptor(TxnId txnId, String name)
             throws AlgebricksException, RemoteException;
-
-    void updateFullTextConfigDescriptor(TxnId txnId, IFullTextConfigDescriptor config)
-            throws HyracksDataException, AlgebricksException, RemoteException;
 
     void dropFullTextConfigDescriptor(TxnId txnId, String configName, boolean ifExists)
             throws RemoteException, AlgebricksException;

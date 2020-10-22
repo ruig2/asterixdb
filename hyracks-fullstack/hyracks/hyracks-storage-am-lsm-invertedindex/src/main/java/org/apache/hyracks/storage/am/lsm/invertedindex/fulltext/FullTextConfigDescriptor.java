@@ -39,20 +39,12 @@ public class FullTextConfigDescriptor implements IFullTextConfigDescriptor {
     private final String name;
     private final IFullTextConfig.TokenizerCategory tokenizerCategory;
     private final ImmutableList<IFullTextFilterDescriptor> filterDescriptors;
-    protected List<String> usedByIndices;
 
     public FullTextConfigDescriptor(String name, IFullTextConfig.TokenizerCategory tokenizerCategory,
             ImmutableList<IFullTextFilterDescriptor> filterDescriptors) {
-        this(name, tokenizerCategory, filterDescriptors, new ArrayList<>());
-    }
-
-    // For usage in fromJson() only where usedByIndices of an existing full-text config written on disk may not be null.
-    public FullTextConfigDescriptor(String name, IFullTextConfig.TokenizerCategory tokenizerCategory,
-            ImmutableList<IFullTextFilterDescriptor> filterDescriptors, List<String> usedByIndices) {
         this.name = name;
         this.tokenizerCategory = tokenizerCategory;
         this.filterDescriptors = filterDescriptors;
-        this.usedByIndices = usedByIndices;
     }
 
     @Override
@@ -67,7 +59,7 @@ public class FullTextConfigDescriptor implements IFullTextConfigDescriptor {
             filtersBuilder.add((IFullTextFilter) filterDescriptor.getEntity());
         }
 
-        return new FullTextConfig(name, tokenizerCategory, filtersBuilder.build(), usedByIndices);
+        return new FullTextConfig(name, tokenizerCategory, filtersBuilder.build());
     }
 
     @Override
@@ -85,20 +77,9 @@ public class FullTextConfigDescriptor implements IFullTextConfigDescriptor {
         return filterDescriptors;
     }
 
-    @Override
-    public List<String> getUsedByIndices() {
-        return usedByIndices;
-    }
-
-    @Override
-    public void addUsedByIndex(String indexName) {
-        this.usedByIndices.add(indexName);
-    }
-
     private static final String FIELD_NAME = "name";
     private static final String FIELD_TOKENIZER_CATEGORY = "tokenizerCategory";
     private static final String FIELD_FILTERS = "filters";
-    private static final String FIELD_USED_BY_INDICES = "usedByIndices";
 
     @Override
     public JsonNode toJson(IPersistedResourceRegistry registry) throws HyracksDataException {
@@ -111,12 +92,6 @@ public class FullTextConfigDescriptor implements IFullTextConfigDescriptor {
             filterArray.add(filterDescriptor.toJson(registry));
         }
         json.set(FIELD_FILTERS, filterArray);
-
-        ArrayNode usedByIndicesArrayNode = AbstractFullTextConfig.OBJECT_MAPPER.createArrayNode();
-        for (String indexName : usedByIndices) {
-            usedByIndicesArrayNode.add(indexName);
-        }
-        json.set(FIELD_USED_BY_INDICES, usedByIndicesArrayNode);
 
         return json;
     }
@@ -135,14 +110,7 @@ public class FullTextConfigDescriptor implements IFullTextConfigDescriptor {
         }
         ImmutableList<IFullTextFilterDescriptor> filters = ImmutableList.copyOf(filterDescriptors);
 
-        ImmutableList.Builder<String> usedByIndicesBuilder = ImmutableList.<String> builder();
-        JsonNode usedByIndicesArrayNode = json.get(FIELD_USED_BY_INDICES);
-        for (int i = 0; i < usedByIndicesArrayNode.size(); i++) {
-            usedByIndicesBuilder.add(usedByIndicesArrayNode.get(i).asText());
-        }
-        ImmutableList usedByIndices = usedByIndicesBuilder.build();
-
-        return new FullTextConfigDescriptor(name, tc, filters, usedByIndices);
+        return new FullTextConfigDescriptor(name, tc, filters);
     }
 
 }

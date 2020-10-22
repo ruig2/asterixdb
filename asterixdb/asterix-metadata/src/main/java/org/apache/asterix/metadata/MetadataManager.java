@@ -434,26 +434,10 @@ public abstract class MetadataManager implements IMetadataManager {
             String indexName) throws AlgebricksException {
         try {
             metadataNode.dropIndex(ctx.getTxnId(), dataverseName, datasetName, indexName);
-            removeUsedByIndicesFromFullTextConfig(ctx, indexName);
         } catch (RemoteException e) {
             throw new MetadataException(ErrorCode.REMOTE_EXCEPTION_WHEN_CALLING_METADATA_NODE, e);
         }
         ctx.dropIndex(dataverseName, datasetName, indexName);
-    }
-
-    // Since dropIndex() only takes the index name instead of the entire index object as the argument,
-    // we don't know the full text configs that is used by the index
-    // And the call sites of dropIndex() are complex,
-    // for a full-text config that used by this index,
-    // it is not practical to remove the index from the usedByIndices field of the corresponding full-text config.
-    // Let's do a full-scan here to remove the index name from related fullTextConfig.usedByIndices
-    private void removeUsedByIndicesFromFullTextConfig(MetadataTransactionContext mdTxnCtx, String indexName)
-            throws AlgebricksException {
-        try {
-            metadataNode.removeUsedByIndicesFromFullTextConfigDescriptor(mdTxnCtx.getTxnId(), indexName);
-        } catch (RemoteException e) {
-            throw new AlgebricksException(e);
-        }
     }
 
     @Override
@@ -683,16 +667,6 @@ public abstract class MetadataManager implements IMetadataManager {
         } catch (AlgebricksException | RemoteException e) {
             throw new AlgebricksException("Error when getting full-text config " + configName,
                     ErrorCode.FULL_TEXT_CONFIG_NOT_FOUND, e);
-        }
-    }
-
-    @Override
-    public void updateFulltextConfigDescriptor(MetadataTransactionContext mdTxnCtx,
-            IFullTextConfigDescriptor configDescriptor) throws AlgebricksException {
-        try {
-            metadataNode.updateFullTextConfigDescriptor(mdTxnCtx.getTxnId(), configDescriptor);
-        } catch (HyracksDataException | RemoteException e) {
-            throw new MetadataException(e);
         }
     }
 
