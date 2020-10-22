@@ -40,11 +40,22 @@ public class FullTextConfigDescriptor implements IFullTextConfigDescriptor {
     private final IFullTextConfig.TokenizerCategory tokenizerCategory;
     private final ImmutableList<IFullTextFilterDescriptor> filterDescriptors;
 
+    // This built-in default full-text config will be used only when no full-text config is specified by the user
+    // Note that the default ft config descriptor is not stored in metadata catalog,
+    // and if we are trying to get a ft config descriptor with no name or this default name,
+    // the metadata manager will return a default one without looking into the metadata catalog
+    // In this way we avoid the edge cases to insert or delete the default config in the catalog
+    public static final String DEFAULT_FULL_TEXT_CONFIG_NAME = "DEFAULT_FULL_TEXT_CONFIG";
+
     public FullTextConfigDescriptor(String name, IFullTextConfig.TokenizerCategory tokenizerCategory,
             ImmutableList<IFullTextFilterDescriptor> filterDescriptors) {
         this.name = name;
         this.tokenizerCategory = tokenizerCategory;
         this.filterDescriptors = filterDescriptors;
+    }
+
+    public static IFullTextConfigDescriptor getDefaultFullTextConfig() {
+        return new FullTextConfigDescriptor(DEFAULT_FULL_TEXT_CONFIG_NAME, IFullTextConfig.TokenizerCategory.WORD, ImmutableList.of());
     }
 
     @Override

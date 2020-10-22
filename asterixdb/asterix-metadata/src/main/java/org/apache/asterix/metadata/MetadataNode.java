@@ -126,6 +126,7 @@ import org.apache.hyracks.storage.am.lsm.common.api.ILSMIndex;
 import org.apache.hyracks.storage.am.lsm.common.api.ILSMIndexAccessor;
 import org.apache.hyracks.storage.am.lsm.common.impls.AbstractLSMIndex;
 import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.FullTextConfig;
+import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.FullTextConfigDescriptor;
 import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextConfigDescriptor;
 import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextEntity;
 import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextEntityDescriptor;
@@ -723,10 +724,7 @@ public class MetadataNode implements IMetadataNode {
 
             List<IFullTextConfigDescriptor> configs = getAllFullTextConfigDescriptors(txnId);
             for (IFullTextConfigDescriptor config : configs) {
-                // The default full-text config shouldn't be dropped even if the dataverse is to be dropped
-                if (config.getName().equals(FullTextConfig.DEFAULT_FULL_TEXT_CONFIG_NAME) == false) {
-                    dropFullTextConfigDescriptor(txnId, config.getName(), true);
-                }
+                dropFullTextConfigDescriptor(txnId, config.getName(), true);
             }
 
             // Drop all types in this dataverse.
@@ -1218,7 +1216,7 @@ public class MetadataNode implements IMetadataNode {
 
     private void confirmFullTextConfigCanBeDeleted(TxnId txnId, String configName)
             throws AlgebricksException {
-        if (configName.equals(FullTextConfig.DEFAULT_FULL_TEXT_CONFIG_NAME)) {
+        if (configName.equals(FullTextConfigDescriptor.DEFAULT_FULL_TEXT_CONFIG_NAME)) {
             throw new MetadataException(FULL_TEXT_DEFAULT_CONFIG_CANNOT_BE_DELETED);
         }
 

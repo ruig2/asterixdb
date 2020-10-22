@@ -29,7 +29,7 @@ import org.apache.commons.lang3.mutable.Mutable;
 import org.apache.hyracks.algebricks.core.algebra.base.ILogicalExpression;
 import org.apache.hyracks.algebricks.core.algebra.expressions.AbstractFunctionCallExpression;
 import org.apache.hyracks.algebricks.core.algebra.functions.FunctionIdentifier;
-import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.FullTextConfig;
+import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.FullTextConfigDescriptor;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -59,7 +59,7 @@ public class FullTextUtil {
             return null;
         }
 
-        String configName = FullTextConfig.DEFAULT_FULL_TEXT_CONFIG_NAME;
+        String configName = FullTextConfigDescriptor.DEFAULT_FULL_TEXT_CONFIG_NAME;
         List<Mutable<ILogicalExpression>> arguments = funcExpr.getArguments();
 
         // The first two arguments are

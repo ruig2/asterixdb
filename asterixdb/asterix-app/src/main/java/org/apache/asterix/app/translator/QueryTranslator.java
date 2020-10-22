@@ -1146,7 +1146,7 @@ public class QueryTranslator extends AbstractLangTranslator implements IStatemen
             if (stmtCreateIndex.getIndexType() == IndexType.SINGLE_PARTITION_WORD_INVIX
                     || stmtCreateIndex.getIndexType() == IndexType.LENGTH_PARTITIONED_WORD_INVIX) {
                 if (Strings.isNullOrEmpty(fullTextConfigName)) {
-                    fullTextConfigName = FullTextConfig.DEFAULT_FULL_TEXT_CONFIG_NAME;
+                    fullTextConfigName = FullTextConfigDescriptor.DEFAULT_FULL_TEXT_CONFIG_NAME;
                 }
             }
 
@@ -1158,7 +1158,7 @@ public class QueryTranslator extends AbstractLangTranslator implements IStatemen
                 // But we don't add this index to the usedByIndices list of the default config
                 //     because the tokenizer in the default config is a WORD tokenizer
 
-                fullTextConfigName = FullTextConfig.DEFAULT_FULL_TEXT_CONFIG_NAME;
+                fullTextConfigName = FullTextConfigDescriptor.DEFAULT_FULL_TEXT_CONFIG_NAME;
             }
 
             Index newIndex = new Index(dataverseName, datasetName, indexName, indexType, indexFields,
@@ -2104,7 +2104,7 @@ public class QueryTranslator extends AbstractLangTranslator implements IStatemen
             IHyracksClientConnection hcc, IRequestParameters requestParameters)
             throws RemoteException, AlgebricksException {
         FullTextConfigDropStatement stmtConfigDrop = (FullTextConfigDropStatement) stmt;
-        if (stmtConfigDrop.getConfigName().equalsIgnoreCase(FullTextConfig.DEFAULT_FULL_TEXT_CONFIG_NAME)) {
+        if (stmtConfigDrop.getConfigName().equalsIgnoreCase(FullTextConfigDescriptor.DEFAULT_FULL_TEXT_CONFIG_NAME)) {
             throw CompilationException.create(ErrorCode.COMPILATION_ERROR,
                     "Not allowed to drop the default full-text config");
         }

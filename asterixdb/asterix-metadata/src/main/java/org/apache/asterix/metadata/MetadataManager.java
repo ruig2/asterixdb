@@ -25,6 +25,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+import com.google.common.base.Strings;
 import org.apache.asterix.common.config.MetadataProperties;
 import org.apache.asterix.common.dataflow.ICcApplicationContext;
 import org.apache.asterix.common.exceptions.ACIDException;
@@ -58,6 +59,8 @@ import org.apache.asterix.metadata.entities.Synonym;
 import org.apache.asterix.transaction.management.opcallbacks.AbstractIndexModificationOperationCallback.Operation;
 import org.apache.hyracks.algebricks.common.exceptions.AlgebricksException;
 import org.apache.hyracks.api.exceptions.HyracksDataException;
+import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.FullTextConfig;
+import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.FullTextConfigDescriptor;
 import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextConfigDescriptor;
 import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextFilterDescriptor;
 import org.apache.hyracks.util.ExitUtil;
@@ -662,6 +665,10 @@ public abstract class MetadataManager implements IMetadataManager {
     @Override
     public IFullTextConfigDescriptor getFullTextConfigDescriptor(MetadataTransactionContext mdTxnCtx, String configName)
             throws AlgebricksException {
+        if (Strings.isNullOrEmpty(configName) || configName.equals(
+                FullTextConfigDescriptor.DEFAULT_FULL_TEXT_CONFIG_NAME)) {
+            return FullTextConfigDescriptor.getDefaultFullTextConfig();
+        }
         try {
             return metadataNode.getFullTextConfigDescriptor(mdTxnCtx.getTxnId(), configName);
         } catch (AlgebricksException | RemoteException e) {

@@ -35,10 +35,4 @@ public class FullTextConfig extends AbstractFullTextConfig {
             List<String> usedByIndices) {
         super(name, tokenizerCategory, filters, usedByIndices);
     }
-
-    // This built-in default full-text config will be used only when no full-text config is specified by the user
-    // Note that on the Asterix layer, the default config should be fetched from MetadataProvider via config name when possible
-    // so that it has the latest usedByIndices field
-    public static final String DEFAULT_FULL_TEXT_CONFIG_NAME = "DEFAULT_FULL_TEXT_CONFIG";
-
 }

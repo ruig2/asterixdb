@@ -171,7 +171,6 @@ public class MetadataBootstrap {
                 insertInitialAdapters(mdTxnCtx);
                 BuiltinFeedPolicies.insertInitialFeedPolicies(mdTxnCtx);
                 insertInitialCompactionPolicies(mdTxnCtx);
-                insertInitialFullTextConfig(mdTxnCtx);
                 if (LOGGER.isInfoEnabled()) {
                     LOGGER.info("Finished creating metadata B-trees.");
                 }
@@ -280,15 +279,6 @@ public class MetadataBootstrap {
         }
     }
 
-    private static void insertInitialFullTextConfig(MetadataTransactionContext mdTxnCtx) throws AlgebricksException {
-        MetadataManager.INSTANCE.addFulltextConfigDescriptor(mdTxnCtx,
-                new FullTextConfigDescriptor(FullTextConfig.DEFAULT_FULL_TEXT_CONFIG_NAME,
-                        IFullTextConfig.TokenizerCategory.WORD, ImmutableList.of()));
-        if (LOGGER.isInfoEnabled()) {
-            LOGGER.info("Finished inserting built-in full-text config.");
-        }
-    }
-
     private static void insertInitialCompactionPolicies(MetadataTransactionContext mdTxnCtx)
             throws AlgebricksException {
         String[] builtInCompactionPolicyClassNames = new String[] { ConstantMergePolicyFactory.class.getName(),
@@ -355,11 +345,6 @@ public class MetadataBootstrap {
                 fullTextFilterRecordType.getTypeName()) == null) {
             MetadataManager.INSTANCE.addDatatype(mdTxnCtx, new Datatype(MetadataConstants.METADATA_DATAVERSE_NAME,
                     fullTextFilterRecordType.getTypeName(), fullTextFilterRecordType, false));
-        }
-
-        if (MetadataManager.INSTANCE.getFullTextConfigDescriptor(mdTxnCtx,
-                FullTextConfig.DEFAULT_FULL_TEXT_CONFIG_NAME) == null) {
-            insertInitialFullTextConfig(mdTxnCtx);
         }
     }
 
