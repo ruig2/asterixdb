@@ -23,10 +23,4 @@ import java.util.List;
 
 public interface IFullTextFilterDescriptor extends IFullTextEntityDescriptor {
     IFullTextFilter.FullTextFilterType getFilterType();
-
-    List<String> getUsedByConfigs();
-
-    void addUsedByConfig(String usedByConfig);
-
-    List<String> deleteUsedByConfig(String usedByConfig);
 }

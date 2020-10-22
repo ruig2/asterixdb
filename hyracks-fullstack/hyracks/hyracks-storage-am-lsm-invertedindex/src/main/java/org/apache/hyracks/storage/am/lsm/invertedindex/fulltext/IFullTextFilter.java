@@ -34,9 +34,18 @@ public interface IFullTextFilter extends IFullTextEntity {
     String FIELD_NAME_STEMMER_LANGUAGE = "language";
 
     enum FullTextFilterType {
-        STOPWORDS,
-        SYNONYM,
-        STEMMER;
+        STOPWORDS("Stopwords"),
+        SYNONYM("Synonym"),
+        STEMMER("Stemmer");
+
+        private String value;
+        FullTextFilterType(String value) {
+            this.value = value;
+        }
+
+        public String getValue() {
+            return value;
+        }
 
         public static FullTextFilterType getEnumIgnoreCase(String str) {
             FullTextFilterType type = EnumUtils.getEnumIgnoreCase(FullTextFilterType.class, str);

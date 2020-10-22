@@ -30,11 +30,9 @@ import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 public class AbstractFullTextFilterDescriptor implements IFullTextFilterDescriptor {
     protected final String name;
-    protected List<String> usedByConfigs;
 
-    public AbstractFullTextFilterDescriptor(String name, List<String> usedByConfigs) {
+    public AbstractFullTextFilterDescriptor(String name) {
         this.name = name;
-        this.usedByConfigs = usedByConfigs;
     }
 
     @Override
@@ -48,23 +46,8 @@ public class AbstractFullTextFilterDescriptor implements IFullTextFilterDescript
     }
 
     @Override
-    public List<String> getUsedByConfigs() {
-        return usedByConfigs;
-    }
-
-    @Override
     public IFullTextEntity.FullTextEntityCategory getCategory() {
         return IFullTextEntity.FullTextEntityCategory.FILTER;
-    }
-
-    @Override
-    public void addUsedByConfig(String usedByConfig) {
-        this.usedByConfigs.add(usedByConfig);
-    }
-
-    @Override
-    public List<String> deleteUsedByConfig(String usedByConfig) {
-        throw new NotImplementedException();
     }
 
     @Override

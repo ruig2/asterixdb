@@ -35,9 +35,8 @@ public class StopwordsFullTextFilterDescriptor extends AbstractFullTextFilterDes
 
     public ImmutableList<String> stopwordList;
 
-    public StopwordsFullTextFilterDescriptor(String name, ImmutableList<String> stopwordList,
-            List<String> usedByConfigs) {
-        super(name, usedByConfigs);
+    public StopwordsFullTextFilterDescriptor(String name, ImmutableList<String> stopwordList) {
+        super(name);
         this.stopwordList = stopwordList;
     }
 
@@ -71,11 +70,6 @@ public class StopwordsFullTextFilterDescriptor extends AbstractFullTextFilterDes
         }
         json.set(STOPWORDS_LIST, stopwordsArrayNode);
 
-        ArrayNode usedByConfigsArrayNode = AbstractFullTextConfig.OBJECT_MAPPER.createArrayNode();
-        for (String s : usedByConfigs) {
-            usedByConfigsArrayNode.add(s);
-        }
-        json.set(USED_BY_CONFIGS, usedByConfigsArrayNode);
         return json;
     }
 
@@ -91,13 +85,6 @@ public class StopwordsFullTextFilterDescriptor extends AbstractFullTextFilterDes
         }
         ImmutableList<String> stopwords = stopwordsBuilder.build();
 
-        ImmutableList.Builder<String> usedByIndicesBuilder = ImmutableList.<String> builder();
-        JsonNode usedByIndicesArrayNode = json.get(USED_BY_CONFIGS);
-        for (int i = 0; i < usedByIndicesArrayNode.size(); i++) {
-            usedByIndicesBuilder.add(usedByIndicesArrayNode.get(i).asText());
-        }
-        ImmutableList<String> usedByIndices = usedByIndicesBuilder.build();
-
-        return new StopwordsFullTextFilterDescriptor(name, stopwords, usedByIndices);
+        return new StopwordsFullTextFilterDescriptor(name, stopwords);
     }
 }

@@ -21,21 +21,13 @@ package org.apache.asterix.metadata.entitytupletranslators;
 
 import com.google.common.collect.ImmutableList;
 import org.apache.asterix.builders.OrderedListBuilder;
-import org.apache.asterix.common.exceptions.ErrorCode;
-import org.apache.asterix.common.exceptions.MetadataException;
 import org.apache.asterix.formats.nontagged.SerializerDeserializerProvider;
-import org.apache.asterix.metadata.MetadataManager;
-import org.apache.asterix.metadata.MetadataTransactionContext;
 import org.apache.asterix.metadata.bootstrap.MetadataPrimaryIndexes;
 import org.apache.asterix.metadata.bootstrap.MetadataRecordTypes;
-import static org.apache.asterix.metadata.bootstrap.MetadataRecordTypes.FIELD_NAME_FULLTEXT_FILTER_CATEGORY;
-import static org.apache.asterix.metadata.bootstrap.MetadataRecordTypes.FIELD_NAME_FULLTEXT_STOPWORD_LIST;
-import static org.apache.asterix.metadata.bootstrap.MetadataRecordTypes.FIELD_NAME_FULLTEXT_TOKENIZER;
-import static org.apache.asterix.metadata.bootstrap.MetadataRecordTypes.FIELD_NAME_FULLTEXT_USED_BY_CONFIGS;
-import static org.apache.asterix.metadata.bootstrap.MetadataRecordTypes.FIELD_NAME_FULLTEXT_USED_BY_INDICES;
-import static org.apache.asterix.metadata.bootstrap.MetadataRecordTypes.FIELD_NAME_FULL_TEXT_FILTER_NAME;
-import static org.apache.asterix.metadata.bootstrap.MetadataRecordTypes.FULLTEXT_ENTITY_ARECORD_FULLTEXT_FILTER_KIND_FIELD_INDEX;
+import static org.apache.asterix.metadata.bootstrap.MetadataRecordTypes.FIELD_NAME_FULL_TEXT_FILTER_TYPE;
+import static org.apache.asterix.metadata.bootstrap.MetadataRecordTypes.FIELD_NAME_FULL_TEXT_STOPWORD_LIST;
 import static org.apache.asterix.metadata.bootstrap.MetadataRecordTypes.FULL_TEXT_ARECORD_FILTER_NAME_FIELD_INDEX;
+import static org.apache.asterix.metadata.bootstrap.MetadataRecordTypes.FULL_TEXT_ARECORD_FILTER_TYPE_FIELD_INDEX;
 import org.apache.asterix.om.base.AInt8;
 import org.apache.asterix.om.base.AOrderedList;
 import org.apache.asterix.om.base.ARecord;
@@ -43,7 +35,6 @@ import org.apache.asterix.om.base.AString;
 import org.apache.asterix.om.base.IACursor;
 import org.apache.asterix.om.types.AOrderedListType;
 import org.apache.asterix.om.types.BuiltinType;
-import org.apache.commons.lang3.EnumUtils;
 import org.apache.hyracks.algebricks.common.exceptions.AlgebricksException;
 import org.apache.hyracks.algebricks.common.exceptions.NotImplementedException;
 import org.apache.hyracks.api.dataflow.value.ISerializerDeserializer;
@@ -52,22 +43,18 @@ import org.apache.hyracks.data.std.util.ArrayBackedValueStorage;
 import org.apache.hyracks.dataflow.common.comm.io.ArrayTupleBuilder;
 import org.apache.hyracks.dataflow.common.comm.io.ArrayTupleReference;
 import org.apache.hyracks.dataflow.common.data.accessors.ITupleReference;
-import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.FullTextConfigDescriptor;
-import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextConfig;
-import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextConfigDescriptor;
 import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextEntity.FullTextEntityCategory;
 import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextEntityDescriptor;
 import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextFilter;
 import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextFilterDescriptor;
 import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.StopwordsFullTextFilterDescriptor;
 
-import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class FullTextFilterDescriptorTupleTranslator extends AbstractTupleTranslator<IFullTextEntityDescriptor> {
+public class FullTextFilterDescriptorTupleTranslator extends AbstractTupleTranslator<IFullTextFilterDescriptor> {
 
-    private static final int FULLTEXT_FILTER_PAYLOAD_TUPLE_FIELD_INDEX = 2;
+    private static final int FULLTEXT_FILTER_PAYLOAD_TUPLE_FIELD_INDEX = 1;
     protected final ArrayTupleReference tuple;
     protected final ISerializerDeserializer<AInt8> int8Serde =
             SerializerDeserializerProvider.INSTANCE.getSerializerDeserializer(BuiltinType.AINT8);
@@ -82,37 +69,25 @@ public class FullTextFilterDescriptorTupleTranslator extends AbstractTupleTransl
     }
 
     @Override
-    protected IFullTextEntityDescriptor createMetadataEntityFromARecord(ARecord aRecord)
+    protected IFullTextFilterDescriptor createMetadataEntityFromARecord(ARecord aRecord)
             throws HyracksDataException, AlgebricksException {
-        AString categoryAString =
-                (AString) aRecord.getValueByPos(FULL_TEXT_ARECORD_FILTER_NAME_FIELD_INDEX);
+        AString filterName = (AString) aRecord.getValueByPos(FULL_TEXT_ARECORD_FILTER_NAME_FIELD_INDEX);
+        AString filterTypeAString =
+                (AString) aRecord.getValueByPos(FULL_TEXT_ARECORD_FILTER_TYPE_FIELD_INDEX);
 
-        FullTextEntityCategory category = FullTextEntityCategory.getEnumIgnoreCase(categoryAString.getStringValue());
-        switch (category) {
-            case FILTER:
-                AString typeAString =
-                        (AString) aRecord.getValueByPos(FULLTEXT_ENTITY_ARECORD_FULLTEXT_FILTER_KIND_FIELD_INDEX);
-                IFullTextFilter.FullTextFilterType kind =
-                        IFullTextFilter.FullTextFilterType.getEnumIgnoreCase(typeAString.getStringValue());
-                switch (kind) {
-                    case STOPWORDS:
-                        return createStopwordsFilterDescriptorFromARecord(aRecord);
-                    case STEMMER:
-                    case SYNONYM:
-                    default:
-                        throw new AlgebricksException("Not supported yet");
-                }
-            case CONFIG:
-                // return createConfigDescriptorFromARecord(aRecord);
+        IFullTextFilter.FullTextFilterType filterType =
+                IFullTextFilter.FullTextFilterType.getEnumIgnoreCase(filterTypeAString.getStringValue());
+        switch (filterType) {
+            case STOPWORDS:
+                return createStopwordsFilterDescriptorFromARecord(filterName, aRecord);
+            case STEMMER:
+            case SYNONYM:
+            default:
+                throw new AlgebricksException("Not supported yet");
         }
-
-        return null;
     }
 
-    public StopwordsFullTextFilterDescriptor createStopwordsFilterDescriptorFromARecord(ARecord aRecord) {
-        String name = ((AString) aRecord
-                .getValueByPos(FULL_TEXT_ARECORD_FILTER_NAME_FIELD_INDEX))
-                        .getStringValue();
+    public StopwordsFullTextFilterDescriptor createStopwordsFilterDescriptorFromARecord(AString name, ARecord aRecord) {
         ImmutableList.Builder<String> stopwordsBuilder = ImmutableList.<String> builder();
         IACursor stopwordsCursor = ((AOrderedList) (aRecord
                 .getValueByPos(MetadataRecordTypes.FULLTEXT_ENTITY_ARECORD_STOPWORD_LIST_FIELD_INDEX))).getCursor();
@@ -120,16 +95,8 @@ public class FullTextFilterDescriptorTupleTranslator extends AbstractTupleTransl
             stopwordsBuilder.add(((AString) stopwordsCursor.get()).getStringValue());
         }
 
-        IACursor usedByConfigsCursor = ((AOrderedList) (aRecord
-                .getValueByPos(MetadataRecordTypes.FULLTEXT_ENTITY_ARECORD_USED_BY_FT_CONFIGS_FIELD_INDEX)))
-                        .getCursor();
-        List<String> usedByConfigs = new ArrayList<>();
-        while (usedByConfigsCursor.next()) {
-            usedByConfigs.add(((AString) usedByConfigsCursor.get()).getStringValue());
-        }
-
         StopwordsFullTextFilterDescriptor descriptor =
-                new StopwordsFullTextFilterDescriptor(name, stopwordsBuilder.build(), usedByConfigs);
+                new StopwordsFullTextFilterDescriptor(name.getStringValue(), stopwordsBuilder.build());
         return descriptor;
     }
 
@@ -144,7 +111,7 @@ public class FullTextFilterDescriptorTupleTranslator extends AbstractTupleTransl
     }
 
     private void writeFilterType2RecordBuilder(IFullTextFilter.FullTextFilterType type) throws HyracksDataException {
-        writeKeyAndValue2FieldVariables(FIELD_NAME_FULLTEXT_FILTER_CATEGORY, type.name());
+        writeKeyAndValue2FieldVariables(FIELD_NAME_FULL_TEXT_FILTER_TYPE, type.name());
 
         recordBuilder.addField(fieldName, fieldValue);
     }
@@ -170,19 +137,23 @@ public class FullTextFilterDescriptorTupleTranslator extends AbstractTupleTransl
         recordBuilder.addField(fieldName, fieldValue);
     }
 
-    private void writeFilterDescriptorBasic(IFullTextFilterDescriptor filterDescriptor) throws HyracksDataException {
-        writeFilterType2RecordBuilder(filterDescriptor.getFilterType());
-        writeOrderedList2RecordBuilder(FIELD_NAME_FULLTEXT_USED_BY_CONFIGS, filterDescriptor.getUsedByConfigs());
-    }
-
     private void writeStopwordFilterDescriptor(StopwordsFullTextFilterDescriptor stopwordsFullTextFilterDescriptor)
             throws HyracksDataException {
-        writeFilterDescriptorBasic(stopwordsFullTextFilterDescriptor);
-        writeOrderedList2RecordBuilder(FIELD_NAME_FULLTEXT_STOPWORD_LIST,
+        writeOrderedList2RecordBuilder(FIELD_NAME_FULL_TEXT_STOPWORD_LIST,
                 stopwordsFullTextFilterDescriptor.getStopwordList());
     }
 
     private void writeFulltextFilter(IFullTextFilterDescriptor filterDescriptor) throws HyracksDataException {
+        fieldValue.reset();
+        aString.setValue(filterDescriptor.getName());
+        stringSerde.serialize(aString, fieldValue.getDataOutput());
+        recordBuilder.addField(FULL_TEXT_ARECORD_FILTER_NAME_FIELD_INDEX, fieldValue);
+
+        fieldValue.reset();
+        aString.setValue(filterDescriptor.getFilterType().getValue());
+        stringSerde.serialize(aString, fieldValue.getDataOutput());
+        recordBuilder.addField(FULL_TEXT_ARECORD_FILTER_TYPE_FIELD_INDEX, fieldValue);
+
         switch (filterDescriptor.getFilterType()) {
             case STOPWORDS:
                 writeStopwordFilterDescriptor((StopwordsFullTextFilterDescriptor) filterDescriptor);
@@ -192,46 +163,26 @@ public class FullTextFilterDescriptorTupleTranslator extends AbstractTupleTransl
             default:
                 throw new NotImplementedException();
         }
-
-        return;
     }
 
-    private void writeIndex(FullTextEntityCategory category, String entityName, ArrayTupleBuilder tupleBuilder)
+    private void writeIndex(String entityName, ArrayTupleBuilder tupleBuilder)
             throws HyracksDataException {
-        // Write the 2 primary-index key fields
-        aString.setValue(category.name());
-        stringSerde.serialize(aString, tupleBuilder.getDataOutput());
-        tupleBuilder.addFieldEndOffset();
-
         aString.setValue(entityName);
         stringSerde.serialize(aString, tupleBuilder.getDataOutput());
         tupleBuilder.addFieldEndOffset();
     }
 
     @Override
-    public ITupleReference getTupleFromMetadataEntity(IFullTextEntityDescriptor fullTextEntityDescriptor)
+    public ITupleReference getTupleFromMetadataEntity(IFullTextFilterDescriptor filterDescriptor)
             throws HyracksDataException {
         tupleBuilder.reset();
 
-        writeIndex(fullTextEntityDescriptor.getCategory(), fullTextEntityDescriptor.getName(), tupleBuilder);
+        writeIndex(filterDescriptor.getName(), tupleBuilder);
 
         // Write the record
         recordBuilder.reset(MetadataRecordTypes.FULL_TEXT_FILTER_RECORDTYPE);
 
-        fieldValue.reset();
-        aString.setValue(fullTextEntityDescriptor.getName());
-        stringSerde.serialize(aString, fieldValue.getDataOutput());
-        recordBuilder.addField(FULL_TEXT_ARECORD_FILTER_NAME_FIELD_INDEX, fieldValue);
-
-        switch (fullTextEntityDescriptor.getCategory()) {
-            case FILTER:
-                writeFulltextFilter((IFullTextFilterDescriptor) fullTextEntityDescriptor);
-                break;
-            case CONFIG:
-                break;
-            default:
-                break;
-        }
+        writeFulltextFilter(filterDescriptor);
 
         recordBuilder.write(tupleBuilder.getDataOutput(), true);
         tupleBuilder.addFieldEndOffset();
@@ -240,12 +191,12 @@ public class FullTextFilterDescriptorTupleTranslator extends AbstractTupleTransl
         return tuple;
     }
 
-    public ITupleReference createTupleAsIndex(FullTextEntityCategory category, String entityName)
+    public ITupleReference createTupleAsIndex(String filterName)
             throws HyracksDataException {
         // -1 to get the number of fields in index only
         ArrayTupleBuilder tupleBuilder =
                 new ArrayTupleBuilder(MetadataPrimaryIndexes.FULL_TEXT_FILTER_DATASET.getFieldCount() - 1);
-        writeIndex(category, entityName, tupleBuilder);
+        writeIndex(filterName, tupleBuilder);
 
         tuple.reset(tupleBuilder.getFieldEndOffsets(), tupleBuilder.getByteArray());
         return tuple;

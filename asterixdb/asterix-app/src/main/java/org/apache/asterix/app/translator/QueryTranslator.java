@@ -1215,7 +1215,7 @@ public class QueryTranslator extends AbstractLangTranslator implements IStatemen
                 }
 
                 filterDescriptor = new StopwordsFullTextFilterDescriptor(stmtCreateFilter.getFilterName(),
-                        stopwordsBuilder.build(), new ArrayList<String>());
+                        stopwordsBuilder.build());
                 break;
             }
 

@@ -28,11 +28,6 @@ import org.apache.asterix.metadata.MetadataManager;
 import org.apache.asterix.metadata.MetadataTransactionContext;
 import org.apache.asterix.metadata.bootstrap.MetadataPrimaryIndexes;
 import org.apache.asterix.metadata.bootstrap.MetadataRecordTypes;
-import static org.apache.asterix.metadata.bootstrap.MetadataRecordTypes.FIELD_NAME_FULLTEXT_FILTER_CATEGORY;
-import static org.apache.asterix.metadata.bootstrap.MetadataRecordTypes.FIELD_NAME_FULLTEXT_STOPWORD_LIST;
-import static org.apache.asterix.metadata.bootstrap.MetadataRecordTypes.FIELD_NAME_FULLTEXT_TOKENIZER;
-import static org.apache.asterix.metadata.bootstrap.MetadataRecordTypes.FIELD_NAME_FULLTEXT_USED_BY_CONFIGS;
-import static org.apache.asterix.metadata.bootstrap.MetadataRecordTypes.FIELD_NAME_FULL_TEXT_FILTER_PIPELINE;
 import static org.apache.asterix.metadata.bootstrap.MetadataRecordTypes.FULL_TEXT_ARECORD_CONFIG_NAME_FIELD_INDEX;
 import static org.apache.asterix.metadata.bootstrap.MetadataRecordTypes.FULL_TEXT_ARECORD_CONFIG_TOKENIZER_FIELD_INDEX;
 import static org.apache.asterix.metadata.bootstrap.MetadataRecordTypes.FULL_TEXT_ARECORD_FILTER_PIPELINE_FIELD_INDEX;
@@ -65,7 +60,7 @@ import java.util.List;
 
 public class FullTextConfigDescriptorTupleTranslator extends AbstractTupleTranslator<IFullTextConfigDescriptor> {
 
-    private static final int FULL_TEXT_CONFIG_PAYLOAD_TUPLE_FIELD_INDEX = 2;
+    private static final int FULL_TEXT_CONFIG_PAYLOAD_TUPLE_FIELD_INDEX = 1;
     protected final ArrayTupleReference tuple;
     protected final ISerializerDeserializer<AInt8> int8Serde =
             SerializerDeserializerProvider.INSTANCE.getSerializerDeserializer(BuiltinType.AINT8);
@@ -122,24 +117,6 @@ public class FullTextConfigDescriptorTupleTranslator extends AbstractTupleTransl
         FullTextConfigDescriptor configDescriptor =
                 new FullTextConfigDescriptor(name, tokenizerCategory, filterDescriptorsBuilder.build());
         return configDescriptor;
-    }
-
-    // ToDo: maybe move to a util class?
-    private void writeKeyAndValue2FieldVariables(String key, String value) throws HyracksDataException {
-        fieldName.reset();
-        aString.setValue(key);
-        stringSerde.serialize(aString, fieldName.getDataOutput());
-
-        fieldValue.reset();
-        aString.setValue(value);
-        stringSerde.serialize(aString, fieldValue.getDataOutput());
-    }
-
-    // ToDo: maybe move to a util class?
-    private void writeOrderedList2RecordBuilder(String strFieldName, List<String> list) throws HyracksDataException {
-    }
-
-    private void writeFulltextConfig(IFullTextConfigDescriptor configDescriptor) throws HyracksDataException {
     }
 
     private void writeIndex(String configName, ArrayTupleBuilder tupleBuilder)
