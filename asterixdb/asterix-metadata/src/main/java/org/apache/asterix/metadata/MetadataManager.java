@@ -29,6 +29,7 @@ import com.google.common.base.Strings;
 import org.apache.asterix.common.config.MetadataProperties;
 import org.apache.asterix.common.dataflow.ICcApplicationContext;
 import org.apache.asterix.common.exceptions.ACIDException;
+import org.apache.asterix.common.exceptions.AsterixException;
 import org.apache.asterix.common.exceptions.ErrorCode;
 import org.apache.asterix.common.exceptions.MetadataException;
 import org.apache.asterix.common.exceptions.RuntimeDataException;
@@ -61,6 +62,7 @@ import org.apache.hyracks.algebricks.common.exceptions.AlgebricksException;
 import org.apache.hyracks.api.exceptions.HyracksDataException;
 import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.FullTextConfig;
 import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.FullTextConfigDescriptor;
+import static org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.FullTextConfigDescriptor.DEFAULT_FULL_TEXT_CONFIG_NAME;
 import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextConfigDescriptor;
 import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextFilterDescriptor;
 import org.apache.hyracks.util.ExitUtil;
@@ -655,6 +657,10 @@ public abstract class MetadataManager implements IMetadataManager {
     @Override
     public void addFulltextConfigDescriptor(MetadataTransactionContext mdTxnCtx,
             IFullTextConfigDescriptor configDescriptor) throws AlgebricksException {
+        if (configDescriptor.getName().equals(DEFAULT_FULL_TEXT_CONFIG_NAME)) {
+            throw new AsterixException(ErrorCode.FULL_TEXT_CONFIG_ALREADY_EXISTS, DEFAULT_FULL_TEXT_CONFIG_NAME);
+        }
+
         try {
             metadataNode.addFullTextConfigDescriptor(mdTxnCtx.getTxnId(), configDescriptor);
         } catch (RemoteException e) {
@@ -666,7 +672,7 @@ public abstract class MetadataManager implements IMetadataManager {
     public IFullTextConfigDescriptor getFullTextConfigDescriptor(MetadataTransactionContext mdTxnCtx, String configName)
             throws AlgebricksException {
         if (Strings.isNullOrEmpty(configName) || configName.equals(
-                FullTextConfigDescriptor.DEFAULT_FULL_TEXT_CONFIG_NAME)) {
+                DEFAULT_FULL_TEXT_CONFIG_NAME)) {
             return FullTextConfigDescriptor.getDefaultFullTextConfig();
         }
         try {

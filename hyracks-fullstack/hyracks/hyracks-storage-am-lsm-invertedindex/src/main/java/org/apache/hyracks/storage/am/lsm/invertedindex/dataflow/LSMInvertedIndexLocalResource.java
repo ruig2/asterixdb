@@ -203,7 +203,7 @@ public class LSMInvertedIndexLocalResource extends LsmResource {
                     (IFullTextConfigDescriptor) registry.deserialize(json.get("fullTextConfigDescriptor"));
         } else {
             fullTextConfigDescriptor =
-                    new FullTextConfigDescriptor("", IFullTextConfig.TokenizerCategory.WORD, ImmutableList.of());
+                    FullTextConfigDescriptor.getDefaultFullTextConfig();
         }
 
         final boolean isPartitioned = json.get("isPartitioned").asBoolean();

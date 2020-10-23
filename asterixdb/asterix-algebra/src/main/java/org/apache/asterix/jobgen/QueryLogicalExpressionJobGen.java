@@ -22,6 +22,7 @@ import java.util.List;
 
 import org.apache.asterix.common.api.IApplicationContext;
 import org.apache.asterix.common.config.CompilerProperties;
+import org.apache.asterix.common.exceptions.AsterixException;
 import org.apache.asterix.common.exceptions.ErrorCode;
 import org.apache.asterix.common.functions.FunctionDescriptorTag;
 import org.apache.asterix.external.library.ExternalFunctionDescriptorProvider;
@@ -164,7 +165,7 @@ public class QueryLogicalExpressionJobGen implements ILogicalExpressionJobGen {
             IFullTextConfigDescriptor configDescriptor =
                     ((MetadataProvider) context.getMetadataProvider()).findFullTextConfigDescriptor(fullTextConfigName);
             if (configDescriptor == null) {
-                throw new AlgebricksException("full-text config not found", ErrorCode.FULL_TEXT_CONFIG_NOT_FOUND,
+                throw new AsterixException(ErrorCode.FULL_TEXT_CONFIG_NOT_FOUND,
                         fullTextConfigName);
             }
             fd = FullTextContainsDescriptor.createFunctionDescriptor(configDescriptor);
