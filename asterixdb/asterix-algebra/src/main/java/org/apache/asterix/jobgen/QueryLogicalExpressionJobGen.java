@@ -25,6 +25,7 @@ import org.apache.asterix.common.config.CompilerProperties;
 import org.apache.asterix.common.exceptions.AsterixException;
 import org.apache.asterix.common.exceptions.ErrorCode;
 import org.apache.asterix.common.functions.FunctionDescriptorTag;
+import org.apache.asterix.common.metadata.DataverseName;
 import org.apache.asterix.external.library.ExternalFunctionDescriptorProvider;
 import org.apache.asterix.metadata.declared.MetadataProvider;
 import org.apache.asterix.om.functions.BuiltinFunctions;
@@ -162,11 +163,12 @@ public class QueryLogicalExpressionJobGen implements ILogicalExpressionJobGen {
             // In the future, if we have more functions that need to be parameterized,
             // then maybe we can create a more general interface for those parameterize-able functions.
             String fullTextConfigName = FullTextUtil.getFullTextConfigNameFromExpr(expr);
-            IFullTextConfigDescriptor configDescriptor =
-                    ((MetadataProvider) context.getMetadataProvider()).findFullTextConfigDescriptor(fullTextConfigName);
+            // ToDo: is namespace the data verse?
+            String namespace = FullTextUtil.getFullTextConfigDataverseNameFromExpr(expr);
+            IFullTextConfigDescriptor configDescriptor = ((MetadataProvider) context.getMetadataProvider())
+                    .findFullTextConfigDescriptor(DataverseName.createFromCanonicalForm(namespace), fullTextConfigName);
             if (configDescriptor == null) {
-                throw new AsterixException(ErrorCode.FULL_TEXT_CONFIG_NOT_FOUND,
-                        fullTextConfigName);
+                throw new AsterixException(ErrorCode.FULL_TEXT_CONFIG_NOT_FOUND, fullTextConfigName);
             }
             fd = FullTextContainsDescriptor.createFunctionDescriptor(configDescriptor);
             fd.setSourceLocation(expr.getSourceLocation());

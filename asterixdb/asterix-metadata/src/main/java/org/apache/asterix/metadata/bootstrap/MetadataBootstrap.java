@@ -89,17 +89,12 @@ import org.apache.hyracks.storage.am.lsm.common.impls.ConcurrentMergePolicyFacto
 import org.apache.hyracks.storage.am.lsm.common.impls.ConstantMergePolicyFactory;
 import org.apache.hyracks.storage.am.lsm.common.impls.NoMergePolicyFactory;
 import org.apache.hyracks.storage.am.lsm.common.impls.PrefixMergePolicyFactory;
-import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.FullTextConfig;
-import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.FullTextConfigDescriptor;
-import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextConfig;
 import org.apache.hyracks.storage.common.ILocalResourceRepository;
 import org.apache.hyracks.storage.common.LocalResource;
 import org.apache.hyracks.storage.common.compression.NoOpCompressorDecompressorFactory;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-
-import com.google.common.collect.ImmutableList;
 
 /**
  * Initializes the remote metadata storage facilities ("universe") using a
@@ -127,7 +122,8 @@ public class MetadataBootstrap {
                     MetadataPrimaryIndexes.FEED_DATASET, MetadataPrimaryIndexes.FEED_POLICY_DATASET,
                     MetadataPrimaryIndexes.LIBRARY_DATASET, MetadataPrimaryIndexes.COMPACTION_POLICY_DATASET,
                     MetadataPrimaryIndexes.EXTERNAL_FILE_DATASET, MetadataPrimaryIndexes.FEED_CONNECTION_DATASET,
-                    MetadataPrimaryIndexes.SYNONYM_DATASET, MetadataPrimaryIndexes.FULL_TEXT_CONFIG_DATASET, MetadataPrimaryIndexes.FULL_TEXT_FILTER_DATASET };
+                    MetadataPrimaryIndexes.SYNONYM_DATASET, MetadataPrimaryIndexes.FULL_TEXT_CONFIG_DATASET,
+                    MetadataPrimaryIndexes.FULL_TEXT_FILTER_DATASET };
 
     private MetadataBootstrap() {
     }
@@ -323,7 +319,8 @@ public class MetadataBootstrap {
     // 1) may not have such a full-text config dataset in the metadata catalog,
     // 2) may not have the default full-text config as an entry in the metadata catalog
     // So here, let's try to insert if not exists
-    private static void insertFullTextConfigAndFilterIfNotExist(MetadataTransactionContext mdTxnCtx) throws AlgebricksException {
+    private static void insertFullTextConfigAndFilterIfNotExist(MetadataTransactionContext mdTxnCtx)
+            throws AlgebricksException {
         if (MetadataManager.INSTANCE.getDataset(mdTxnCtx, MetadataConstants.METADATA_DATAVERSE_NAME,
                 MetadataConstants.FULL_TEXT_CONFIG_DATASET_NAME) == null) {
             insertMetadataDatasets(mdTxnCtx, new IMetadataIndex[] { MetadataPrimaryIndexes.FULL_TEXT_CONFIG_DATASET });
@@ -549,7 +546,7 @@ public class MetadataBootstrap {
                 // Backward-compatibility: FULLTEXT_ENTITY_DATASET is added to AsterixDB recently
                 // and may not exist in an older dataverse
                 && index != MetadataPrimaryIndexes.FULL_TEXT_CONFIG_DATASET
-                && index != MetadataPrimaryIndexes.FULL_TEXT_FILTER_DATASET ) {
+                && index != MetadataPrimaryIndexes.FULL_TEXT_FILTER_DATASET) {
             throw new IllegalStateException(
                     "attempt to create metadata index " + index.getIndexName() + ". Index should already exist");
         }

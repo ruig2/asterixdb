@@ -422,20 +422,20 @@ public interface IMetadataManager extends IMetadataBootstrap {
     void addFullTextFilterDescriptor(MetadataTransactionContext mdTxnCtx, IFullTextFilterDescriptor filterDescriptor)
             throws AlgebricksException, RemoteException;
 
-    IFullTextFilterDescriptor getFullTextFilterDescriptor(MetadataTransactionContext mdTxnCtx, String name)
-            throws RemoteException, AlgebricksException;
+    IFullTextFilterDescriptor getFullTextFilterDescriptor(MetadataTransactionContext mdTxnCtx,
+            DataverseName dataverseName, String name) throws RemoteException, AlgebricksException;
 
-    void dropFullTextFilterDescriptor(MetadataTransactionContext mdTxnCtx, String filterName, boolean ifExists)
-            throws AlgebricksException;
+    void dropFullTextFilterDescriptor(MetadataTransactionContext mdTxnCtx, DataverseName dataverseName,
+            String filterName, boolean ifExists) throws AlgebricksException;
 
     void addFulltextConfigDescriptor(MetadataTransactionContext mdTxnCtx, IFullTextConfigDescriptor configDescriptor)
             throws AlgebricksException;
 
-    IFullTextConfigDescriptor getFullTextConfigDescriptor(MetadataTransactionContext mdTxnCtx, String name)
-            throws AlgebricksException;
+    IFullTextConfigDescriptor getFullTextConfigDescriptor(MetadataTransactionContext mdTxnCtx,
+            DataverseName dataverseName, String name) throws AlgebricksException;
 
-    void dropFullTextConfigDescriptor(MetadataTransactionContext mdTxnCtx, String configName, boolean ifExists)
-            throws AlgebricksException;
+    void dropFullTextConfigDescriptor(MetadataTransactionContext mdTxnCtx, DataverseName dataverseName,
+            String configName, boolean ifExists) throws AlgebricksException;
 
     /**
      * @param mdTxnCtx

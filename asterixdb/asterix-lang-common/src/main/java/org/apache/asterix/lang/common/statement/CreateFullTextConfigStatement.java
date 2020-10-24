@@ -19,6 +19,7 @@
 package org.apache.asterix.lang.common.statement;
 
 import org.apache.asterix.common.exceptions.CompilationException;
+import org.apache.asterix.common.metadata.DataverseName;
 import org.apache.asterix.lang.common.base.AbstractStatement;
 import org.apache.asterix.lang.common.base.Expression;
 import org.apache.asterix.lang.common.base.Statement;
@@ -27,11 +28,14 @@ import org.apache.asterix.lang.common.visitor.base.ILangVisitor;
 
 public class CreateFullTextConfigStatement extends AbstractStatement {
 
+    private DataverseName dataverseName;
     private String configName;
     private boolean ifNotExists;
     private RecordConstructor expr;
 
-    public CreateFullTextConfigStatement(String configName, boolean ifNotExists, RecordConstructor expr) {
+    public CreateFullTextConfigStatement(DataverseName dataverseName, String configName, boolean ifNotExists,
+            RecordConstructor expr) {
+        this.dataverseName = dataverseName;
         this.configName = configName;
         this.ifNotExists = ifNotExists;
         this.expr = expr;
@@ -40,6 +44,10 @@ public class CreateFullTextConfigStatement extends AbstractStatement {
     public static void checkExpression(Statement stmt) throws Exception {
         // Do nothing for now
         return;
+    }
+
+    public DataverseName getDataverseName() {
+        return dataverseName;
     }
 
     public String getConfigName() {

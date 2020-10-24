@@ -36,6 +36,7 @@ import com.google.common.collect.ImmutableList;
 public class FullTextConfigDescriptor implements IFullTextConfigDescriptor {
     private static final long serialVersionUID = 1L;
 
+    private final String dataverseName;
     private final String name;
     private final IFullTextConfig.TokenizerCategory tokenizerCategory;
     private final ImmutableList<IFullTextFilterDescriptor> filterDescriptors;
@@ -47,15 +48,23 @@ public class FullTextConfigDescriptor implements IFullTextConfigDescriptor {
     // In this way we avoid the edge cases to insert or delete the default config in the catalog
     public static final String DEFAULT_FULL_TEXT_CONFIG_NAME = "DEFAULT_FULL_TEXT_CONFIG";
 
-    public FullTextConfigDescriptor(String name, IFullTextConfig.TokenizerCategory tokenizerCategory,
+    public FullTextConfigDescriptor(String dataverseName, String name,
+            IFullTextConfig.TokenizerCategory tokenizerCategory,
             ImmutableList<IFullTextFilterDescriptor> filterDescriptors) {
+        this.dataverseName = dataverseName;
         this.name = name;
         this.tokenizerCategory = tokenizerCategory;
         this.filterDescriptors = filterDescriptors;
     }
 
     public static IFullTextConfigDescriptor getDefaultFullTextConfig() {
-        return new FullTextConfigDescriptor(DEFAULT_FULL_TEXT_CONFIG_NAME, IFullTextConfig.TokenizerCategory.WORD, ImmutableList.of());
+        return new FullTextConfigDescriptor(null, DEFAULT_FULL_TEXT_CONFIG_NAME, IFullTextConfig.TokenizerCategory.WORD,
+                ImmutableList.of());
+    }
+
+    @Override
+    public String getDataverseName() {
+        return dataverseName;
     }
 
     @Override
@@ -88,6 +97,7 @@ public class FullTextConfigDescriptor implements IFullTextConfigDescriptor {
         return filterDescriptors;
     }
 
+    private static final String FIELD_DATAVERSE_NAME = "dataverseName";
     private static final String FIELD_NAME = "name";
     private static final String FIELD_TOKENIZER_CATEGORY = "tokenizerCategory";
     private static final String FIELD_FILTERS = "filters";
@@ -95,6 +105,7 @@ public class FullTextConfigDescriptor implements IFullTextConfigDescriptor {
     @Override
     public JsonNode toJson(IPersistedResourceRegistry registry) throws HyracksDataException {
         final ObjectNode json = registry.getClassIdentifier(getClass(), serialVersionUID);
+        json.put(FIELD_DATAVERSE_NAME, dataverseName);
         json.put(FIELD_NAME, name);
         json.put(FIELD_TOKENIZER_CATEGORY, tokenizerCategory.toString());
 
@@ -109,6 +120,7 @@ public class FullTextConfigDescriptor implements IFullTextConfigDescriptor {
 
     public static IJsonSerializable fromJson(IPersistedResourceRegistry registry, JsonNode json)
             throws HyracksDataException {
+        final String dataverseName = json.get(FIELD_DATAVERSE_NAME).asText();
         final String name = json.get(FIELD_NAME).asText();
         final String tokenizerCategoryStr = json.get(FIELD_TOKENIZER_CATEGORY).asText();
         IFullTextConfig.TokenizerCategory tc =
@@ -121,7 +133,7 @@ public class FullTextConfigDescriptor implements IFullTextConfigDescriptor {
         }
         ImmutableList<IFullTextFilterDescriptor> filters = ImmutableList.copyOf(filterDescriptors);
 
-        return new FullTextConfigDescriptor(name, tc, filters);
+        return new FullTextConfigDescriptor(dataverseName, name, tc, filters);
     }
 
 }

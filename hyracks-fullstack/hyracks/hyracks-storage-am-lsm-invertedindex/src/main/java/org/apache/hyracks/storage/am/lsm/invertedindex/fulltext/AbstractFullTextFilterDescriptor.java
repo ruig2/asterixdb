@@ -19,8 +19,6 @@
 
 package org.apache.hyracks.storage.am.lsm.invertedindex.fulltext;
 
-import java.util.List;
-
 import org.apache.hyracks.api.exceptions.HyracksDataException;
 import org.apache.hyracks.api.io.IPersistedResourceRegistry;
 
@@ -29,10 +27,17 @@ import com.fasterxml.jackson.databind.JsonNode;
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 public class AbstractFullTextFilterDescriptor implements IFullTextFilterDescriptor {
+    protected final String dataverseName;
     protected final String name;
 
-    public AbstractFullTextFilterDescriptor(String name) {
+    public AbstractFullTextFilterDescriptor(String dataverseName, String name) {
+        this.dataverseName = dataverseName;
         this.name = name;
+    }
+
+    @Override
+    public String getDataverseName() {
+        return dataverseName;
     }
 
     @Override

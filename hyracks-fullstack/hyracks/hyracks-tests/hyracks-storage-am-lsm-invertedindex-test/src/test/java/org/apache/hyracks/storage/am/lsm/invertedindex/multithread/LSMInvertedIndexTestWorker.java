@@ -95,8 +95,8 @@ public class LSMInvertedIndexTestWorker extends AbstractIndexTestWorker {
         IBinaryTokenizerFactory tokenizerFactory = invIndex.getTokenizerFactory();
         int searchModifierIndex = Math.abs(rnd.nextInt()) % TEST_SEARCH_MODIFIERS.length;
         InvertedIndexSearchPredicate searchPred = new InvertedIndexSearchPredicate(
-                tokenizerFactory.createTokenizer(), new FullTextAnalyzer(new FullTextConfigDescriptor("",
-                        IFullTextConfig.TokenizerCategory.WORD, ImmutableList.of(), null)),
+                tokenizerFactory.createTokenizer(), new FullTextAnalyzer(new FullTextConfigDescriptor("", "",
+                        IFullTextConfig.TokenizerCategory.WORD, ImmutableList.of())),
                 TEST_SEARCH_MODIFIERS[searchModifierIndex]);
 
         switch (op) {

@@ -19,6 +19,7 @@
 package org.apache.asterix.lang.common.statement;
 
 import org.apache.asterix.common.exceptions.CompilationException;
+import org.apache.asterix.common.metadata.DataverseName;
 import org.apache.asterix.lang.common.base.AbstractStatement;
 import org.apache.asterix.lang.common.base.Expression;
 import org.apache.asterix.lang.common.base.Statement;
@@ -27,14 +28,21 @@ import org.apache.asterix.lang.common.visitor.base.ILangVisitor;
 
 public class CreateFullTextFilterStatement extends AbstractStatement {
 
+    private DataverseName dataverseName;
     private String filterName;
     private RecordConstructor expr;
     private boolean ifNotExists;
 
-    public CreateFullTextFilterStatement(String filterName, boolean ifNotExists, RecordConstructor expr) {
+    public CreateFullTextFilterStatement(DataverseName dataverseName, String filterName, boolean ifNotExists,
+            RecordConstructor expr) {
+        this.dataverseName = dataverseName;
         this.filterName = filterName;
         this.ifNotExists = ifNotExists;
         this.expr = expr;
+    }
+
+    public DataverseName getDataverseName() {
+        return dataverseName;
     }
 
     public String getFilterName() {

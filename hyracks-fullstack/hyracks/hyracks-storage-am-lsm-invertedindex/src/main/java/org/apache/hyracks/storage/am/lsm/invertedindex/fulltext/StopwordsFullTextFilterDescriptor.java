@@ -35,8 +35,8 @@ public class StopwordsFullTextFilterDescriptor extends AbstractFullTextFilterDes
 
     public ImmutableList<String> stopwordList;
 
-    public StopwordsFullTextFilterDescriptor(String name, ImmutableList<String> stopwordList) {
-        super(name);
+    public StopwordsFullTextFilterDescriptor(String dataverseName, String name, ImmutableList<String> stopwordList) {
+        super(dataverseName, name);
         this.stopwordList = stopwordList;
     }
 
@@ -54,14 +54,15 @@ public class StopwordsFullTextFilterDescriptor extends AbstractFullTextFilterDes
         return new StopwordsFullTextFilter(name, stopwordList);
     }
 
+    private static final String DATAVERSE_NAME = "dataverseName";
     private static final String STOPWORDS_FILTER_NAME = "stopwordsFilterName";
     private static final String STOPWORDS_LIST = "stopwordsList";
-    private static final String USED_BY_CONFIGS = "usedByConfigs";
 
     // ToDo: extract the common logics to a dedicated helper or utilization class after more filters are implemented
     @Override
     public JsonNode toJson(IPersistedResourceRegistry registry) throws HyracksDataException {
         final ObjectNode json = registry.getClassIdentifier(getClass(), this.serialVersionUID);
+        json.put(DATAVERSE_NAME, dataverseName);
         json.put(STOPWORDS_FILTER_NAME, name);
 
         ArrayNode stopwordsArrayNode = AbstractFullTextConfig.OBJECT_MAPPER.createArrayNode();
@@ -75,6 +76,7 @@ public class StopwordsFullTextFilterDescriptor extends AbstractFullTextFilterDes
 
     public static IJsonSerializable fromJson(IPersistedResourceRegistry registry, JsonNode json)
             throws HyracksDataException {
+        final String dataverseName = json.get(DATAVERSE_NAME).asText();
         final String name = json.get(STOPWORDS_FILTER_NAME).asText();
 
         // ToDo: create a new function to extract a list from json
@@ -85,6 +87,6 @@ public class StopwordsFullTextFilterDescriptor extends AbstractFullTextFilterDes
         }
         ImmutableList<String> stopwords = stopwordsBuilder.build();
 
-        return new StopwordsFullTextFilterDescriptor(name, stopwords);
+        return new StopwordsFullTextFilterDescriptor(dataverseName, name, stopwords);
     }
 }

@@ -445,8 +445,9 @@ public class MetadataProvider implements IMetadataProvider<DataSourceId, String>
         return MetadataManagerUtil.findSynonym(mdTxnCtx, dataverseName, synonymName);
     }
 
-    public IFullTextConfigDescriptor findFullTextConfigDescriptor(String ftConfigName) throws AlgebricksException {
-        return MetadataManagerUtil.findFullTextConfigDescriptor(mdTxnCtx, ftConfigName);
+    public IFullTextConfigDescriptor findFullTextConfigDescriptor(DataverseName dataverseName, String ftConfigName)
+            throws AlgebricksException {
+        return MetadataManagerUtil.findFullTextConfigDescriptor(mdTxnCtx, dataverseName, ftConfigName);
     }
 
     @Override
@@ -1649,8 +1650,8 @@ public class MetadataProvider implements IMetadataProvider<DataSourceId, String>
 
             IBinaryTokenizerFactory tokenizerFactory = NonTaggedFormatUtil.getBinaryTokenizerFactory(
                     secondaryKeyType.getTypeTag(), indexType, secondaryIndex.getGramLength());
-            IFullTextConfigDescriptor configDescriptor =
-                    findFullTextConfigDescriptor(secondaryIndex.getFullTextConfigName());
+            IFullTextConfigDescriptor configDescriptor = findFullTextConfigDescriptor(secondaryIndex.getDataverseName(),
+                    secondaryIndex.getFullTextConfigName());
 
             Pair<IFileSplitProvider, AlgebricksPartitionConstraint> splitsAndConstraint =
                     getSplitProviderAndConstraints(dataset, secondaryIndex.getIndexName());

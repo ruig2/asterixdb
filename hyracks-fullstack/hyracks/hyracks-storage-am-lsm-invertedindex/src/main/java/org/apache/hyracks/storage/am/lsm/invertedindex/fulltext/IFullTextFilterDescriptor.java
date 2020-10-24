@@ -19,8 +19,6 @@
 
 package org.apache.hyracks.storage.am.lsm.invertedindex.fulltext;
 
-import java.util.List;
-
 public interface IFullTextFilterDescriptor extends IFullTextEntityDescriptor {
     IFullTextFilter.FullTextFilterType getFilterType();
 }

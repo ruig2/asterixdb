@@ -19,18 +19,23 @@
 
 package org.apache.asterix.metadata.entitytupletranslators;
 
-import com.google.common.collect.ImmutableList;
+import static org.apache.asterix.metadata.bootstrap.MetadataRecordTypes.FULL_TEXT_ARECORD_CONFIG_NAME_FIELD_INDEX;
+import static org.apache.asterix.metadata.bootstrap.MetadataRecordTypes.FULL_TEXT_ARECORD_CONFIG_TOKENIZER_FIELD_INDEX;
+import static org.apache.asterix.metadata.bootstrap.MetadataRecordTypes.FULL_TEXT_ARECORD_FILTER_PIPELINE_FIELD_INDEX;
+
+import java.rmi.RemoteException;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.apache.asterix.builders.OrderedListBuilder;
 import org.apache.asterix.common.exceptions.ErrorCode;
 import org.apache.asterix.common.exceptions.MetadataException;
+import org.apache.asterix.common.metadata.DataverseName;
 import org.apache.asterix.formats.nontagged.SerializerDeserializerProvider;
 import org.apache.asterix.metadata.MetadataManager;
 import org.apache.asterix.metadata.MetadataTransactionContext;
 import org.apache.asterix.metadata.bootstrap.MetadataPrimaryIndexes;
 import org.apache.asterix.metadata.bootstrap.MetadataRecordTypes;
-import static org.apache.asterix.metadata.bootstrap.MetadataRecordTypes.FULL_TEXT_ARECORD_CONFIG_NAME_FIELD_INDEX;
-import static org.apache.asterix.metadata.bootstrap.MetadataRecordTypes.FULL_TEXT_ARECORD_CONFIG_TOKENIZER_FIELD_INDEX;
-import static org.apache.asterix.metadata.bootstrap.MetadataRecordTypes.FULL_TEXT_ARECORD_FILTER_PIPELINE_FIELD_INDEX;
 import org.apache.asterix.om.base.AInt8;
 import org.apache.asterix.om.base.AOrderedList;
 import org.apache.asterix.om.base.ARecord;
@@ -40,7 +45,6 @@ import org.apache.asterix.om.types.AOrderedListType;
 import org.apache.asterix.om.types.BuiltinType;
 import org.apache.commons.lang3.EnumUtils;
 import org.apache.hyracks.algebricks.common.exceptions.AlgebricksException;
-import org.apache.hyracks.algebricks.common.exceptions.NotImplementedException;
 import org.apache.hyracks.api.dataflow.value.ISerializerDeserializer;
 import org.apache.hyracks.api.exceptions.HyracksDataException;
 import org.apache.hyracks.data.std.util.ArrayBackedValueStorage;
@@ -50,13 +54,9 @@ import org.apache.hyracks.dataflow.common.data.accessors.ITupleReference;
 import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.FullTextConfigDescriptor;
 import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextConfig;
 import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextConfigDescriptor;
-import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextFilter;
 import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextFilterDescriptor;
-import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.StopwordsFullTextFilterDescriptor;
 
-import java.rmi.RemoteException;
-import java.util.ArrayList;
-import java.util.List;
+import com.google.common.collect.ImmutableList;
 
 public class FullTextConfigDescriptorTupleTranslator extends AbstractTupleTranslator<IFullTextConfigDescriptor> {
 
@@ -77,19 +77,22 @@ public class FullTextConfigDescriptorTupleTranslator extends AbstractTupleTransl
     @Override
     protected IFullTextConfigDescriptor createMetadataEntityFromARecord(ARecord aRecord)
             throws HyracksDataException, AlgebricksException {
-        String name = ((AString) aRecord.getValueByPos(MetadataRecordTypes.FULL_TEXT_ARECORD_CONFIG_NAME_FIELD_INDEX))
+        String dataverseName =
+                ((AString) aRecord.getValueByPos(MetadataRecordTypes.FULL_TEXT_ARECORD_DATAVERSE_NAME_FIELD_INDEX))
                         .getStringValue();
+
+        String name = ((AString) aRecord.getValueByPos(MetadataRecordTypes.FULL_TEXT_ARECORD_CONFIG_NAME_FIELD_INDEX))
+                .getStringValue();
 
         IFullTextConfig.TokenizerCategory tokenizerCategory =
                 EnumUtils.getEnumIgnoreCase(IFullTextConfig.TokenizerCategory.class,
-                        ((AString) aRecord.getValueByPos(
-                                MetadataRecordTypes.FULL_TEXT_ARECORD_CONFIG_TOKENIZER_FIELD_INDEX))
+                        ((AString) aRecord
+                                .getValueByPos(MetadataRecordTypes.FULL_TEXT_ARECORD_CONFIG_TOKENIZER_FIELD_INDEX))
                                         .getStringValue());
 
         List<String> filterNames = new ArrayList<>();
         IACursor filterNamesCursor = ((AOrderedList) (aRecord
-                .getValueByPos(MetadataRecordTypes.FULL_TEXT_ARECORD_FILTER_PIPELINE_FIELD_INDEX)))
-                        .getCursor();
+                .getValueByPos(MetadataRecordTypes.FULL_TEXT_ARECORD_FILTER_PIPELINE_FIELD_INDEX))).getCursor();
         while (filterNamesCursor.next()) {
             filterNames.add(((AString) filterNamesCursor.get()).getStringValue());
         }
@@ -101,8 +104,8 @@ public class FullTextConfigDescriptorTupleTranslator extends AbstractTupleTransl
         try {
             mdTxnCtx = MetadataManager.INSTANCE.beginTransaction();
             for (String filterName : filterNames) {
-                IFullTextFilterDescriptor filterDescriptor =
-                        MetadataManager.INSTANCE.getFullTextFilterDescriptor(mdTxnCtx, filterName);
+                IFullTextFilterDescriptor filterDescriptor = MetadataManager.INSTANCE.getFullTextFilterDescriptor(
+                        mdTxnCtx, DataverseName.createFromCanonicalForm(dataverseName), filterName);
                 filterDescriptorsBuilder.add(filterDescriptor);
             }
             MetadataManager.INSTANCE.commitTransaction(mdTxnCtx);
@@ -115,12 +118,16 @@ public class FullTextConfigDescriptorTupleTranslator extends AbstractTupleTransl
         }
 
         FullTextConfigDescriptor configDescriptor =
-                new FullTextConfigDescriptor(name, tokenizerCategory, filterDescriptorsBuilder.build());
+                new FullTextConfigDescriptor(dataverseName, name, tokenizerCategory, filterDescriptorsBuilder.build());
         return configDescriptor;
     }
 
-    private void writeIndex(String configName, ArrayTupleBuilder tupleBuilder)
+    private void writeIndex(String dataverseName, String configName, ArrayTupleBuilder tupleBuilder)
             throws HyracksDataException {
+        aString.setValue(dataverseName);
+        stringSerde.serialize(aString, tupleBuilder.getDataOutput());
+        tupleBuilder.addFieldEndOffset();
+
         aString.setValue(configName);
         stringSerde.serialize(aString, tupleBuilder.getDataOutput());
         tupleBuilder.addFieldEndOffset();
@@ -131,10 +138,16 @@ public class FullTextConfigDescriptorTupleTranslator extends AbstractTupleTransl
             throws HyracksDataException {
         tupleBuilder.reset();
 
-        writeIndex(fullTextConfigDescriptor.getName(), tupleBuilder);
+        writeIndex(fullTextConfigDescriptor.getDataverseName(), fullTextConfigDescriptor.getName(), tupleBuilder);
 
         // Write the record
         recordBuilder.reset(MetadataRecordTypes.FULL_TEXT_CONFIG_RECORDTYPE);
+
+        // set dataverse name
+        fieldValue.reset();
+        aString.setValue(fullTextConfigDescriptor.getName());
+        stringSerde.serialize(aString, fieldValue.getDataOutput());
+        recordBuilder.addField(FULL_TEXT_ARECORD_CONFIG_NAME_FIELD_INDEX, fieldValue);
 
         // set name
         fieldValue.reset();
@@ -175,12 +188,11 @@ public class FullTextConfigDescriptorTupleTranslator extends AbstractTupleTransl
         return tuple;
     }
 
-    public ITupleReference createTupleAsIndex(String configName)
-            throws HyracksDataException {
+    public ITupleReference createTupleAsIndex(String dataverseName, String configName) throws HyracksDataException {
         // -1 to get the number of fields in index only
         ArrayTupleBuilder tupleBuilder =
                 new ArrayTupleBuilder(MetadataPrimaryIndexes.FULL_TEXT_CONFIG_DATASET.getFieldCount() - 1);
-        writeIndex(configName, tupleBuilder);
+        writeIndex(dataverseName, configName, tupleBuilder);
 
         tuple.reset(tupleBuilder.getFieldEndOffsets(), tupleBuilder.getByteArray());
         return tuple;

@@ -43,7 +43,6 @@ import org.apache.hyracks.storage.am.lsm.common.api.IVirtualBufferCache;
 import org.apache.hyracks.storage.am.lsm.common.api.IVirtualBufferCacheProvider;
 import org.apache.hyracks.storage.am.lsm.common.dataflow.LsmResource;
 import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.FullTextConfigDescriptor;
-import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextConfig;
 import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextConfigDescriptor;
 import org.apache.hyracks.storage.am.lsm.invertedindex.tokenizers.IBinaryTokenizerFactory;
 import org.apache.hyracks.storage.am.lsm.invertedindex.util.InvertedIndexUtils;
@@ -53,7 +52,6 @@ import org.apache.hyracks.storage.common.buffercache.IBufferCache;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.google.common.collect.ImmutableList;
 
 public class LSMInvertedIndexLocalResource extends LsmResource {
     // ToDo: add full-text filter and config here
@@ -202,8 +200,7 @@ public class LSMInvertedIndexLocalResource extends LsmResource {
             fullTextConfigDescriptor =
                     (IFullTextConfigDescriptor) registry.deserialize(json.get("fullTextConfigDescriptor"));
         } else {
-            fullTextConfigDescriptor =
-                    FullTextConfigDescriptor.getDefaultFullTextConfig();
+            fullTextConfigDescriptor = FullTextConfigDescriptor.getDefaultFullTextConfig();
         }
 
         final boolean isPartitioned = json.get("isPartitioned").asBoolean();

@@ -68,6 +68,7 @@ public class MetadataTupleTranslatorProvider {
     public FullTextConfigDescriptorTupleTranslator getFullTextConfigTupleTranslator(boolean getTuple) {
         return new FullTextConfigDescriptorTupleTranslator(getTuple);
     }
+
     public FullTextFilterDescriptorTupleTranslator getFullTextFilterTupleTranslator(boolean getTuple) {
         return new FullTextFilterDescriptorTupleTranslator(getTuple);
     }

@@ -44,7 +44,6 @@ import org.apache.asterix.metadata.entities.NodeGroup;
 import org.apache.asterix.metadata.entities.Synonym;
 import org.apache.asterix.transaction.management.opcallbacks.AbstractIndexModificationOperationCallback;
 import org.apache.hyracks.algebricks.common.exceptions.AlgebricksException;
-import org.apache.hyracks.api.exceptions.HyracksDataException;
 import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextConfigDescriptor;
 import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextFilterDescriptor;
 
@@ -451,19 +450,19 @@ public interface IMetadataNode extends Remote, Serializable {
     void addFullTextFilterDescriptor(TxnId txnId, IFullTextFilterDescriptor filterDescriptor)
             throws RemoteException, AlgebricksException;
 
-    IFullTextFilterDescriptor getFulltextFilterDescriptor(TxnId txnId, String filterName)
+    IFullTextFilterDescriptor getFulltextFilterDescriptor(TxnId txnId, DataverseName dataverseName, String filterName)
             throws RemoteException, AlgebricksException;
 
-    void dropFullTextFilterDescriptor(TxnId txnId, String filterName, boolean ifExists)
+    void dropFullTextFilterDescriptor(TxnId txnId, DataverseName dataverseName, String filterName, boolean ifExists)
             throws RemoteException, AlgebricksException;
 
     void addFullTextConfigDescriptor(TxnId txnId, IFullTextConfigDescriptor config)
             throws AlgebricksException, RemoteException;
 
-    IFullTextConfigDescriptor getFullTextConfigDescriptor(TxnId txnId, String name)
+    IFullTextConfigDescriptor getFullTextConfigDescriptor(TxnId txnId, DataverseName dataverseName, String name)
             throws AlgebricksException, RemoteException;
 
-    void dropFullTextConfigDescriptor(TxnId txnId, String configName, boolean ifExists)
+    void dropFullTextConfigDescriptor(TxnId txnId, DataverseName dataverseName, String configName, boolean ifExists)
             throws RemoteException, AlgebricksException;
 
     /**

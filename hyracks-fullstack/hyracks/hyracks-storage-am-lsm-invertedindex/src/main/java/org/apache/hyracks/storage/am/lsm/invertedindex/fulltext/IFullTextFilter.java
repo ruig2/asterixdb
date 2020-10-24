@@ -39,6 +39,7 @@ public interface IFullTextFilter extends IFullTextEntity {
         STEMMER("Stemmer");
 
         private String value;
+
         FullTextFilterType(String value) {
             this.value = value;
         }

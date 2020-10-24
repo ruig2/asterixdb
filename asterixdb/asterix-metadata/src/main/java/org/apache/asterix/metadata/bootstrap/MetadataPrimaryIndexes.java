@@ -147,13 +147,15 @@ public class MetadataPrimaryIndexes {
                     0, MetadataRecordTypes.SYNONYM_RECORDTYPE, true, new int[] { 0, 1 });
 
     public static final IMetadataIndex FULL_TEXT_CONFIG_DATASET =
-            new MetadataIndex(PROPERTIES_FULL_TEXT_CONFIG, 2, new IAType[] { BuiltinType.ASTRING },
-                    Arrays.asList( Arrays.asList(MetadataRecordTypes.FIELD_NAME_FULL_TEXT_CONFIG_NAME) ),
-                    0, MetadataRecordTypes.FULL_TEXT_CONFIG_RECORDTYPE, true, new int[] { 0 });
+            new MetadataIndex(PROPERTIES_FULL_TEXT_CONFIG, 3, new IAType[] { BuiltinType.ASTRING, BuiltinType.ASTRING },
+                    Arrays.asList(Arrays.asList(MetadataRecordTypes.FIELD_NAME_DATAVERSE_NAME),
+                            Arrays.asList(MetadataRecordTypes.FIELD_NAME_FULL_TEXT_CONFIG_NAME)),
+                    0, MetadataRecordTypes.FULL_TEXT_CONFIG_RECORDTYPE, true, new int[] { 0, 1 });
     public static final IMetadataIndex FULL_TEXT_FILTER_DATASET =
-            new MetadataIndex(PROPERTIES_FULL_TEXT_FILTER, 2, new IAType[] { BuiltinType.ASTRING },
-                    Arrays.asList(Arrays.asList(MetadataRecordTypes.FIELD_NAME_FULL_TEXT_FILTER_NAME)),
-                    0, MetadataRecordTypes.FULL_TEXT_FILTER_RECORDTYPE, true, new int[] { 0 });
+            new MetadataIndex(PROPERTIES_FULL_TEXT_FILTER, 3, new IAType[] { BuiltinType.ASTRING, BuiltinType.ASTRING },
+                    Arrays.asList(Arrays.asList(MetadataRecordTypes.FIELD_NAME_DATAVERSE_NAME),
+                            Arrays.asList(MetadataRecordTypes.FIELD_NAME_FULL_TEXT_FILTER_NAME)),
+                    0, MetadataRecordTypes.FULL_TEXT_FILTER_RECORDTYPE, true, new int[] { 0, 1 });
 
     private MetadataPrimaryIndexes() {
     }

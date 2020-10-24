@@ -24,6 +24,8 @@ import java.io.Serializable;
 import org.apache.hyracks.api.io.IJsonSerializable;
 
 public interface IFullTextEntityDescriptor extends Serializable, IJsonSerializable {
+    String getDataverseName();
+
     String getName();
 
     IFullTextEntity getEntity();

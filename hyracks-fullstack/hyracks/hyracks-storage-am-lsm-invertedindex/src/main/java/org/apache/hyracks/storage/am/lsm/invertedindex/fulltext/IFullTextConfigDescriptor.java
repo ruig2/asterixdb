@@ -19,8 +19,6 @@
 
 package org.apache.hyracks.storage.am.lsm.invertedindex.fulltext;
 
-import java.util.List;
-
 import com.google.common.collect.ImmutableList;
 
 public interface IFullTextConfigDescriptor extends IFullTextEntityDescriptor {

@@ -124,7 +124,7 @@ public class LSMInvertedIndexTestUtils {
     public static final int TEST_GRAM_LENGTH = 3;
 
     public static FullTextConfigDescriptor ftFactory =
-            new FullTextConfigDescriptor("", IFullTextConfig.TokenizerCategory.WORD, ImmutableList.of(), null);
+            new FullTextConfigDescriptor("", "", IFullTextConfig.TokenizerCategory.WORD, ImmutableList.of());
 
     public static TupleGenerator createStringDocumentTupleGen(Random rnd) throws IOException {
         IFieldValueGenerator[] fieldGens = new IFieldValueGenerator[2];
@@ -570,7 +570,7 @@ public class LSMInvertedIndexTestUtils {
         IInvertedIndexAccessor accessor = (IInvertedIndexAccessor) invIndex.createAccessor(iap);
         IBinaryTokenizer tokenizer = testCtx.getTokenizerFactory().createTokenizer();
         InvertedIndexSearchPredicate searchPred = new InvertedIndexSearchPredicate(tokenizer, new FullTextAnalyzer(
-                new FullTextConfigDescriptor("", IFullTextConfig.TokenizerCategory.WORD, ImmutableList.of(), null)),
+                new FullTextConfigDescriptor("", "", IFullTextConfig.TokenizerCategory.WORD, ImmutableList.of())),
                 searchModifier);
         List<ITupleReference> documentCorpus = testCtx.getDocumentCorpus();
         // Project away the primary-key field.

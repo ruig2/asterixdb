@@ -1417,39 +1417,35 @@ Statement CreateFullTextStatement(Token startStmtToken) throws ParseException:
 
 CreateFullTextFilterStatement CreateFullTextFilterSpec(Token startStmtToken) throws ParseException:
 {
-  CreateFullTextFilterStatement stmt = null;
-  String filterName = null;
+  Pair<DataverseName,Identifier> nameComponents = null;
   boolean ifNotExists = false;
   RecordConstructor expr = null;
 }
 {
   (
-    filterName = Identifier() ifNotExists = IfNotExists()
+    nameComponents = QualifiedName() ifNotExists = IfNotExists()
     <AS>
     expr = RecordConstructor()
   )
   {
-    stmt = new CreateFullTextFilterStatement(filterName, ifNotExists, expr);
-    return stmt;
+    return new CreateFullTextFilterStatement(nameComponents.first, nameComponents.second.getValue(), ifNotExists, expr);
   }
 }
 
 CreateFullTextConfigStatement CreateFullTextConfigSpec(Token startStmtToken) throws ParseException:
 {
-  org.apache.asterix.lang.common.statement.CreateFullTextConfigStatement stmt = null;
-  String configName = null;
+  Pair<DataverseName,Identifier> nameComponents = null;
   boolean ifNotExists = false;
   RecordConstructor expr = null;
 }
 {
   (
-    configName = Identifier() ifNotExists = IfNotExists()
+    nameComponents = QualifiedName() ifNotExists = IfNotExists()
     <AS>
     expr = RecordConstructor()
   )
   {
-    stmt = new CreateFullTextConfigStatement(configName, ifNotExists, expr);
-    return stmt;
+    return new CreateFullTextConfigStatement(nameComponents.first, nameComponents.second.getValue(), ifNotExists, expr);
   }
 }
 
@@ -1667,35 +1663,35 @@ Statement DropFullTextStatement(Token startStmtToken) throws ParseException:
 {
   <FULLTEXT>
   (
-    <FILTER> stmt = DropFullTextFilterSpecification(startStmtToken)
-     | (<IDENTIFIER> { expectToken(FULLTEXT_CONFIG); } stmt = DropFullTextConfigSpecification(startStmtToken))
+    <FILTER> stmt = DropFullTextFilterSpec(startStmtToken)
+     | (<IDENTIFIER> { expectToken(FULLTEXT_CONFIG); } stmt = DropFullTextConfigSpec(startStmtToken))
   )
   {
     return stmt;
   }
 }
 
-FullTextFilterDropStatement DropFullTextFilterSpecification(Token startStmtToken) throws ParseException:
+FullTextFilterDropStatement DropFullTextFilterSpec(Token startStmtToken) throws ParseException:
 {
-  String filterName = null;
+  Pair<DataverseName,Identifier> nameComponents = null;
   boolean ifExists = false;
 }
 {
-  filterName = Identifier() ifExists = IfExists()
+  nameComponents = QualifiedName() ifExists = IfExists()
   {
-    return new org.apache.asterix.lang.common.statement.FullTextFilterDropStatement(filterName, ifExists);
+    return new FullTextFilterDropStatement(nameComponents.first, nameComponents.second.getValue(), ifExists);
   }
 }
 
-FullTextConfigDropStatement DropFullTextConfigSpecification(Token startStmtToken) throws ParseException:
+FullTextConfigDropStatement DropFullTextConfigSpec(Token startStmtToken) throws ParseException:
 {
-  String configName = null;
+  Pair<DataverseName,Identifier> nameComponents = null;
   boolean ifExists = false;
 }
 {
-  configName = Identifier() ifExists = IfExists()
+  nameComponents = QualifiedName() ifExists = IfExists()
   {
-    return new org.apache.asterix.lang.common.statement.FullTextConfigDropStatement(configName, ifExists);
+    return new FullTextConfigDropStatement(nameComponents.first, nameComponents.second.getValue(), ifExists);
   }
 }
 
