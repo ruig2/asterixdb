@@ -21,6 +21,7 @@ package org.apache.asterix.metadata.entitytupletranslators;
 
 import static org.apache.asterix.metadata.bootstrap.MetadataRecordTypes.FULL_TEXT_ARECORD_CONFIG_NAME_FIELD_INDEX;
 import static org.apache.asterix.metadata.bootstrap.MetadataRecordTypes.FULL_TEXT_ARECORD_CONFIG_TOKENIZER_FIELD_INDEX;
+import static org.apache.asterix.metadata.bootstrap.MetadataRecordTypes.FULL_TEXT_ARECORD_DATAVERSE_NAME_FIELD_INDEX;
 import static org.apache.asterix.metadata.bootstrap.MetadataRecordTypes.FULL_TEXT_ARECORD_FILTER_PIPELINE_FIELD_INDEX;
 
 import java.rmi.RemoteException;
@@ -60,7 +61,7 @@ import com.google.common.collect.ImmutableList;
 
 public class FullTextConfigDescriptorTupleTranslator extends AbstractTupleTranslator<IFullTextConfigDescriptor> {
 
-    private static final int FULL_TEXT_CONFIG_PAYLOAD_TUPLE_FIELD_INDEX = 1;
+    private static final int FULL_TEXT_CONFIG_PAYLOAD_TUPLE_FIELD_INDEX = 2;
     protected final ArrayTupleReference tuple;
     protected final ISerializerDeserializer<AInt8> int8Serde =
             SerializerDeserializerProvider.INSTANCE.getSerializerDeserializer(BuiltinType.AINT8);
@@ -140,22 +141,21 @@ public class FullTextConfigDescriptorTupleTranslator extends AbstractTupleTransl
 
         writeIndex(fullTextConfigDescriptor.getDataverseName(), fullTextConfigDescriptor.getName(), tupleBuilder);
 
-        // Write the record
         recordBuilder.reset(MetadataRecordTypes.FULL_TEXT_CONFIG_RECORDTYPE);
 
-        // set dataverse name
+        // write dataverse name
+        fieldValue.reset();
+        aString.setValue(fullTextConfigDescriptor.getDataverseName());
+        stringSerde.serialize(aString, fieldValue.getDataOutput());
+        recordBuilder.addField(FULL_TEXT_ARECORD_DATAVERSE_NAME_FIELD_INDEX, fieldValue);
+
+        // write name
         fieldValue.reset();
         aString.setValue(fullTextConfigDescriptor.getName());
         stringSerde.serialize(aString, fieldValue.getDataOutput());
         recordBuilder.addField(FULL_TEXT_ARECORD_CONFIG_NAME_FIELD_INDEX, fieldValue);
 
-        // set name
-        fieldValue.reset();
-        aString.setValue(fullTextConfigDescriptor.getName());
-        stringSerde.serialize(aString, fieldValue.getDataOutput());
-        recordBuilder.addField(FULL_TEXT_ARECORD_CONFIG_NAME_FIELD_INDEX, fieldValue);
-
-        // set tokenizer
+        // write tokenizer category
         fieldValue.reset();
         aString.setValue(fullTextConfigDescriptor.getTokenizerCategory().name());
         stringSerde.serialize(aString, fieldValue.getDataOutput());

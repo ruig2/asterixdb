@@ -475,7 +475,7 @@ public class MetadataNode implements IMetadataNode {
             if (results.isEmpty()) {
                 return null;
             }
-            return (IFullTextFilterDescriptor) results.get(0);
+            return results.get(0);
         } catch (HyracksDataException e) {
             throw new AlgebricksException(e);
         }

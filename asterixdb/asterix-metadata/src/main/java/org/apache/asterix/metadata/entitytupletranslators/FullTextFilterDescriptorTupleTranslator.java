@@ -54,7 +54,7 @@ import com.google.common.collect.ImmutableList;
 
 public class FullTextFilterDescriptorTupleTranslator extends AbstractTupleTranslator<IFullTextFilterDescriptor> {
 
-    private static final int FULLTEXT_FILTER_PAYLOAD_TUPLE_FIELD_INDEX = 1;
+    private static final int FULLTEXT_FILTER_PAYLOAD_TUPLE_FIELD_INDEX = 2;
     protected final ArrayTupleReference tuple;
     protected final ISerializerDeserializer<AInt8> int8Serde =
             SerializerDeserializerProvider.INSTANCE.getSerializerDeserializer(BuiltinType.AINT8);
@@ -111,12 +111,6 @@ public class FullTextFilterDescriptorTupleTranslator extends AbstractTupleTransl
         stringSerde.serialize(aString, fieldValue.getDataOutput());
     }
 
-    private void writeFilterType2RecordBuilder(IFullTextFilter.FullTextFilterType type) throws HyracksDataException {
-        writeKeyAndValue2FieldVariables(FIELD_NAME_FULL_TEXT_FILTER_TYPE, type.name());
-
-        recordBuilder.addField(fieldName, fieldValue);
-    }
-
     private void writeOrderedList2RecordBuilder(String strFieldName, List<String> list) throws HyracksDataException {
         fieldName.reset();
         aString.setValue(strFieldName);
@@ -145,6 +139,11 @@ public class FullTextFilterDescriptorTupleTranslator extends AbstractTupleTransl
     }
 
     private void writeFulltextFilter(IFullTextFilterDescriptor filterDescriptor) throws HyracksDataException {
+        fieldValue.reset();
+        aString.setValue(filterDescriptor.getDataverseName());
+        stringSerde.serialize(aString, fieldValue.getDataOutput());
+        recordBuilder.addField(FULL_TEXT_ARECORD_DATAVERSE_NAME_FIELD_INDEX, fieldValue);
+
         fieldValue.reset();
         aString.setValue(filterDescriptor.getName());
         stringSerde.serialize(aString, fieldValue.getDataOutput());
