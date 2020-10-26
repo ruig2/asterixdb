@@ -164,9 +164,8 @@ public class QueryLogicalExpressionJobGen implements ILogicalExpressionJobGen {
             // then maybe we can create a more general interface for those parameterize-able functions.
             String fullTextConfigName = FullTextUtil.getFullTextConfigNameFromExpr(expr);
             // ToDo: is namespace the data verse?
-            String namespace = FullTextUtil.getFullTextConfigDataverseNameFromExpr(expr);
-            IFullTextConfigDescriptor configDescriptor = ((MetadataProvider) context.getMetadataProvider())
-                    .findFullTextConfigDescriptor(DataverseName.createFromCanonicalForm(namespace), fullTextConfigName);
+            MetadataProvider metadataProvider = (MetadataProvider) context.getMetadataProvider();
+            IFullTextConfigDescriptor configDescriptor = metadataProvider.findFullTextConfigDescriptor(metadataProvider.getDefaultDataverseName(), fullTextConfigName);
             if (configDescriptor == null) {
                 throw new AsterixException(ErrorCode.FULL_TEXT_CONFIG_NOT_FOUND, fullTextConfigName);
             }

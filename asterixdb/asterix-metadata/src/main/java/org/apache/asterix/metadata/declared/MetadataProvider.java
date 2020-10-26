@@ -450,6 +450,11 @@ public class MetadataProvider implements IMetadataProvider<DataSourceId, String>
         return MetadataManagerUtil.findFullTextConfigDescriptor(mdTxnCtx, dataverseName, ftConfigName);
     }
 
+    public IFullTextConfigDescriptor findFullTextConfigDescriptor(String ftConfigName)
+            throws AlgebricksException {
+        return MetadataManagerUtil.findFullTextConfigDescriptor(mdTxnCtx, defaultDataverse.getDataverseName(), ftConfigName);
+    }
+
     @Override
     public IFunctionInfo lookupFunction(FunctionIdentifier fid) {
         return BuiltinFunctions.getBuiltinFunctionInfo(fid);
