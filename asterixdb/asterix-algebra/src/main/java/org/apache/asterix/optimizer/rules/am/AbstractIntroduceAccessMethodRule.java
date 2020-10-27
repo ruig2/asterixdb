@@ -80,7 +80,6 @@ import org.apache.hyracks.algebricks.core.algebra.operators.logical.UnnestOperat
 import org.apache.hyracks.algebricks.core.algebra.operators.logical.visitors.VariableUtilities;
 import org.apache.hyracks.algebricks.core.algebra.typing.ITypingContext;
 import org.apache.hyracks.algebricks.core.rewriter.base.IAlgebraicRewriteRule;
-import org.apache.logging.log4j.LogManager;
 
 import com.google.common.collect.ImmutableSet;
 
@@ -89,7 +88,6 @@ import com.google.common.collect.ImmutableSet;
  * methods.
  */
 public abstract class AbstractIntroduceAccessMethodRule implements IAlgebraicRewriteRule {
-    protected static final org.apache.logging.log4j.Logger LOGGER = LogManager.getLogger();
 
     protected MetadataProvider metadataProvider;
 
@@ -244,13 +242,10 @@ public abstract class AbstractIntroduceAccessMethodRule implements IAlgebraicRew
                         || indexType == IndexType.SINGLE_PARTITION_NGRAM_INVIX;
                 if ((chosenAccessMethod == BTreeAccessMethod.INSTANCE && indexType == IndexType.BTREE)
                         || (chosenAccessMethod == RTreeAccessMethod.INSTANCE && indexType == IndexType.RTREE)
-                        || (chosenAccessMethod == InvertedIndexAccessMethod.INSTANCE && isKeywordOrNgramIndexChosen)) {
-
-                    // If the function is ftcontains() and the ft config in the function differs from that in the index
-                    // then skip the index
-                    if (isFullTextFuncAndConfigDiffersFromExpected(analysisCtx, chosenIndex.getFullTextConfigName())) {
-                        continue;
-                    }
+                        // the inverted index will be utilized
+                        // only when the full-text config used in the index is the same as in the query
+                        || (chosenAccessMethod == InvertedIndexAccessMethod.INSTANCE && isKeywordOrNgramIndexChosen &&
+                        isFullTextFuncAndSameConfig(analysisCtx, chosenIndex.getFullTextConfigName()))) {
 
                     if (resultVarsToIndexTypesMap.containsKey(indexEntry.getValue())) {
                         List<IndexType> appliedIndexTypes = resultVarsToIndexTypesMap.get(indexEntry.getValue());
@@ -270,13 +265,12 @@ public abstract class AbstractIntroduceAccessMethodRule implements IAlgebraicRew
         return result;
     }
 
-    private boolean isFullTextFuncAndConfigDiffersFromExpected(AccessMethodAnalysisContext analysisCtx,
+    private boolean isFullTextFuncAndSameConfig(AccessMethodAnalysisContext analysisCtx,
             String indexFullTextConfig) {
-        // What if more than 1 func expr? Is it possible in ftcontains()?
         IOptimizableFuncExpr expr = analysisCtx.getMatchedFuncExpr(0);
         if (FullTextUtil.isFullTextFunctionExpr(expr)) {
             String expectedConfig = FullTextUtil.getFullTextConfigNameFromExpr(expr);
-            if (expectedConfig.equals(indexFullTextConfig) == false) {
+            if (expectedConfig.equals(indexFullTextConfig)) {
                 return true;
             }
         }
