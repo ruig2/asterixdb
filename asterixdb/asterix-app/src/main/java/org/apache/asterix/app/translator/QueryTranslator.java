@@ -1215,9 +1215,8 @@ public class QueryTranslator extends AbstractLangTranslator implements IStatemen
 
                 DataverseName dataverseName = getActiveDataverseName(stmtCreateFilter.getDataverseName());
 
-                filterDescriptor =
-                        new StopwordsFullTextFilterDescriptor(dataverseName.getCanonicalForm(),
-                                stmtCreateFilter.getFilterName(), stopwordsBuilder.build());
+                filterDescriptor = new StopwordsFullTextFilterDescriptor(dataverseName.getCanonicalForm(),
+                        stmtCreateFilter.getFilterName(), stopwordsBuilder.build());
                 break;
             }
 
@@ -1291,16 +1290,15 @@ public class QueryTranslator extends AbstractLangTranslator implements IStatemen
                     ImmutableList.<IFullTextFilterDescriptor> builder();
             for (String name : filterNames) {
                 DataverseName dataverseName = getActiveDataverseName(stmtCreateConfig.getDataverseName());
-                IFullTextFilterDescriptor filterDescriptor = MetadataManager.INSTANCE
-                        .getFullTextFilterDescriptor(mdTxnCtx, dataverseName, name);
+                IFullTextFilterDescriptor filterDescriptor =
+                        MetadataManager.INSTANCE.getFullTextFilterDescriptor(mdTxnCtx, dataverseName, name);
                 filterDescriptorsBuilder.add(filterDescriptor);
             }
 
             DataverseName dataverseName = getActiveDataverseName(stmtCreateConfig.getDataverseName());
 
-            IFullTextConfigDescriptor configDescriptor =
-                    new FullTextConfigDescriptor(dataverseName.getCanonicalForm(),
-                            stmtCreateConfig.getConfigName(), tokenizerCategory, filterDescriptorsBuilder.build());
+            IFullTextConfigDescriptor configDescriptor = new FullTextConfigDescriptor(dataverseName.getCanonicalForm(),
+                    stmtCreateConfig.getConfigName(), tokenizerCategory, filterDescriptorsBuilder.build());
 
             MetadataManager.INSTANCE.addFulltextConfigDescriptor(mdTxnCtx, configDescriptor);
 

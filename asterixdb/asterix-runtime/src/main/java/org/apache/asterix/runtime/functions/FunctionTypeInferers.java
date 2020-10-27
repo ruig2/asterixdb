@@ -37,6 +37,7 @@ import org.apache.asterix.om.types.AUnionType;
 import org.apache.asterix.om.types.IAType;
 import org.apache.asterix.om.utils.ConstantExpressionUtil;
 import org.apache.asterix.om.utils.RecordUtil;
+import org.apache.asterix.runtime.evaluators.functions.FullTextContainsDescriptor;
 import org.apache.commons.lang3.mutable.Mutable;
 import org.apache.hyracks.algebricks.common.exceptions.AlgebricksException;
 import org.apache.hyracks.algebricks.common.exceptions.NotImplementedException;
@@ -44,6 +45,9 @@ import org.apache.hyracks.algebricks.core.algebra.base.ILogicalExpression;
 import org.apache.hyracks.algebricks.core.algebra.expressions.AbstractFunctionCallExpression;
 import org.apache.hyracks.algebricks.core.algebra.expressions.ConstantExpression;
 import org.apache.hyracks.algebricks.core.algebra.expressions.IVariableTypeEnvironment;
+import org.apache.hyracks.algebricks.core.algebra.metadata.IMetadataProvider;
+import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.FullTextConfigDescriptor;
+import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextConfigDescriptor;
 
 /**
  * Implementations of {@link IFunctionTypeInferer} for built-in functions
@@ -319,6 +323,51 @@ public final class FunctionTypeInferers {
             }
             fd.setImmutableStates((Object[]) argRecordTypes);
         }
+    }
+
+    public static final class FullTextContainsTypeInferer implements IFunctionTypeInferer {
+
+        @Override
+        public void infer(ILogicalExpression expr, IFunctionDescriptor fd, IVariableTypeEnvironment context,
+                CompilerProperties compilerProps) throws AlgebricksException {
+            // Call the following infer() method to get the metadata provider
+            throw new NotImplementedException();
+        }
+
+        @Override
+        public void infer(ILogicalExpression expr, IFunctionDescriptor fd, IVariableTypeEnvironment context,
+                CompilerProperties compilerProps, IMetadataProvider metadataProvider) throws AlgebricksException {
+            String dataverseName = metadataProvider.getDefaultDataverseNameInString();
+            IFullTextConfigDescriptor configDescriptor =
+                    metadataProvider.findFullTextConfigDescriptor(dataverseName, getFullTextConfigNameFromExpr(expr));
+
+            fd.setImmutableStates(configDescriptor);
+        }
+    }
+
+    private static String getFullTextConfigNameFromExpr(ILogicalExpression expr) {
+        AbstractFunctionCallExpression funcExpr = (AbstractFunctionCallExpression) expr;
+        String configName = FullTextConfigDescriptor.DEFAULT_FULL_TEXT_CONFIG_NAME;
+        List<Mutable<ILogicalExpression>> arguments = funcExpr.getArguments();
+
+        // The first two arguments are
+        // 1) the full-text record field to be queried,
+        // 2) the query keyword array
+        // The next fields are the list of full-text search options,
+        // say, the next 4 fields can be "mode", "all", "config", "DEFAULT_FULL_TEXT_CONFIG"
+        // Originally, the full-text search option is an Asterix record such as
+        //     {"mode": "all", "config": "DEFAULT_FULL_TEXT_CONFIG"}
+        for (int i = 2; i < arguments.size(); i += 2) {
+            // The the full-text search option arguments are already checked in FullTextContainsParameterCheckRule,
+            String optionName = ConstantExpressionUtil.getStringConstant(arguments.get(i).getValue());
+
+            if (optionName.equalsIgnoreCase(FullTextContainsDescriptor.FULLTEXT_CONFIG_OPTION)) {
+                configName = ConstantExpressionUtil.getStringConstant(arguments.get(i + 1).getValue());
+                break;
+            }
+        }
+
+        return configName;
     }
 
     private static IAType[] getArgumentsTypes(AbstractFunctionCallExpression funExp, IVariableTypeEnvironment ctx)

@@ -38,6 +38,7 @@ import org.apache.hyracks.api.dataflow.value.RecordDescriptor;
 import org.apache.hyracks.api.job.JobSpecification;
 import org.apache.hyracks.api.result.IResultMetadata;
 import org.apache.hyracks.storage.am.common.api.ITupleFilterFactory;
+import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextConfigDescriptor;
 
 public interface IMetadataProvider<S, I> {
     public IDataSource<S> findDataSource(S id) throws AlgebricksException;
@@ -213,6 +214,11 @@ public interface IMetadataProvider<S, I> {
 
     public ITupleFilterFactory createTupleFilterFactory(IOperatorSchema[] inputSchemas,
             IVariableTypeEnvironment typeEnv, ILogicalExpression filterExpr, JobGenContext context)
+            throws AlgebricksException;
+
+    public String getDefaultDataverseNameInString();
+
+    public IFullTextConfigDescriptor findFullTextConfigDescriptor(String dataverseName, String ftConfigName)
             throws AlgebricksException;
 
     public Map<String, Object> getConfig();

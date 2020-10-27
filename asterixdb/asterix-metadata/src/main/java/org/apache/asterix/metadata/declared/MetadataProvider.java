@@ -249,6 +249,11 @@ public class MetadataProvider implements IMetadataProvider<DataSourceId, String>
         return defaultDataverse.getDataverseName();
     }
 
+    @Override
+    public String getDefaultDataverseNameInString() {
+        return defaultDataverse.getDataverseName().getCanonicalForm();
+    }
+
     public void setWriteTransaction(boolean writeTransaction) {
         this.isWriteTransaction = writeTransaction;
     }
@@ -445,14 +450,10 @@ public class MetadataProvider implements IMetadataProvider<DataSourceId, String>
         return MetadataManagerUtil.findSynonym(mdTxnCtx, dataverseName, synonymName);
     }
 
-    public IFullTextConfigDescriptor findFullTextConfigDescriptor(DataverseName dataverseName, String ftConfigName)
+    @Override
+    public IFullTextConfigDescriptor findFullTextConfigDescriptor(String dataverseName, String ftConfigName)
             throws AlgebricksException {
         return MetadataManagerUtil.findFullTextConfigDescriptor(mdTxnCtx, dataverseName, ftConfigName);
-    }
-
-    public IFullTextConfigDescriptor findFullTextConfigDescriptor(String ftConfigName)
-            throws AlgebricksException {
-        return MetadataManagerUtil.findFullTextConfigDescriptor(mdTxnCtx, defaultDataverse.getDataverseName(), ftConfigName);
     }
 
     @Override
@@ -1655,8 +1656,8 @@ public class MetadataProvider implements IMetadataProvider<DataSourceId, String>
 
             IBinaryTokenizerFactory tokenizerFactory = NonTaggedFormatUtil.getBinaryTokenizerFactory(
                     secondaryKeyType.getTypeTag(), indexType, secondaryIndex.getGramLength());
-            IFullTextConfigDescriptor configDescriptor = findFullTextConfigDescriptor(secondaryIndex.getDataverseName(),
-                    secondaryIndex.getFullTextConfigName());
+            IFullTextConfigDescriptor configDescriptor = findFullTextConfigDescriptor(
+                    secondaryIndex.getDataverseName().getCanonicalForm(), secondaryIndex.getFullTextConfigName());
 
             Pair<IFileSplitProvider, AlgebricksPartitionConstraint> splitsAndConstraint =
                     getSplitProviderAndConstraints(dataset, secondaryIndex.getIndexName());

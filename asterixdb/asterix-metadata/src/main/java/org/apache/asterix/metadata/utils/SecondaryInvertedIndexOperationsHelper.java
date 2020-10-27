@@ -81,8 +81,8 @@ public class SecondaryInvertedIndexOperationsHelper extends SecondaryTreeIndexOp
     protected SecondaryInvertedIndexOperationsHelper(Dataset dataset, Index index, MetadataProvider metadataProvider,
             SourceLocation sourceLoc) throws AlgebricksException {
         super(dataset, index, metadataProvider, sourceLoc);
-        this.fullTextConfigDescriptor = metadataProvider.findFullTextConfigDescriptor(dataset.getDataverseName(),
-                index.getFullTextConfigName());
+        this.fullTextConfigDescriptor = metadataProvider.findFullTextConfigDescriptor(
+                dataset.getDataverseName().getCanonicalForm(), index.getFullTextConfigName());
     }
 
     @Override

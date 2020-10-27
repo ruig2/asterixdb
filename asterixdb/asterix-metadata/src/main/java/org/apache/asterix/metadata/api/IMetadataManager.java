@@ -431,8 +431,8 @@ public interface IMetadataManager extends IMetadataBootstrap {
     void addFulltextConfigDescriptor(MetadataTransactionContext mdTxnCtx, IFullTextConfigDescriptor configDescriptor)
             throws AlgebricksException;
 
-    IFullTextConfigDescriptor getFullTextConfigDescriptor(MetadataTransactionContext mdTxnCtx,
-            DataverseName dataverseName, String name) throws AlgebricksException;
+    IFullTextConfigDescriptor getFullTextConfigDescriptor(MetadataTransactionContext mdTxnCtx, String dataverseName,
+            String name) throws AlgebricksException;
 
     void dropFullTextConfigDescriptor(MetadataTransactionContext mdTxnCtx, DataverseName dataverseName,
             String configName, boolean ifExists) throws AlgebricksException;

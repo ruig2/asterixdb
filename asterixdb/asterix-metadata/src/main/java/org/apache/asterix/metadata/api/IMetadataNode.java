@@ -459,7 +459,7 @@ public interface IMetadataNode extends Remote, Serializable {
     void addFullTextConfigDescriptor(TxnId txnId, IFullTextConfigDescriptor config)
             throws AlgebricksException, RemoteException;
 
-    IFullTextConfigDescriptor getFullTextConfigDescriptor(TxnId txnId, DataverseName dataverseName, String name)
+    IFullTextConfigDescriptor getFullTextConfigDescriptor(TxnId txnId, String dataverseName, String name)
             throws AlgebricksException, RemoteException;
 
     void dropFullTextConfigDescriptor(TxnId txnId, DataverseName dataverseName, String configName, boolean ifExists)

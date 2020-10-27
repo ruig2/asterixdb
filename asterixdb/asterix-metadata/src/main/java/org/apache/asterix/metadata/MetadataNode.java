@@ -549,15 +549,15 @@ public class MetadataNode implements IMetadataNode {
     }
 
     @Override
-    public IFullTextConfigDescriptor getFullTextConfigDescriptor(TxnId txnId, DataverseName dataverseName,
-            String configName) throws AlgebricksException {
+    public IFullTextConfigDescriptor getFullTextConfigDescriptor(TxnId txnId, String dataverseName, String configName)
+            throws AlgebricksException {
         FullTextConfigDescriptorTupleTranslator translator =
                 tupleTranslatorProvider.getFullTextConfigTupleTranslator(true);
 
         ITupleReference searchKey = null;
         List<IFullTextConfigDescriptor> results = new ArrayList<>();
         try {
-            searchKey = translator.createTupleAsIndex(dataverseName.getCanonicalForm(), configName);
+            searchKey = translator.createTupleAsIndex(dataverseName, configName);
             IValueExtractor<IFullTextConfigDescriptor> valueExtractor = new MetadataEntityValueExtractor<>(translator);
             searchIndex(txnId, MetadataPrimaryIndexes.FULL_TEXT_CONFIG_DATASET, searchKey, valueExtractor, results);
         } catch (HyracksDataException e) {

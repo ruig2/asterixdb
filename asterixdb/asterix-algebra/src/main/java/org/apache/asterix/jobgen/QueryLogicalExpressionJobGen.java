@@ -22,10 +22,7 @@ import java.util.List;
 
 import org.apache.asterix.common.api.IApplicationContext;
 import org.apache.asterix.common.config.CompilerProperties;
-import org.apache.asterix.common.exceptions.AsterixException;
-import org.apache.asterix.common.exceptions.ErrorCode;
 import org.apache.asterix.common.functions.FunctionDescriptorTag;
-import org.apache.asterix.common.metadata.DataverseName;
 import org.apache.asterix.external.library.ExternalFunctionDescriptorProvider;
 import org.apache.asterix.metadata.declared.MetadataProvider;
 import org.apache.asterix.om.functions.BuiltinFunctions;
@@ -33,8 +30,6 @@ import org.apache.asterix.om.functions.IExternalFunctionInfo;
 import org.apache.asterix.om.functions.IFunctionDescriptor;
 import org.apache.asterix.om.functions.IFunctionManager;
 import org.apache.asterix.om.functions.IFunctionTypeInferer;
-import org.apache.asterix.optimizer.rules.util.FullTextUtil;
-import org.apache.asterix.runtime.evaluators.common.FullTextContainsDescriptor;
 import org.apache.asterix.runtime.functions.FunctionTypeInferers;
 import org.apache.commons.lang3.mutable.Mutable;
 import org.apache.hyracks.algebricks.common.exceptions.AlgebricksException;
@@ -58,7 +53,6 @@ import org.apache.hyracks.algebricks.runtime.base.ISerializedAggregateEvaluatorF
 import org.apache.hyracks.algebricks.runtime.base.IUnnestingEvaluatorFactory;
 import org.apache.hyracks.algebricks.runtime.evaluators.ColumnAccessEvalFactory;
 import org.apache.hyracks.api.exceptions.SourceLocation;
-import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextConfigDescriptor;
 
 public class QueryLogicalExpressionJobGen implements ILogicalExpressionJobGen {
 
@@ -151,7 +145,8 @@ public class QueryLogicalExpressionJobGen implements ILogicalExpressionJobGen {
                     .getExternalFunctionDescriptor((IExternalFunctionInfo) expr.getFunctionInfo());
             CompilerProperties props = ((IApplicationContext) context.getAppContext()).getCompilerProperties();
             FunctionTypeInferers.SET_ARGUMENTS_TYPE.infer(expr, fd, env, props);
-        } else if (FullTextUtil.isFullTextFunctionExpr(expr)) {
+            /*
+            } else if (FullTextUtil.isFullTextFunctionExpr(expr)) {
             // Expr is a special internal (built-in) function: ftcontains()
             // it is different from a general built-in function because it needs a parameter from the metadataProvider
             // The parameter is the full-text configuration which will be used to tokenize and process tokens,
@@ -163,14 +158,15 @@ public class QueryLogicalExpressionJobGen implements ILogicalExpressionJobGen {
             // In the future, if we have more functions that need to be parameterized,
             // then maybe we can create a more general interface for those parameterize-able functions.
             String fullTextConfigName = FullTextUtil.getFullTextConfigNameFromExpr(expr);
-            // ToDo: is namespace the data verse?
             MetadataProvider metadataProvider = (MetadataProvider) context.getMetadataProvider();
-            IFullTextConfigDescriptor configDescriptor = metadataProvider.findFullTextConfigDescriptor(metadataProvider.getDefaultDataverseName(), fullTextConfigName);
+            IFullTextConfigDescriptor configDescriptor = metadataProvider
+                    .findFullTextConfigDescriptor(metadataProvider.getDefaultDataverseName(), fullTextConfigName);
             if (configDescriptor == null) {
                 throw new AsterixException(ErrorCode.FULL_TEXT_CONFIG_NOT_FOUND, fullTextConfigName);
             }
             fd = FullTextContainsDescriptor.createFunctionDescriptor(configDescriptor);
             fd.setSourceLocation(expr.getSourceLocation());
+             */
         } else {
             // Expr is an internal (built-in) function
             fd = resolveFunction(expr, env, context);
@@ -237,7 +233,7 @@ public class QueryLogicalExpressionJobGen implements ILogicalExpressionJobGen {
         IFunctionTypeInferer fnTypeInfer = functionManager.lookupFunctionTypeInferer(fnId);
         if (fnTypeInfer != null) {
             CompilerProperties compilerProps = ((IApplicationContext) context.getAppContext()).getCompilerProperties();
-            fnTypeInfer.infer(expr, fd, env, compilerProps);
+            fnTypeInfer.infer(expr, fd, env, compilerProps, context.getMetadataProvider());
         }
         return fd;
     }
