@@ -89,9 +89,10 @@ public class MetadataLockUtil implements IMetadataLockUtil {
 
     @Override
     public void createIndexBegin(IMetadataLockManager lockMgr, LockList locks, DataverseName dataverseName,
-            String datasetName) throws AlgebricksException {
+            String datasetName, String fullTextConfigName) throws AlgebricksException {
         lockMgr.acquireDataverseReadLock(locks, dataverseName);
         lockMgr.acquireDatasetCreateIndexLock(locks, dataverseName, datasetName);
+        lockMgr.acquireFullTextConfigReadLock(locks, dataverseName, fullTextConfigName);
     }
 
     @Override

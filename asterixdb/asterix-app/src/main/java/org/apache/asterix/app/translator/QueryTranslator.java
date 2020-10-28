@@ -993,7 +993,8 @@ public class QueryTranslator extends AbstractLangTranslator implements IStatemen
         CreateIndexStatement stmtCreateIndex = (CreateIndexStatement) stmt;
         DataverseName dataverseName = getActiveDataverseName(stmtCreateIndex.getDataverseName());
         String datasetName = stmtCreateIndex.getDatasetName().getValue();
-        lockUtil.createIndexBegin(lockManager, metadataProvider.getLocks(), dataverseName, datasetName);
+        String fullTextConfigName = stmtCreateIndex.getFullTextConfigName();
+        lockUtil.createIndexBegin(lockManager, metadataProvider.getLocks(), dataverseName, datasetName, fullTextConfigName);
         try {
             doCreateIndex(metadataProvider, stmtCreateIndex, dataverseName, datasetName, hcc, requestParameters);
         } finally {
@@ -1236,18 +1237,17 @@ public class QueryTranslator extends AbstractLangTranslator implements IStatemen
             abort(e, e, mdTxnCtx);
             throw e;
         }
-
-        return;
     }
 
-    /* Example of SQLPP DDL to create config:
-    CREATE FULLTEXT CONFIG my_first_stopword_config IF NOT EXISTS AS {
-        "Tokenizer": "Word", // built-in tokenizers: "Word" or "NGram"
-                "FilterPipeline": ["my_first_stopword_filter"]
-    };
-     */
     public void handleCreateFullTextConfigStatement(MetadataProvider metadataProvider, Statement stmt)
             throws Exception {
+        /* Example of SQLPP DDL to create config:
+        CREATE FULLTEXT CONFIG my_first_stopword_config IF NOT EXISTS AS {
+            "Tokenizer": "Word", // built-in tokenizers: "Word" or "NGram"
+            "FilterPipeline": ["my_first_stopword_filter"]
+        };
+         */
+
         CreateFullTextConfigStatement.checkExpression(stmt);
 
         CreateFullTextConfigStatement stmtCreateConfig = (CreateFullTextConfigStatement) stmt;

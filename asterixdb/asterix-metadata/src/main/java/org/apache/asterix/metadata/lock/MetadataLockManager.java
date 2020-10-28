@@ -110,6 +110,22 @@ public class MetadataLockManager implements IMetadataLockManager {
     }
 
     @Override
+    public void acquireFullTextConfigReadLock(LockList locks, DataverseName dataverseName,
+            String fullTextConfigName) throws AlgebricksException {
+        MetadataLockKey key = MetadataLockKey.createFullTextConfigLockKey(dataverseName, fullTextConfigName);
+        IMetadataLock lock = mdlocks.computeIfAbsent(key, LOCK_FUNCTION);
+        locks.add(IMetadataLock.Mode.READ, lock);
+    }
+
+    @Override
+    public void acquireFullTextConfigWriteLock(LockList locks, DataverseName dataverseName,
+            String fullTextConfigName) throws AlgebricksException {
+        MetadataLockKey key = MetadataLockKey.createFullTextConfigLockKey(dataverseName, fullTextConfigName);
+        IMetadataLock lock = mdlocks.computeIfAbsent(key, LOCK_FUNCTION);
+        locks.add(IMetadataLock.Mode.WRITE, lock);
+    }
+
+    @Override
     public void acquireLibraryReadLock(LockList locks, DataverseName dataverseName, String libraryName)
             throws AlgebricksException {
         MetadataLockKey key = MetadataLockKey.createLibraryLockKey(dataverseName, libraryName);

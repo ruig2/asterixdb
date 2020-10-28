@@ -59,7 +59,7 @@ public interface IMetadataLockUtil {
     // Index helpers
 
     void createIndexBegin(IMetadataLockManager lockManager, LockList locks, DataverseName dataverseName,
-            String datasetName) throws AlgebricksException;
+            String datasetName, String fullTextConfigName) throws AlgebricksException;
 
     void dropIndexBegin(IMetadataLockManager lockManager, LockList locks, DataverseName dataverseName,
             String datasetName) throws AlgebricksException;
