@@ -125,7 +125,7 @@ public class CreateFullTextConfigStatement extends AbstractStatement {
     }
 
     private List<FieldBinding> getFields() throws AlgebricksException {
-        RecordConstructor rc = (RecordConstructor) expr;
+        RecordConstructor rc = expr;
         List<FieldBinding> fb = rc.getFbList();
         if (fb.size() < 2) {
             throw CompilationException.create(ErrorCode.COMPILATION_INVALID_EXPRESSION,

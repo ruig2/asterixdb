@@ -2091,8 +2091,22 @@ public class QueryTranslator extends AbstractLangTranslator implements IStatemen
 
     protected void handleFullTextConfigDrop(MetadataProvider metadataProvider, Statement stmt,
             IHyracksClientConnection hcc, IRequestParameters requestParameters)
-            throws RemoteException, AlgebricksException {
+            throws AlgebricksException, RemoteException {
         FullTextConfigDropStatement stmtConfigDrop = (FullTextConfigDropStatement) stmt;
+        DataverseName dataverseName = getActiveDataverseName(stmtConfigDrop.getDataverseName());
+        String configName = stmtConfigDrop.getConfigName();
+
+        lockUtil.dropFullTextConfigBegin(lockManager, metadataProvider.getLocks(), dataverseName, configName);
+        try {
+            doDropFullTextConfig(metadataProvider, stmtConfigDrop, hcc, requestParameters);
+        } finally {
+            metadataProvider.getLocks().unlock();
+        }
+    }
+
+    private void doDropFullTextConfig(MetadataProvider metadataProvider, FullTextConfigDropStatement stmtConfigDrop,
+            IHyracksClientConnection hcc, IRequestParameters requestParameters)
+            throws RemoteException, AlgebricksException {
         if (stmtConfigDrop.getConfigName().equalsIgnoreCase(FullTextConfigDescriptor.DEFAULT_FULL_TEXT_CONFIG_NAME)) {
             throw CompilationException.create(ErrorCode.COMPILATION_ERROR,
                     "Not allowed to drop the default full-text config");

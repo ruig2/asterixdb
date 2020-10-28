@@ -583,8 +583,7 @@ public class MetadataNode implements IMetadataNode {
     @Override
     public void dropFullTextConfigDescriptor(TxnId txnId, DataverseName dataverseName, String configName,
             boolean ifExists) throws AlgebricksException {
-        dropFullTextConfigDescriptor(txnId, dataverseName, configName,
-        ifExists, false);
+        dropFullTextConfigDescriptor(txnId, dataverseName, configName, ifExists, false);
     }
 
     private void dropFullTextConfigDescriptor(TxnId txnId, DataverseName dataverseName, String configName,
