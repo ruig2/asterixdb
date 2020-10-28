@@ -638,6 +638,7 @@ public abstract class MetadataManager implements IMetadataManager {
     @Override
     public void dropFullTextFilterDescriptor(MetadataTransactionContext mdTxnCtx, DataverseName dataverseName,
             String filterName, boolean ifExists) throws AlgebricksException {
+
         try {
             metadataNode.dropFullTextFilterDescriptor(mdTxnCtx.getTxnId(), dataverseName, filterName, ifExists);
         } catch (RemoteException e) {

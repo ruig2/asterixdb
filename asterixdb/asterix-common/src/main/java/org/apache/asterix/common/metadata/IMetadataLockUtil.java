@@ -88,6 +88,22 @@ public interface IMetadataLockUtil {
     void dropFunctionBegin(IMetadataLockManager lockManager, LockList locks, DataverseName dataverseName,
             String functionName) throws AlgebricksException;
 
+    // Full-text filter helpers
+
+    void createFullTextFilterBegin(IMetadataLockManager lockManager, LockList locks, DataverseName dataverseName,
+            String fullTextFilterName) throws AlgebricksException;
+
+    void dropFullTextFilterBegin(IMetadataLockManager lockManager, LockList locks, DataverseName dataverseName,
+            String fullTextFilterName) throws AlgebricksException;
+
+    // Full-text config helpers
+
+    void createFullTextConfigBegin(IMetadataLockManager lockManager, LockList locks, DataverseName dataverseName,
+            String fullTextFilterName) throws AlgebricksException;
+
+    void dropFullTextConfigBegin(IMetadataLockManager lockManager, LockList locks, DataverseName dataverseName,
+            String fullTextFilterName) throws AlgebricksException;
+
     // Adapter helpers
 
     void createAdapterBegin(IMetadataLockManager lockManager, LockList locks, DataverseName dataverseName,

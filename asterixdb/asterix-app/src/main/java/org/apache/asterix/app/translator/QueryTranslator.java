@@ -1140,24 +1140,12 @@ public class QueryTranslator extends AbstractLangTranslator implements IStatemen
             validateIndexKeyFields(stmtCreateIndex, keySourceIndicators, aRecordType, metaRecordType, indexFields,
                     indexFieldTypes);
 
-            // ToDo: polish here
             String fullTextConfigName = stmtCreateIndex.getFullTextConfigName();
             // The index is of TYPE FULLTEXT in SQLPP
-            if (stmtCreateIndex.getIndexType() == IndexType.SINGLE_PARTITION_WORD_INVIX
-                    || stmtCreateIndex.getIndexType() == IndexType.LENGTH_PARTITIONED_WORD_INVIX) {
-                if (Strings.isNullOrEmpty(fullTextConfigName)) {
-                    fullTextConfigName = FullTextConfigDescriptor.DEFAULT_FULL_TEXT_CONFIG_NAME;
-                }
-            }
-
-            if (stmtCreateIndex.getIndexType() == IndexType.SINGLE_PARTITION_NGRAM_INVIX
-                    || stmtCreateIndex.getIndexType() == IndexType.LENGTH_PARTITIONED_NGRAM_INVIX) {
-                // If the index is for NGram rather than Word, then we still use the default full-text config for it
-                // Note that the tokenizer will be replaced with a NGram one at run time
-                //     (e.g. when insert and  look up NGram index)
-                // But we don't add this index to the usedByIndices list of the default config
-                //     because the tokenizer in the default config is a WORD tokenizer
-
+            if ((stmtCreateIndex.getIndexType() == IndexType.SINGLE_PARTITION_WORD_INVIX
+                    || stmtCreateIndex.getIndexType() == IndexType.LENGTH_PARTITIONED_WORD_INVIX)
+                    && Strings.isNullOrEmpty(fullTextConfigName)) {
+                // Use the default full-text config by default
                 fullTextConfigName = FullTextConfigDescriptor.DEFAULT_FULL_TEXT_CONFIG_NAME;
             }
 
@@ -1178,12 +1166,26 @@ public class QueryTranslator extends AbstractLangTranslator implements IStatemen
 
     public void handleCreateFullTextFilterStatement(MetadataProvider metadataProvider, Statement stmt)
             throws Exception {
-        CreateFullTextFilterStatement.checkExpression(stmt);
-
         CreateFullTextFilterStatement stmtCreateFilter = (CreateFullTextFilterStatement) stmt;
+        DataverseName dataverseName = getActiveDataverseName(stmtCreateFilter.getDataverseName());
+        String fullTextFilterName = stmtCreateFilter.getFilterName();
+
+        lockUtil.createFullTextFilterBegin(lockManager, metadataProvider.getLocks(), dataverseName, fullTextFilterName);
+        try {
+            doCreateFullTextFilter(metadataProvider, stmtCreateFilter, dataverseName);
+        } finally {
+            metadataProvider.getLocks().unlock();
+        }
+    }
+
+    protected void doCreateFullTextFilter(MetadataProvider metadataProvider, CreateFullTextFilterStatement stmtCreateFilter,
+            DataverseName dataverseName)
+            throws Exception {
+        CreateFullTextFilterStatement.checkExpression(stmtCreateFilter);
+
         RecordConstructor rc = (RecordConstructor) stmtCreateFilter.getExpression();
 
-        IFullTextFilterDescriptor filterDescriptor = null;
+        IFullTextFilterDescriptor filterDescriptor;
         List<FieldBinding> fbs = rc.getFbList();
 
         if (fbs.size() < 2) {
@@ -1213,8 +1215,6 @@ public class QueryTranslator extends AbstractLangTranslator implements IStatemen
                 for (Expression l : ((ListConstructor) (fbs.get(1).getRightExpr())).getExprList()) {
                     stopwordsBuilder.add(((LiteralExpr) l).getValue().getStringValue());
                 }
-
-                DataverseName dataverseName = getActiveDataverseName(stmtCreateFilter.getDataverseName());
 
                 filterDescriptor = new StopwordsFullTextFilterDescriptor(dataverseName.getCanonicalForm(),
                         stmtCreateFilter.getFilterName(), stopwordsBuilder.build());
@@ -2090,19 +2090,30 @@ public class QueryTranslator extends AbstractLangTranslator implements IStatemen
             IHyracksClientConnection hcc, IRequestParameters requestParameters) throws Exception {
         FullTextFilterDropStatement stmtFilterDrop = (FullTextFilterDropStatement) stmt;
         DataverseName dataverseName = getActiveDataverseName(stmtFilterDrop.getDataverseName());
+        String fullTextFilterName = stmtFilterDrop.getFilterName();
 
+        lockUtil.dropFullTextFilterBegin(lockManager, metadataProvider.getLocks(), dataverseName, fullTextFilterName);
+        try {
+            doDropFullTextFilter(metadataProvider, stmtFilterDrop, dataverseName, fullTextFilterName);
+        } finally {
+            metadataProvider.getLocks().unlock();
+        }
+    }
+
+    protected void doDropFullTextFilter(MetadataProvider metadataProvider, FullTextFilterDropStatement stmtFilterDrop,
+            DataverseName dataverseName, String fullTextFilterName)
+            throws AlgebricksException, RemoteException {
         MetadataTransactionContext mdTxnCtx = null;
         try {
             mdTxnCtx = MetadataManager.INSTANCE.beginTransaction();
             metadataProvider.setMetadataTxnContext(mdTxnCtx);
             MetadataManager.INSTANCE.dropFullTextFilterDescriptor(mdTxnCtx, dataverseName,
-                    stmtFilterDrop.getFilterName(), stmtFilterDrop.getIfExists());
+                    fullTextFilterName, stmtFilterDrop.getIfExists());
             MetadataManager.INSTANCE.commitTransaction(mdTxnCtx);
         } catch (RemoteException | AlgebricksException e) {
             abort(e, e, mdTxnCtx);
             throw e;
         }
-        return;
     }
 
     protected void handleFullTextConfigDrop(MetadataProvider metadataProvider, Statement stmt,

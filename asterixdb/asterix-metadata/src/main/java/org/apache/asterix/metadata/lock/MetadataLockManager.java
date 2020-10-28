@@ -27,6 +27,7 @@ import org.apache.asterix.common.metadata.DataverseName;
 import org.apache.asterix.common.metadata.IMetadataLock;
 import org.apache.asterix.common.metadata.LockList;
 import org.apache.hyracks.algebricks.common.exceptions.AlgebricksException;
+import org.apache.hyracks.algebricks.common.exceptions.NotImplementedException;
 
 public class MetadataLockManager implements IMetadataLockManager {
 
@@ -121,6 +122,20 @@ public class MetadataLockManager implements IMetadataLockManager {
     public void acquireFullTextConfigWriteLock(LockList locks, DataverseName dataverseName,
             String fullTextConfigName) throws AlgebricksException {
         MetadataLockKey key = MetadataLockKey.createFullTextConfigLockKey(dataverseName, fullTextConfigName);
+        IMetadataLock lock = mdlocks.computeIfAbsent(key, LOCK_FUNCTION);
+        locks.add(IMetadataLock.Mode.WRITE, lock);
+    }
+
+    @Override public void acquireFullTextFilterReadLock(LockList locks, DataverseName dataverseName,
+            String fullTextFilterName) throws AlgebricksException {
+        MetadataLockKey key = MetadataLockKey.createFullTextConfigLockKey(dataverseName, fullTextFilterName);
+        IMetadataLock lock = mdlocks.computeIfAbsent(key, LOCK_FUNCTION);
+        locks.add(IMetadataLock.Mode.READ, lock);
+    }
+
+    @Override public void acquireFullTextFilterWriteLock(LockList locks, DataverseName dataverseName,
+            String fullTextFilterName) throws AlgebricksException {
+        MetadataLockKey key = MetadataLockKey.createFullTextConfigLockKey(dataverseName, fullTextFilterName);
         IMetadataLock lock = mdlocks.computeIfAbsent(key, LOCK_FUNCTION);
         locks.add(IMetadataLock.Mode.WRITE, lock);
     }

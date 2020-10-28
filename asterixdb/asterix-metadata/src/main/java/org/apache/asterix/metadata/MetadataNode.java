@@ -484,6 +484,15 @@ public class MetadataNode implements IMetadataNode {
     @Override
     public void dropFullTextFilterDescriptor(TxnId txnId, DataverseName dataverseName, String filterName,
             boolean ifExists) throws AlgebricksException {
+        dropFullTextFilterDescriptor(txnId, dataverseName, filterName, ifExists, false);
+    }
+
+    private void dropFullTextFilterDescriptor(TxnId txnId, DataverseName dataverseName, String filterName,
+            boolean ifExists, boolean force) throws AlgebricksException {
+        if (!force) {
+            confirmFullTextFilterCanBeDeleted(txnId, dataverseName, filterName);
+        }
+
         try {
             FullTextFilterDescriptorTupleTranslator translator =
                     tupleTranslatorProvider.getFullTextFilterTupleTranslator(true);
@@ -497,7 +506,6 @@ public class MetadataNode implements IMetadataNode {
             }
             throw new AlgebricksException(e);
         }
-        return;
     }
 
     private void insertFullTextConfigDescriptorToCatalog(TxnId txnId, IFullTextConfigDescriptor configDescriptor)
@@ -575,7 +583,15 @@ public class MetadataNode implements IMetadataNode {
     @Override
     public void dropFullTextConfigDescriptor(TxnId txnId, DataverseName dataverseName, String configName,
             boolean ifExists) throws AlgebricksException {
-        confirmFullTextConfigCanBeDeleted(txnId, configName);
+        dropFullTextConfigDescriptor(txnId, dataverseName, configName,
+        ifExists, false);
+    }
+
+    private void dropFullTextConfigDescriptor(TxnId txnId, DataverseName dataverseName, String configName,
+        boolean ifExists, boolean force) throws AlgebricksException {
+        if (!force) {
+            confirmFullTextConfigCanBeDeleted(txnId, configName);
+        }
 
         try {
             FullTextConfigDescriptorTupleTranslator translator =
@@ -718,12 +734,12 @@ public class MetadataNode implements IMetadataNode {
 
             List<IFullTextConfigDescriptor> configs = getAllFullTextConfigDescriptors(txnId);
             for (IFullTextConfigDescriptor config : configs) {
-                dropFullTextConfigDescriptor(txnId, dataverseName, config.getName(), true);
+                dropFullTextConfigDescriptor(txnId, dataverseName, config.getName(), true, true);
             }
 
             List<IFullTextFilterDescriptor> filters = getAllFullTextFilterDescriptors(txnId);
             for (IFullTextFilterDescriptor filter : filters) {
-                dropFullTextFilterDescriptor(txnId, dataverseName, filter.getName(), true);
+                dropFullTextFilterDescriptor(txnId, dataverseName, filter.getName(), true, true);
             }
 
             // Drop all types in this dataverse.
@@ -1242,7 +1258,6 @@ public class MetadataNode implements IMetadataNode {
                 }
             }
         }
-
     }
 
     private void confirmLibraryCanBeDeleted(TxnId txnId, DataverseName dataverseName, String libraryName)
@@ -1330,6 +1345,20 @@ public class MetadataNode implements IMetadataNode {
                     throw new AlgebricksException(
                             "Cannot drop type " + TypeUtil.getFullyQualifiedDisplayName(dataverseName, dataTypeName)
                                     + " is being used by function " + function.getSignature());
+                }
+            }
+        }
+    }
+
+    private void confirmFullTextFilterCanBeDeleted(TxnId txnId, DataverseName dataverseName, String fullTextFilterName)
+            throws AlgebricksException {
+        List<IFullTextConfigDescriptor> configs = getAllFullTextConfigDescriptors(txnId);
+        for (IFullTextConfigDescriptor config : configs) {
+            for (IFullTextFilterDescriptor filterDescriptor: config.getFilterDescriptors()) {
+                if (filterDescriptor.getName().equals(fullTextFilterName)) {
+                    throw new AlgebricksException("Cannot drop full-text filter "
+                            + TypeUtil.getFullyQualifiedDisplayName(dataverseName, fullTextFilterName) + " being used by type "
+                            + TypeUtil.getFullyQualifiedDisplayName(dataverseName, config.getName()));
                 }
             }
         }

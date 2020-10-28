@@ -157,6 +157,28 @@ public class MetadataLockUtil implements IMetadataLockUtil {
         lockMgr.acquireFunctionWriteLock(locks, dataverseName, functionName);
     }
 
+    @Override public void createFullTextFilterBegin(IMetadataLockManager lockMgr, LockList locks,
+            DataverseName dataverseName, String fullTextFilterName) throws AlgebricksException {
+        lockMgr.acquireDataverseReadLock(locks, dataverseName);
+        lockMgr.acquireFullTextFilterWriteLock(locks, dataverseName, fullTextFilterName);
+    }
+
+    @Override public void dropFullTextFilterBegin(IMetadataLockManager lockMgr, LockList locks,
+            DataverseName dataverseName, String fullTextFilterName) throws AlgebricksException {
+        lockMgr.acquireDataverseReadLock(locks, dataverseName);
+        lockMgr.acquireFullTextFilterWriteLock(locks, dataverseName, fullTextFilterName);
+    }
+
+    @Override public void createFullTextConfigBegin(IMetadataLockManager lockMgr, LockList locks,
+            DataverseName dataverseName, String fullTextFilterName) throws AlgebricksException {
+
+    }
+
+    @Override public void dropFullTextConfigBegin(IMetadataLockManager lockMgr, LockList locks,
+            DataverseName dataverseName, String fullTextFilterName) throws AlgebricksException {
+
+    }
+
     @Override
     public void createAdapterBegin(IMetadataLockManager lockMgr, LockList locks, DataverseName dataverseName,
             String adapterName, DataverseName libraryDataverseName, String libraryName) throws AlgebricksException {
