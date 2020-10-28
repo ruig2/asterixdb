@@ -19,14 +19,29 @@
 package org.apache.asterix.lang.common.statement;
 
 import org.apache.asterix.common.exceptions.CompilationException;
+import org.apache.asterix.common.exceptions.ErrorCode;
 import org.apache.asterix.common.metadata.DataverseName;
 import org.apache.asterix.lang.common.base.AbstractStatement;
 import org.apache.asterix.lang.common.base.Expression;
 import org.apache.asterix.lang.common.base.Statement;
+import org.apache.asterix.lang.common.expression.FieldBinding;
+import org.apache.asterix.lang.common.expression.ListConstructor;
+import org.apache.asterix.lang.common.expression.LiteralExpr;
 import org.apache.asterix.lang.common.expression.RecordConstructor;
 import org.apache.asterix.lang.common.visitor.base.ILangVisitor;
+import org.apache.hyracks.algebricks.common.exceptions.AlgebricksException;
+import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextConfig;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class CreateFullTextConfigStatement extends AbstractStatement {
+    /* Example of SQLPP DDL to create config:
+    CREATE FULLTEXT CONFIG my_first_stopword_config IF NOT EXISTS AS {
+        "Tokenizer": "Word", // built-in tokenizers: "Word" or "NGram"
+        "FilterPipeline": ["my_first_stopword_filter"]
+    };
+     */
 
     private DataverseName dataverseName;
     private String configName;
@@ -76,4 +91,47 @@ public class CreateFullTextConfigStatement extends AbstractStatement {
     public Expression getExpression() {
         return expr;
     }
+
+    public IFullTextConfig.TokenizerCategory getTokenizerCategory() throws AlgebricksException {
+        List<FieldBinding> fb = getFields();
+        String tokenizerTupleKeyStr =
+                ((LiteralExpr) (fb.get(0).getLeftExpr())).getValue().getStringValue().toLowerCase();
+        if (tokenizerTupleKeyStr.equalsIgnoreCase(IFullTextConfig.FIELD_NAME_TOKENIZER) == false) {
+            throw CompilationException.create(ErrorCode.COMPILATION_INVALID_EXPRESSION,
+                    "expect tokenizer in the first row");
+        }
+        String tokenizerTupleValueStr =
+                ((LiteralExpr) (fb.get(0).getRightExpr())).getValue().getStringValue().toLowerCase();
+        IFullTextConfig.TokenizerCategory tokenizerCategory =
+                IFullTextConfig.TokenizerCategory.getEnumIgnoreCase(tokenizerTupleValueStr);
+
+        return tokenizerCategory;
+    }
+
+    public List<String> getFilterNames() throws AlgebricksException {
+        List<FieldBinding> fb = getFields();
+        String filterPipelineTupleKeyStr =
+                ((LiteralExpr) (fb.get(1).getLeftExpr())).getValue().getStringValue().toLowerCase();
+        if (filterPipelineTupleKeyStr.equalsIgnoreCase(IFullTextConfig.FIELD_NAME_FILTER_PIPELINE) == false) {
+            throw CompilationException.create(ErrorCode.COMPILATION_INVALID_EXPRESSION,
+                    "expect filter pipeline in the second row");
+        }
+        List<String> filterNames = new ArrayList<>();
+        for (Expression l : ((ListConstructor) (fb.get(1).getRightExpr())).getExprList()) {
+            filterNames.add(((LiteralExpr) l).getValue().getStringValue());
+        }
+
+        return filterNames;
+    }
+
+    private List<FieldBinding> getFields() throws AlgebricksException {
+        RecordConstructor rc = (RecordConstructor) expr;
+        List<FieldBinding> fb = rc.getFbList();
+        if (fb.size() < 2) {
+            throw CompilationException.create(ErrorCode.COMPILATION_INVALID_EXPRESSION,
+                    "number of parameter less than expected");
+        }
+        return fb;
+    }
+
 }

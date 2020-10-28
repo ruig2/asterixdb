@@ -25,6 +25,8 @@ import org.apache.asterix.common.metadata.IMetadataLockUtil;
 import org.apache.asterix.common.metadata.LockList;
 import org.apache.hyracks.algebricks.common.exceptions.AlgebricksException;
 
+import java.util.List;
+
 public class MetadataLockUtil implements IMetadataLockUtil {
 
     @Override
@@ -170,8 +172,12 @@ public class MetadataLockUtil implements IMetadataLockUtil {
     }
 
     @Override public void createFullTextConfigBegin(IMetadataLockManager lockMgr, LockList locks,
-            DataverseName dataverseName, String fullTextFilterName) throws AlgebricksException {
-
+            DataverseName dataverseName, String fullTextConfigName, List<String> fullTextFilterNames) throws AlgebricksException {
+        lockMgr.acquireDataverseReadLock(locks, dataverseName);
+        lockMgr.acquireFullTextConfigWriteLock(locks, dataverseName, fullTextConfigName);
+        for (String filterName: fullTextFilterNames) {
+            lockMgr.acquireFullTextFilterReadLock(locks, dataverseName, filterName);
+        }
     }
 
     @Override public void dropFullTextConfigBegin(IMetadataLockManager lockMgr, LockList locks,

@@ -1241,45 +1241,23 @@ public class QueryTranslator extends AbstractLangTranslator implements IStatemen
 
     public void handleCreateFullTextConfigStatement(MetadataProvider metadataProvider, Statement stmt)
             throws Exception {
-        /* Example of SQLPP DDL to create config:
-        CREATE FULLTEXT CONFIG my_first_stopword_config IF NOT EXISTS AS {
-            "Tokenizer": "Word", // built-in tokenizers: "Word" or "NGram"
-            "FilterPipeline": ["my_first_stopword_filter"]
-        };
-         */
-
-        CreateFullTextConfigStatement.checkExpression(stmt);
-
         CreateFullTextConfigStatement stmtCreateConfig = (CreateFullTextConfigStatement) stmt;
-        RecordConstructor rc = (RecordConstructor) stmtCreateConfig.getExpression();
+        DataverseName dataverseName = getActiveDataverseName(stmtCreateConfig.getDataverseName());
+        String configName = stmtCreateConfig.getConfigName();
+        List<String> filterNames = stmtCreateConfig.getFilterNames();
 
-        List<FieldBinding> fb = rc.getFbList();
-        if (fb.size() < 2) {
-            throw CompilationException.create(ErrorCode.COMPILATION_INVALID_EXPRESSION,
-                    "number of parameter less than expected");
+        lockUtil.createFullTextConfigBegin(lockManager, metadataProvider.getLocks(), dataverseName, configName, filterNames);
+        try {
+            doCreateFullTextConfig(metadataProvider, stmtCreateConfig, dataverseName, configName, filterNames);
+        } finally {
+            metadataProvider.getLocks().unlock();
         }
+    }
 
-        String tokenizerTupleKeyStr =
-                ((LiteralExpr) (fb.get(0).getLeftExpr())).getValue().getStringValue().toLowerCase();
-        if (tokenizerTupleKeyStr.equalsIgnoreCase(IFullTextConfig.FIELD_NAME_TOKENIZER) == false) {
-            throw CompilationException.create(ErrorCode.COMPILATION_INVALID_EXPRESSION,
-                    "expect tokenizer in the first row");
-        }
-        String tokenizerTupleValueStr =
-                ((LiteralExpr) (fb.get(0).getRightExpr())).getValue().getStringValue().toLowerCase();
-        IFullTextConfig.TokenizerCategory tokenizerCategory =
-                IFullTextConfig.TokenizerCategory.getEnumIgnoreCase(tokenizerTupleValueStr);
-
-        String filterPipelineTupleKeyStr =
-                ((LiteralExpr) (fb.get(1).getLeftExpr())).getValue().getStringValue().toLowerCase();
-        if (filterPipelineTupleKeyStr.equalsIgnoreCase(IFullTextConfig.FIELD_NAME_FILTER_PIPELINE) == false) {
-            throw CompilationException.create(ErrorCode.COMPILATION_INVALID_EXPRESSION,
-                    "expect filter pipeline in the second row");
-        }
-        List<String> filterNames = new ArrayList<>();
-        for (Expression l : ((ListConstructor) (fb.get(1).getRightExpr())).getExprList()) {
-            filterNames.add(((LiteralExpr) l).getValue().getStringValue());
-        }
+    protected void doCreateFullTextConfig(MetadataProvider metadataProvider, CreateFullTextConfigStatement stmtCreateConfig,
+            DataverseName dataverseName, String configName, List<String> filterNames)
+            throws Exception {
+        CreateFullTextConfigStatement.checkExpression(stmtCreateConfig);
 
         MetadataTransactionContext mdTxnCtx = null;
         try {
@@ -1289,26 +1267,21 @@ public class QueryTranslator extends AbstractLangTranslator implements IStatemen
             ImmutableList.Builder<IFullTextFilterDescriptor> filterDescriptorsBuilder =
                     ImmutableList.<IFullTextFilterDescriptor> builder();
             for (String name : filterNames) {
-                DataverseName dataverseName = getActiveDataverseName(stmtCreateConfig.getDataverseName());
                 IFullTextFilterDescriptor filterDescriptor =
                         MetadataManager.INSTANCE.getFullTextFilterDescriptor(mdTxnCtx, dataverseName, name);
                 filterDescriptorsBuilder.add(filterDescriptor);
             }
 
-            DataverseName dataverseName = getActiveDataverseName(stmtCreateConfig.getDataverseName());
-
+            IFullTextConfig.TokenizerCategory tokenizerCategory = stmtCreateConfig.getTokenizerCategory();
             IFullTextConfigDescriptor configDescriptor = new FullTextConfigDescriptor(dataverseName.getCanonicalForm(),
-                    stmtCreateConfig.getConfigName(), tokenizerCategory, filterDescriptorsBuilder.build());
+                    configName, tokenizerCategory, filterDescriptorsBuilder.build());
 
             MetadataManager.INSTANCE.addFulltextConfigDescriptor(mdTxnCtx, configDescriptor);
-
             MetadataManager.INSTANCE.commitTransaction(mdTxnCtx);
         } catch (RemoteException e) {
             abort(e, e, mdTxnCtx);
             throw e;
         }
-
-        return;
     }
 
     private void doCreateIndexImpl(IHyracksClientConnection hcc, MetadataProvider metadataProvider, Dataset ds,

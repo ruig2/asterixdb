@@ -23,6 +23,8 @@ import org.apache.asterix.common.api.IMetadataLockManager;
 import org.apache.asterix.common.config.DatasetConfig;
 import org.apache.hyracks.algebricks.common.exceptions.AlgebricksException;
 
+import java.util.List;
+
 public interface IMetadataLockUtil {
 
     // Dataverse helpers
@@ -99,7 +101,7 @@ public interface IMetadataLockUtil {
     // Full-text config helpers
 
     void createFullTextConfigBegin(IMetadataLockManager lockManager, LockList locks, DataverseName dataverseName,
-            String fullTextFilterName) throws AlgebricksException;
+            String fullTextConfigName, List<String> fullTextFilterNames) throws AlgebricksException;
 
     void dropFullTextConfigBegin(IMetadataLockManager lockManager, LockList locks, DataverseName dataverseName,
             String fullTextFilterName) throws AlgebricksException;
