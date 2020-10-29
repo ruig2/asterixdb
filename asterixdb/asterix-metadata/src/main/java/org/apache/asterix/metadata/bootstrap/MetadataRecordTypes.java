@@ -540,7 +540,7 @@ public final class MetadataRecordTypes {
             new String[] { FIELD_NAME_DATAVERSE_NAME, FIELD_NAME_FULL_TEXT_CONFIG_NAME, FIELD_NAME_FULL_TEXT_TOKENIZER,
                     FIELD_NAME_FULL_TEXT_FILTER_PIPELINE },
             new IAType[] { BuiltinType.ASTRING, BuiltinType.ASTRING, BuiltinType.ASTRING,
-                    new AOrderedListType(BuiltinType.ASTRING, null) },
+                    new AOrderedListType(BuiltinType.ASTRING, "FullTextFilterPipeline") },
             false);
 
     public static final String RECORD_NAME_FULL_TEXT_FILTER = "FullTextFilterRecordType";

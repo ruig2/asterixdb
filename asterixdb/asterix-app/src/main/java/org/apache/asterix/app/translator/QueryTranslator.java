@@ -1248,9 +1248,13 @@ public class QueryTranslator extends AbstractLangTranslator implements IStatemen
 
             ImmutableList.Builder<IFullTextFilterDescriptor> filterDescriptorsBuilder =
                     ImmutableList.<IFullTextFilterDescriptor> builder();
-            for (String name : filterNames) {
+            for (String filterName : filterNames) {
                 IFullTextFilterDescriptor filterDescriptor =
-                        MetadataManager.INSTANCE.getFullTextFilter(mdTxnCtx, dataverseName, name);
+                        MetadataManager.INSTANCE.getFullTextFilter(mdTxnCtx, dataverseName, filterName);
+                if (filterDescriptor == null) {
+                    throw new CompilationException(ErrorCode.FULL_TEXT_FAIL_TO_GET_FILTER_FROM_METADATA,
+                            "Full-text filter " + filterName + " not found");
+                }
                 filterDescriptorsBuilder.add(filterDescriptor);
             }
 
