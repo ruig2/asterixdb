@@ -684,13 +684,13 @@ public abstract class FormatPrintVisitor implements ILangVisitor<Void, Integer> 
 
     @Override
     public Void visit(CreateFullTextFilterStatement cis, Integer step) throws CompilationException {
-        out.print(skip(step) + "create fulltext filter ");
+        out.print(skip(step) + "create fulltext filter " + cis.getFilterName());
         return null;
     }
 
     @Override
     public Void visit(CreateFullTextConfigStatement cis, Integer step) throws CompilationException {
-        out.print(skip(step) + "create fulltext config ");
+        out.print(skip(step) + "create fulltext config " + cis.getConfigName());
         return null;
     }
 
@@ -729,14 +729,14 @@ public abstract class FormatPrintVisitor implements ILangVisitor<Void, Integer> 
 
     @Override
     public Void visit(FullTextFilterDropStatement del, Integer step) throws CompilationException {
-        out.print(skip(step) + "drop fulltext filter ");
+        out.print(skip(step) + "drop fulltext filter " + del.getFilterName());
         out.println(generateIfExists(del.getIfExists()) + SEMICOLON);
         return null;
     }
 
     @Override
     public Void visit(FullTextConfigDropStatement del, Integer step) throws CompilationException {
-        out.print(skip(step) + "drop fulltext config ");
+        out.print(skip(step) + "drop fulltext config " + del.getConfigName());
         out.println(generateIfExists(del.getIfExists()) + SEMICOLON);
         return null;
     }

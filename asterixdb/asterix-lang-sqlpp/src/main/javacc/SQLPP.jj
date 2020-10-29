@@ -1089,7 +1089,7 @@ IndexParams IndexType() throws ParseException:
 {
   IndexType type = null;
   int gramLength = 0;
-  String fullTextConfig = "";
+  String fullTextConfig = null;
 }
 {
   (<BTREE>
@@ -1108,7 +1108,10 @@ IndexParams IndexType() throws ParseException:
     {
       type = IndexType.SINGLE_PARTITION_WORD_INVIX;
     }
-    ( LOOKAHEAD(1) <USING> <IDENTIFIER>
+    // For now we don't allow inverted index creation using a full-text config in another data verse.
+    // We may want to support corss-dataverse full-text config access later
+    // If so, replace the Identifier() with QualifiedName() to get the dataverse name
+    ( <USING> Identifier()
       {
         fullTextConfig = token.image;
       }
@@ -1417,6 +1420,7 @@ Statement CreateFullTextStatement(Token startStmtToken) throws ParseException:
 
 CreateFullTextFilterStatement CreateFullTextFilterSpec(Token startStmtToken) throws ParseException:
 {
+  CreateFullTextFilterStatement stmt = null;
   Pair<DataverseName,Identifier> nameComponents = null;
   boolean ifNotExists = false;
   RecordConstructor expr = null;
@@ -1429,7 +1433,8 @@ CreateFullTextFilterStatement CreateFullTextFilterSpec(Token startStmtToken) thr
   )
   {
     try {
-      return new CreateFullTextFilterStatement(nameComponents.first, nameComponents.second.getValue(), ifNotExists, expr);
+      stmt = new CreateFullTextFilterStatement(nameComponents.first, nameComponents.second.getValue(), ifNotExists, expr);
+      return addSourceLocation(stmt, startStmtToken);
     } catch (CompilationException e) {
        throw new SqlppParseException(getSourceLocation(startStmtToken), e.getMessage());
     }
@@ -1438,6 +1443,7 @@ CreateFullTextFilterStatement CreateFullTextFilterSpec(Token startStmtToken) thr
 
 CreateFullTextConfigStatement CreateFullTextConfigSpec(Token startStmtToken) throws ParseException:
 {
+  CreateFullTextConfigStatement stmt = null;
   Pair<DataverseName,Identifier> nameComponents = null;
   boolean ifNotExists = false;
   RecordConstructor expr = null;
@@ -1450,7 +1456,8 @@ CreateFullTextConfigStatement CreateFullTextConfigSpec(Token startStmtToken) thr
   )
   {
     try {
-      return new CreateFullTextConfigStatement(nameComponents.first, nameComponents.second.getValue(), ifNotExists, expr);
+      stmt = new CreateFullTextConfigStatement(nameComponents.first, nameComponents.second.getValue(), ifNotExists, expr);
+      return addSourceLocation(stmt, startStmtToken);
     } catch (CompilationException e) {
        throw new SqlppParseException(getSourceLocation(startStmtToken), e.getMessage());
     }
@@ -1663,7 +1670,6 @@ IndexDropStatement DropIndexSpecification(Token startStmtToken) throws ParseExce
   }
 }
 
-// DROP FULLTEXT Filter myStopwordFilter;
 Statement DropFullTextStatement(Token startStmtToken) throws ParseException:
 {
   Statement stmt = null;
@@ -1681,25 +1687,29 @@ Statement DropFullTextStatement(Token startStmtToken) throws ParseException:
 
 FullTextFilterDropStatement DropFullTextFilterSpec(Token startStmtToken) throws ParseException:
 {
+  FullTextFilterDropStatement stmt = null;
   Pair<DataverseName,Identifier> nameComponents = null;
   boolean ifExists = false;
 }
 {
   nameComponents = QualifiedName() ifExists = IfExists()
   {
-    return new FullTextFilterDropStatement(nameComponents.first, nameComponents.second.getValue(), ifExists);
+    stmt = new FullTextFilterDropStatement(nameComponents.first, nameComponents.second.getValue(), ifExists);
+    return addSourceLocation(stmt, startStmtToken);
   }
 }
 
 FullTextConfigDropStatement DropFullTextConfigSpec(Token startStmtToken) throws ParseException:
 {
+  FullTextConfigDropStatement stmt = null;
   Pair<DataverseName,Identifier> nameComponents = null;
   boolean ifExists = false;
 }
 {
   nameComponents = QualifiedName() ifExists = IfExists()
   {
-    return new FullTextConfigDropStatement(nameComponents.first, nameComponents.second.getValue(), ifExists);
+    stmt = new FullTextConfigDropStatement(nameComponents.first, nameComponents.second.getValue(), ifExists);
+    return addSourceLocation(stmt, startStmtToken);
   }
 }
 
