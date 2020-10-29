@@ -1197,6 +1197,14 @@ public class QueryTranslator extends AbstractLangTranslator implements IStatemen
         try {
             mdTxnCtx = MetadataManager.INSTANCE.beginTransaction();
             metadataProvider.setMetadataTxnContext(mdTxnCtx);
+
+            IFullTextFilterDescriptor existingFilter = MetadataManager.INSTANCE.getFullTextFilter(mdTxnCtx,
+                    stmtCreateFilter.getDataverseName(), stmtCreateFilter.getFilterName());
+            if (existingFilter != null && !stmtCreateFilter.getIfNotExists()) {
+                MetadataManager.INSTANCE.commitTransaction(mdTxnCtx);
+                return;
+            }
+
             MetadataManager.INSTANCE.addFullTextFilter(mdTxnCtx, filterDescriptor);
             MetadataManager.INSTANCE.commitTransaction(mdTxnCtx);
         } catch (AlgebricksException | RemoteException e) {
@@ -1230,6 +1238,13 @@ public class QueryTranslator extends AbstractLangTranslator implements IStatemen
         try {
             mdTxnCtx = MetadataManager.INSTANCE.beginTransaction();
             metadataProvider.setMetadataTxnContext(mdTxnCtx);
+
+            IFullTextConfigDescriptor existingConfig = MetadataManager.INSTANCE.getFullTextConfig(mdTxnCtx,
+                    stmtCreateConfig.getDataverseName().getCanonicalForm(), stmtCreateConfig.getConfigName());
+            if (existingConfig != null && !stmtCreateConfig.getIfNotExists()) {
+                MetadataManager.INSTANCE.commitTransaction(mdTxnCtx);
+                return;
+            }
 
             ImmutableList.Builder<IFullTextFilterDescriptor> filterDescriptorsBuilder =
                     ImmutableList.<IFullTextFilterDescriptor> builder();
