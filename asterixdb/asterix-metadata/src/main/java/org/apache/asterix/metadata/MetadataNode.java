@@ -462,8 +462,8 @@ public class MetadataNode implements IMetadataNode {
     }
 
     @Override
-    public IFullTextFilterDescriptor getFullTextFilter(TxnId txnId, DataverseName dataverseName,
-            String filterName) throws AlgebricksException {
+    public IFullTextFilterDescriptor getFullTextFilter(TxnId txnId, DataverseName dataverseName, String filterName)
+            throws AlgebricksException {
         try {
             FullTextFilterDescriptorTupleTranslator translator =
                     tupleTranslatorProvider.getFullTextFilterTupleTranslator(true);
@@ -482,8 +482,8 @@ public class MetadataNode implements IMetadataNode {
     }
 
     @Override
-    public void dropFullTextFilter(TxnId txnId, DataverseName dataverseName, String filterName,
-            boolean ifExists) throws AlgebricksException {
+    public void dropFullTextFilter(TxnId txnId, DataverseName dataverseName, String filterName, boolean ifExists)
+            throws AlgebricksException {
         dropFullTextFilterDescriptor(txnId, dataverseName, filterName, ifExists, false);
     }
 
@@ -581,8 +581,8 @@ public class MetadataNode implements IMetadataNode {
     }
 
     @Override
-    public void dropFullTextConfig(TxnId txnId, DataverseName dataverseName, String configName,
-            boolean ifExists) throws AlgebricksException {
+    public void dropFullTextConfig(TxnId txnId, DataverseName dataverseName, String configName, boolean ifExists)
+            throws AlgebricksException {
         dropFullTextConfigDescriptor(txnId, dataverseName, configName, ifExists, false);
     }
 

@@ -105,8 +105,8 @@ public class FullTextConfigDescriptorTupleTranslator extends AbstractTupleTransl
         try {
             mdTxnCtx = MetadataManager.INSTANCE.beginTransaction();
             for (String filterName : filterNames) {
-                IFullTextFilterDescriptor filterDescriptor = MetadataManager.INSTANCE.getFullTextFilter(
-                        mdTxnCtx, DataverseName.createFromCanonicalForm(dataverseName), filterName);
+                IFullTextFilterDescriptor filterDescriptor = MetadataManager.INSTANCE.getFullTextFilter(mdTxnCtx,
+                        DataverseName.createFromCanonicalForm(dataverseName), filterName);
                 filterDescriptorsBuilder.add(filterDescriptor);
             }
             MetadataManager.INSTANCE.commitTransaction(mdTxnCtx);

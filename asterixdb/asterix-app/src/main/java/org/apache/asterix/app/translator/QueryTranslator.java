@@ -2084,8 +2084,8 @@ public class QueryTranslator extends AbstractLangTranslator implements IStatemen
             metadataProvider.setMetadataTxnContext(mdTxnCtx);
 
             DataverseName dataverseName = getActiveDataverseName(stmtConfigDrop.getDataverseName());
-            MetadataManager.INSTANCE.dropFullTextConfig(mdTxnCtx, dataverseName,
-                    stmtConfigDrop.getConfigName(), stmtConfigDrop.getIfExists());
+            MetadataManager.INSTANCE.dropFullTextConfig(mdTxnCtx, dataverseName, stmtConfigDrop.getConfigName(),
+                    stmtConfigDrop.getIfExists());
             MetadataManager.INSTANCE.commitTransaction(mdTxnCtx);
         } catch (RemoteException e) {
             abort(e, e, mdTxnCtx);

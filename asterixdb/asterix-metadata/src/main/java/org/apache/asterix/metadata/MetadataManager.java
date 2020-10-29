@@ -636,8 +636,8 @@ public abstract class MetadataManager implements IMetadataManager {
     }
 
     @Override
-    public void dropFullTextFilter(MetadataTransactionContext mdTxnCtx, DataverseName dataverseName,
-            String filterName, boolean ifExists) throws AlgebricksException {
+    public void dropFullTextFilter(MetadataTransactionContext mdTxnCtx, DataverseName dataverseName, String filterName,
+            boolean ifExists) throws AlgebricksException {
 
         try {
             metadataNode.dropFullTextFilter(mdTxnCtx.getTxnId(), dataverseName, filterName, ifExists);
@@ -647,8 +647,8 @@ public abstract class MetadataManager implements IMetadataManager {
     }
 
     @Override
-    public IFullTextFilterDescriptor getFullTextFilter(MetadataTransactionContext mdTxnCtx,
-            DataverseName dataverseName, String filterName) throws AlgebricksException {
+    public IFullTextFilterDescriptor getFullTextFilter(MetadataTransactionContext mdTxnCtx, DataverseName dataverseName,
+            String filterName) throws AlgebricksException {
         try {
             return metadataNode.getFullTextFilter(mdTxnCtx.getTxnId(), dataverseName, filterName);
         } catch (AlgebricksException | RemoteException e) {
@@ -657,8 +657,8 @@ public abstract class MetadataManager implements IMetadataManager {
     }
 
     @Override
-    public void addFullTextConfig(MetadataTransactionContext mdTxnCtx,
-            IFullTextConfigDescriptor configDescriptor) throws AlgebricksException {
+    public void addFullTextConfig(MetadataTransactionContext mdTxnCtx, IFullTextConfigDescriptor configDescriptor)
+            throws AlgebricksException {
         if (configDescriptor.getName().equals(DEFAULT_FULL_TEXT_CONFIG_NAME)) {
             throw new AsterixException(ErrorCode.FULL_TEXT_CONFIG_ALREADY_EXISTS, DEFAULT_FULL_TEXT_CONFIG_NAME);
         }
@@ -671,8 +671,8 @@ public abstract class MetadataManager implements IMetadataManager {
     }
 
     @Override
-    public IFullTextConfigDescriptor getFullTextConfig(MetadataTransactionContext mdTxnCtx,
-            String dataverseName, String configName) throws AlgebricksException {
+    public IFullTextConfigDescriptor getFullTextConfig(MetadataTransactionContext mdTxnCtx, String dataverseName,
+            String configName) throws AlgebricksException {
         if (Strings.isNullOrEmpty(configName) || configName.equals(DEFAULT_FULL_TEXT_CONFIG_NAME)) {
             return FullTextConfigDescriptor.getDefaultFullTextConfig();
         }
@@ -685,8 +685,8 @@ public abstract class MetadataManager implements IMetadataManager {
     }
 
     @Override
-    public void dropFullTextConfig(MetadataTransactionContext mdTxnCtx, DataverseName dataverseName,
-            String configName, boolean ifExists) throws AlgebricksException {
+    public void dropFullTextConfig(MetadataTransactionContext mdTxnCtx, DataverseName dataverseName, String configName,
+            boolean ifExists) throws AlgebricksException {
         try {
             metadataNode.dropFullTextConfig(mdTxnCtx.getTxnId(), dataverseName, configName, ifExists);
         } catch (RemoteException e) {

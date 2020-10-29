@@ -440,8 +440,8 @@ public interface IMetadataManager extends IMetadataBootstrap {
      * @throws AlgebricksException
      *              For example, if the filter doesn't exist
      */
-    IFullTextFilterDescriptor getFullTextFilter(MetadataTransactionContext mdTxnCtx,
-            DataverseName dataverseName, String filterName) throws RemoteException, AlgebricksException;
+    IFullTextFilterDescriptor getFullTextFilter(MetadataTransactionContext mdTxnCtx, DataverseName dataverseName,
+            String filterName) throws RemoteException, AlgebricksException;
 
     /**
      * @param mdTxnCtx
@@ -455,8 +455,8 @@ public interface IMetadataManager extends IMetadataBootstrap {
      * @throws AlgebricksException
      *              For example, if ifExists is set to false and the filter doesn't exist
      */
-    void dropFullTextFilter(MetadataTransactionContext mdTxnCtx, DataverseName dataverseName,
-            String filterName, boolean ifExists) throws AlgebricksException;
+    void dropFullTextFilter(MetadataTransactionContext mdTxnCtx, DataverseName dataverseName, String filterName,
+            boolean ifExists) throws AlgebricksException;
 
     /**
      * @param mdTxnCtx
@@ -494,8 +494,8 @@ public interface IMetadataManager extends IMetadataBootstrap {
      * @throws AlgebricksException
      *              For example, if ifExists is set to false and the config doesn't exist
      */
-    void dropFullTextConfig(MetadataTransactionContext mdTxnCtx, DataverseName dataverseName,
-            String configName, boolean ifExists) throws AlgebricksException;
+    void dropFullTextConfig(MetadataTransactionContext mdTxnCtx, DataverseName dataverseName, String configName,
+            boolean ifExists) throws AlgebricksException;
 
     /**
      * @param mdTxnCtx
