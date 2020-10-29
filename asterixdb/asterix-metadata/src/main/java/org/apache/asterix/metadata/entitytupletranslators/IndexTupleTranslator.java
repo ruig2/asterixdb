@@ -159,7 +159,7 @@ public class IndexTupleTranslator extends AbstractTupleTranslator<Index> {
             gramLength = ((AInt32) indexRecord.getValueByPos(gramLenPos)).getIntegerValue();
         }
 
-        String fullTextConfig = "";
+        String fullTextConfig = null;
         int fullTextConfigPos = indexRecord.getType().getFieldIndex(FULL_TEXT_CONFIG_FIELD_NAME);
         if (fullTextConfigPos >= 0) {
             fullTextConfig = ((AString) indexRecord.getValueByPos(fullTextConfigPos)).getStringValue();
@@ -321,11 +321,14 @@ public class IndexTupleTranslator extends AbstractTupleTranslator<Index> {
 
     private void writeFullTextConfig(Index index) throws HyracksDataException {
         if (!Strings.isNullOrEmpty(index.getFullTextConfigName())) {
-            fieldValue.reset();
             nameValue.reset();
             aString.setValue(FULL_TEXT_CONFIG_FIELD_NAME);
             stringSerde.serialize(aString, nameValue.getDataOutput());
-            stringSerde.serialize(new AString(index.getFullTextConfigName()), fieldValue.getDataOutput());
+
+            fieldValue.reset();
+            aString.setValue(index.getFullTextConfigName());
+            stringSerde.serialize(aString, fieldValue.getDataOutput());
+
             recordBuilder.addField(nameValue, fieldValue);
         }
     }
