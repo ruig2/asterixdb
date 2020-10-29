@@ -34,7 +34,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 public class FullTextUtil {
-    private static final Logger LOGGER = LogManager.getLogger();
 
     public static boolean isFullTextFunctionExpr(IOptimizableFuncExpr expr) {
         return isFullTextFunctionExpr(expr.getFuncExpr());
@@ -58,6 +57,8 @@ public class FullTextUtil {
         return getFullTextConfigNameFromExpr(expr.getFuncExpr());
     }
 
+    // ToDo: here we are parsing the expr manually, maybe we can find a better way to parse the arguments,
+    //  e.g. convert the argument into an AdmObjectNode and then read from the object node
     public static String getFullTextConfigNameFromExpr(AbstractFunctionCallExpression funcExpr) {
         if (isFullTextFunctionExpr(funcExpr) == false) {
             return null;

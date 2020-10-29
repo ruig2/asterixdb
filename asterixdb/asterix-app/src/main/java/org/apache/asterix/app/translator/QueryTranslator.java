@@ -1200,7 +1200,7 @@ public class QueryTranslator extends AbstractLangTranslator implements IStatemen
 
             IFullTextFilterDescriptor existingFilter = MetadataManager.INSTANCE.getFullTextFilter(mdTxnCtx,
                     stmtCreateFilter.getDataverseName(), stmtCreateFilter.getFilterName());
-            if (existingFilter != null && !stmtCreateFilter.getIfNotExists()) {
+            if (existingFilter != null && stmtCreateFilter.getIfNotExists()) {
                 MetadataManager.INSTANCE.commitTransaction(mdTxnCtx);
                 return;
             }
@@ -1241,7 +1241,7 @@ public class QueryTranslator extends AbstractLangTranslator implements IStatemen
 
             IFullTextConfigDescriptor existingConfig = MetadataManager.INSTANCE.getFullTextConfig(mdTxnCtx,
                     stmtCreateConfig.getDataverseName().getCanonicalForm(), stmtCreateConfig.getConfigName());
-            if (existingConfig != null && !stmtCreateConfig.getIfNotExists()) {
+            if (existingConfig != null && stmtCreateConfig.getIfNotExists()) {
                 MetadataManager.INSTANCE.commitTransaction(mdTxnCtx);
                 return;
             }
