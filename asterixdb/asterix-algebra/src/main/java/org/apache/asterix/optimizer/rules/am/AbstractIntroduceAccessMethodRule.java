@@ -244,8 +244,8 @@ public abstract class AbstractIntroduceAccessMethodRule implements IAlgebraicRew
                         || (chosenAccessMethod == RTreeAccessMethod.INSTANCE && indexType == IndexType.RTREE)
                         // the inverted index will be utilized
                         // only when the full-text config used in the index is the same as in the query
-                        || (chosenAccessMethod == InvertedIndexAccessMethod.INSTANCE && isKeywordOrNgramIndexChosen &&
-                        isFullTextFuncAndSameConfig(analysisCtx, chosenIndex.getFullTextConfigName()))) {
+                        || (chosenAccessMethod == InvertedIndexAccessMethod.INSTANCE && isKeywordOrNgramIndexChosen
+                                && isFullTextFuncAndSameConfig(analysisCtx, chosenIndex.getFullTextConfigName()))) {
 
                     if (resultVarsToIndexTypesMap.containsKey(indexEntry.getValue())) {
                         List<IndexType> appliedIndexTypes = resultVarsToIndexTypesMap.get(indexEntry.getValue());
@@ -265,8 +265,7 @@ public abstract class AbstractIntroduceAccessMethodRule implements IAlgebraicRew
         return result;
     }
 
-    private boolean isFullTextFuncAndSameConfig(AccessMethodAnalysisContext analysisCtx,
-            String indexFullTextConfig) {
+    private boolean isFullTextFuncAndSameConfig(AccessMethodAnalysisContext analysisCtx, String indexFullTextConfig) {
         IOptimizableFuncExpr expr = analysisCtx.getMatchedFuncExpr(0);
         if (FullTextUtil.isFullTextFunctionExpr(expr)) {
             String expectedConfig = FullTextUtil.getFullTextConfigNameFromExpr(expr);

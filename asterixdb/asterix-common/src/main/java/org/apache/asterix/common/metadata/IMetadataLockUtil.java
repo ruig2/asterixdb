@@ -19,11 +19,11 @@
 
 package org.apache.asterix.common.metadata;
 
+import java.util.List;
+
 import org.apache.asterix.common.api.IMetadataLockManager;
 import org.apache.asterix.common.config.DatasetConfig;
 import org.apache.hyracks.algebricks.common.exceptions.AlgebricksException;
-
-import java.util.List;
 
 public interface IMetadataLockUtil {
 

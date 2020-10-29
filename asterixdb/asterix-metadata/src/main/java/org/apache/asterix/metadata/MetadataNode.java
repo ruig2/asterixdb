@@ -587,7 +587,7 @@ public class MetadataNode implements IMetadataNode {
     }
 
     private void dropFullTextConfigDescriptor(TxnId txnId, DataverseName dataverseName, String configName,
-        boolean ifExists, boolean force) throws AlgebricksException {
+            boolean ifExists, boolean force) throws AlgebricksException {
         if (!force) {
             confirmFullTextConfigCanBeDeleted(txnId, configName);
         }
@@ -1353,10 +1353,11 @@ public class MetadataNode implements IMetadataNode {
             throws AlgebricksException {
         List<IFullTextConfigDescriptor> configs = getAllFullTextConfigDescriptors(txnId);
         for (IFullTextConfigDescriptor config : configs) {
-            for (IFullTextFilterDescriptor filterDescriptor: config.getFilterDescriptors()) {
+            for (IFullTextFilterDescriptor filterDescriptor : config.getFilterDescriptors()) {
                 if (filterDescriptor.getName().equals(fullTextFilterName)) {
                     throw new AlgebricksException("Cannot drop full-text filter "
-                            + TypeUtil.getFullyQualifiedDisplayName(dataverseName, fullTextFilterName) + " being used by type "
+                            + TypeUtil.getFullyQualifiedDisplayName(dataverseName, fullTextFilterName)
+                            + " being used by type "
                             + TypeUtil.getFullyQualifiedDisplayName(dataverseName, config.getName()));
                 }
             }

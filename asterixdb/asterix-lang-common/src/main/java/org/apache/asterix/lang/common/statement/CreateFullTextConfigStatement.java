@@ -18,22 +18,24 @@
  */
 package org.apache.asterix.lang.common.statement;
 
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+
 import org.apache.asterix.common.exceptions.CompilationException;
-import org.apache.asterix.common.exceptions.ErrorCode;
 import org.apache.asterix.common.metadata.DataverseName;
 import org.apache.asterix.lang.common.base.AbstractStatement;
-import org.apache.asterix.lang.common.base.Expression;
 import org.apache.asterix.lang.common.base.Statement;
-import org.apache.asterix.lang.common.expression.FieldBinding;
-import org.apache.asterix.lang.common.expression.ListConstructor;
-import org.apache.asterix.lang.common.expression.LiteralExpr;
 import org.apache.asterix.lang.common.expression.RecordConstructor;
+import org.apache.asterix.lang.common.util.FullTextUtil;
 import org.apache.asterix.lang.common.visitor.base.ILangVisitor;
+import org.apache.asterix.object.base.AdmArrayNode;
+import org.apache.asterix.object.base.AdmObjectNode;
+import org.apache.asterix.object.base.AdmStringNode;
+import org.apache.asterix.object.base.IAdmNode;
 import org.apache.hyracks.algebricks.common.exceptions.AlgebricksException;
+import org.apache.hyracks.api.exceptions.HyracksDataException;
 import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextConfig;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public class CreateFullTextConfigStatement extends AbstractStatement {
     /* Example of SQLPP DDL to create config:
@@ -46,14 +48,14 @@ public class CreateFullTextConfigStatement extends AbstractStatement {
     private DataverseName dataverseName;
     private String configName;
     private boolean ifNotExists;
-    private RecordConstructor expr;
+    private AdmObjectNode configNode;
 
     public CreateFullTextConfigStatement(DataverseName dataverseName, String configName, boolean ifNotExists,
-            RecordConstructor expr) {
+            RecordConstructor expr) throws CompilationException {
         this.dataverseName = dataverseName;
         this.configName = configName;
         this.ifNotExists = ifNotExists;
-        this.expr = expr;
+        this.configNode = FullTextUtil.validateAndGetConfigNode(expr);
     }
 
     public static void checkExpression(Statement stmt) throws Exception {
@@ -88,50 +90,24 @@ public class CreateFullTextConfigStatement extends AbstractStatement {
         return Category.DDL;
     }
 
-    public Expression getExpression() {
-        return expr;
-    }
-
-    public IFullTextConfig.TokenizerCategory getTokenizerCategory() throws AlgebricksException {
-        List<FieldBinding> fb = getFields();
-        String tokenizerTupleKeyStr =
-                ((LiteralExpr) (fb.get(0).getLeftExpr())).getValue().getStringValue().toLowerCase();
-        if (tokenizerTupleKeyStr.equalsIgnoreCase(IFullTextConfig.FIELD_NAME_TOKENIZER) == false) {
-            throw CompilationException.create(ErrorCode.COMPILATION_INVALID_EXPRESSION,
-                    "expect tokenizer in the first row");
-        }
-        String tokenizerTupleValueStr =
-                ((LiteralExpr) (fb.get(0).getRightExpr())).getValue().getStringValue().toLowerCase();
+    public IFullTextConfig.TokenizerCategory getTokenizerCategory() throws HyracksDataException {
+        String tokenizerCategoryStr = configNode.getString(FullTextUtil.TOKENIZER_CATEGORY);
         IFullTextConfig.TokenizerCategory tokenizerCategory =
-                IFullTextConfig.TokenizerCategory.getEnumIgnoreCase(tokenizerTupleValueStr);
+                IFullTextConfig.TokenizerCategory.getEnumIgnoreCase(tokenizerCategoryStr);
 
         return tokenizerCategory;
     }
 
     public List<String> getFilterNames() throws AlgebricksException {
-        List<FieldBinding> fb = getFields();
-        String filterPipelineTupleKeyStr =
-                ((LiteralExpr) (fb.get(1).getLeftExpr())).getValue().getStringValue().toLowerCase();
-        if (filterPipelineTupleKeyStr.equalsIgnoreCase(IFullTextConfig.FIELD_NAME_FILTER_PIPELINE) == false) {
-            throw CompilationException.create(ErrorCode.COMPILATION_INVALID_EXPRESSION,
-                    "expect filter pipeline in the second row");
-        }
-        List<String> filterNames = new ArrayList<>();
-        for (Expression l : ((ListConstructor) (fb.get(1).getRightExpr())).getExprList()) {
-            filterNames.add(((LiteralExpr) l).getValue().getStringValue());
+        AdmArrayNode arrayNode = (AdmArrayNode) configNode.get(FullTextUtil.FILTER_PIPELINE);
+        List<String> results = new ArrayList<>();
+
+        Iterator<IAdmNode> iterator = arrayNode.iterator();
+        while (iterator.hasNext()) {
+            results.add(((AdmStringNode) iterator.next()).get());
         }
 
-        return filterNames;
-    }
-
-    private List<FieldBinding> getFields() throws AlgebricksException {
-        RecordConstructor rc = expr;
-        List<FieldBinding> fb = rc.getFbList();
-        if (fb.size() < 2) {
-            throw CompilationException.create(ErrorCode.COMPILATION_INVALID_EXPRESSION,
-                    "number of parameter less than expected");
-        }
-        return fb;
+        return results;
     }
 
 }

@@ -994,7 +994,8 @@ public class QueryTranslator extends AbstractLangTranslator implements IStatemen
         DataverseName dataverseName = getActiveDataverseName(stmtCreateIndex.getDataverseName());
         String datasetName = stmtCreateIndex.getDatasetName().getValue();
         String fullTextConfigName = stmtCreateIndex.getFullTextConfigName();
-        lockUtil.createIndexBegin(lockManager, metadataProvider.getLocks(), dataverseName, datasetName, fullTextConfigName);
+        lockUtil.createIndexBegin(lockManager, metadataProvider.getLocks(), dataverseName, datasetName,
+                fullTextConfigName);
         try {
             doCreateIndex(metadataProvider, stmtCreateIndex, dataverseName, datasetName, hcc, requestParameters);
         } finally {
@@ -1178,9 +1179,8 @@ public class QueryTranslator extends AbstractLangTranslator implements IStatemen
         }
     }
 
-    protected void doCreateFullTextFilter(MetadataProvider metadataProvider, CreateFullTextFilterStatement stmtCreateFilter,
-            DataverseName dataverseName)
-            throws Exception {
+    protected void doCreateFullTextFilter(MetadataProvider metadataProvider,
+            CreateFullTextFilterStatement stmtCreateFilter, DataverseName dataverseName) throws Exception {
         CreateFullTextFilterStatement.checkExpression(stmtCreateFilter);
 
         RecordConstructor rc = (RecordConstructor) stmtCreateFilter.getExpression();
@@ -1246,7 +1246,8 @@ public class QueryTranslator extends AbstractLangTranslator implements IStatemen
         String configName = stmtCreateConfig.getConfigName();
         List<String> filterNames = stmtCreateConfig.getFilterNames();
 
-        lockUtil.createFullTextConfigBegin(lockManager, metadataProvider.getLocks(), dataverseName, configName, filterNames);
+        lockUtil.createFullTextConfigBegin(lockManager, metadataProvider.getLocks(), dataverseName, configName,
+                filterNames);
         try {
             doCreateFullTextConfig(metadataProvider, stmtCreateConfig, dataverseName, configName, filterNames);
         } finally {
@@ -1254,9 +1255,9 @@ public class QueryTranslator extends AbstractLangTranslator implements IStatemen
         }
     }
 
-    protected void doCreateFullTextConfig(MetadataProvider metadataProvider, CreateFullTextConfigStatement stmtCreateConfig,
-            DataverseName dataverseName, String configName, List<String> filterNames)
-            throws Exception {
+    protected void doCreateFullTextConfig(MetadataProvider metadataProvider,
+            CreateFullTextConfigStatement stmtCreateConfig, DataverseName dataverseName, String configName,
+            List<String> filterNames) throws Exception {
         CreateFullTextConfigStatement.checkExpression(stmtCreateConfig);
 
         MetadataTransactionContext mdTxnCtx = null;
@@ -2074,14 +2075,13 @@ public class QueryTranslator extends AbstractLangTranslator implements IStatemen
     }
 
     protected void doDropFullTextFilter(MetadataProvider metadataProvider, FullTextFilterDropStatement stmtFilterDrop,
-            DataverseName dataverseName, String fullTextFilterName)
-            throws AlgebricksException, RemoteException {
+            DataverseName dataverseName, String fullTextFilterName) throws AlgebricksException, RemoteException {
         MetadataTransactionContext mdTxnCtx = null;
         try {
             mdTxnCtx = MetadataManager.INSTANCE.beginTransaction();
             metadataProvider.setMetadataTxnContext(mdTxnCtx);
-            MetadataManager.INSTANCE.dropFullTextFilterDescriptor(mdTxnCtx, dataverseName,
-                    fullTextFilterName, stmtFilterDrop.getIfExists());
+            MetadataManager.INSTANCE.dropFullTextFilterDescriptor(mdTxnCtx, dataverseName, fullTextFilterName,
+                    stmtFilterDrop.getIfExists());
             MetadataManager.INSTANCE.commitTransaction(mdTxnCtx);
         } catch (RemoteException | AlgebricksException e) {
             abort(e, e, mdTxnCtx);
