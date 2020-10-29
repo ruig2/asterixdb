@@ -16,20 +16,15 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.hyracks.algebricks.core.algebra.expressions;
+/*
+* Description  : Test Standard UTF-8
+* Expected Res : Success
+* Date         : August 30th 2020
+*/
+USE test;
 
-public abstract class AbstractExpressionAnnotation implements IExpressionAnnotation {
+SET `compiler.external.field.pushdown` "true";
 
-    protected Object object;
-
-    @Override
-    public Object getObject() {
-        return object;
-    }
-
-    @Override
-    public void setObject(Object object) {
-        this.object = object;
-    }
-
-}
+SELECT VALUE array_count(split(trim(p.comment),"𩸽"))
+FROM ParquetDataset p
+WHERE contains(p.comment, "𩸽");
