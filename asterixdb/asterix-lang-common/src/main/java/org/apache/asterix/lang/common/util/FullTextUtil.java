@@ -25,6 +25,8 @@ import org.apache.asterix.om.types.AOrderedListType;
 import org.apache.asterix.om.types.ARecordType;
 import org.apache.asterix.om.types.BuiltinType;
 import org.apache.asterix.om.types.IAType;
+import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextConfig;
+import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextFilter;
 
 public class FullTextUtil {
 
@@ -32,8 +34,6 @@ public class FullTextUtil {
     }
 
     //--------------------------------------- Full-text config --------------------------------------//
-    public static final String TOKENIZER_CATEGORY = "Tokenizer";
-    public static final String FILTER_PIPELINE = "FilterPipeline";
 
     // Example of full-text config create statement
     // CREATE FULLTEXT CONFIG my_second_stopword_config IF NOT EXISTS AS {
@@ -41,7 +41,8 @@ public class FullTextUtil {
     //     "FilterPipeline": ["my_second_stopword_filter"]
     // };
     private static ARecordType getFullTextConfigRecordType() {
-        final String[] fieldNames = { TOKENIZER_CATEGORY, FILTER_PIPELINE };
+        final String[] fieldNames =
+                { IFullTextConfig.FIELD_NAME_TOKENIZER, IFullTextConfig.FIELD_NAME_FILTER_PIPELINE };
         final IAType[] fieldTypes = { BuiltinType.ASTRING, new AOrderedListType(BuiltinType.ASTRING, null) };
         return new ARecordType("fullTextConfigRecordType", fieldNames, fieldTypes, false);
     }
@@ -58,8 +59,6 @@ public class FullTextUtil {
 
     //--------------------------------------- Full-text filter --------------------------------------//
 
-    public static final String FILTER_TYPE = "type";
-
     // Example of full-text filter create statement
     // Note that only the type field is a must, and other fields is filter-type-specific
     //
@@ -68,7 +67,7 @@ public class FullTextUtil {
     //     "StopwordsList": ["xxx", "yyy", "zzz"]
     // };
     private static ARecordType getFullTextFilterRecordType() {
-        final String[] fieldNames = { FILTER_TYPE };
+        final String[] fieldNames = { IFullTextFilter.FIELD_NAME_TYPE };
         final IAType[] fieldTypes = { BuiltinType.ASTRING };
         return new ARecordType("fullTextFilterRecordType", fieldNames, fieldTypes, true);
     }

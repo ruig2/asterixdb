@@ -38,12 +38,6 @@ import org.apache.hyracks.api.exceptions.HyracksDataException;
 import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextConfig;
 
 public class CreateFullTextConfigStatement extends AbstractStatement {
-    /* Example of SQLPP DDL to create config:
-    CREATE FULLTEXT CONFIG my_first_stopword_config IF NOT EXISTS AS {
-        "Tokenizer": "Word", // built-in tokenizers: "Word" or "NGram"
-        "FilterPipeline": ["my_first_stopword_filter"]
-    };
-     */
 
     private DataverseName dataverseName;
     private String configName;
@@ -91,7 +85,7 @@ public class CreateFullTextConfigStatement extends AbstractStatement {
     }
 
     public IFullTextConfig.TokenizerCategory getTokenizerCategory() throws HyracksDataException {
-        String tokenizerCategoryStr = configNode.getString(FullTextUtil.TOKENIZER_CATEGORY);
+        String tokenizerCategoryStr = configNode.getString(IFullTextConfig.FIELD_NAME_TOKENIZER);
         IFullTextConfig.TokenizerCategory tokenizerCategory =
                 IFullTextConfig.TokenizerCategory.getEnumIgnoreCase(tokenizerCategoryStr);
 
@@ -99,7 +93,7 @@ public class CreateFullTextConfigStatement extends AbstractStatement {
     }
 
     public List<String> getFilterNames() throws AlgebricksException {
-        AdmArrayNode arrayNode = (AdmArrayNode) configNode.get(FullTextUtil.FILTER_PIPELINE);
+        AdmArrayNode arrayNode = (AdmArrayNode) configNode.get(IFullTextConfig.FIELD_NAME_FILTER_PIPELINE);
         List<String> results = new ArrayList<>();
 
         Iterator<IAdmNode> iterator = arrayNode.iterator();

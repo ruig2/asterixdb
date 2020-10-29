@@ -18,27 +18,37 @@
  */
 package org.apache.asterix.lang.common.statement;
 
+import java.util.Iterator;
+
 import org.apache.asterix.common.exceptions.CompilationException;
 import org.apache.asterix.common.metadata.DataverseName;
 import org.apache.asterix.lang.common.base.AbstractStatement;
-import org.apache.asterix.lang.common.base.Expression;
 import org.apache.asterix.lang.common.base.Statement;
 import org.apache.asterix.lang.common.expression.RecordConstructor;
+import org.apache.asterix.lang.common.util.FullTextUtil;
 import org.apache.asterix.lang.common.visitor.base.ILangVisitor;
+import org.apache.asterix.object.base.AdmArrayNode;
+import org.apache.asterix.object.base.AdmObjectNode;
+import org.apache.asterix.object.base.AdmStringNode;
+import org.apache.asterix.object.base.IAdmNode;
+import org.apache.hyracks.api.exceptions.HyracksDataException;
+import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextFilter;
+
+import com.google.common.collect.ImmutableList;
 
 public class CreateFullTextFilterStatement extends AbstractStatement {
 
     private DataverseName dataverseName;
     private String filterName;
-    private RecordConstructor expr;
+    private AdmObjectNode filterNode;
     private boolean ifNotExists;
 
     public CreateFullTextFilterStatement(DataverseName dataverseName, String filterName, boolean ifNotExists,
-            RecordConstructor expr) {
+            RecordConstructor expr) throws CompilationException {
         this.dataverseName = dataverseName;
         this.filterName = filterName;
         this.ifNotExists = ifNotExists;
-        this.expr = expr;
+        this.filterNode = FullTextUtil.validateAndGetFilterNode(expr);
     }
 
     public DataverseName getDataverseName() {
@@ -49,16 +59,28 @@ public class CreateFullTextFilterStatement extends AbstractStatement {
         return filterName;
     }
 
-    public Expression getExpression() {
-        return expr;
-    }
-
     public void setIfNotExists(boolean ifNotExists) {
         this.ifNotExists = ifNotExists;
     }
 
     public boolean getIfNotExists() {
         return this.ifNotExists;
+    }
+
+    public String getFilterType() throws HyracksDataException {
+        return filterNode.getString(IFullTextFilter.FIELD_NAME_TYPE);
+    }
+
+    public ImmutableList<String> getStopwordsList() {
+        ImmutableList.Builder listBuiler = ImmutableList.<String> builder();
+        AdmArrayNode arrayNode = (AdmArrayNode) filterNode.get(IFullTextFilter.FIELD_NAME_STOPWORDS_LIST);
+
+        Iterator<IAdmNode> iterator = arrayNode.iterator();
+        while (iterator.hasNext()) {
+            listBuiler.add(((AdmStringNode) iterator.next()).get());
+        }
+
+        return listBuiler.build();
     }
 
     @Override

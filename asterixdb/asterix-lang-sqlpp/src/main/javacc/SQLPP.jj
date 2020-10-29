@@ -1428,7 +1428,11 @@ CreateFullTextFilterStatement CreateFullTextFilterSpec(Token startStmtToken) thr
     expr = RecordConstructor()
   )
   {
-    return new CreateFullTextFilterStatement(nameComponents.first, nameComponents.second.getValue(), ifNotExists, expr);
+    try {
+      return new CreateFullTextFilterStatement(nameComponents.first, nameComponents.second.getValue(), ifNotExists, expr);
+    } catch (CompilationException e) {
+       throw new SqlppParseException(getSourceLocation(startStmtToken), e.getMessage());
+    }
   }
 }
 

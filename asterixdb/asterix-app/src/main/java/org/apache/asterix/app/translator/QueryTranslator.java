@@ -92,16 +92,11 @@ import org.apache.asterix.external.indexing.IndexingConstants;
 import org.apache.asterix.external.operators.FeedIntakeOperatorNodePushable;
 import org.apache.asterix.external.util.ExternalDataConstants;
 import org.apache.asterix.external.util.ExternalDataUtils;
-import org.apache.asterix.lang.common.base.Expression;
 import org.apache.asterix.lang.common.base.IReturningStatement;
 import org.apache.asterix.lang.common.base.IRewriterFactory;
 import org.apache.asterix.lang.common.base.IStatementRewriter;
 import org.apache.asterix.lang.common.base.Statement;
-import org.apache.asterix.lang.common.expression.FieldBinding;
 import org.apache.asterix.lang.common.expression.IndexedTypeExpression;
-import org.apache.asterix.lang.common.expression.ListConstructor;
-import org.apache.asterix.lang.common.expression.LiteralExpr;
-import org.apache.asterix.lang.common.expression.RecordConstructor;
 import org.apache.asterix.lang.common.expression.TypeExpression;
 import org.apache.asterix.lang.common.expression.TypeReferenceExpression;
 import org.apache.asterix.lang.common.statement.AdapterDropStatement;
@@ -1182,49 +1177,20 @@ public class QueryTranslator extends AbstractLangTranslator implements IStatemen
     protected void doCreateFullTextFilter(MetadataProvider metadataProvider,
             CreateFullTextFilterStatement stmtCreateFilter, DataverseName dataverseName) throws Exception {
         CreateFullTextFilterStatement.checkExpression(stmtCreateFilter);
-
-        RecordConstructor rc = (RecordConstructor) stmtCreateFilter.getExpression();
-
         IFullTextFilterDescriptor filterDescriptor;
-        List<FieldBinding> fbs = rc.getFbList();
 
-        if (fbs.size() < 2) {
-            throw CompilationException.create(ErrorCode.TYPE_UNSUPPORTED,
-                    "number of parameters for the filter is less than expected");
-        }
-
-        String leftStr = ((LiteralExpr) fbs.get(0).getLeftExpr()).getValue().getStringValue().toLowerCase();
-        String rightStr = ((LiteralExpr) fbs.get(0).getRightExpr()).getValue().getStringValue().toLowerCase();
-
-        if (leftStr.equalsIgnoreCase(IFullTextFilter.FIELD_NAME_TYPE) == false) {
-            throw CompilationException.create(ErrorCode.COMPILATION_INVALID_EXPRESSION,
-                    "expect filter type in the first row");
-        }
-
-        switch (rightStr.toLowerCase()) {
+        String filterType = stmtCreateFilter.getFilterType();
+        switch (filterType) {
             case IFullTextFilter.FIELD_NAME_STOPWORDS: {
-                ImmutableList.Builder stopwordsBuilder = ImmutableList.<String> builder();
-
-                String leftStopwordListStr =
-                        ((LiteralExpr) fbs.get(1).getLeftExpr()).getValue().getStringValue().toLowerCase();
-                if (leftStopwordListStr.equalsIgnoreCase(IFullTextFilter.FIELD_NAME_STOPWORDS_LIST) == false) {
-                    throw CompilationException.create(ErrorCode.COMPILATION_INVALID_EXPRESSION,
-                            "expect StopwordsList in the second row; get " + leftStopwordListStr);
-                }
-
-                for (Expression l : ((ListConstructor) (fbs.get(1).getRightExpr())).getExprList()) {
-                    stopwordsBuilder.add(((LiteralExpr) l).getValue().getStringValue());
-                }
-
                 filterDescriptor = new StopwordsFullTextFilterDescriptor(dataverseName.getCanonicalForm(),
-                        stmtCreateFilter.getFilterName(), stopwordsBuilder.build());
+                        stmtCreateFilter.getFilterName(), stmtCreateFilter.getStopwordsList());
                 break;
             }
 
             case IFullTextFilter.FIELD_NAME_STEMMER:
             default:
                 throw CompilationException.create(ErrorCode.COMPILATION_INVALID_EXPRESSION,
-                        "Unexpected value: " + rightStr.toLowerCase());
+                        "Unexpected value: " + filterType);
         }
 
         MetadataTransactionContext mdTxnCtx = null;
