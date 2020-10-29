@@ -44,7 +44,7 @@ import com.google.common.base.Strings;
  */
 public class Index implements IMetadataEntity<Index>, Comparable<Index> {
 
-    private static final long serialVersionUID = 2L;
+    private static final long serialVersionUID = 3L;
     public static final int RECORD_INDICATOR = 0;
 
     private final DataverseName dataverseName;
@@ -62,6 +62,8 @@ public class Index implements IMetadataEntity<Index>, Comparable<Index> {
     // Specific to NGRAM indexes.
     private final int gramLength;
     // Specific to FullText indexes.
+    // ToDo: maybe put the dataverse name in the fullTextConfigName
+    //  so that the index can access the full-text config in another dataverse
     private final String fullTextConfigName;
     // Type of pending operations with respect to atomic DDL operation
     private int pendingOp;
@@ -95,7 +97,7 @@ public class Index implements IMetadataEntity<Index>, Comparable<Index> {
             List<List<String>> keyFieldNames, List<Integer> keyFieldSourceIndicators, List<IAType> keyFieldTypes,
             boolean overrideKeyFieldTypes, boolean isEnforced, boolean isPrimaryIndex, int pendingOp) {
         this(dataverseName, datasetName, indexName, indexType, keyFieldNames, keyFieldSourceIndicators, keyFieldTypes,
-                -1, "", overrideKeyFieldTypes, isEnforced, isPrimaryIndex, pendingOp);
+                -1, null, overrideKeyFieldTypes, isEnforced, isPrimaryIndex, pendingOp);
     }
 
     public DataverseName getDataverseName() {
