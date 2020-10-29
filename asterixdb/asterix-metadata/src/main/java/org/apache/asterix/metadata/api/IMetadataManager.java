@@ -419,22 +419,82 @@ public interface IMetadataManager extends IMetadataBootstrap {
     List<Function> getDataverseFunctions(MetadataTransactionContext ctx, DataverseName dataverseName)
             throws AlgebricksException;
 
-    void addFullTextFilterDescriptor(MetadataTransactionContext mdTxnCtx, IFullTextFilterDescriptor filterDescriptor)
+    /**
+     * @param mdTxnCtx
+     *            MetadataTransactionContext of an active metadata transaction.
+     * @param filterDescriptor
+     *            the full-text filter descriptor to be added
+     * @throws AlgebricksException
+     *              For example, if the filter with the same name in the same dataverse already exists
+     */
+    void addFullTextFilter(MetadataTransactionContext mdTxnCtx, IFullTextFilterDescriptor filterDescriptor)
             throws AlgebricksException, RemoteException;
 
-    IFullTextFilterDescriptor getFullTextFilterDescriptor(MetadataTransactionContext mdTxnCtx,
-            DataverseName dataverseName, String name) throws RemoteException, AlgebricksException;
+    /**
+     * @param mdTxnCtx
+     *            MetadataTransactionContext of an active metadata transaction.
+     * @param dataverseName
+     *            the name of the dataverse where the full-text filter belongs
+     * @param filterName
+     *            the name of the full-text filter to be fetched
+     * @throws AlgebricksException
+     *              For example, if the filter doesn't exist
+     */
+    IFullTextFilterDescriptor getFullTextFilter(MetadataTransactionContext mdTxnCtx,
+            DataverseName dataverseName, String filterName) throws RemoteException, AlgebricksException;
 
-    void dropFullTextFilterDescriptor(MetadataTransactionContext mdTxnCtx, DataverseName dataverseName,
+    /**
+     * @param mdTxnCtx
+     *            MetadataTransactionContext of an active metadata transaction.
+     * @param dataverseName
+     *            the name of the dataverse where the full-text filter belongs
+     * @param filterName
+     *            the name of the full-text filter to be dropped
+     * @param ifExists
+     *            if set to true, don't throw an exception if the filter doesn't exist
+     * @throws AlgebricksException
+     *              For example, if ifExists is set to false and the filter doesn't exist
+     */
+    void dropFullTextFilter(MetadataTransactionContext mdTxnCtx, DataverseName dataverseName,
             String filterName, boolean ifExists) throws AlgebricksException;
 
-    void addFulltextConfigDescriptor(MetadataTransactionContext mdTxnCtx, IFullTextConfigDescriptor configDescriptor)
+    /**
+     * @param mdTxnCtx
+     *            MetadataTransactionContext of an active metadata transaction.
+     * @param configDescriptor
+     *            the full-text config descriptor to be added
+     * @throws AlgebricksException
+     *              For example, if the config with the same name in the same dataverse already exists
+     */
+    void addFullTextConfig(MetadataTransactionContext mdTxnCtx, IFullTextConfigDescriptor configDescriptor)
             throws AlgebricksException;
 
-    IFullTextConfigDescriptor getFullTextConfigDescriptor(MetadataTransactionContext mdTxnCtx, String dataverseName,
-            String name) throws AlgebricksException;
+    /**
+     * @param mdTxnCtx
+     *            MetadataTransactionContext of an active metadata transaction.
+     * @param dataverseName
+     *            the name of the dataverse where the full-text filter belongs
+     * @param configName
+     *            the name of the full-text config to be fetched
+     * @throws AlgebricksException
+     *              For example, if the full-text config doesn't exist
+     */
+    IFullTextConfigDescriptor getFullTextConfig(MetadataTransactionContext mdTxnCtx, String dataverseName,
+            String configName) throws AlgebricksException;
 
-    void dropFullTextConfigDescriptor(MetadataTransactionContext mdTxnCtx, DataverseName dataverseName,
+    /**
+     * @param mdTxnCtx
+     *            MetadataTransactionContext of an active metadata transaction.
+     * @param dataverseName
+     *            the name of the dataverse where the full-text filter belongs
+     * @param configName
+     *            the name of the full-text config to be dropped
+     * @param ifExists
+     *            if set to true, don't throw an exception if the config doesn't exist
+     * @throws AlgebricksException
+     *              For example, if ifExists is set to false and the config doesn't exist
+     */
+    void dropFullTextConfig(MetadataTransactionContext mdTxnCtx, DataverseName dataverseName,
             String configName, boolean ifExists) throws AlgebricksException;
 
     /**

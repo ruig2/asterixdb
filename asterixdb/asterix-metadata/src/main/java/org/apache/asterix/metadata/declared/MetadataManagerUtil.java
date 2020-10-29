@@ -151,7 +151,7 @@ public class MetadataManagerUtil {
 
     public static IFullTextConfigDescriptor findFullTextConfigDescriptor(MetadataTransactionContext mdTxnCtx,
             String dataverseName, String ftConfigName) throws AlgebricksException {
-        return MetadataManager.INSTANCE.getFullTextConfigDescriptor(mdTxnCtx, dataverseName, ftConfigName);
+        return MetadataManager.INSTANCE.getFullTextConfig(mdTxnCtx, dataverseName, ftConfigName);
     }
 
     public static List<Index> getDatasetIndexes(MetadataTransactionContext mdTxnCtx, DataverseName dataverseName,

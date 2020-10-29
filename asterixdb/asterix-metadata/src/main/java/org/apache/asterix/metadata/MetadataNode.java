@@ -455,14 +455,14 @@ public class MetadataNode implements IMetadataNode {
     }
 
     @Override
-    public void addFullTextFilterDescriptor(TxnId txnId, IFullTextFilterDescriptor filterDescriptor)
+    public void addFullTextFilter(TxnId txnId, IFullTextFilterDescriptor filterDescriptor)
             throws RemoteException, AlgebricksException {
         insertFullTextFilterDescriptorToCatalog(txnId, filterDescriptor);
         return;
     }
 
     @Override
-    public IFullTextFilterDescriptor getFulltextFilterDescriptor(TxnId txnId, DataverseName dataverseName,
+    public IFullTextFilterDescriptor getFullTextFilter(TxnId txnId, DataverseName dataverseName,
             String filterName) throws AlgebricksException {
         try {
             FullTextFilterDescriptorTupleTranslator translator =
@@ -482,7 +482,7 @@ public class MetadataNode implements IMetadataNode {
     }
 
     @Override
-    public void dropFullTextFilterDescriptor(TxnId txnId, DataverseName dataverseName, String filterName,
+    public void dropFullTextFilter(TxnId txnId, DataverseName dataverseName, String filterName,
             boolean ifExists) throws AlgebricksException {
         dropFullTextFilterDescriptor(txnId, dataverseName, filterName, ifExists, false);
     }
@@ -544,7 +544,7 @@ public class MetadataNode implements IMetadataNode {
      */
 
     @Override
-    public void addFullTextConfigDescriptor(TxnId txnId, IFullTextConfigDescriptor configDescriptor)
+    public void addFullTextConfig(TxnId txnId, IFullTextConfigDescriptor configDescriptor)
             throws AlgebricksException, RemoteException {
         try {
             // Make the following a transaction to avoid data corruption, e.g. , config is updated but filters not
@@ -557,7 +557,7 @@ public class MetadataNode implements IMetadataNode {
     }
 
     @Override
-    public IFullTextConfigDescriptor getFullTextConfigDescriptor(TxnId txnId, String dataverseName, String configName)
+    public IFullTextConfigDescriptor getFullTextConfig(TxnId txnId, String dataverseName, String configName)
             throws AlgebricksException {
         FullTextConfigDescriptorTupleTranslator translator =
                 tupleTranslatorProvider.getFullTextConfigTupleTranslator(true);
@@ -581,7 +581,7 @@ public class MetadataNode implements IMetadataNode {
     }
 
     @Override
-    public void dropFullTextConfigDescriptor(TxnId txnId, DataverseName dataverseName, String configName,
+    public void dropFullTextConfig(TxnId txnId, DataverseName dataverseName, String configName,
             boolean ifExists) throws AlgebricksException {
         dropFullTextConfigDescriptor(txnId, dataverseName, configName, ifExists, false);
     }

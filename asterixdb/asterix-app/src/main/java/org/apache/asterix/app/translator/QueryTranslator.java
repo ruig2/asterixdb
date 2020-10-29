@@ -1197,7 +1197,7 @@ public class QueryTranslator extends AbstractLangTranslator implements IStatemen
         try {
             mdTxnCtx = MetadataManager.INSTANCE.beginTransaction();
             metadataProvider.setMetadataTxnContext(mdTxnCtx);
-            MetadataManager.INSTANCE.addFullTextFilterDescriptor(mdTxnCtx, filterDescriptor);
+            MetadataManager.INSTANCE.addFullTextFilter(mdTxnCtx, filterDescriptor);
             MetadataManager.INSTANCE.commitTransaction(mdTxnCtx);
         } catch (AlgebricksException | RemoteException e) {
             abort(e, e, mdTxnCtx);
@@ -1235,7 +1235,7 @@ public class QueryTranslator extends AbstractLangTranslator implements IStatemen
                     ImmutableList.<IFullTextFilterDescriptor> builder();
             for (String name : filterNames) {
                 IFullTextFilterDescriptor filterDescriptor =
-                        MetadataManager.INSTANCE.getFullTextFilterDescriptor(mdTxnCtx, dataverseName, name);
+                        MetadataManager.INSTANCE.getFullTextFilter(mdTxnCtx, dataverseName, name);
                 filterDescriptorsBuilder.add(filterDescriptor);
             }
 
@@ -1243,7 +1243,7 @@ public class QueryTranslator extends AbstractLangTranslator implements IStatemen
             IFullTextConfigDescriptor configDescriptor = new FullTextConfigDescriptor(dataverseName.getCanonicalForm(),
                     configName, tokenizerCategory, filterDescriptorsBuilder.build());
 
-            MetadataManager.INSTANCE.addFulltextConfigDescriptor(mdTxnCtx, configDescriptor);
+            MetadataManager.INSTANCE.addFullTextConfig(mdTxnCtx, configDescriptor);
             MetadataManager.INSTANCE.commitTransaction(mdTxnCtx);
         } catch (RemoteException e) {
             abort(e, e, mdTxnCtx);
@@ -2046,7 +2046,7 @@ public class QueryTranslator extends AbstractLangTranslator implements IStatemen
         try {
             mdTxnCtx = MetadataManager.INSTANCE.beginTransaction();
             metadataProvider.setMetadataTxnContext(mdTxnCtx);
-            MetadataManager.INSTANCE.dropFullTextFilterDescriptor(mdTxnCtx, dataverseName, fullTextFilterName,
+            MetadataManager.INSTANCE.dropFullTextFilter(mdTxnCtx, dataverseName, fullTextFilterName,
                     stmtFilterDrop.getIfExists());
             MetadataManager.INSTANCE.commitTransaction(mdTxnCtx);
         } catch (RemoteException | AlgebricksException e) {
@@ -2084,7 +2084,7 @@ public class QueryTranslator extends AbstractLangTranslator implements IStatemen
             metadataProvider.setMetadataTxnContext(mdTxnCtx);
 
             DataverseName dataverseName = getActiveDataverseName(stmtConfigDrop.getDataverseName());
-            MetadataManager.INSTANCE.dropFullTextConfigDescriptor(mdTxnCtx, dataverseName,
+            MetadataManager.INSTANCE.dropFullTextConfig(mdTxnCtx, dataverseName,
                     stmtConfigDrop.getConfigName(), stmtConfigDrop.getIfExists());
             MetadataManager.INSTANCE.commitTransaction(mdTxnCtx);
         } catch (RemoteException e) {

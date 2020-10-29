@@ -630,54 +630,54 @@ public abstract class MetadataManager implements IMetadataManager {
     }
 
     @Override
-    public void addFullTextFilterDescriptor(MetadataTransactionContext mdTxnCtx, IFullTextFilterDescriptor filter)
+    public void addFullTextFilter(MetadataTransactionContext mdTxnCtx, IFullTextFilterDescriptor filter)
             throws RemoteException, AlgebricksException {
-        metadataNode.addFullTextFilterDescriptor(mdTxnCtx.getTxnId(), filter);
+        metadataNode.addFullTextFilter(mdTxnCtx.getTxnId(), filter);
     }
 
     @Override
-    public void dropFullTextFilterDescriptor(MetadataTransactionContext mdTxnCtx, DataverseName dataverseName,
+    public void dropFullTextFilter(MetadataTransactionContext mdTxnCtx, DataverseName dataverseName,
             String filterName, boolean ifExists) throws AlgebricksException {
 
         try {
-            metadataNode.dropFullTextFilterDescriptor(mdTxnCtx.getTxnId(), dataverseName, filterName, ifExists);
+            metadataNode.dropFullTextFilter(mdTxnCtx.getTxnId(), dataverseName, filterName, ifExists);
         } catch (RemoteException e) {
             throw new MetadataException(ErrorCode.REMOTE_EXCEPTION_WHEN_CALLING_METADATA_NODE, e);
         }
     }
 
     @Override
-    public IFullTextFilterDescriptor getFullTextFilterDescriptor(MetadataTransactionContext mdTxnCtx,
+    public IFullTextFilterDescriptor getFullTextFilter(MetadataTransactionContext mdTxnCtx,
             DataverseName dataverseName, String filterName) throws AlgebricksException {
         try {
-            return metadataNode.getFulltextFilterDescriptor(mdTxnCtx.getTxnId(), dataverseName, filterName);
+            return metadataNode.getFullTextFilter(mdTxnCtx.getTxnId(), dataverseName, filterName);
         } catch (AlgebricksException | RemoteException e) {
             throw new MetadataException(ErrorCode.REMOTE_EXCEPTION_WHEN_CALLING_METADATA_NODE, e);
         }
     }
 
     @Override
-    public void addFulltextConfigDescriptor(MetadataTransactionContext mdTxnCtx,
+    public void addFullTextConfig(MetadataTransactionContext mdTxnCtx,
             IFullTextConfigDescriptor configDescriptor) throws AlgebricksException {
         if (configDescriptor.getName().equals(DEFAULT_FULL_TEXT_CONFIG_NAME)) {
             throw new AsterixException(ErrorCode.FULL_TEXT_CONFIG_ALREADY_EXISTS, DEFAULT_FULL_TEXT_CONFIG_NAME);
         }
 
         try {
-            metadataNode.addFullTextConfigDescriptor(mdTxnCtx.getTxnId(), configDescriptor);
+            metadataNode.addFullTextConfig(mdTxnCtx.getTxnId(), configDescriptor);
         } catch (RemoteException e) {
             throw new MetadataException(ErrorCode.REMOTE_EXCEPTION_WHEN_CALLING_METADATA_NODE, e);
         }
     }
 
     @Override
-    public IFullTextConfigDescriptor getFullTextConfigDescriptor(MetadataTransactionContext mdTxnCtx,
+    public IFullTextConfigDescriptor getFullTextConfig(MetadataTransactionContext mdTxnCtx,
             String dataverseName, String configName) throws AlgebricksException {
         if (Strings.isNullOrEmpty(configName) || configName.equals(DEFAULT_FULL_TEXT_CONFIG_NAME)) {
             return FullTextConfigDescriptor.getDefaultFullTextConfig();
         }
         try {
-            return metadataNode.getFullTextConfigDescriptor(mdTxnCtx.getTxnId(), dataverseName, configName);
+            return metadataNode.getFullTextConfig(mdTxnCtx.getTxnId(), dataverseName, configName);
         } catch (AlgebricksException | RemoteException e) {
             throw new AlgebricksException("Error when getting full-text config " + configName,
                     ErrorCode.FULL_TEXT_CONFIG_NOT_FOUND, e);
@@ -685,10 +685,10 @@ public abstract class MetadataManager implements IMetadataManager {
     }
 
     @Override
-    public void dropFullTextConfigDescriptor(MetadataTransactionContext mdTxnCtx, DataverseName dataverseName,
+    public void dropFullTextConfig(MetadataTransactionContext mdTxnCtx, DataverseName dataverseName,
             String configName, boolean ifExists) throws AlgebricksException {
         try {
-            metadataNode.dropFullTextConfigDescriptor(mdTxnCtx.getTxnId(), dataverseName, configName, ifExists);
+            metadataNode.dropFullTextConfig(mdTxnCtx.getTxnId(), dataverseName, configName, ifExists);
         } catch (RemoteException e) {
             throw new AlgebricksException(e);
         }

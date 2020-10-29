@@ -447,22 +447,82 @@ public interface IMetadataNode extends Remote, Serializable {
      */
     void addFunction(TxnId txnId, Function function) throws AlgebricksException, RemoteException;
 
-    void addFullTextFilterDescriptor(TxnId txnId, IFullTextFilterDescriptor filterDescriptor)
+    /**
+     * @param txnId
+     *            Metadata transaction id of an active metadata transaction.
+     * @param filterDescriptor
+     *            the full-text filter descriptor to be added
+     * @throws AlgebricksException
+     *              For example, if the filter with the same name in the same dataverse already exists
+     */
+    void addFullTextFilter(TxnId txnId, IFullTextFilterDescriptor filterDescriptor)
             throws RemoteException, AlgebricksException;
 
-    IFullTextFilterDescriptor getFulltextFilterDescriptor(TxnId txnId, DataverseName dataverseName, String filterName)
+    /**
+     * @param txnId
+     *            Metadata transaction id of an active metadata transaction.
+     * @param dataverseName
+     *            the name of the dataverse where the full-text filter belongs
+     * @param filterName
+     *            the name of the full-text filter to be fetched
+     * @throws AlgebricksException
+     *              For example, if the filter doesn't exist
+     */
+    IFullTextFilterDescriptor getFullTextFilter(TxnId txnId, DataverseName dataverseName, String filterName)
             throws RemoteException, AlgebricksException;
 
-    void dropFullTextFilterDescriptor(TxnId txnId, DataverseName dataverseName, String filterName, boolean ifExists)
+    /**
+     * @param txnId
+     *            Metadata transaction id of an active metadata transaction.
+     * @param dataverseName
+     *            the name of the dataverse where the full-text filter belongs
+     * @param filterName
+     *            the name of the full-text filter to be dropped
+     * @param ifExists
+     *            if set to true, don't throw an exception if the filter doesn't exist
+     * @throws AlgebricksException
+     *              For example, if ifExists is set to false and the filter doesn't exist
+     */
+    void dropFullTextFilter(TxnId txnId, DataverseName dataverseName, String filterName, boolean ifExists)
             throws RemoteException, AlgebricksException;
 
-    void addFullTextConfigDescriptor(TxnId txnId, IFullTextConfigDescriptor config)
+    /**
+     * @param txnId
+     *            Metadata transaction id of an active metadata transaction.
+     * @param configDescriptor
+     *            the full-text config descriptor to be added
+     * @throws AlgebricksException
+     *              For example, if the config with the same name in the same dataverse already exists
+     */
+    void addFullTextConfig(TxnId txnId, IFullTextConfigDescriptor configDescriptor)
             throws AlgebricksException, RemoteException;
 
-    IFullTextConfigDescriptor getFullTextConfigDescriptor(TxnId txnId, String dataverseName, String name)
+    /**
+     * @param txnId
+     *            Metadata transaction id of an active metadata transaction.
+     * @param dataverseName
+     *            the name of the dataverse where the full-text filter belongs
+     * @param configName
+     *            the name of the full-text config to be fetched
+     * @throws AlgebricksException
+     *              For example, if the full-text config doesn't exist
+     */
+    IFullTextConfigDescriptor getFullTextConfig(TxnId txnId, String dataverseName, String configName)
             throws AlgebricksException, RemoteException;
 
-    void dropFullTextConfigDescriptor(TxnId txnId, DataverseName dataverseName, String configName, boolean ifExists)
+    /**
+     * @param txnId
+     *            Metadata transaction id of an active metadata transaction.
+     * @param dataverseName
+     *            the name of the dataverse where the full-text filter belongs
+     * @param configName
+     *            the name of the full-text config to be dropped
+     * @param ifExists
+     *            if set to true, don't throw an exception if the config doesn't exist
+     * @throws AlgebricksException
+     *              For example, if ifExists is set to false and the config doesn't exist
+     */
+    void dropFullTextConfig(TxnId txnId, DataverseName dataverseName, String configName, boolean ifExists)
             throws RemoteException, AlgebricksException;
 
     /**
