@@ -32,7 +32,7 @@ import org.apache.hyracks.api.exceptions.SourceLocation;
 
 public interface IFunctionDescriptor extends Serializable {
 
-    void setImmutableStates(Object... states) throws AlgebricksException;
+    void setImmutableStates(Object... states);
 
     void setSourceLocation(SourceLocation sourceLoc);
 

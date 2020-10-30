@@ -1230,7 +1230,8 @@ public class MetadataNode implements IMetadataNode {
         }
     }
 
-    private void confirmFullTextConfigCanBeDeleted(TxnId txnId, DataverseName dataverseName, String configName) throws AlgebricksException {
+    private void confirmFullTextConfigCanBeDeleted(TxnId txnId, DataverseName dataverseName, String configName)
+            throws AlgebricksException {
         if (configName.equals(FullTextConfigDescriptor.DEFAULT_FULL_TEXT_CONFIG_NAME)) {
             throw new MetadataException(FULL_TEXT_DEFAULT_CONFIG_CANNOT_BE_DELETED);
         }
