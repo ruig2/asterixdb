@@ -137,6 +137,7 @@ import org.apache.hyracks.storage.common.MultiComparator;
 import org.apache.hyracks.util.ExitUtil;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.apache.parquet.Strings;
 
 public class MetadataNode implements IMetadataNode {
     private static final long serialVersionUID = 1L;
@@ -1251,7 +1252,8 @@ public class MetadataNode implements IMetadataNode {
         for (Dataset dataset : datasets) {
             List<Index> indexes = getDatasetIndexes(txnId, dataset.getDataverseName(), dataset.getDatasetName());
             for (Index index : indexes) {
-                if (index.getFullTextConfigName().equals(configName)) {
+                String indexConfigName = index.getFullTextConfigName();
+                if (!Strings.isNullOrEmpty(indexConfigName) && indexConfigName.equals(configName)) {
                     throw new AlgebricksException("Cannot drop full-text config "
                             + " because it is being used by index " + index.getIndexName());
                 }

@@ -74,11 +74,12 @@ public class FullTextUtil {
 
     private static final ARecordType FULL_TEXT_FILTER_RECORD_TYPE = getFullTextFilterRecordType();
 
-    public static AdmObjectNode validateAndGetFilterNode(RecordConstructor recordConstructor)
+    public static AdmObjectNode getFilterNode(RecordConstructor recordConstructor)
             throws CompilationException {
-        final ConfigurationTypeValidator validator = new ConfigurationTypeValidator();
+        // Skip validation here because the current validator only supports CLOSED record validate
+        // while the FULL_TEXT_FILTER_RECORD_TYPE is open and specific to the filter types,
+        // e.g. stopwords filter and stemmer filter may have different fields
         final AdmObjectNode node = ExpressionUtils.toNode(recordConstructor);
-        validator.validateType(FULL_TEXT_FILTER_RECORD_TYPE, node);
         return node;
     }
 

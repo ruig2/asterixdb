@@ -1164,6 +1164,7 @@ public class QueryTranslator extends AbstractLangTranslator implements IStatemen
             throws Exception {
         CreateFullTextFilterStatement stmtCreateFilter = (CreateFullTextFilterStatement) stmt;
         DataverseName dataverseName = getActiveDataverseName(stmtCreateFilter.getDataverseName());
+        dataverseName = getActiveDataverseName(dataverseName);
         String fullTextFilterName = stmtCreateFilter.getFilterName();
 
         lockUtil.createFullTextFilterBegin(lockManager, metadataProvider.getLocks(), dataverseName, fullTextFilterName);
@@ -1199,7 +1200,7 @@ public class QueryTranslator extends AbstractLangTranslator implements IStatemen
             metadataProvider.setMetadataTxnContext(mdTxnCtx);
 
             IFullTextFilterDescriptor existingFilter = MetadataManager.INSTANCE.getFullTextFilter(mdTxnCtx,
-                    stmtCreateFilter.getDataverseName(), stmtCreateFilter.getFilterName());
+                    dataverseName, stmtCreateFilter.getFilterName());
             if (existingFilter != null && stmtCreateFilter.getIfNotExists()) {
                 MetadataManager.INSTANCE.commitTransaction(mdTxnCtx);
                 return;
@@ -1217,6 +1218,7 @@ public class QueryTranslator extends AbstractLangTranslator implements IStatemen
             throws Exception {
         CreateFullTextConfigStatement stmtCreateConfig = (CreateFullTextConfigStatement) stmt;
         DataverseName dataverseName = getActiveDataverseName(stmtCreateConfig.getDataverseName());
+        dataverseName = getActiveDataverseName(dataverseName);
         String configName = stmtCreateConfig.getConfigName();
         List<String> filterNames = stmtCreateConfig.getFilterNames();
 
@@ -1239,8 +1241,8 @@ public class QueryTranslator extends AbstractLangTranslator implements IStatemen
             mdTxnCtx = MetadataManager.INSTANCE.beginTransaction();
             metadataProvider.setMetadataTxnContext(mdTxnCtx);
 
-            IFullTextConfigDescriptor existingConfig = MetadataManager.INSTANCE.getFullTextConfig(mdTxnCtx,
-                    stmtCreateConfig.getDataverseName().getCanonicalForm(), stmtCreateConfig.getConfigName());
+            IFullTextConfigDescriptor existingConfig =
+                    MetadataManager.INSTANCE.getFullTextConfig(mdTxnCtx, dataverseName.getCanonicalForm(), configName);
             if (existingConfig != null && stmtCreateConfig.getIfNotExists()) {
                 MetadataManager.INSTANCE.commitTransaction(mdTxnCtx);
                 return;

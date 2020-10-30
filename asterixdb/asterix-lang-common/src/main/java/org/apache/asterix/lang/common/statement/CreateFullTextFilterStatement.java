@@ -48,7 +48,7 @@ public class CreateFullTextFilterStatement extends AbstractStatement {
         this.dataverseName = dataverseName;
         this.filterName = filterName;
         this.ifNotExists = ifNotExists;
-        this.filterNode = FullTextUtil.validateAndGetFilterNode(expr);
+        this.filterNode = FullTextUtil.getFilterNode(expr);
     }
 
     public DataverseName getDataverseName() {
