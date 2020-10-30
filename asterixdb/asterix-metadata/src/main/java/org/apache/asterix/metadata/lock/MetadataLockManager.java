@@ -128,7 +128,7 @@ public class MetadataLockManager implements IMetadataLockManager {
     @Override
     public void acquireFullTextFilterReadLock(LockList locks, DataverseName dataverseName, String fullTextFilterName)
             throws AlgebricksException {
-        MetadataLockKey key = MetadataLockKey.createFullTextConfigLockKey(dataverseName, fullTextFilterName);
+        MetadataLockKey key = MetadataLockKey.createFullTextFilterLockKey(dataverseName, fullTextFilterName);
         IMetadataLock lock = mdlocks.computeIfAbsent(key, LOCK_FUNCTION);
         locks.add(IMetadataLock.Mode.READ, lock);
     }
@@ -136,7 +136,7 @@ public class MetadataLockManager implements IMetadataLockManager {
     @Override
     public void acquireFullTextFilterWriteLock(LockList locks, DataverseName dataverseName, String fullTextFilterName)
             throws AlgebricksException {
-        MetadataLockKey key = MetadataLockKey.createFullTextConfigLockKey(dataverseName, fullTextFilterName);
+        MetadataLockKey key = MetadataLockKey.createFullTextFilterLockKey(dataverseName, fullTextFilterName);
         IMetadataLock lock = mdlocks.computeIfAbsent(key, LOCK_FUNCTION);
         locks.add(IMetadataLock.Mode.WRITE, lock);
     }
