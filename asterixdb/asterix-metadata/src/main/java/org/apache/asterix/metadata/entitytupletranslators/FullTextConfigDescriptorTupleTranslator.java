@@ -98,7 +98,7 @@ public class FullTextConfigDescriptorTupleTranslator extends AbstractTupleTransl
             filterNames.add(((AString) filterNamesCursor.get()).getStringValue());
         }
 
-        // ToDo: where to start metadata txn?
+        // Need to access metadata to get filters
         MetadataTransactionContext mdTxnCtx = null;
         ImmutableList.Builder<IFullTextFilterDescriptor> filterDescriptorsBuilder =
                 ImmutableList.<IFullTextFilterDescriptor> builder();
