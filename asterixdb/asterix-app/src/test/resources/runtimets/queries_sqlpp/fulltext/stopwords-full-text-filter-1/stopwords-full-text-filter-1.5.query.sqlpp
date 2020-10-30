@@ -23,3 +23,7 @@ USE MyDataVerse;
 // SELECT "Without FT Config";
 SELECT VALUE myMessage from MyMessageDataset myMessage
     WHERE ftcontains(myMessage.myMessageBody, ["the", "smart", "black"], {"mode":"all"});
+
+// Without ftcontains option
+SELECT VALUE myMessage from MyMessageDataset myMessage
+    WHERE ftcontains(myMessage.myMessageBody, ["the", "smart", "black"]);

@@ -74,7 +74,7 @@ public interface IMetadataLockUtil {
     void dropTypeBegin(IMetadataLockManager lockManager, LockList locks, DataverseName dataverseName, String typeName)
             throws AlgebricksException;
 
-    // Function helpers
+    // Library helpers
 
     void createLibraryBegin(IMetadataLockManager lockManager, LockList locks, DataverseName dataverseName,
             String libraryName) throws AlgebricksException;
