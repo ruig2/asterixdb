@@ -19,18 +19,13 @@
 
 package org.apache.hyracks.storage.am.lsm.invertedindex.fulltext;
 
-import java.util.ArrayList;
-import java.util.List;
-
 public abstract class AbstractFullTextFilter implements IFullTextFilter {
     protected final String name;
     protected FullTextFilterType type;
-    protected List<String> usedByFTConfigs;
 
     public AbstractFullTextFilter(String name, IFullTextFilter.FullTextFilterType type) {
         this.name = name;
         this.type = type;
-        this.usedByFTConfigs = new ArrayList<>();
     }
 
     @Override
@@ -46,15 +41,5 @@ public abstract class AbstractFullTextFilter implements IFullTextFilter {
     @Override
     public FullTextFilterType getFilterType() {
         return type;
-    }
-
-    @Override
-    public List<String> getUsedByFTConfigs() {
-        return usedByFTConfigs;
-    }
-
-    @Override
-    public void addUsedByFTConfigs(String ftConfigName) {
-        usedByFTConfigs.add(ftConfigName);
     }
 }

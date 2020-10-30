@@ -37,6 +37,7 @@ public interface IBinaryTokenizer {
     // Get the tokenizer types: String or List
     TokenizerType getTokenizerType();
 
+    // WORD or NGRAM tokenizer
     IFullTextConfig.TokenizerCategory getTokenizerCategory();
 
 }

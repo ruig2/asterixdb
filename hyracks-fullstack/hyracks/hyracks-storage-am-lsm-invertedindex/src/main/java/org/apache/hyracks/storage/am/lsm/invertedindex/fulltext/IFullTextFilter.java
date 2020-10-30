@@ -19,8 +19,6 @@
 
 package org.apache.hyracks.storage.am.lsm.invertedindex.fulltext;
 
-import java.util.List;
-
 import org.apache.commons.lang3.EnumUtils;
 import org.apache.hyracks.storage.am.lsm.invertedindex.tokenizers.IToken;
 import org.apache.hyracks.storage.am.lsm.invertedindex.tokenizers.TokenizerInfo;
@@ -59,10 +57,6 @@ public interface IFullTextFilter extends IFullTextEntity {
     }
 
     FullTextFilterType getFilterType();
-
-    List<String> getUsedByFTConfigs();
-
-    void addUsedByFTConfigs(String ftConfigName);
 
     IToken processToken(TokenizerInfo.TokenizerType tokenizerType, IToken token);
 }
