@@ -350,10 +350,10 @@ public class QueryTranslator extends AbstractLangTranslator implements IStatemen
                     case CREATE_INDEX:
                         handleCreateIndexStatement(metadataProvider, stmt, hcc, requestParameters);
                         break;
-                    case CREATE_FULLTEXT_FILTER:
+                    case CREATE_FULL_TEXT_FILTER:
                         handleCreateFullTextFilterStatement(metadataProvider, stmt);
                         break;
-                    case CREATE_FULLTEXT_CONFIG:
+                    case CREATE_FULL_TEXT_CONFIG:
                         handleCreateFullTextConfigStatement(metadataProvider, stmt);
                         break;
                     case TYPE_DECL:
@@ -371,10 +371,10 @@ public class QueryTranslator extends AbstractLangTranslator implements IStatemen
                     case INDEX_DROP:
                         handleIndexDropStatement(metadataProvider, stmt, hcc, requestParameters);
                         break;
-                    case FULLTEXT_FILTER_DROP:
+                    case FULL_TEXT_FILTER_DROP:
                         handleFullTextFilterDrop(metadataProvider, stmt, hcc, requestParameters);
                         break;
-                    case FULLTEXT_CONFIG_DROP:
+                    case FULL_TEXT_CONFIG_DROP:
                         handleFullTextConfigDrop(metadataProvider, stmt, hcc, requestParameters);
                         break;
                     case TYPE_DROP:

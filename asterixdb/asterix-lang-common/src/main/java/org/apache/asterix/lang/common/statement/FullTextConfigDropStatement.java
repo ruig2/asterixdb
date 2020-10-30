@@ -37,7 +37,7 @@ public class FullTextConfigDropStatement extends AbstractStatement {
 
     @Override
     public Kind getKind() {
-        return Kind.FULLTEXT_CONFIG_DROP;
+        return Kind.FULL_TEXT_CONFIG_DROP;
     }
 
     public boolean getIfExists() {

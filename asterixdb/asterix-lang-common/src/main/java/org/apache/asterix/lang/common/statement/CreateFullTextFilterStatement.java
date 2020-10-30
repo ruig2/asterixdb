@@ -85,7 +85,7 @@ public class CreateFullTextFilterStatement extends AbstractStatement {
 
     @Override
     public Kind getKind() {
-        return Kind.CREATE_FULLTEXT_FILTER;
+        return Kind.CREATE_FULL_TEXT_FILTER;
     }
 
     @Override

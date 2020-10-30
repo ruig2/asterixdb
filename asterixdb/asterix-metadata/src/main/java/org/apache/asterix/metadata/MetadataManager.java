@@ -631,14 +631,17 @@ public abstract class MetadataManager implements IMetadataManager {
 
     @Override
     public void addFullTextFilter(MetadataTransactionContext mdTxnCtx, IFullTextFilterDescriptor filter)
-            throws RemoteException, AlgebricksException {
-        metadataNode.addFullTextFilter(mdTxnCtx.getTxnId(), filter);
+            throws AlgebricksException {
+        try {
+            metadataNode.addFullTextFilter(mdTxnCtx.getTxnId(), filter);
+        } catch (RemoteException e) {
+            throw new MetadataException(ErrorCode.REMOTE_EXCEPTION_WHEN_CALLING_METADATA_NODE, e);
+        }
     }
 
     @Override
     public void dropFullTextFilter(MetadataTransactionContext mdTxnCtx, DataverseName dataverseName, String filterName,
             boolean ifExists) throws AlgebricksException {
-
         try {
             metadataNode.dropFullTextFilter(mdTxnCtx.getTxnId(), dataverseName, filterName, ifExists);
         } catch (RemoteException e) {

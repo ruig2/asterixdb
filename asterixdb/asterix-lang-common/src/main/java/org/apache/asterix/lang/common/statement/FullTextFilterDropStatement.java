@@ -37,7 +37,7 @@ public class FullTextFilterDropStatement extends AbstractStatement {
 
     @Override
     public Kind getKind() {
-        return Kind.FULLTEXT_FILTER_DROP;
+        return Kind.FULL_TEXT_FILTER_DROP;
     }
 
     public DataverseName getDataverseName() {

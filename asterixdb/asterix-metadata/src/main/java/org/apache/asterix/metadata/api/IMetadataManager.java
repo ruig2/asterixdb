@@ -428,7 +428,7 @@ public interface IMetadataManager extends IMetadataBootstrap {
      *              For example, if the filter with the same name in the same dataverse already exists
      */
     void addFullTextFilter(MetadataTransactionContext mdTxnCtx, IFullTextFilterDescriptor filterDescriptor)
-            throws AlgebricksException, RemoteException;
+            throws AlgebricksException;
 
     /**
      * @param mdTxnCtx
@@ -441,7 +441,7 @@ public interface IMetadataManager extends IMetadataBootstrap {
      *              For example, if the filter doesn't exist
      */
     IFullTextFilterDescriptor getFullTextFilter(MetadataTransactionContext mdTxnCtx, DataverseName dataverseName,
-            String filterName) throws RemoteException, AlgebricksException;
+            String filterName) throws AlgebricksException;
 
     /**
      * @param mdTxnCtx

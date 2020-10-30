@@ -71,7 +71,7 @@ public class CreateFullTextConfigStatement extends AbstractStatement {
 
     @Override
     public Kind getKind() {
-        return Kind.CREATE_FULLTEXT_CONFIG;
+        return Kind.CREATE_FULL_TEXT_CONFIG;
     }
 
     @Override
