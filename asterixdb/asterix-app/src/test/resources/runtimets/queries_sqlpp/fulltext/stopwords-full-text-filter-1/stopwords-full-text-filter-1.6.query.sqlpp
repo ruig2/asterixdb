@@ -16,8 +16,9 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
 ///////////////////////////////////////
-// Step 5: Select with ft_config
+// Step 5a: Select with ft_config
 
 USE MyDataVerse;
 // SELECT "With FT Config my_first_stopword_config and `the`";

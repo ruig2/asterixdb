@@ -16,6 +16,9 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
+///////////////////////////////////////
+// Step 2: Create full-text filter and config
 USE MyDataVerse;
 
 DROP FULLTEXT CONFIG my_stopword_config IF EXISTS;

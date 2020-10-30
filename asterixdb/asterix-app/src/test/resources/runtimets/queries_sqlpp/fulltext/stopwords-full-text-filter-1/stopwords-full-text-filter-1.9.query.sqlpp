@@ -16,14 +16,14 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-/////////////////////////////////////////
 
+/////////////////////////////////////////
 // Step 6: Do a full-scan when no index with the same config
 USE MyDataVerse;
 DROP FULLTEXT CONFIG my_third_stopword_config IF EXISTS;
 CREATE FULLTEXT CONFIG my_third_stopword_config IF NOT EXISTS AS {
-    "Tokenizer": "Word",
-    "FilterPipeline": []
+    "tokenizer": "Word",
+    "filterPipeline": []
 }; // No index created with this new config
 
 // No records should be matched

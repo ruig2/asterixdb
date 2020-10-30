@@ -16,6 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
 ///////////////////////////////////////
 // Step 4: Insert after index created
 
@@ -26,7 +27,6 @@ UPSERT INTO MyMessageDataset ([
       "myMessageBody":  "xxx cute cat"
   }
 ]);
-
 
 USE MyDataVerse;
 UPSERT INTO MyMessageDataset ([

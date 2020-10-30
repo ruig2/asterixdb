@@ -16,6 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
 ///////////////////////////////////////
 // Step 3: Create 3 FullText Indices
 USE MyDataVerse;
@@ -28,4 +29,5 @@ CREATE INDEX message_ft_index_1  IF NOT EXISTS on MyMessageDataset(myMessageBody
 CREATE INDEX message_ft_index_2  IF NOT EXISTS on MyMessageDataset(myMessageBody) TYPE FULLTEXT USING my_second_stopword_config;
 
 SELECT Value v from Metadata.`Index` v;
-SELECT VALUE ix FROM Metadata.`FullTextEntity` ix;
+SELECT VALUE ix FROM Metadata.`FullTextConfig` ix;
+SELECT VALUE ix FROM Metadata.`FullTextFilter` ix;
