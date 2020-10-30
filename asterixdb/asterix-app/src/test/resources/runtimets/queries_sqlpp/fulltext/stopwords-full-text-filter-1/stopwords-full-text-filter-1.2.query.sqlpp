@@ -42,4 +42,5 @@ CREATE FULLTEXT CONFIG my_second_stopword_config IF NOT EXISTS AS {
     "filterPipeline": ["my_second_stopword_filter"]
 };
 
-SELECT VALUE ix FROM Metadata.`FullTextEntity` ix;
+SELECT VALUE ix FROM Metadata.`FullTextConfig` ix;
+SELECT VALUE ix FROM Metadata.`FullTextFilter` ix;
