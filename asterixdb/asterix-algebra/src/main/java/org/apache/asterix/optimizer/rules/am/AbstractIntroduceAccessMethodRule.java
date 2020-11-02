@@ -236,15 +236,25 @@ public abstract class AbstractIntroduceAccessMethodRule implements IAlgebraicRew
                 IAccessMethod chosenAccessMethod = amEntry.getKey();
                 Index chosenIndex = indexEntry.getKey();
                 IndexType indexType = chosenIndex.getIndexType();
-                boolean isKeywordOrNgramIndexChosen = indexType == IndexType.LENGTH_PARTITIONED_WORD_INVIX
-                        || indexType == IndexType.LENGTH_PARTITIONED_NGRAM_INVIX
-                        || indexType == IndexType.SINGLE_PARTITION_WORD_INVIX
+                boolean isKeywordIndexChosen = indexType == IndexType.LENGTH_PARTITIONED_WORD_INVIX
+                        || indexType == IndexType.SINGLE_PARTITION_WORD_INVIX;
+                boolean isNgramIndexChosen = indexType == IndexType.LENGTH_PARTITIONED_NGRAM_INVIX
                         || indexType == IndexType.SINGLE_PARTITION_NGRAM_INVIX;
                 if ((chosenAccessMethod == BTreeAccessMethod.INSTANCE && indexType == IndexType.BTREE)
                         || (chosenAccessMethod == RTreeAccessMethod.INSTANCE && indexType == IndexType.RTREE)
                         // the inverted index will be utilized
-                        // only when the full-text config used in the index is the same as in the query
-                        || (chosenAccessMethod == InvertedIndexAccessMethod.INSTANCE && isKeywordOrNgramIndexChosen
+                        // For Ngram, the full-text config used in the index and in the query are always the default one,
+                        // so we don't check if the full-text config in the index and query match
+                        // Note that the ngram index can be used in both
+                        // 1) full-text ftcontains() function
+                        // 2) non-full-text, regular string contains() function
+                        || (chosenAccessMethod == InvertedIndexAccessMethod.INSTANCE && isNgramIndexChosen)
+                        // the inverted index will be utilized
+                        // For keyword, different full-text configs may apply to different indexes on the same field,
+                        // so we need to check if the config used in the index matches the config in the ftcontains() query
+                        // If not, then we cannot use this index.
+                        // Note that for now, the keyword index can be utilized only in the full-text ftcontains() function
+                        || (chosenAccessMethod == InvertedIndexAccessMethod.INSTANCE && isKeywordIndexChosen
                                 && isFullTextFuncAndSameConfig(analysisCtx, chosenIndex.getFullTextConfigName()))) {
 
                     if (resultVarsToIndexTypesMap.containsKey(indexEntry.getValue())) {
