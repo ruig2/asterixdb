@@ -113,7 +113,7 @@ public class FullTextContainsDescriptor extends AbstractScalarFunctionDynamicDes
     public IScalarEvaluatorFactory createEvaluatorFactory(final IScalarEvaluatorFactory[] args)
             throws AlgebricksException {
         return new IScalarEvaluatorFactory() {
-            private static final long serialVersionUID = 1L;
+            private static final long serialVersionUID = 2L;
 
             @Override
             public IScalarEvaluator createScalarEvaluator(IEvaluatorContext ctx) throws HyracksDataException {
