@@ -82,6 +82,7 @@ import org.apache.hyracks.algebricks.core.algebra.typing.ITypingContext;
 import org.apache.hyracks.algebricks.core.rewriter.base.IAlgebraicRewriteRule;
 
 import com.google.common.collect.ImmutableSet;
+import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.FullTextConfigDescriptor;
 
 /**
  * Class that embodies the commonalities between rewrite rules for access
@@ -245,17 +246,23 @@ public abstract class AbstractIntroduceAccessMethodRule implements IAlgebraicRew
                         // the inverted index will be utilized
                         // For Ngram, the full-text config used in the index and in the query are always the default one,
                         // so we don't check if the full-text config in the index and query match
+                        //
                         // Note that the ngram index can be used in both
                         // 1) full-text ftcontains() function
                         // 2) non-full-text, regular string contains() function
+                        // 3) edit-distance functions that take keyword as an argument,
+                        //     e.g. edit_distance_check() when the threshold is larger than 1
                         || (chosenAccessMethod == InvertedIndexAccessMethod.INSTANCE && isNgramIndexChosen)
                         // the inverted index will be utilized
                         // For keyword, different full-text configs may apply to different indexes on the same field,
                         // so we need to check if the config used in the index matches the config in the ftcontains() query
                         // If not, then we cannot use this index.
-                        // Note that for now, the keyword index can be utilized only in the full-text ftcontains() function
+                        //
+                        // Note that for now, the keyword/fulltext index can be utilized in
+                        // 1) the full-text ftcontains() function
+                        // 2) functions that take keyword as an argument, e.g. edit_distance_check() when the threshold is 1
                         || (chosenAccessMethod == InvertedIndexAccessMethod.INSTANCE && isKeywordIndexChosen
-                                && isFullTextFuncAndSameConfig(analysisCtx, chosenIndex.getFullTextConfigName()))) {
+                                && isSameFullTextConfigInIndexAndQuery(analysisCtx, chosenIndex.getFullTextConfigName()))) {
 
                     if (resultVarsToIndexTypesMap.containsKey(indexEntry.getValue())) {
                         List<IndexType> appliedIndexTypes = resultVarsToIndexTypesMap.get(indexEntry.getValue());
@@ -275,11 +282,22 @@ public abstract class AbstractIntroduceAccessMethodRule implements IAlgebraicRew
         return result;
     }
 
-    private boolean isFullTextFuncAndSameConfig(AccessMethodAnalysisContext analysisCtx, String indexFullTextConfig) {
+    private boolean isSameFullTextConfigInIndexAndQuery(AccessMethodAnalysisContext analysisCtx, String indexFullTextConfig) {
         IOptimizableFuncExpr expr = analysisCtx.getMatchedFuncExpr(0);
-        if (FullTextUtil.isFullTextFunctionExpr(expr)) {
+        if (FullTextUtil.isFullTextContainsFunctionExpr(expr)) {
+            // ftcontains()
             String expectedConfig = FullTextUtil.getFullTextConfigNameFromExpr(expr);
             if (expectedConfig.equals(indexFullTextConfig)) {
+                return true;
+            }
+        } else {
+            // besides ftcontains(), there are other functions that utilize the full-text inverted-index,
+            // e.g. edit_distance_check(),
+            // for now, we don't accept users to specify the full-text config in those functions,
+            // that means, we assume the full-text config used in those function is always the DEFAULT_FULL_TEXT_CONFIG_NAME,
+            // so here we simply check if the index uses the DEFAULT_FULL_TEXT_CONFIG_NAME,
+            // and if yes, then this index can be utilized by the function
+            if (indexFullTextConfig.equals(FullTextConfigDescriptor.DEFAULT_FULL_TEXT_CONFIG_NAME)) {
                 return true;
             }
         }

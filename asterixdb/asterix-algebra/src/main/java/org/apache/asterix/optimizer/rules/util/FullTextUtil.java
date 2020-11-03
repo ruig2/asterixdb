@@ -33,11 +33,11 @@ import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.FullTextConfigDe
 
 public class FullTextUtil {
 
-    public static boolean isFullTextFunctionExpr(IOptimizableFuncExpr expr) {
-        return isFullTextFunctionExpr(expr.getFuncExpr());
+    public static boolean isFullTextContainsFunctionExpr(IOptimizableFuncExpr expr) {
+        return isFullTextContainsFunctionExpr(expr.getFuncExpr());
     }
 
-    public static boolean isFullTextFunctionExpr(AbstractFunctionCallExpression expr) {
+    public static boolean isFullTextContainsFunctionExpr(AbstractFunctionCallExpression expr) {
         FunctionIdentifier funcId = expr.getFunctionIdentifier();
         if (funcId == BuiltinFunctions.FULLTEXT_CONTAINS || funcId == BuiltinFunctions.FULLTEXT_CONTAINS_WO_OPTION) {
             return true;
@@ -58,7 +58,7 @@ public class FullTextUtil {
     // ToDo: here we are parsing the expr manually, maybe we can find a better way to parse the arguments,
     //  e.g. convert the argument into an AdmObjectNode and then read from the object node
     public static String getFullTextConfigNameFromExpr(AbstractFunctionCallExpression funcExpr) {
-        if (isFullTextFunctionExpr(funcExpr) == false) {
+        if (isFullTextContainsFunctionExpr(funcExpr) == false) {
             return null;
         }
 
