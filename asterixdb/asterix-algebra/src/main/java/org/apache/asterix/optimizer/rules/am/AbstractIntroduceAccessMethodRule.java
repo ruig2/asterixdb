@@ -80,9 +80,9 @@ import org.apache.hyracks.algebricks.core.algebra.operators.logical.UnnestOperat
 import org.apache.hyracks.algebricks.core.algebra.operators.logical.visitors.VariableUtilities;
 import org.apache.hyracks.algebricks.core.algebra.typing.ITypingContext;
 import org.apache.hyracks.algebricks.core.rewriter.base.IAlgebraicRewriteRule;
+import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.FullTextConfigDescriptor;
 
 import com.google.common.collect.ImmutableSet;
-import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.FullTextConfigDescriptor;
 
 /**
  * Class that embodies the commonalities between rewrite rules for access
@@ -262,7 +262,8 @@ public abstract class AbstractIntroduceAccessMethodRule implements IAlgebraicRew
                         // 1) the full-text ftcontains() function
                         // 2) functions that take keyword as an argument, e.g. edit_distance_check() when the threshold is 1
                         || (chosenAccessMethod == InvertedIndexAccessMethod.INSTANCE && isKeywordIndexChosen
-                                && isSameFullTextConfigInIndexAndQuery(analysisCtx, chosenIndex.getFullTextConfigName()))) {
+                                && isSameFullTextConfigInIndexAndQuery(analysisCtx,
+                                        chosenIndex.getFullTextConfigName()))) {
 
                     if (resultVarsToIndexTypesMap.containsKey(indexEntry.getValue())) {
                         List<IndexType> appliedIndexTypes = resultVarsToIndexTypesMap.get(indexEntry.getValue());
@@ -282,7 +283,8 @@ public abstract class AbstractIntroduceAccessMethodRule implements IAlgebraicRew
         return result;
     }
 
-    private boolean isSameFullTextConfigInIndexAndQuery(AccessMethodAnalysisContext analysisCtx, String indexFullTextConfig) {
+    private boolean isSameFullTextConfigInIndexAndQuery(AccessMethodAnalysisContext analysisCtx,
+            String indexFullTextConfig) {
         IOptimizableFuncExpr expr = analysisCtx.getMatchedFuncExpr(0);
         if (FullTextUtil.isFullTextContainsFunctionExpr(expr)) {
             // ftcontains()
