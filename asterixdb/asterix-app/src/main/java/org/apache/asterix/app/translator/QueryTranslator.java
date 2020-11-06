@@ -241,7 +241,6 @@ import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
 
 /*
@@ -1142,9 +1141,10 @@ public class QueryTranslator extends AbstractLangTranslator implements IStatemen
             validateIndexKeyFields(stmtCreateIndex, keySourceIndicators, aRecordType, metaRecordType, indexFields,
                     indexFieldTypes);
 
-            Index newIndex = new Index(dataverseName, datasetName, indexName, indexType, indexFields,
-                    keySourceIndicators, indexFieldTypes, stmtCreateIndex.getGramLength(), stmtCreateIndex.getFullTextConfigName(),
-                    overridesFieldTypes, stmtCreateIndex.isEnforced(), false, MetadataUtil.PENDING_ADD_OP);
+            Index newIndex =
+                    new Index(dataverseName, datasetName, indexName, indexType, indexFields, keySourceIndicators,
+                            indexFieldTypes, stmtCreateIndex.getGramLength(), stmtCreateIndex.getFullTextConfigName(),
+                            overridesFieldTypes, stmtCreateIndex.isEnforced(), false, MetadataUtil.PENDING_ADD_OP);
 
             bActiveTxn = false; // doCreateIndexImpl() takes over the current transaction
             doCreateIndexImpl(hcc, metadataProvider, ds, newIndex, jobFlags, sourceLoc);
@@ -1195,18 +1195,20 @@ public class QueryTranslator extends AbstractLangTranslator implements IStatemen
         try {
             Dataverse dv = MetadataManager.INSTANCE.getDataverse(mdTxnCtx, dataverseName);
             if (dv == null) {
-                throw new CompilationException(ErrorCode.UNKNOWN_DATAVERSE, stmtCreateFilter.getSourceLocation(), dataverseName);
+                throw new CompilationException(ErrorCode.UNKNOWN_DATAVERSE, stmtCreateFilter.getSourceLocation(),
+                        dataverseName);
             }
 
             String filterName = stmtCreateFilter.getFilterName();
-            IFullTextFilterDescriptor existingFilter = MetadataManager.INSTANCE.getFullTextFilter(mdTxnCtx,
-                    dataverseName, filterName);
+            IFullTextFilterDescriptor existingFilter =
+                    MetadataManager.INSTANCE.getFullTextFilter(mdTxnCtx, dataverseName, filterName);
             if (existingFilter != null) {
                 if (stmtCreateFilter.getIfNotExists()) {
                     MetadataManager.INSTANCE.commitTransaction(mdTxnCtx);
                     return;
                 } else {
-                    throw new CompilationException(ErrorCode.FULL_TEXT_FILTER_ALREADY_EXISTS, stmtCreateFilter.getSourceLocation(), filterName);
+                    throw new CompilationException(ErrorCode.FULL_TEXT_FILTER_ALREADY_EXISTS,
+                            stmtCreateFilter.getSourceLocation(), filterName);
                 }
             }
 
@@ -1250,7 +1252,8 @@ public class QueryTranslator extends AbstractLangTranslator implements IStatemen
                     MetadataManager.INSTANCE.commitTransaction(mdTxnCtx);
                     return;
                 } else {
-                    throw new CompilationException(ErrorCode.FULL_TEXT_CONFIG_ALREADY_EXISTS, stmtCreateConfig.getSourceLocation(), configName);
+                    throw new CompilationException(ErrorCode.FULL_TEXT_CONFIG_ALREADY_EXISTS,
+                            stmtCreateConfig.getSourceLocation(), configName);
                 }
             }
 

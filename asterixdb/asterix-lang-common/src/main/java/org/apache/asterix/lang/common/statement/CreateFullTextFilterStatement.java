@@ -23,7 +23,6 @@ import java.util.Iterator;
 import org.apache.asterix.common.exceptions.CompilationException;
 import org.apache.asterix.common.metadata.DataverseName;
 import org.apache.asterix.lang.common.base.AbstractStatement;
-import org.apache.asterix.lang.common.base.Statement;
 import org.apache.asterix.lang.common.expression.RecordConstructor;
 import org.apache.asterix.lang.common.util.FullTextUtil;
 import org.apache.asterix.lang.common.visitor.base.ILangVisitor;

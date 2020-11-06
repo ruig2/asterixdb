@@ -39,7 +39,8 @@ public class FullTextUtil {
 
     public static boolean isFullTextContainsFunctionExpr(AbstractFunctionCallExpression expr) {
         FunctionIdentifier funcId = expr.getFunctionIdentifier();
-        if (funcId.equals(BuiltinFunctions.FULLTEXT_CONTAINS) || funcId.equals(BuiltinFunctions.FULLTEXT_CONTAINS_WO_OPTION)) {
+        if (funcId.equals(BuiltinFunctions.FULLTEXT_CONTAINS)
+                || funcId.equals(BuiltinFunctions.FULLTEXT_CONTAINS_WO_OPTION)) {
             return true;
         }
         return false;
