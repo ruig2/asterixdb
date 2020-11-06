@@ -25,9 +25,9 @@ import org.apache.asterix.lang.common.visitor.base.ILangVisitor;
 
 public class FullTextFilterDropStatement extends AbstractStatement {
 
-    private DataverseName dataverseName;
-    private String filterName;
-    private boolean ifExists;
+    private final DataverseName dataverseName;
+    private final String filterName;
+    private final boolean ifExists;
 
     public FullTextFilterDropStatement(DataverseName dataverseName, String filterName, boolean ifExists) {
         this.dataverseName = dataverseName;
