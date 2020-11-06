@@ -45,7 +45,7 @@ public class CreateIndexStatement extends AbstractStatement {
     // Specific to NGram indexes.
     private int gramLength = -1;
     // Specific to FullText indexes.
-    private String fullTextConfigName = null;
+    private String fullTextConfigName;
 
     public CreateIndexStatement() {
     }

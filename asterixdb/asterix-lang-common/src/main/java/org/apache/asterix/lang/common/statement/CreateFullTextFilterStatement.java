@@ -38,10 +38,10 @@ import com.google.common.collect.ImmutableList;
 
 public class CreateFullTextFilterStatement extends AbstractStatement {
 
-    private DataverseName dataverseName;
-    private String filterName;
-    private AdmObjectNode filterNode;
-    private boolean ifNotExists;
+    private final DataverseName dataverseName;
+    private final String filterName;
+    private final boolean ifNotExists;
+    private final AdmObjectNode filterNode;
 
     public CreateFullTextFilterStatement(DataverseName dataverseName, String filterName, boolean ifNotExists,
             RecordConstructor expr) throws CompilationException {
@@ -57,10 +57,6 @@ public class CreateFullTextFilterStatement extends AbstractStatement {
 
     public String getFilterName() {
         return filterName;
-    }
-
-    public void setIfNotExists(boolean ifNotExists) {
-        this.ifNotExists = ifNotExists;
     }
 
     public boolean getIfNotExists() {
@@ -96,10 +92,5 @@ public class CreateFullTextFilterStatement extends AbstractStatement {
     @Override
     public byte getCategory() {
         return Category.DDL;
-    }
-
-    public static boolean checkExpression(Statement stmt) {
-        // Currently, we don't check the expression at compile-time
-        return true;
     }
 }

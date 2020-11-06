@@ -39,10 +39,10 @@ import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextConfig;
 
 public class CreateFullTextConfigStatement extends AbstractStatement {
 
-    private DataverseName dataverseName;
-    private String configName;
-    private boolean ifNotExists;
-    private AdmObjectNode configNode;
+    private final DataverseName dataverseName;
+    private final String configName;
+    private final boolean ifNotExists;
+    private final AdmObjectNode configNode;
 
     public CreateFullTextConfigStatement(DataverseName dataverseName, String configName, boolean ifNotExists,
             RecordConstructor expr) throws CompilationException {
@@ -50,11 +50,6 @@ public class CreateFullTextConfigStatement extends AbstractStatement {
         this.configName = configName;
         this.ifNotExists = ifNotExists;
         this.configNode = FullTextUtil.validateAndGetConfigNode(expr);
-    }
-
-    public static void checkExpression(Statement stmt) throws Exception {
-        // Do nothing for now
-        return;
     }
 
     public DataverseName getDataverseName() {

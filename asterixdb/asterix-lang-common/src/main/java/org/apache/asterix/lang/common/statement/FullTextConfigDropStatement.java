@@ -25,9 +25,9 @@ import org.apache.asterix.lang.common.visitor.base.ILangVisitor;
 
 public class FullTextConfigDropStatement extends AbstractStatement {
 
-    DataverseName dataverseName;
-    private String configName;
-    private boolean ifExists;
+    private final DataverseName dataverseName;
+    private final String configName;
+    private final boolean ifExists;
 
     public FullTextConfigDropStatement(DataverseName dataverseName, String configName, boolean ifExists) {
         this.dataverseName = dataverseName;

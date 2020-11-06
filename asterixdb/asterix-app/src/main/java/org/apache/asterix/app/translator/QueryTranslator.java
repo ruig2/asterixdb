@@ -1174,7 +1174,6 @@ public class QueryTranslator extends AbstractLangTranslator implements IStatemen
 
     protected void doCreateFullTextFilter(MetadataProvider metadataProvider,
             CreateFullTextFilterStatement stmtCreateFilter, DataverseName dataverseName) throws Exception {
-        CreateFullTextFilterStatement.checkExpression(stmtCreateFilter);
         IFullTextFilterDescriptor filterDescriptor;
 
         String filterType = stmtCreateFilter.getFilterType();
@@ -1239,7 +1238,6 @@ public class QueryTranslator extends AbstractLangTranslator implements IStatemen
     protected void doCreateFullTextConfig(MetadataProvider metadataProvider,
             CreateFullTextConfigStatement stmtCreateConfig, DataverseName dataverseName, String configName,
             List<String> filterNames) throws Exception {
-        CreateFullTextConfigStatement.checkExpression(stmtCreateConfig);
 
         MetadataTransactionContext mdTxnCtx = MetadataManager.INSTANCE.beginTransaction();
         metadataProvider.setMetadataTxnContext(mdTxnCtx);
