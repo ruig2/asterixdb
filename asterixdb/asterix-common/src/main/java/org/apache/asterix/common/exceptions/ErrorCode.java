@@ -224,6 +224,7 @@ public class ErrorCode {
     public static final int FULL_TEXT_FAIL_TO_GET_FILTER_FROM_METADATA = 1133;
     public static final int FULL_TEXT_DEFAULT_CONFIG_CANNOT_BE_DELETED = 1134;
     public static final int FULL_TEXT_CONFIG_ALREADY_EXISTS = 1135;
+    public static final int FULL_TEXT_FILTER_ALREADY_EXISTS = 1136;
 
     // Feed errors
     public static final int DATAFLOW_ILLEGAL_STATE = 3001;

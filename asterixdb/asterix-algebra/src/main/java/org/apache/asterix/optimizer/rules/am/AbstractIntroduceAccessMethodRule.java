@@ -216,7 +216,7 @@ public abstract class AbstractIntroduceAccessMethodRule implements IAlgebraicRew
     /**
      * Choose all indexes that match the given access method. These indexes will be used as index-search
      * to replace the given predicates in a SELECT operator. Also, if there are multiple same type of indexes
-     * on the same field, only of them will be chosen. Allowed cases (AccessMethod, IndexType) are:
+     * on the same field, only one of them will be chosen. Allowed cases (AccessMethod, IndexType) are:
      * [BTreeAccessMethod , IndexType.BTREE], [RTreeAccessMethod , IndexType.RTREE],
      * [InvertedIndexAccessMethod, IndexType.SINGLE_PARTITION_WORD_INVIX || SINGLE_PARTITION_NGRAM_INVIX ||
      * LENGTH_PARTITIONED_WORD_INVIX || LENGTH_PARTITIONED_NGRAM_INVIX]
