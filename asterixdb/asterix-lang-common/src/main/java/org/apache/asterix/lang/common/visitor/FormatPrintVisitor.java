@@ -685,12 +685,14 @@ public abstract class FormatPrintVisitor implements ILangVisitor<Void, Integer> 
     @Override
     public Void visit(CreateFullTextFilterStatement cis, Integer step) throws CompilationException {
         out.print(skip(step) + "create fulltext filter " + cis.getFilterName());
+        out.println(SEMICOLON);
         return null;
     }
 
     @Override
     public Void visit(CreateFullTextConfigStatement cis, Integer step) throws CompilationException {
         out.print(skip(step) + "create fulltext config " + cis.getConfigName());
+        out.println(SEMICOLON);
         return null;
     }
 
