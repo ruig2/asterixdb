@@ -43,6 +43,7 @@ import org.apache.hyracks.storage.am.lsm.common.api.IVirtualBufferCache;
 import org.apache.hyracks.storage.am.lsm.common.api.IVirtualBufferCacheProvider;
 import org.apache.hyracks.storage.am.lsm.common.dataflow.LsmResource;
 import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.FullTextConfigDescriptor;
+import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.FullTextConfigEvaluatorFactory;
 import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextConfigEvaluatorFactory;
 import org.apache.hyracks.storage.am.lsm.invertedindex.tokenizers.IBinaryTokenizerFactory;
 import org.apache.hyracks.storage.am.lsm.invertedindex.util.InvertedIndexUtils;
@@ -204,8 +205,7 @@ public class LSMInvertedIndexLocalResource extends LsmResource {
             fullTextConfigEvaluatorFactory = (IFullTextConfigEvaluatorFactory) registry
                     .deserialize(json.get(FULL_TEXT_CONFIG_EVALUATOR_FACTORY));
         } else {
-            fullTextConfigEvaluatorFactory =
-                    FullTextConfigDescriptor.getDefaultFullTextConfig().createEvaluatorFactory();
+            fullTextConfigEvaluatorFactory = FullTextConfigEvaluatorFactory.getDefaultFactory();
         }
 
         final boolean isPartitioned = json.get(IS_PARTITIONED).asBoolean();

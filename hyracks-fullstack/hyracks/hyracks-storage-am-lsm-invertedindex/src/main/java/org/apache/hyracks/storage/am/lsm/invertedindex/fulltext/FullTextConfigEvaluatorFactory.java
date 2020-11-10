@@ -48,6 +48,10 @@ public class FullTextConfigEvaluatorFactory implements IFullTextConfigEvaluatorF
         return new FullTextConfigEvaluator(name, tokenizerCategory, filters);
     }
 
+    public static IFullTextConfigEvaluatorFactory getDefaultFactory() {
+        return new FullTextConfigEvaluatorFactory("default_config_evaluator_factory", TokenizerCategory.WORD, ImmutableList.of());
+    }
+
     private static final String FIELD_NAME = "name";
     private static final String FIELD_TOKENIZER_CATEGORY = "tokenizerCategory";
     private static final String FIELD_FILTERS = "filters";
