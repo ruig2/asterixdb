@@ -21,14 +21,11 @@ package org.apache.hyracks.storage.am.lsm.invertedindex.fulltext;
 
 import java.io.Serializable;
 
-import org.apache.hyracks.api.io.IJsonSerializable;
-
-public interface IFullTextEntityDescriptor extends Serializable, IJsonSerializable {
+public interface IFullTextEntityDescriptor extends Serializable {
     String getDataverseName();
 
     String getName();
 
-    IFullTextEntity getEntity();
-
-    IFullTextEntity.FullTextEntityCategory getCategory();
+    // Filter or Config
+    FullTextEntityCategory getCategory();
 }

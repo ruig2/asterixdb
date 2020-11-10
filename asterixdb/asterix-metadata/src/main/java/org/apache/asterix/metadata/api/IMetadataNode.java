@@ -507,7 +507,7 @@ public interface IMetadataNode extends Remote, Serializable {
      * @throws AlgebricksException
      *              For example, if the full-text config doesn't exist
      */
-    IFullTextConfigDescriptor getFullTextConfig(TxnId txnId, String dataverseName, String configName)
+    IFullTextConfigDescriptor getFullTextConfig(TxnId txnId, DataverseName dataverseName, String configName)
             throws AlgebricksException, RemoteException;
 
     /**

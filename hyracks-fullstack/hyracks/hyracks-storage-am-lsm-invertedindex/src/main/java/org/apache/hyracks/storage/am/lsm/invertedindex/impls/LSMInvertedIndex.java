@@ -60,7 +60,7 @@ import org.apache.hyracks.storage.am.lsm.common.impls.AbstractLSMIndexOperationC
 import org.apache.hyracks.storage.am.lsm.common.impls.LSMComponentFileReferences;
 import org.apache.hyracks.storage.am.lsm.common.impls.LSMComponentFilterManager;
 import org.apache.hyracks.storage.am.lsm.invertedindex.api.IInvertedIndex;
-import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextConfigDescriptor;
+import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextConfigEvaluatorFactory;
 import org.apache.hyracks.storage.am.lsm.invertedindex.inmemory.InMemoryInvertedIndex;
 import org.apache.hyracks.storage.am.lsm.invertedindex.inmemory.InMemoryInvertedIndexAccessor;
 import org.apache.hyracks.storage.am.lsm.invertedindex.search.InvertedIndexSearchPredicate;
@@ -83,7 +83,7 @@ public class LSMInvertedIndex extends AbstractLSMIndex implements IInvertedIndex
     private static final Logger LOGGER = LogManager.getLogger();
 
     protected final IBinaryTokenizerFactory tokenizerFactory;
-    protected final IFullTextConfigDescriptor fullTextConfigDescriptor;
+    protected final IFullTextConfigEvaluatorFactory fullTextConfigEvaluatorFactory;
 
     // Type traits and comparators for tokens and inverted-list elements.
     protected final ITypeTraits[] invListTypeTraits;
@@ -99,7 +99,7 @@ public class LSMInvertedIndex extends AbstractLSMIndex implements IInvertedIndex
             double bloomFilterFalsePositiveRate, IBufferCache diskBufferCache, ILSMIndexFileManager fileManager,
             ITypeTraits[] invListTypeTraits, IBinaryComparatorFactory[] invListCmpFactories,
             ITypeTraits[] tokenTypeTraits, IBinaryComparatorFactory[] tokenCmpFactories,
-            IBinaryTokenizerFactory tokenizerFactory, IFullTextConfigDescriptor fullTextConfigDescriptor,
+            IBinaryTokenizerFactory tokenizerFactory, IFullTextConfigEvaluatorFactory fullTextConfigEvaluatorFactory,
             ILSMMergePolicy mergePolicy, ILSMOperationTracker opTracker, ILSMIOOperationScheduler ioScheduler,
             ILSMIOOperationCallbackFactory ioOpCallbackFactory, ILSMPageWriteCallbackFactory pageWriteCallbackFactory,
             int[] invertedIndexFields, int[] filterFields, int[] filterFieldsForNonBulkLoadOps,
@@ -109,7 +109,7 @@ public class LSMInvertedIndex extends AbstractLSMIndex implements IInvertedIndex
                 componentFactory, filterFrameFactory, filterManager, filterFields, durable, filterHelper,
                 invertedIndexFields, tracer);
         this.tokenizerFactory = tokenizerFactory;
-        this.fullTextConfigDescriptor = fullTextConfigDescriptor;
+        this.fullTextConfigEvaluatorFactory = fullTextConfigEvaluatorFactory;
         this.invListTypeTraits = invListTypeTraits;
         this.invListCmpFactories = invListCmpFactories;
         this.tokenTypeTraits = tokenTypeTraits;
@@ -409,7 +409,7 @@ public class LSMInvertedIndex extends AbstractLSMIndex implements IInvertedIndex
             VirtualFreePageManager virtualFreePageManager, int id) throws HyracksDataException {
         return InvertedIndexUtils.createInMemoryBTreeInvertedindex(virtualBufferCache, virtualFreePageManager,
                 invListTypeTraits, invListCmpFactories, tokenTypeTraits, tokenCmpFactories, tokenizerFactory,
-                fullTextConfigDescriptor,
+                fullTextConfigEvaluatorFactory,
                 ioManager.resolveAbsolutePath(fileManager.getBaseDir() + "_virtual_vocab_" + id));
     }
 

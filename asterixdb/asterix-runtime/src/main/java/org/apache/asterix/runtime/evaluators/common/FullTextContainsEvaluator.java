@@ -50,9 +50,8 @@ import org.apache.hyracks.data.std.util.ArrayBackedValueStorage;
 import org.apache.hyracks.data.std.util.BinaryEntry;
 import org.apache.hyracks.data.std.util.BinaryHashSet;
 import org.apache.hyracks.dataflow.common.data.accessors.IFrameTupleReference;
-import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.FullTextAnalyzer;
-import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextAnalyzer;
 import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextConfigDescriptor;
+import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextConfigEvaluator;
 import org.apache.hyracks.storage.am.lsm.invertedindex.tokenizers.DelimitedUTF8StringBinaryTokenizer;
 import org.apache.hyracks.storage.am.lsm.invertedindex.tokenizers.IBinaryTokenizer;
 import org.apache.hyracks.storage.am.lsm.invertedindex.tokenizers.IToken;
@@ -87,8 +86,8 @@ public class FullTextContainsEvaluator implements IScalarEvaluator {
     private final IBinaryComparator strLowerCaseCmp =
             BinaryComparatorFactoryProvider.UTF8STRING_LOWERCASE_POINTABLE_INSTANCE.createBinaryComparator();
 
-    private IFullTextAnalyzer analyzerLeft = null;
-    private IFullTextAnalyzer analyzerRight = null;
+    private IFullTextConfigEvaluator analyzerLeft = null;
+    private IFullTextConfigEvaluator analyzerRight = null;
 
     // Case insensitive hash for full-text search
     private IBinaryHashFunction hashFunc = null;
@@ -130,8 +129,8 @@ public class FullTextContainsEvaluator implements IScalarEvaluator {
         this.argOptions = new TaggedValuePointable[optionArgsLength];
 
         // fullTextConfig is shared by multiple threads on the NC node, so each thread needs a local copy
-        this.analyzerLeft = new FullTextAnalyzer(fullTextConfigDescriptor);
-        this.analyzerRight = new FullTextAnalyzer(fullTextConfigDescriptor);
+        this.analyzerLeft = fullTextConfigDescriptor.createEvaluatorFactory().createFullTextConfigEvaluator();
+        this.analyzerRight = fullTextConfigDescriptor.createEvaluatorFactory().createFullTextConfigEvaluator();
 
         for (int i = 0; i < optionArgsLength; i++) {
             this.evalOptions[i] = args[i + 2].createScalarEvaluator(context);

@@ -45,7 +45,7 @@ import org.apache.hyracks.data.std.util.ArrayBackedValueStorage;
 import org.apache.hyracks.dataflow.common.comm.io.ArrayTupleBuilder;
 import org.apache.hyracks.dataflow.common.comm.io.ArrayTupleReference;
 import org.apache.hyracks.dataflow.common.data.accessors.ITupleReference;
-import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextFilter;
+import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.FullTextFilterType;
 import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextFilterDescriptor;
 import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.StopwordsFullTextFilterDescriptor;
 
@@ -74,8 +74,7 @@ public class FullTextFilterDescriptorTupleTranslator extends AbstractTupleTransl
         AString filterName = (AString) aRecord.getValueByPos(FULL_TEXT_ARECORD_FILTER_NAME_FIELD_INDEX);
         AString filterTypeAString = (AString) aRecord.getValueByPos(FULL_TEXT_ARECORD_FILTER_TYPE_FIELD_INDEX);
 
-        IFullTextFilter.FullTextFilterType filterType =
-                IFullTextFilter.FullTextFilterType.getEnumIgnoreCase(filterTypeAString.getStringValue());
+        FullTextFilterType filterType = FullTextFilterType.getEnumIgnoreCase(filterTypeAString.getStringValue());
         switch (filterType) {
             case STOPWORDS:
                 return createStopwordsFilterDescriptorFromARecord(dataverseName, filterName, aRecord);

@@ -19,27 +19,10 @@
 
 package org.apache.hyracks.storage.am.lsm.invertedindex.fulltext;
 
-public abstract class AbstractFullTextFilter implements IFullTextFilter {
-    protected final String name;
-    protected FullTextFilterType type;
+import java.io.Serializable;
 
-    public AbstractFullTextFilter(String name, IFullTextFilter.FullTextFilterType type) {
-        this.name = name;
-        this.type = type;
-    }
+import org.apache.hyracks.api.io.IJsonSerializable;
 
-    @Override
-    public FullTextEntityCategory getCategory() {
-        return FullTextEntityCategory.FILTER;
-    }
-
-    @Override
-    public String getName() {
-        return name;
-    }
-
-    @Override
-    public FullTextFilterType getFilterType() {
-        return type;
-    }
+public interface IFullTextConfigEvaluatorFactory extends Serializable, IJsonSerializable {
+    IFullTextConfigEvaluator createFullTextConfigEvaluator();
 }

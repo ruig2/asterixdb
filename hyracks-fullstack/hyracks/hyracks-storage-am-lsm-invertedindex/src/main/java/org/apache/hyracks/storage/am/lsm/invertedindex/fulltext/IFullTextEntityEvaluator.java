@@ -19,28 +19,8 @@
 
 package org.apache.hyracks.storage.am.lsm.invertedindex.fulltext;
 
-import org.apache.hyracks.storage.am.lsm.invertedindex.tokenizers.IBinaryTokenizer;
-import org.apache.hyracks.storage.am.lsm.invertedindex.tokenizers.IToken;
+public interface IFullTextEntityEvaluator {
+    FullTextEntityCategory getCategory();
 
-import com.google.common.collect.ImmutableList;
-
-public interface IFullTextAnalyzer {
-
-    IBinaryTokenizer getTokenizer();
-
-    void setTokenizer(IBinaryTokenizer tokenizer);
-
-    ImmutableList<IFullTextFilterDescriptor> getFilterDescriptors();
-
-    void reset(byte[] data, int start, int length);
-
-    IToken getToken();
-
-    boolean hasNext();
-
-    void next();
-
-    // Get the total number of tokens
-    // Currently, it returns the number of tokens in the original text, that means stopwords are still counted
-    int getTokensCount();
+    String getName();
 }

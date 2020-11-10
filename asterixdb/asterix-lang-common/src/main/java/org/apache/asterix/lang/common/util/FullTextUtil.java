@@ -18,6 +18,10 @@
  */
 package org.apache.asterix.lang.common.util;
 
+import static org.apache.asterix.lang.common.statement.CreateFullTextConfigStatement.FIELD_NAME_FILTER_PIPELINE;
+import static org.apache.asterix.lang.common.statement.CreateFullTextConfigStatement.FIELD_NAME_TOKENIZER;
+import static org.apache.asterix.lang.common.statement.CreateFullTextFilterStatement.FIELD_NAME_TYPE;
+
 import org.apache.asterix.common.exceptions.CompilationException;
 import org.apache.asterix.lang.common.expression.RecordConstructor;
 import org.apache.asterix.object.base.AdmObjectNode;
@@ -25,8 +29,6 @@ import org.apache.asterix.om.types.AOrderedListType;
 import org.apache.asterix.om.types.ARecordType;
 import org.apache.asterix.om.types.BuiltinType;
 import org.apache.asterix.om.types.IAType;
-import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextConfig;
-import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextFilter;
 
 public class FullTextUtil {
 
@@ -41,10 +43,9 @@ public class FullTextUtil {
     //     "FilterPipeline": ["my_second_stopword_filter"]
     // };
     private static ARecordType getFullTextConfigRecordType() {
-        final String[] fieldNames =
-                { IFullTextConfig.FIELD_NAME_TOKENIZER, IFullTextConfig.FIELD_NAME_FILTER_PIPELINE };
+        final String[] fieldNames = { FIELD_NAME_TOKENIZER, FIELD_NAME_FILTER_PIPELINE };
         final IAType[] fieldTypes = { BuiltinType.ASTRING, new AOrderedListType(BuiltinType.ASTRING, null) };
-        return new ARecordType("fullTextConfigRecordType", fieldNames, fieldTypes, false);
+        return new ARecordType("fullTextConfigRecordType", fieldNames, fieldTypes, true);
     }
 
     private static final ARecordType FULL_TEXT_CONFIG_RECORD_TYPE = getFullTextConfigRecordType();
@@ -67,7 +68,7 @@ public class FullTextUtil {
     //     "StopwordsList": ["xxx", "yyy", "zzz"]
     // };
     private static ARecordType getFullTextFilterRecordType() {
-        final String[] fieldNames = { IFullTextFilter.FIELD_NAME_TYPE };
+        final String[] fieldNames = { FIELD_NAME_TYPE };
         final IAType[] fieldTypes = { BuiltinType.ASTRING };
         return new ARecordType("fullTextFilterRecordType", fieldNames, fieldTypes, true);
     }
@@ -81,5 +82,4 @@ public class FullTextUtil {
         final AdmObjectNode node = ExpressionUtils.toNode(recordConstructor);
         return node;
     }
-
 }

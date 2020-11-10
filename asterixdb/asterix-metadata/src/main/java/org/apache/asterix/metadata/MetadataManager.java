@@ -674,7 +674,7 @@ public abstract class MetadataManager implements IMetadataManager {
     }
 
     @Override
-    public IFullTextConfigDescriptor getFullTextConfig(MetadataTransactionContext mdTxnCtx, String dataverseName,
+    public IFullTextConfigDescriptor getFullTextConfig(MetadataTransactionContext mdTxnCtx, DataverseName dataverseName,
             String configName) throws AlgebricksException {
         if (Strings.isNullOrEmpty(configName) || configName.equals(DEFAULT_FULL_TEXT_CONFIG_NAME)) {
             return FullTextConfigDescriptor.getDefaultFullTextConfig();

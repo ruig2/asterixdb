@@ -157,6 +157,7 @@ import org.apache.hyracks.storage.am.common.ophelpers.IndexOperation;
 import org.apache.hyracks.storage.am.lsm.btree.dataflow.LSMBTreeBatchPointSearchOperatorDescriptor;
 import org.apache.hyracks.storage.am.lsm.invertedindex.dataflow.BinaryTokenizerOperatorDescriptor;
 import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextConfigDescriptor;
+import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextConfigEvaluatorFactory;
 import org.apache.hyracks.storage.am.lsm.invertedindex.tokenizers.IBinaryTokenizerFactory;
 import org.apache.hyracks.storage.am.rtree.dataflow.RTreeSearchOperatorDescriptor;
 import org.apache.hyracks.storage.common.IStorageManager;
@@ -248,11 +249,6 @@ public class MetadataProvider implements IMetadataProvider<DataSourceId, String>
 
     public DataverseName getDefaultDataverseName() {
         return defaultDataverse.getDataverseName();
-    }
-
-    @Override
-    public String getDefaultDataverseNameInString() {
-        return defaultDataverse.getDataverseName().getCanonicalForm();
     }
 
     public void setWriteTransaction(boolean writeTransaction) {
@@ -452,8 +448,8 @@ public class MetadataProvider implements IMetadataProvider<DataSourceId, String>
     }
 
     @Override
-    public IFullTextConfigDescriptor findFullTextConfigDescriptor(String dataverseName, String ftConfigName)
-            throws AlgebricksException {
+    public IFullTextConfigDescriptor findFullTextConfigDescriptor(String ftConfigName) throws AlgebricksException {
+        DataverseName dataverseName = getDefaultDataverseName();
         return MetadataManagerUtil.findFullTextConfigDescriptor(mdTxnCtx, dataverseName, ftConfigName);
     }
 
@@ -1657,8 +1653,9 @@ public class MetadataProvider implements IMetadataProvider<DataSourceId, String>
 
             IBinaryTokenizerFactory tokenizerFactory = NonTaggedFormatUtil.getBinaryTokenizerFactory(
                     secondaryKeyType.getTypeTag(), indexType, secondaryIndex.getGramLength());
-            IFullTextConfigDescriptor configDescriptor = findFullTextConfigDescriptor(
-                    secondaryIndex.getDataverseName().getCanonicalForm(), secondaryIndex.getFullTextConfigName());
+            IFullTextConfigDescriptor configDescriptor =
+                    findFullTextConfigDescriptor(secondaryIndex.getFullTextConfigName());
+            IFullTextConfigEvaluatorFactory fullTextConfigEvaluatorFactory = configDescriptor.createEvaluatorFactory();
 
             Pair<IFileSplitProvider, AlgebricksPartitionConstraint> splitsAndConstraint =
                     getSplitProviderAndConstraints(dataset, secondaryIndex.getIndexName());
@@ -1701,7 +1698,8 @@ public class MetadataProvider implements IMetadataProvider<DataSourceId, String>
             }
 
             tokenizerOp = new BinaryTokenizerOperatorDescriptor(spec, tokenKeyPairRecDesc, tokenizerFactory,
-                    configDescriptor, docField, keyFields, isPartitioned, true, false, MissingWriterFactory.INSTANCE);
+                    fullTextConfigEvaluatorFactory, docField, keyFields, isPartitioned, true, false,
+                    MissingWriterFactory.INSTANCE);
             return new Pair<>(tokenizerOp, splitsAndConstraint.second);
         } catch (Exception e) {
             throw new AlgebricksException(e);

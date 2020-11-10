@@ -21,9 +21,8 @@ package org.apache.hyracks.storage.am.lsm.invertedindex.inmemory;
 
 import org.apache.hyracks.api.dataflow.value.IBinaryComparatorFactory;
 import org.apache.hyracks.storage.am.btree.impls.BTree;
-import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.FullTextAnalyzer;
-import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextAnalyzer;
-import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextConfigDescriptor;
+import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextConfigEvaluator;
+import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextConfigEvaluatorFactory;
 import org.apache.hyracks.storage.am.lsm.invertedindex.tokenizers.IBinaryTokenizer;
 import org.apache.hyracks.storage.am.lsm.invertedindex.tokenizers.IBinaryTokenizerFactory;
 import org.apache.hyracks.storage.am.lsm.invertedindex.util.PartitionedInvertedIndexTokenizingTupleIterator;
@@ -31,14 +30,15 @@ import org.apache.hyracks.storage.am.lsm.invertedindex.util.PartitionedInvertedI
 public class PartitionedInMemoryInvertedIndexOpContext extends InMemoryInvertedIndexOpContext {
 
     public PartitionedInMemoryInvertedIndexOpContext(BTree btree, IBinaryComparatorFactory[] tokenCmpFactories,
-            IBinaryTokenizerFactory tokenizerFactory, IFullTextConfigDescriptor fullTextConfigDescriptor) {
-        super(btree, tokenCmpFactories, tokenizerFactory, fullTextConfigDescriptor);
+            IBinaryTokenizerFactory tokenizerFactory, IFullTextConfigEvaluatorFactory fullTextConfigEvaluatorFactory) {
+        super(btree, tokenCmpFactories, tokenizerFactory, fullTextConfigEvaluatorFactory);
     }
 
     protected void setTokenizingTupleIterator() {
         IBinaryTokenizer tokenizer = getTokenizerFactory().createTokenizer();
-        IFullTextAnalyzer fullTextAnalyzer = new FullTextAnalyzer(getFullTextConfigDescriptor());
+        IFullTextConfigEvaluator fullTextConfigEvaluator =
+                getFullTextConfigEvaluatorFactory().createFullTextConfigEvaluator();
         setTupleIter(new PartitionedInvertedIndexTokenizingTupleIterator(tokenCmpFactories.length,
-                btree.getFieldCount() - tokenCmpFactories.length, tokenizer, fullTextAnalyzer));
+                btree.getFieldCount() - tokenCmpFactories.length, tokenizer, fullTextConfigEvaluator));
     }
 }

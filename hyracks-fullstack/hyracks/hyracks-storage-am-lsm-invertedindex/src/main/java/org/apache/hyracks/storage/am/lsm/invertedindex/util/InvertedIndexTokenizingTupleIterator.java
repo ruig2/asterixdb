@@ -25,7 +25,7 @@ import org.apache.hyracks.api.exceptions.HyracksDataException;
 import org.apache.hyracks.dataflow.common.comm.io.ArrayTupleBuilder;
 import org.apache.hyracks.dataflow.common.comm.io.ArrayTupleReference;
 import org.apache.hyracks.dataflow.common.data.accessors.ITupleReference;
-import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextAnalyzer;
+import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextConfigEvaluator;
 import org.apache.hyracks.storage.am.lsm.invertedindex.tokenizers.IBinaryTokenizer;
 import org.apache.hyracks.storage.am.lsm.invertedindex.tokenizers.IToken;
 
@@ -37,33 +37,33 @@ public class InvertedIndexTokenizingTupleIterator {
     protected final int invListFieldCount;
     protected final ArrayTupleBuilder tupleBuilder;
     protected final ArrayTupleReference tupleReference;
-    protected final IFullTextAnalyzer fullTextAnalyzer;
+    protected final IFullTextConfigEvaluator fullTextConfigEvaluator;
     protected ITupleReference inputTuple;
 
     public InvertedIndexTokenizingTupleIterator(int tokensFieldCount, int invListFieldCount, IBinaryTokenizer tokenizer,
-            IFullTextAnalyzer fullTextAnalyzer) {
+            IFullTextConfigEvaluator fullTextConfigEvaluator) {
         this.invListFieldCount = invListFieldCount;
         this.tupleBuilder = new ArrayTupleBuilder(tokensFieldCount + invListFieldCount);
         this.tupleReference = new ArrayTupleReference();
-        this.fullTextAnalyzer = fullTextAnalyzer;
+        this.fullTextConfigEvaluator = fullTextConfigEvaluator;
 
         // ToDo: check the codes in upper layer to see if we can remove tokenizer to use fullTextConfig instead
-        this.fullTextAnalyzer.setTokenizer(tokenizer);
+        this.fullTextConfigEvaluator.setTokenizer(tokenizer);
     }
 
     public void reset(ITupleReference inputTuple) {
         this.inputTuple = inputTuple;
-        fullTextAnalyzer.reset(inputTuple.getFieldData(DOC_FIELD_INDEX), inputTuple.getFieldStart(DOC_FIELD_INDEX),
-                inputTuple.getFieldLength(DOC_FIELD_INDEX));
+        fullTextConfigEvaluator.reset(inputTuple.getFieldData(DOC_FIELD_INDEX),
+                inputTuple.getFieldStart(DOC_FIELD_INDEX), inputTuple.getFieldLength(DOC_FIELD_INDEX));
     }
 
     public boolean hasNext() {
-        return fullTextAnalyzer.hasNext();
+        return fullTextConfigEvaluator.hasNext();
     }
 
     public void next() throws HyracksDataException {
-        fullTextAnalyzer.next();
-        IToken token = fullTextAnalyzer.getToken();
+        fullTextConfigEvaluator.next();
+        IToken token = fullTextConfigEvaluator.getToken();
 
         tupleBuilder.reset();
         try {

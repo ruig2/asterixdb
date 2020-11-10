@@ -19,40 +19,33 @@
 
 package org.apache.hyracks.storage.am.lsm.invertedindex.fulltext;
 
-import java.util.List;
-
-import org.apache.commons.lang3.EnumUtils;
 import org.apache.hyracks.storage.am.lsm.invertedindex.tokenizers.IBinaryTokenizer;
+import org.apache.hyracks.storage.am.lsm.invertedindex.tokenizers.IToken;
 
 import com.google.common.collect.ImmutableList;
 
-public interface IFullTextConfig extends IFullTextEntity {
-    // case-insensitive
-    String FIELD_NAME_TOKENIZER = "tokenizer";
-    String FIELD_NAME_FILTER_PIPELINE = "filterPipeline";
-
-    enum TokenizerCategory {
-        NGRAM,
-        WORD;
-
-        public static TokenizerCategory getEnumIgnoreCase(String str) {
-            return EnumUtils.getEnumIgnoreCase(TokenizerCategory.class, str);
-        }
-    }
+public interface IFullTextConfigEvaluator extends IFullTextEntityEvaluator {
 
     TokenizerCategory getTokenizerCategory();
 
     void setTokenizer(IBinaryTokenizer tokenizer);
+
+    void reset(byte[] data, int start, int length);
 
     // ToDo: wrap the tokenizer and filters into a dedicated Java class
     // so that at runtime the operators (evaluators) don't touch the usedByIndices filed
     // That means, the usedByIndices field should be modified via MetadataManager only at compile time
     IBinaryTokenizer getTokenizer();
 
-    ImmutableList<IFullTextFilter> getFilters();
+    IToken getToken();
 
-    List<String> getUsedByIndices();
+    boolean hasNext();
 
-    void addUsedByIndices(String indexName);
+    void next();
 
+    ImmutableList<IFullTextFilterEvaluator> getFilterEvaluators();
+
+    // Get the total number of tokens
+    // Currently, it returns the number of tokens in the original text, that means stopwords are still counted
+    int getTokensCount();
 }

@@ -169,15 +169,15 @@ public class InvertedIndexPOperator extends IndexSearchPOperator {
                 InvertedIndexAccessMethod.getSearchModifierFactory(searchModifierType, simThresh, secondaryIndex);
         IBinaryTokenizerFactory queryTokenizerFactory =
                 InvertedIndexAccessMethod.getBinaryTokenizerFactory(searchModifierType, searchKeyType, secondaryIndex);
-        IFullTextConfigDescriptor fullTextConfigDescriptor = metadataProvider.findFullTextConfigDescriptor(
-                dataset.getDataverseName().getCanonicalForm(), secondaryIndex.getFullTextConfigName());
+        IFullTextConfigDescriptor fullTextConfigDescriptor =
+                metadataProvider.findFullTextConfigDescriptor(secondaryIndex.getFullTextConfigName());
         IIndexDataflowHelperFactory dataflowHelperFactory = new IndexDataflowHelperFactory(
                 metadataProvider.getStorageComponentProvider().getStorageManager(), secondarySplitsAndConstraint.first);
 
         LSMInvertedIndexSearchOperatorDescriptor invIndexSearchOp =
                 new LSMInvertedIndexSearchOperatorDescriptor(jobSpec, outputRecDesc, queryField, dataflowHelperFactory,
-                        queryTokenizerFactory, fullTextConfigDescriptor, searchModifierFactory, retainInput,
-                        retainMissing, context.getMissingWriterFactory(),
+                        queryTokenizerFactory, fullTextConfigDescriptor.createEvaluatorFactory(), searchModifierFactory,
+                        retainInput, retainMissing, context.getMissingWriterFactory(),
                         dataset.getSearchCallbackFactory(metadataProvider.getStorageComponentProvider(), secondaryIndex,
                                 IndexOperation.SEARCH, null),
                         minFilterFieldIndexes, maxFilterFieldIndexes, isFullTextSearchQuery, numPrimaryKeys,

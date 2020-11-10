@@ -19,14 +19,9 @@
 
 package org.apache.hyracks.storage.am.lsm.invertedindex.fulltext;
 
-import org.apache.hyracks.api.exceptions.HyracksDataException;
-import org.apache.hyracks.api.io.IPersistedResourceRegistry;
-
-import com.fasterxml.jackson.databind.JsonNode;
-
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
-public class AbstractFullTextFilterDescriptor implements IFullTextFilterDescriptor {
+public abstract class AbstractFullTextFilterDescriptor implements IFullTextFilterDescriptor {
     protected final String dataverseName;
     protected final String name;
 
@@ -46,23 +41,12 @@ public class AbstractFullTextFilterDescriptor implements IFullTextFilterDescript
     }
 
     @Override
-    public IFullTextFilter.FullTextFilterType getFilterType() {
+    public FullTextFilterType getFilterType() {
         throw new NotImplementedException();
     }
 
     @Override
-    public IFullTextEntity.FullTextEntityCategory getCategory() {
-        return IFullTextEntity.FullTextEntityCategory.FILTER;
+    public FullTextEntityCategory getCategory() {
+        return FullTextEntityCategory.FILTER;
     }
-
-    @Override
-    public IFullTextEntity getEntity() {
-        throw new NotImplementedException();
-    }
-
-    @Override
-    public JsonNode toJson(IPersistedResourceRegistry registry) throws HyracksDataException {
-        throw new NotImplementedException();
-    }
-
 }

@@ -20,5 +20,7 @@
 package org.apache.hyracks.storage.am.lsm.invertedindex.fulltext;
 
 public interface IFullTextFilterDescriptor extends IFullTextEntityDescriptor {
-    IFullTextFilter.FullTextFilterType getFilterType();
+    FullTextFilterType getFilterType();
+
+    IFullTextFilterEvaluator createEvaluator();
 }

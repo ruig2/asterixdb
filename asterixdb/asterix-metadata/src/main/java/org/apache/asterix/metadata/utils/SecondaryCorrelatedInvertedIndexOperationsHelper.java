@@ -152,8 +152,7 @@ public class SecondaryCorrelatedInvertedIndexOperationsHelper extends SecondaryC
         // and add the choice to the index metadata.
         tokenizerFactory = NonTaggedFormatUtil.getBinaryTokenizerFactory(secondaryKeyType.getTypeTag(), indexType,
                 index.getGramLength());
-        fullTextConfigDescriptor = metadataProvider.findFullTextConfigDescriptor(
-                index.getDataverseName().getCanonicalForm(), index.getFullTextConfigName());
+        fullTextConfigDescriptor = metadataProvider.findFullTextConfigDescriptor(index.getFullTextConfigName());
         // Type traits for inverted-list elements. Inverted lists contain
         // primary keys.
         invListsTypeTraits = new ITypeTraits[numPrimaryKeys];
@@ -282,9 +281,10 @@ public class SecondaryCorrelatedInvertedIndexOperationsHelper extends SecondaryC
         for (int i = NUM_TAG_FIELDS; i < keyFields.length; i++) {
             keyFields[i] = i + numSecondaryKeys;
         }
-        BinaryTokenizerOperatorDescriptor tokenizerOp = new BinaryTokenizerOperatorDescriptor(spec,
-                getTaggedRecordDescriptor(tokenKeyPairRecDesc), tokenizerFactory, fullTextConfigDescriptor, docField,
-                keyFields, isPartitioned, false, true, MissingWriterFactory.INSTANCE);
+        BinaryTokenizerOperatorDescriptor tokenizerOp =
+                new BinaryTokenizerOperatorDescriptor(spec, getTaggedRecordDescriptor(tokenKeyPairRecDesc),
+                        tokenizerFactory, fullTextConfigDescriptor.createEvaluatorFactory(), docField, keyFields,
+                        isPartitioned, false, true, MissingWriterFactory.INSTANCE);
         AlgebricksPartitionConstraintHelper.setPartitionConstraintInJobSpec(spec, tokenizerOp,
                 primaryPartitionConstraint);
         return tokenizerOp;

@@ -18,6 +18,8 @@
  */
 package org.apache.asterix.app.translator;
 
+import static org.apache.asterix.lang.common.statement.CreateFullTextFilterStatement.FIELD_NAME_STOPWORDS;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
@@ -232,11 +234,10 @@ import org.apache.hyracks.control.cc.ClusterControllerService;
 import org.apache.hyracks.control.common.controllers.CCConfig;
 import org.apache.hyracks.storage.am.lsm.common.api.ILSMMergePolicyFactory;
 import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.FullTextConfigDescriptor;
-import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextConfig;
 import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextConfigDescriptor;
-import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextFilter;
 import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextFilterDescriptor;
 import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.StopwordsFullTextFilterDescriptor;
+import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.TokenizerCategory;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -1178,13 +1179,11 @@ public class QueryTranslator extends AbstractLangTranslator implements IStatemen
 
         String filterType = stmtCreateFilter.getFilterType();
         switch (filterType) {
-            case IFullTextFilter.FIELD_NAME_STOPWORDS: {
+            case FIELD_NAME_STOPWORDS: {
                 filterDescriptor = new StopwordsFullTextFilterDescriptor(dataverseName.getCanonicalForm(),
                         stmtCreateFilter.getFilterName(), stmtCreateFilter.getStopwordsList());
                 break;
             }
-
-            case IFullTextFilter.FIELD_NAME_STEMMER:
             default:
                 throw CompilationException.create(ErrorCode.COMPILATION_ERROR, stmtCreateFilter.getSourceLocation(),
                         "Unexpected full-text filter type: " + filterType);
@@ -1246,7 +1245,7 @@ public class QueryTranslator extends AbstractLangTranslator implements IStatemen
 
         try {
             IFullTextConfigDescriptor existingConfig =
-                    MetadataManager.INSTANCE.getFullTextConfig(mdTxnCtx, dataverseName.getCanonicalForm(), configName);
+                    MetadataManager.INSTANCE.getFullTextConfig(mdTxnCtx, dataverseName, configName);
             if (existingConfig != null) {
                 if (stmtCreateConfig.getIfNotExists()) {
                     MetadataManager.INSTANCE.commitTransaction(mdTxnCtx);
@@ -1269,7 +1268,7 @@ public class QueryTranslator extends AbstractLangTranslator implements IStatemen
                 filterDescriptorsBuilder.add(filterDescriptor);
             }
 
-            IFullTextConfig.TokenizerCategory tokenizerCategory = stmtCreateConfig.getTokenizerCategory();
+            TokenizerCategory tokenizerCategory = stmtCreateConfig.getTokenizerCategory();
             IFullTextConfigDescriptor configDescriptor = new FullTextConfigDescriptor(dataverseName.getCanonicalForm(),
                     configName, tokenizerCategory, filterDescriptorsBuilder.build());
 

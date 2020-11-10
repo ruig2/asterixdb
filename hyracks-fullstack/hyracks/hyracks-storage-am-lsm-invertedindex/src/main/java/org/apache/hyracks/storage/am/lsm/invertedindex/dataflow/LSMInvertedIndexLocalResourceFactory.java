@@ -31,7 +31,7 @@ import org.apache.hyracks.storage.am.lsm.common.api.ILSMOperationTrackerFactory;
 import org.apache.hyracks.storage.am.lsm.common.api.ILSMPageWriteCallbackFactory;
 import org.apache.hyracks.storage.am.lsm.common.api.IVirtualBufferCacheProvider;
 import org.apache.hyracks.storage.am.lsm.common.dataflow.LsmResourceFactory;
-import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextConfigDescriptor;
+import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextConfigEvaluatorFactory;
 import org.apache.hyracks.storage.am.lsm.invertedindex.tokenizers.IBinaryTokenizerFactory;
 import org.apache.hyracks.storage.common.IResource;
 import org.apache.hyracks.storage.common.IStorageManager;
@@ -47,7 +47,7 @@ public class LSMInvertedIndexLocalResourceFactory extends LsmResourceFactory {
     private final int[] filterFieldsForNonBulkLoadOps;
     private final int[] invertedIndexFieldsForNonBulkLoadOps;
     private final double bloomFilterFalsePositiveRate;
-    private final IFullTextConfigDescriptor fullTextConfigDescriptor;
+    private final IFullTextConfigEvaluatorFactory fullTextConfigEvaluatorFactory;
 
     public LSMInvertedIndexLocalResourceFactory(IStorageManager storageManager, ITypeTraits[] typeTraits,
             // Inherited fields
@@ -60,7 +60,7 @@ public class LSMInvertedIndexLocalResourceFactory extends LsmResourceFactory {
             Map<String, String> mergePolicyProperties, boolean durable,
             // New fields
             ITypeTraits[] tokenTypeTraits, IBinaryComparatorFactory[] tokenCmpFactories,
-            IBinaryTokenizerFactory tokenizerFactory, IFullTextConfigDescriptor fullTextConfigDescriptor,
+            IBinaryTokenizerFactory tokenizerFactory, IFullTextConfigEvaluatorFactory fullTextConfigEvaluatorFactory,
             boolean isPartitioned, int[] invertedIndexFields, int[] filterFieldsForNonBulkLoadOps,
             int[] invertedIndexFieldsForNonBulkLoadOps, double bloomFilterFalsePositiveRate) {
         super(storageManager, typeTraits, cmpFactories, filterTypeTraits, filterCmpFactories, filterFields,
@@ -70,7 +70,7 @@ public class LSMInvertedIndexLocalResourceFactory extends LsmResourceFactory {
         this.tokenCmpFactories = tokenCmpFactories;
         // ToDo: totally replace tokenizerFactory with full-text config
         this.tokenizerFactory = tokenizerFactory;
-        this.fullTextConfigDescriptor = fullTextConfigDescriptor;
+        this.fullTextConfigEvaluatorFactory = fullTextConfigEvaluatorFactory;
         this.isPartitioned = isPartitioned;
         this.invertedIndexFields = invertedIndexFields;
         this.filterFieldsForNonBulkLoadOps = filterFieldsForNonBulkLoadOps;
@@ -84,7 +84,7 @@ public class LSMInvertedIndexLocalResourceFactory extends LsmResourceFactory {
                 filterTypeTraits, filterCmpFactories, filterFields, opTrackerProvider, ioOpCallbackFactory,
                 pageWriteCallbackFactory, metadataPageManagerFactory, vbcProvider, ioSchedulerProvider,
                 mergePolicyFactory, mergePolicyProperties, durable, tokenTypeTraits, tokenCmpFactories,
-                tokenizerFactory, fullTextConfigDescriptor, isPartitioned, invertedIndexFields,
+                tokenizerFactory, fullTextConfigEvaluatorFactory, isPartitioned, invertedIndexFields,
                 filterFieldsForNonBulkLoadOps, invertedIndexFieldsForNonBulkLoadOps, bloomFilterFalsePositiveRate);
     }
 

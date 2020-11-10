@@ -17,26 +17,15 @@
  * under the License.
  */
 
-package org.apache.hyracks.storage.am.lsm.invertedindex.tokenizers;
+package org.apache.hyracks.storage.am.lsm.invertedindex.fulltext;
 
-import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.TokenizerCategory;
-import org.apache.hyracks.storage.am.lsm.invertedindex.tokenizers.TokenizerInfo.TokenizerType;
+import org.apache.commons.lang3.EnumUtils;
 
-public interface IBinaryTokenizer {
-    IToken getToken();
+public enum FullTextEntityCategory {
+    FILTER,
+    CONFIG;
 
-    boolean hasNext();
-
-    void next();
-
-    void reset(byte[] data, int start, int length);
-
-    // Get the total number of tokens
-    short getTokensCount();
-
-    // Get the tokenizer types: String or List
-    TokenizerType getTokenizerType();
-
-    // WORD or NGRAM tokenizer
-    TokenizerCategory getTokenizerCategory();
+    public static FullTextEntityCategory getEnumIgnoreCase(String value) {
+        return EnumUtils.getEnumIgnoreCase(FullTextEntityCategory.class, value);
+    }
 }

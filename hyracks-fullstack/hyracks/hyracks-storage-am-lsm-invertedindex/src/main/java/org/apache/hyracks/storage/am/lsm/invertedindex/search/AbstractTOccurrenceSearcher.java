@@ -45,7 +45,7 @@ import org.apache.hyracks.storage.am.lsm.invertedindex.api.IInvertedIndexSearche
 import org.apache.hyracks.storage.am.lsm.invertedindex.api.IInvertedListCursor;
 import org.apache.hyracks.storage.am.lsm.invertedindex.api.IInvertedListTupleReference;
 import org.apache.hyracks.storage.am.lsm.invertedindex.api.IObjectFactory;
-import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextAnalyzer;
+import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextConfigEvaluator;
 import org.apache.hyracks.storage.am.lsm.invertedindex.tokenizers.DelimitedUTF8StringBinaryTokenizer;
 import org.apache.hyracks.storage.am.lsm.invertedindex.tokenizers.IToken;
 import org.apache.hyracks.storage.am.lsm.invertedindex.tokenizers.TokenizerInfo.TokenizerType;
@@ -126,7 +126,7 @@ public abstract class AbstractTOccurrenceSearcher implements IInvertedIndexSearc
     protected void tokenizeQuery(InvertedIndexSearchPredicate searchPred) throws HyracksDataException {
         ITupleReference queryTuple = searchPred.getQueryTuple();
         int queryFieldIndex = searchPred.getQueryFieldIndex();
-        IFullTextAnalyzer fullTextAnalyzer = searchPred.getFullTextAnalyzer();
+        IFullTextConfigEvaluator fullTextAnalyzer = searchPred.getFullTextConfigEvaluator();
         fullTextAnalyzer.setTokenizer(searchPred.getQueryTokenizer());
 
         // Is this a full-text query?

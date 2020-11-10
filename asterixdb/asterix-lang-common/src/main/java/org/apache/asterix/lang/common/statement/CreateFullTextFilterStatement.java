@@ -31,7 +31,6 @@ import org.apache.asterix.object.base.AdmObjectNode;
 import org.apache.asterix.object.base.AdmStringNode;
 import org.apache.asterix.object.base.IAdmNode;
 import org.apache.hyracks.api.exceptions.HyracksDataException;
-import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextFilter;
 
 import com.google.common.collect.ImmutableList;
 
@@ -41,6 +40,11 @@ public class CreateFullTextFilterStatement extends AbstractStatement {
     private final String filterName;
     private final boolean ifNotExists;
     private final AdmObjectNode filterNode;
+
+    public static final String FIELD_NAME_TYPE = "type";
+    public static final String FIELD_NAME_STOPWORDS_LIST = "stopwordsList";
+    public static final String FIELD_NAME_STOPWORDS = "stopwords";
+    public static final String FIELD_NAME_STEMMER = "stemmer";
 
     public CreateFullTextFilterStatement(DataverseName dataverseName, String filterName, boolean ifNotExists,
             RecordConstructor expr) throws CompilationException {
@@ -63,12 +67,12 @@ public class CreateFullTextFilterStatement extends AbstractStatement {
     }
 
     public String getFilterType() throws HyracksDataException {
-        return filterNode.getString(IFullTextFilter.FIELD_NAME_TYPE);
+        return filterNode.getString(FIELD_NAME_TYPE);
     }
 
     public ImmutableList<String> getStopwordsList() {
         ImmutableList.Builder listBuiler = ImmutableList.<String> builder();
-        AdmArrayNode arrayNode = (AdmArrayNode) filterNode.get(IFullTextFilter.FIELD_NAME_STOPWORDS_LIST);
+        AdmArrayNode arrayNode = (AdmArrayNode) filterNode.get(FIELD_NAME_STOPWORDS_LIST);
 
         Iterator<IAdmNode> iterator = arrayNode.iterator();
         while (iterator.hasNext()) {

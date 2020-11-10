@@ -22,7 +22,9 @@ package org.apache.hyracks.storage.am.lsm.invertedindex.fulltext;
 import com.google.common.collect.ImmutableList;
 
 public interface IFullTextConfigDescriptor extends IFullTextEntityDescriptor {
-    IFullTextConfig.TokenizerCategory getTokenizerCategory();
+    TokenizerCategory getTokenizerCategory();
 
     ImmutableList<IFullTextFilterDescriptor> getFilterDescriptors();
+
+    IFullTextConfigEvaluatorFactory createEvaluatorFactory();
 }

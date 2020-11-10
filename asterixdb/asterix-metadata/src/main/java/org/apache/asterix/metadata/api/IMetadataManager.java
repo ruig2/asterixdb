@@ -479,7 +479,7 @@ public interface IMetadataManager extends IMetadataBootstrap {
      * @throws AlgebricksException
      *              For example, if the full-text config doesn't exist
      */
-    IFullTextConfigDescriptor getFullTextConfig(MetadataTransactionContext mdTxnCtx, String dataverseName,
+    IFullTextConfigDescriptor getFullTextConfig(MetadataTransactionContext mdTxnCtx, DataverseName dataverseName,
             String configName) throws AlgebricksException;
 
     /**

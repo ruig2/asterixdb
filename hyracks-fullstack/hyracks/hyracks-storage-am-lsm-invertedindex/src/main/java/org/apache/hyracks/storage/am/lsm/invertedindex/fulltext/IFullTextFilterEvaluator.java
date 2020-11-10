@@ -19,19 +19,14 @@
 
 package org.apache.hyracks.storage.am.lsm.invertedindex.fulltext;
 
-import org.apache.commons.lang3.EnumUtils;
+import org.apache.hyracks.api.io.IJsonSerializable;
+import org.apache.hyracks.storage.am.lsm.invertedindex.tokenizers.IToken;
+import org.apache.hyracks.storage.am.lsm.invertedindex.tokenizers.TokenizerInfo;
 
-public interface IFullTextEntity {
-    enum FullTextEntityCategory {
-        FILTER,
-        CONFIG;
+import java.io.Serializable;
 
-        public static FullTextEntityCategory getEnumIgnoreCase(String value) {
-            return EnumUtils.getEnumIgnoreCase(FullTextEntityCategory.class, value);
-        }
-    }
+public interface IFullTextFilterEvaluator extends IFullTextEntityEvaluator, IJsonSerializable, Serializable {
+    FullTextFilterType getFilterType();
 
-    FullTextEntityCategory getCategory();
-
-    String getName();
+    IToken processToken(TokenizerInfo.TokenizerType tokenizerType, IToken token);
 }

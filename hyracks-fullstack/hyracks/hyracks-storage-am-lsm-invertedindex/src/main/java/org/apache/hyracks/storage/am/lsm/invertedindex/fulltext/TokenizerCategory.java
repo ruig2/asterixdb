@@ -16,27 +16,15 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+package org.apache.hyracks.storage.am.lsm.invertedindex.fulltext;
 
-package org.apache.hyracks.storage.am.lsm.invertedindex.tokenizers;
+import org.apache.commons.lang3.EnumUtils;
 
-import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.TokenizerCategory;
-import org.apache.hyracks.storage.am.lsm.invertedindex.tokenizers.TokenizerInfo.TokenizerType;
+public enum TokenizerCategory {
+    NGRAM,
+    WORD;
 
-public interface IBinaryTokenizer {
-    IToken getToken();
-
-    boolean hasNext();
-
-    void next();
-
-    void reset(byte[] data, int start, int length);
-
-    // Get the total number of tokens
-    short getTokensCount();
-
-    // Get the tokenizer types: String or List
-    TokenizerType getTokenizerType();
-
-    // WORD or NGRAM tokenizer
-    TokenizerCategory getTokenizerCategory();
+    public static TokenizerCategory getEnumIgnoreCase(String str) {
+        return EnumUtils.getEnumIgnoreCase(TokenizerCategory.class, str);
+    }
 }

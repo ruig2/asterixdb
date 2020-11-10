@@ -34,7 +34,7 @@ import org.apache.asterix.object.base.AdmStringNode;
 import org.apache.asterix.object.base.IAdmNode;
 import org.apache.hyracks.algebricks.common.exceptions.AlgebricksException;
 import org.apache.hyracks.api.exceptions.HyracksDataException;
-import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextConfig;
+import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.TokenizerCategory;
 
 public class CreateFullTextConfigStatement extends AbstractStatement {
 
@@ -42,6 +42,9 @@ public class CreateFullTextConfigStatement extends AbstractStatement {
     private final String configName;
     private final boolean ifNotExists;
     private final AdmObjectNode configNode;
+
+    public static final String FIELD_NAME_TOKENIZER = "tokenizer";
+    public static final String FIELD_NAME_FILTER_PIPELINE = "filterPipeline";
 
     public CreateFullTextConfigStatement(DataverseName dataverseName, String configName, boolean ifNotExists,
             RecordConstructor expr) throws CompilationException {
@@ -78,16 +81,15 @@ public class CreateFullTextConfigStatement extends AbstractStatement {
         return Category.DDL;
     }
 
-    public IFullTextConfig.TokenizerCategory getTokenizerCategory() throws HyracksDataException {
-        String tokenizerCategoryStr = configNode.getString(IFullTextConfig.FIELD_NAME_TOKENIZER);
-        IFullTextConfig.TokenizerCategory tokenizerCategory =
-                IFullTextConfig.TokenizerCategory.getEnumIgnoreCase(tokenizerCategoryStr);
+    public TokenizerCategory getTokenizerCategory() throws HyracksDataException {
+        String tokenizerCategoryStr = configNode.getString(FIELD_NAME_TOKENIZER);
+        TokenizerCategory tokenizerCategory = TokenizerCategory.getEnumIgnoreCase(tokenizerCategoryStr);
 
         return tokenizerCategory;
     }
 
     public List<String> getFilterNames() throws AlgebricksException {
-        AdmArrayNode arrayNode = (AdmArrayNode) configNode.get(IFullTextConfig.FIELD_NAME_FILTER_PIPELINE);
+        AdmArrayNode arrayNode = (AdmArrayNode) configNode.get(FIELD_NAME_FILTER_PIPELINE);
         List<String> results = new ArrayList<>();
 
         Iterator<IAdmNode> iterator = arrayNode.iterator();

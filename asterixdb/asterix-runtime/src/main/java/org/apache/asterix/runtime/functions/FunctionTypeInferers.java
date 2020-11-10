@@ -337,9 +337,8 @@ public final class FunctionTypeInferers {
         @Override
         public void infer(ILogicalExpression expr, IFunctionDescriptor fd, IVariableTypeEnvironment context,
                 CompilerProperties compilerProps, IMetadataProvider metadataProvider) throws AlgebricksException {
-            String dataverseName = metadataProvider.getDefaultDataverseNameInString();
             IFullTextConfigDescriptor configDescriptor =
-                    metadataProvider.findFullTextConfigDescriptor(dataverseName, getFullTextConfigNameFromExpr(expr));
+                    metadataProvider.findFullTextConfigDescriptor(getFullTextConfigNameFromExpr(expr));
 
             fd.setImmutableStates(configDescriptor);
         }

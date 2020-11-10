@@ -23,7 +23,7 @@ import org.apache.asterix.om.types.ATypeTag;
 import org.apache.asterix.om.types.EnumDeserializer;
 import org.apache.asterix.om.utils.NonTaggedFormatUtil;
 import org.apache.hyracks.api.exceptions.HyracksDataException;
-import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextConfig;
+import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.TokenizerCategory;
 import org.apache.hyracks.storage.am.lsm.invertedindex.tokenizers.IBinaryTokenizer;
 import org.apache.hyracks.storage.am.lsm.invertedindex.tokenizers.IToken;
 import org.apache.hyracks.storage.am.lsm.invertedindex.tokenizers.ITokenFactory;
@@ -99,13 +99,13 @@ public class AOrderedListBinaryTokenizer implements IBinaryTokenizer {
     }
 
     @Override
-    public IFullTextConfig.TokenizerCategory getTokenizerCategory() {
+    public TokenizerCategory getTokenizerCategory() {
         // Currently, the AOrderedListBinaryTokenizer is used in ftcontains() function only,
         // which means it is used to tokenize WORD only
         //
         // The functions that utilize NGRAM index are edit_distance(), edit_distance_check() and so on,
         // which don't take a list as input (string only).
         // e.g. edit_distance(u.name, "Suzanna Tilson")
-        return IFullTextConfig.TokenizerCategory.WORD;
+        return TokenizerCategory.WORD;
     }
 }

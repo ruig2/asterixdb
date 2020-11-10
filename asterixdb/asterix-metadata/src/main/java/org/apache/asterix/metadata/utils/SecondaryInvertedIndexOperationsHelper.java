@@ -81,8 +81,7 @@ public class SecondaryInvertedIndexOperationsHelper extends SecondaryTreeIndexOp
     protected SecondaryInvertedIndexOperationsHelper(Dataset dataset, Index index, MetadataProvider metadataProvider,
             SourceLocation sourceLoc) throws AlgebricksException {
         super(dataset, index, metadataProvider, sourceLoc);
-        this.fullTextConfigDescriptor = metadataProvider.findFullTextConfigDescriptor(
-                dataset.getDataverseName().getCanonicalForm(), index.getFullTextConfigName());
+        this.fullTextConfigDescriptor = metadataProvider.findFullTextConfigDescriptor(index.getFullTextConfigName());
     }
 
     @Override
@@ -280,8 +279,8 @@ public class SecondaryInvertedIndexOperationsHelper extends SecondaryTreeIndexOp
             primaryKeyFields[i] = numSecondaryKeys + i;
         }
         BinaryTokenizerOperatorDescriptor tokenizerOp = new BinaryTokenizerOperatorDescriptor(spec, tokenKeyPairRecDesc,
-                tokenizerFactory, fullTextConfigDescriptor, docField, primaryKeyFields, isPartitioned, false, false,
-                MissingWriterFactory.INSTANCE);
+                tokenizerFactory, fullTextConfigDescriptor.createEvaluatorFactory(), docField, primaryKeyFields,
+                isPartitioned, false, false, MissingWriterFactory.INSTANCE);
         tokenizerOp.setSourceLocation(sourceLoc);
         AlgebricksPartitionConstraintHelper.setPartitionConstraintInJobSpec(spec, tokenizerOp,
                 primaryPartitionConstraint);

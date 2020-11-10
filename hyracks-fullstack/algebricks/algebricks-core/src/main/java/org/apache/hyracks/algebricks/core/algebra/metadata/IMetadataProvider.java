@@ -216,10 +216,7 @@ public interface IMetadataProvider<S, I> {
             IVariableTypeEnvironment typeEnv, ILogicalExpression filterExpr, JobGenContext context)
             throws AlgebricksException;
 
-    public String getDefaultDataverseNameInString();
-
-    public IFullTextConfigDescriptor findFullTextConfigDescriptor(String dataverseName, String ftConfigName)
-            throws AlgebricksException;
+    public IFullTextConfigDescriptor findFullTextConfigDescriptor(String ftConfigName) throws AlgebricksException;
 
     public Map<String, Object> getConfig();
 

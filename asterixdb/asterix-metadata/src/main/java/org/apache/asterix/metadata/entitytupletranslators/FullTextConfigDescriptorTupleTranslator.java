@@ -53,9 +53,9 @@ import org.apache.hyracks.dataflow.common.comm.io.ArrayTupleBuilder;
 import org.apache.hyracks.dataflow.common.comm.io.ArrayTupleReference;
 import org.apache.hyracks.dataflow.common.data.accessors.ITupleReference;
 import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.FullTextConfigDescriptor;
-import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextConfig;
 import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextConfigDescriptor;
 import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextFilterDescriptor;
+import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.TokenizerCategory;
 
 import com.google.common.collect.ImmutableList;
 
@@ -85,8 +85,8 @@ public class FullTextConfigDescriptorTupleTranslator extends AbstractTupleTransl
         String name = ((AString) aRecord.getValueByPos(MetadataRecordTypes.FULL_TEXT_ARECORD_CONFIG_NAME_FIELD_INDEX))
                 .getStringValue();
 
-        IFullTextConfig.TokenizerCategory tokenizerCategory =
-                EnumUtils.getEnumIgnoreCase(IFullTextConfig.TokenizerCategory.class,
+        TokenizerCategory tokenizerCategory =
+                EnumUtils.getEnumIgnoreCase(TokenizerCategory.class,
                         ((AString) aRecord
                                 .getValueByPos(MetadataRecordTypes.FULL_TEXT_ARECORD_CONFIG_TOKENIZER_FIELD_INDEX))
                                         .getStringValue());

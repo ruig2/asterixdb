@@ -16,27 +16,31 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+package org.apache.hyracks.storage.am.lsm.invertedindex.fulltext;
 
-package org.apache.hyracks.storage.am.lsm.invertedindex.tokenizers;
+import org.apache.commons.lang3.EnumUtils;
 
-import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.TokenizerCategory;
-import org.apache.hyracks.storage.am.lsm.invertedindex.tokenizers.TokenizerInfo.TokenizerType;
+public enum FullTextFilterType {
+    STOPWORDS("Stopwords"),
+    SYNONYM("Synonym"),
+    STEMMER("Stemmer");
 
-public interface IBinaryTokenizer {
-    IToken getToken();
+    private String value;
 
-    boolean hasNext();
+    FullTextFilterType(String value) {
+        this.value = value;
+    }
 
-    void next();
+    public String getValue() {
+        return value;
+    }
 
-    void reset(byte[] data, int start, int length);
+    public static FullTextFilterType getEnumIgnoreCase(String str) {
+        FullTextFilterType type = EnumUtils.getEnumIgnoreCase(FullTextFilterType.class, str);
 
-    // Get the total number of tokens
-    short getTokensCount();
-
-    // Get the tokenizer types: String or List
-    TokenizerType getTokenizerType();
-
-    // WORD or NGRAM tokenizer
-    TokenizerCategory getTokenizerCategory();
+        if (type == null) {
+            throw new IllegalArgumentException("Cannot convert string " + str + " to FullTextFilterType!");
+        }
+        return type;
+    }
 }

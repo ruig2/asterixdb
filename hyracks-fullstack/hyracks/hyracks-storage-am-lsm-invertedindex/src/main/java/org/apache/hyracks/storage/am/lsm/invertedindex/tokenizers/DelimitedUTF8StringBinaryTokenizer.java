@@ -19,7 +19,7 @@
 
 package org.apache.hyracks.storage.am.lsm.invertedindex.tokenizers;
 
-import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextConfig;
+import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.TokenizerCategory;
 import org.apache.hyracks.storage.am.lsm.invertedindex.tokenizers.TokenizerInfo.TokenizerType;
 import org.apache.hyracks.util.string.UTF8StringUtil;
 
@@ -124,7 +124,7 @@ public class DelimitedUTF8StringBinaryTokenizer extends AbstractUTF8StringBinary
     }
 
     @Override
-    public IFullTextConfig.TokenizerCategory getTokenizerCategory() {
-        return IFullTextConfig.TokenizerCategory.WORD;
+    public TokenizerCategory getTokenizerCategory() {
+        return TokenizerCategory.WORD;
     }
 }

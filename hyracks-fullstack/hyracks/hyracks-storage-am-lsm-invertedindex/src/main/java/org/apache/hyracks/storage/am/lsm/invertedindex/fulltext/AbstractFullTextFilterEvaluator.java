@@ -1,4 +1,4 @@
-/**
+/*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -19,20 +19,27 @@
 
 package org.apache.hyracks.storage.am.lsm.invertedindex.fulltext;
 
-import java.util.ArrayList;
-import java.util.List;
+public abstract class AbstractFullTextFilterEvaluator implements IFullTextFilterEvaluator {
+    protected final String name;
+    protected FullTextFilterType type;
 
-import com.google.common.collect.ImmutableList;
-
-public class FullTextConfig extends AbstractFullTextConfig {
-
-    public FullTextConfig(String name, TokenizerCategory tokenizerCategory, ImmutableList<IFullTextFilter> filters) {
-        super(name, tokenizerCategory, filters, new ArrayList<>());
+    public AbstractFullTextFilterEvaluator(String name, FullTextFilterType type) {
+        this.name = name;
+        this.type = type;
     }
 
-    // For usage in fromJson() only where usedByIndices of an existing full-text config written on disk may not be null.
-    public FullTextConfig(String name, TokenizerCategory tokenizerCategory, ImmutableList<IFullTextFilter> filters,
-            List<String> usedByIndices) {
-        super(name, tokenizerCategory, filters, usedByIndices);
+    @Override
+    public FullTextEntityCategory getCategory() {
+        return FullTextEntityCategory.FILTER;
+    }
+
+    @Override
+    public String getName() {
+        return name;
+    }
+
+    @Override
+    public FullTextFilterType getFilterType() {
+        return type;
     }
 }

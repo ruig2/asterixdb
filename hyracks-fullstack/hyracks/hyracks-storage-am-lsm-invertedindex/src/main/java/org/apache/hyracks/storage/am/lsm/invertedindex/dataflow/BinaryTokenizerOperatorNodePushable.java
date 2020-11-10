@@ -36,7 +36,7 @@ import org.apache.hyracks.dataflow.common.comm.util.FrameUtils;
 import org.apache.hyracks.dataflow.common.data.accessors.FrameTupleReference;
 import org.apache.hyracks.dataflow.common.data.accessors.ITupleReference;
 import org.apache.hyracks.dataflow.std.base.AbstractUnaryInputUnaryOutputOperatorNodePushable;
-import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextAnalyzer;
+import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextConfigEvaluator;
 import org.apache.hyracks.storage.am.lsm.invertedindex.tokenizers.IBinaryTokenizer;
 import org.apache.hyracks.storage.am.lsm.invertedindex.tokenizers.IToken;
 
@@ -44,7 +44,7 @@ public class BinaryTokenizerOperatorNodePushable extends AbstractUnaryInputUnary
 
     private final IHyracksTaskContext ctx;
     // ToDo: remove tokenizer because now we use fullTextConfig instead
-    private final IFullTextAnalyzer fullTextAnalyzer;
+    private final IFullTextConfigEvaluator fullTextEvaluator;
     private final int docField;
     private final int[] keyFields;
     private final boolean addNumTokensKey;
@@ -61,17 +61,17 @@ public class BinaryTokenizerOperatorNodePushable extends AbstractUnaryInputUnary
     private FrameTupleAppender appender;
 
     public BinaryTokenizerOperatorNodePushable(IHyracksTaskContext ctx, RecordDescriptor inputRecDesc,
-            RecordDescriptor outputRecDesc, IBinaryTokenizer tokenizer, IFullTextAnalyzer fullTextAnalyzer,
+            RecordDescriptor outputRecDesc, IBinaryTokenizer tokenizer, IFullTextConfigEvaluator fullTextEvaluator,
             int docField, int[] keyFields, boolean addNumTokensKey, boolean writeKeyFieldsFirst, boolean writeMissing,
             IMissingWriterFactory missingWriterFactory) {
         this.ctx = ctx;
-        this.fullTextAnalyzer = fullTextAnalyzer;
+        this.fullTextEvaluator = fullTextEvaluator;
         // Need to use the tokenizer created in the upper-layer when:
         // 1. The tokenizer is of TokenizerCategory.NGram rather than Word
         // 2. If the tokenizer is a TokenizerCategory.Word one, then its parameters
         //    (e.g. boolean ignoreTokenCount, boolean sourceHasTypeTag) may be different
         //    from the tokenizer in the default full-text config
-        this.fullTextAnalyzer.setTokenizer(tokenizer);
+        this.fullTextEvaluator.setTokenizer(tokenizer);
 
         this.docField = docField;
         this.keyFields = keyFields;
@@ -103,17 +103,17 @@ public class BinaryTokenizerOperatorNodePushable extends AbstractUnaryInputUnary
             int numTokens = 0;
 
             if (!isDocFieldMissing(tuple)) {
-                fullTextAnalyzer.reset(tuple.getFieldData(docField), tuple.getFieldStart(docField),
+                fullTextEvaluator.reset(tuple.getFieldData(docField), tuple.getFieldStart(docField),
                         tuple.getFieldLength(docField));
                 if (addNumTokensKey) {
                     // Get the total number of tokens.
-                    numTokens = fullTextAnalyzer.getTokensCount();
+                    numTokens = fullTextEvaluator.getTokensCount();
                 }
                 // Write token and data into frame by following the order specified
                 // in the writeKeyFieldsFirst field.
-                while (fullTextAnalyzer.hasNext()) {
-                    fullTextAnalyzer.next();
-                    IToken token = fullTextAnalyzer.getToken();
+                while (fullTextEvaluator.hasNext()) {
+                    fullTextEvaluator.next();
+                    IToken token = fullTextEvaluator.getToken();
                     writeTuple(token, numTokens, i);
                 }
             } else if (writeMissing) {

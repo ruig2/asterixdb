@@ -23,7 +23,7 @@ import java.io.IOException;
 
 import org.apache.hyracks.api.exceptions.HyracksDataException;
 import org.apache.hyracks.dataflow.common.data.accessors.ITupleReference;
-import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextAnalyzer;
+import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextConfigEvaluator;
 import org.apache.hyracks.storage.am.lsm.invertedindex.tokenizers.IBinaryTokenizer;
 import org.apache.hyracks.storage.am.lsm.invertedindex.tokenizers.IToken;
 
@@ -33,8 +33,8 @@ public class PartitionedInvertedIndexTokenizingTupleIterator extends InvertedInd
     protected short numTokens = 0;
 
     public PartitionedInvertedIndexTokenizingTupleIterator(int tokensFieldCount, int invListFieldCount,
-            IBinaryTokenizer tokenizer, IFullTextAnalyzer fullTextAnalyzer) {
-        super(tokensFieldCount, invListFieldCount, tokenizer, fullTextAnalyzer);
+            IBinaryTokenizer tokenizer, IFullTextConfigEvaluator fullTextConfigEvaluator) {
+        super(tokensFieldCount, invListFieldCount, tokenizer, fullTextConfigEvaluator);
     }
 
     @Override
@@ -42,8 +42,8 @@ public class PartitionedInvertedIndexTokenizingTupleIterator extends InvertedInd
         super.reset(inputTuple);
         // Run through the tokenizer once to get the total number of tokens.
         numTokens = 0;
-        while (fullTextAnalyzer.hasNext()) {
-            fullTextAnalyzer.next();
+        while (fullTextConfigEvaluator.hasNext()) {
+            fullTextConfigEvaluator.next();
             numTokens++;
         }
         super.reset(inputTuple);
@@ -51,8 +51,8 @@ public class PartitionedInvertedIndexTokenizingTupleIterator extends InvertedInd
 
     @Override
     public void next() throws HyracksDataException {
-        fullTextAnalyzer.next();
-        IToken token = fullTextAnalyzer.getToken();
+        fullTextConfigEvaluator.next();
+        IToken token = fullTextConfigEvaluator.getToken();
 
         tupleBuilder.reset();
         try {

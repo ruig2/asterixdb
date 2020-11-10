@@ -21,13 +21,6 @@ package org.apache.hyracks.storage.am.lsm.invertedindex.fulltext;
 
 import java.util.List;
 
-import org.apache.hyracks.api.exceptions.HyracksDataException;
-import org.apache.hyracks.api.io.IJsonSerializable;
-import org.apache.hyracks.api.io.IPersistedResourceRegistry;
-
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.collect.ImmutableList;
 
 public class StopwordsFullTextFilterDescriptor extends AbstractFullTextFilterDescriptor {
@@ -41,8 +34,8 @@ public class StopwordsFullTextFilterDescriptor extends AbstractFullTextFilterDes
     }
 
     @Override
-    public IFullTextFilter.FullTextFilterType getFilterType() {
-        return IFullTextFilter.FullTextFilterType.STOPWORDS;
+    public FullTextFilterType getFilterType() {
+        return FullTextFilterType.STOPWORDS;
     }
 
     public List<String> getStopwordList() {
@@ -50,43 +43,7 @@ public class StopwordsFullTextFilterDescriptor extends AbstractFullTextFilterDes
     }
 
     @Override
-    public IFullTextEntity getEntity() {
-        return new StopwordsFullTextFilter(name, stopwordList);
-    }
-
-    private static final String DATAVERSE_NAME = "dataverseName";
-    private static final String STOPWORDS_FILTER_NAME = "stopwordsFilterName";
-    private static final String STOPWORDS_LIST = "stopwordsList";
-
-    // ToDo: extract the common logics to a dedicated helper or utilization class after more filters are implemented
-    @Override
-    public JsonNode toJson(IPersistedResourceRegistry registry) throws HyracksDataException {
-        final ObjectNode json = registry.getClassIdentifier(getClass(), this.serialVersionUID);
-        json.put(DATAVERSE_NAME, dataverseName);
-        json.put(STOPWORDS_FILTER_NAME, name);
-
-        ArrayNode stopwordsArrayNode = AbstractFullTextConfig.OBJECT_MAPPER.createArrayNode();
-        for (String s : stopwordList) {
-            stopwordsArrayNode.add(s);
-        }
-        json.set(STOPWORDS_LIST, stopwordsArrayNode);
-
-        return json;
-    }
-
-    public static IJsonSerializable fromJson(IPersistedResourceRegistry registry, JsonNode json)
-            throws HyracksDataException {
-        final String dataverseName = json.get(DATAVERSE_NAME).asText();
-        final String name = json.get(STOPWORDS_FILTER_NAME).asText();
-
-        // ToDo: create a new function to extract a list from json
-        ImmutableList.Builder<String> stopwordsBuilder = ImmutableList.<String> builder();
-        JsonNode stopwordsArrayNode = json.get(STOPWORDS_LIST);
-        for (int i = 0; i < stopwordsArrayNode.size(); i++) {
-            stopwordsBuilder.add(stopwordsArrayNode.get(i).asText());
-        }
-        ImmutableList<String> stopwords = stopwordsBuilder.build();
-
-        return new StopwordsFullTextFilterDescriptor(dataverseName, name, stopwords);
+    public IFullTextFilterEvaluator createEvaluator() {
+        return new StopwordsFullTextFilterEvaluator(name, stopwordList);
     }
 }

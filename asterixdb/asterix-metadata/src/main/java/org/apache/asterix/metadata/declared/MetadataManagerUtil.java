@@ -150,7 +150,7 @@ public class MetadataManagerUtil {
     }
 
     public static IFullTextConfigDescriptor findFullTextConfigDescriptor(MetadataTransactionContext mdTxnCtx,
-            String dataverseName, String ftConfigName) throws AlgebricksException {
+            DataverseName dataverseName, String ftConfigName) throws AlgebricksException {
         return MetadataManager.INSTANCE.getFullTextConfig(mdTxnCtx, dataverseName, ftConfigName);
     }
 

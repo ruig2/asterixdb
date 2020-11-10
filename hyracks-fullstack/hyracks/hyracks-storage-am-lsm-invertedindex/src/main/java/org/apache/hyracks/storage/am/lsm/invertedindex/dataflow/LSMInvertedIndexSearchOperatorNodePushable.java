@@ -34,9 +34,10 @@ import org.apache.hyracks.storage.am.common.api.ISearchOperationCallbackFactory;
 import org.apache.hyracks.storage.am.common.dataflow.IIndexDataflowHelperFactory;
 import org.apache.hyracks.storage.am.common.dataflow.IndexSearchOperatorNodePushable;
 import org.apache.hyracks.storage.am.lsm.invertedindex.api.IInvertedIndexSearchModifier;
-import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.FullTextAnalyzer;
-import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextConfigDescriptor;
+import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextConfigEvaluator;
+import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextConfigEvaluatorFactory;
 import org.apache.hyracks.storage.am.lsm.invertedindex.search.InvertedIndexSearchPredicate;
+import org.apache.hyracks.storage.am.lsm.invertedindex.tokenizers.IBinaryTokenizer;
 import org.apache.hyracks.storage.am.lsm.invertedindex.tokenizers.IBinaryTokenizerFactory;
 import org.apache.hyracks.storage.common.IIndexAccessParameters;
 import org.apache.hyracks.storage.common.ISearchPredicate;
@@ -45,7 +46,7 @@ public class LSMInvertedIndexSearchOperatorNodePushable extends IndexSearchOpera
 
     protected final IInvertedIndexSearchModifier searchModifier;
     protected final IBinaryTokenizerFactory binaryTokenizerFactory;
-    protected final IFullTextConfigDescriptor fullTextConfigDescriptor;
+    protected final IFullTextConfigEvaluatorFactory fullTextConfigEvaluatorFactory;
     protected final int queryFieldIndex;
     protected final int numOfFields;
     // Keeps the information whether the given query is a full-text search or not.
@@ -60,13 +61,14 @@ public class LSMInvertedIndexSearchOperatorNodePushable extends IndexSearchOpera
             IIndexDataflowHelperFactory indexHelperFactory, boolean retainInput, boolean retainMissing,
             IMissingWriterFactory missingWriterFactory, ISearchOperationCallbackFactory searchCallbackFactory,
             IInvertedIndexSearchModifier searchModifier, IBinaryTokenizerFactory binaryTokenizerFactory,
-            IFullTextConfigDescriptor fullTextConfigDescriptor, int queryFieldIndex, boolean isFullTextSearchQuery,
-            int numOfFields, boolean appendIndexFilter, int frameLimit) throws HyracksDataException {
+            IFullTextConfigEvaluatorFactory fullTextConfigEvaluatorFactory, int queryFieldIndex,
+            boolean isFullTextSearchQuery, int numOfFields, boolean appendIndexFilter, int frameLimit)
+            throws HyracksDataException {
         super(ctx, inputRecDesc, partition, minFilterFieldIndexes, maxFilterFieldIndexes, indexHelperFactory,
                 retainInput, retainMissing, missingWriterFactory, searchCallbackFactory, appendIndexFilter);
         this.searchModifier = searchModifier;
         this.binaryTokenizerFactory = binaryTokenizerFactory;
-        this.fullTextConfigDescriptor = fullTextConfigDescriptor;
+        this.fullTextConfigEvaluatorFactory = fullTextConfigEvaluatorFactory;
         this.queryFieldIndex = queryFieldIndex;
         this.isFullTextSearchQuery = isFullTextSearchQuery;
         // If retainInput is true, the frameTuple is created in IndexSearchOperatorNodePushable.open().
@@ -83,10 +85,12 @@ public class LSMInvertedIndexSearchOperatorNodePushable extends IndexSearchOpera
 
     @Override
     protected ISearchPredicate createSearchPredicate() {
-        FullTextAnalyzer analyzer = new FullTextAnalyzer(fullTextConfigDescriptor);
+        IBinaryTokenizer tokenizer = binaryTokenizerFactory.createTokenizer();
+        IFullTextConfigEvaluator fullTextConfigEvaluator =
+                fullTextConfigEvaluatorFactory.createFullTextConfigEvaluator();
 
-        return new InvertedIndexSearchPredicate(binaryTokenizerFactory.createTokenizer(), analyzer, searchModifier,
-                minFilterKey, maxFilterKey, isFullTextSearchQuery);
+        return new InvertedIndexSearchPredicate(tokenizer, fullTextConfigEvaluator, searchModifier, minFilterKey,
+                maxFilterKey, isFullTextSearchQuery);
     }
 
     @Override
