@@ -25,6 +25,11 @@ import org.apache.hyracks.storage.am.lsm.invertedindex.tokenizers.TokenizerInfo;
 
 import java.io.Serializable;
 
+// The full-text filter evaluator needs to be stored in the index local resource, so it needs to be IJsonSerializable
+// Also, it needs to be distributed from CC (compile-time) to NC (run-time), so it needs to be Serializable
+//
+// For the full-text config evaluator, we distribute and store the config evaluator factory in the index local resource instead.
+// So the config evaluator IFullTextConfigEvaluator is not IJsonSerializable nor Serializable
 public interface IFullTextFilterEvaluator extends IFullTextEntityEvaluator, IJsonSerializable, Serializable {
     FullTextFilterType getFilterType();
 
