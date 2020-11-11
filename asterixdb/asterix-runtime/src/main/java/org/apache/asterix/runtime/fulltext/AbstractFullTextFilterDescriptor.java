@@ -17,21 +17,25 @@
  * under the License.
  */
 
-package org.apache.hyracks.storage.am.lsm.invertedindex.fulltext;
+package org.apache.asterix.runtime.fulltext;
+
+import org.apache.asterix.common.metadata.DataverseName;
+import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.FullTextEntityCategory;
+import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.FullTextFilterType;
+import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextFilterDescriptor;
 
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 public abstract class AbstractFullTextFilterDescriptor implements IFullTextFilterDescriptor {
-    protected final String dataverseName;
+    protected final DataverseName dataverseName;
     protected final String name;
 
-    public AbstractFullTextFilterDescriptor(String dataverseName, String name) {
+    public AbstractFullTextFilterDescriptor(DataverseName dataverseName, String name) {
         this.dataverseName = dataverseName;
         this.name = name;
     }
 
-    @Override
-    public String getDataverseName() {
+    public DataverseName getDataverseName() {
         return dataverseName;
     }
 

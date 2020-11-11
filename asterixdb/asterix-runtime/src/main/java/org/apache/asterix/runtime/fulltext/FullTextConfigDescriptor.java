@@ -17,14 +17,23 @@
  * under the License.
  */
 
-package org.apache.hyracks.storage.am.lsm.invertedindex.fulltext;
+package org.apache.asterix.runtime.fulltext;
+
+import org.apache.asterix.common.metadata.DataverseName;
+import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.FullTextConfigEvaluatorFactory;
+import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.FullTextEntityCategory;
+import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextConfigDescriptor;
+import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextConfigEvaluatorFactory;
+import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextFilterDescriptor;
+import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextFilterEvaluator;
+import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.TokenizerCategory;
 
 import com.google.common.collect.ImmutableList;
 
 public class FullTextConfigDescriptor implements IFullTextConfigDescriptor {
     private static final long serialVersionUID = 1L;
 
-    private final String dataverseName;
+    private final DataverseName dataverseName;
     private final String name;
     private final TokenizerCategory tokenizerCategory;
     private final ImmutableList<IFullTextFilterDescriptor> filterDescriptors;
@@ -36,7 +45,7 @@ public class FullTextConfigDescriptor implements IFullTextConfigDescriptor {
     // In this way we avoid the edge cases to insert or delete the default config in the catalog
     public static final String DEFAULT_FULL_TEXT_CONFIG_NAME = "DEFAULT_FULL_TEXT_CONFIG";
 
-    public FullTextConfigDescriptor(String dataverseName, String name, TokenizerCategory tokenizerCategory,
+    public FullTextConfigDescriptor(DataverseName dataverseName, String name, TokenizerCategory tokenizerCategory,
             ImmutableList<IFullTextFilterDescriptor> filterDescriptors) {
         this.dataverseName = dataverseName;
         this.name = name;
@@ -44,13 +53,12 @@ public class FullTextConfigDescriptor implements IFullTextConfigDescriptor {
         this.filterDescriptors = filterDescriptors;
     }
 
-    public static IFullTextConfigDescriptor getDefaultFullTextConfig() {
+    public static FullTextConfigDescriptor getDefaultFullTextConfig() {
         return new FullTextConfigDescriptor(null, DEFAULT_FULL_TEXT_CONFIG_NAME, TokenizerCategory.WORD,
                 ImmutableList.of());
     }
 
-    @Override
-    public String getDataverseName() {
+    public DataverseName getDataverseName() {
         return dataverseName;
     }
 

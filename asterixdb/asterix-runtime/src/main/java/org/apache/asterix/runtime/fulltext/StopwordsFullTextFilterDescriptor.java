@@ -17,9 +17,14 @@
  * under the License.
  */
 
-package org.apache.hyracks.storage.am.lsm.invertedindex.fulltext;
+package org.apache.asterix.runtime.fulltext;
 
 import java.util.List;
+
+import org.apache.asterix.common.metadata.DataverseName;
+import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.FullTextFilterType;
+import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextFilterEvaluator;
+import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.StopwordsFullTextFilterEvaluator;
 
 import com.google.common.collect.ImmutableList;
 
@@ -28,7 +33,8 @@ public class StopwordsFullTextFilterDescriptor extends AbstractFullTextFilterDes
 
     public ImmutableList<String> stopwordList;
 
-    public StopwordsFullTextFilterDescriptor(String dataverseName, String name, ImmutableList<String> stopwordList) {
+    public StopwordsFullTextFilterDescriptor(DataverseName dataverseName, String name,
+            ImmutableList<String> stopwordList) {
         super(dataverseName, name);
         this.stopwordList = stopwordList;
     }

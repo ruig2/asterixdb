@@ -185,6 +185,9 @@ import org.apache.asterix.om.types.ATypeTag;
 import org.apache.asterix.om.types.BuiltinType;
 import org.apache.asterix.om.types.IAType;
 import org.apache.asterix.om.types.TypeSignature;
+import org.apache.asterix.runtime.fulltext.AbstractFullTextFilterDescriptor;
+import org.apache.asterix.runtime.fulltext.FullTextConfigDescriptor;
+import org.apache.asterix.runtime.fulltext.StopwordsFullTextFilterDescriptor;
 import org.apache.asterix.transaction.management.service.transaction.DatasetIdFactory;
 import org.apache.asterix.translator.AbstractLangTranslator;
 import org.apache.asterix.translator.ClientRequest;
@@ -233,10 +236,8 @@ import org.apache.hyracks.api.result.ResultSetId;
 import org.apache.hyracks.control.cc.ClusterControllerService;
 import org.apache.hyracks.control.common.controllers.CCConfig;
 import org.apache.hyracks.storage.am.lsm.common.api.ILSMMergePolicyFactory;
-import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.FullTextConfigDescriptor;
 import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextConfigDescriptor;
 import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextFilterDescriptor;
-import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.StopwordsFullTextFilterDescriptor;
 import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.TokenizerCategory;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
@@ -1175,12 +1176,12 @@ public class QueryTranslator extends AbstractLangTranslator implements IStatemen
 
     protected void doCreateFullTextFilter(MetadataProvider metadataProvider,
             CreateFullTextFilterStatement stmtCreateFilter, DataverseName dataverseName) throws Exception {
-        IFullTextFilterDescriptor filterDescriptor;
+        AbstractFullTextFilterDescriptor filterDescriptor;
 
         String filterType = stmtCreateFilter.getFilterType();
         switch (filterType) {
             case FIELD_NAME_STOPWORDS: {
-                filterDescriptor = new StopwordsFullTextFilterDescriptor(dataverseName.getCanonicalForm(),
+                filterDescriptor = new StopwordsFullTextFilterDescriptor(dataverseName,
                         stmtCreateFilter.getFilterName(), stmtCreateFilter.getStopwordsList());
                 break;
             }
@@ -1269,8 +1270,8 @@ public class QueryTranslator extends AbstractLangTranslator implements IStatemen
             }
 
             TokenizerCategory tokenizerCategory = stmtCreateConfig.getTokenizerCategory();
-            IFullTextConfigDescriptor configDescriptor = new FullTextConfigDescriptor(dataverseName.getCanonicalForm(),
-                    configName, tokenizerCategory, filterDescriptorsBuilder.build());
+            FullTextConfigDescriptor configDescriptor = new FullTextConfigDescriptor(dataverseName, configName,
+                    tokenizerCategory, filterDescriptorsBuilder.build());
 
             MetadataManager.INSTANCE.addFullTextConfig(mdTxnCtx, configDescriptor);
             MetadataManager.INSTANCE.commitTransaction(mdTxnCtx);

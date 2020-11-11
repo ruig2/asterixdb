@@ -22,8 +22,6 @@ package org.apache.hyracks.storage.am.lsm.invertedindex.fulltext;
 import java.io.Serializable;
 
 public interface IFullTextEntityDescriptor extends Serializable {
-    String getDataverseName();
-
     String getName();
 
     // Filter or Config

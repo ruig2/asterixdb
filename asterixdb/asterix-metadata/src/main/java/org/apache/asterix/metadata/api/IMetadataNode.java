@@ -42,10 +42,10 @@ import org.apache.asterix.metadata.entities.Library;
 import org.apache.asterix.metadata.entities.Node;
 import org.apache.asterix.metadata.entities.NodeGroup;
 import org.apache.asterix.metadata.entities.Synonym;
+import org.apache.asterix.runtime.fulltext.AbstractFullTextFilterDescriptor;
+import org.apache.asterix.runtime.fulltext.FullTextConfigDescriptor;
 import org.apache.asterix.transaction.management.opcallbacks.AbstractIndexModificationOperationCallback;
 import org.apache.hyracks.algebricks.common.exceptions.AlgebricksException;
-import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextConfigDescriptor;
-import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextFilterDescriptor;
 
 /**
  * A metadata node stores metadata in its local storage structures (currently
@@ -455,7 +455,7 @@ public interface IMetadataNode extends Remote, Serializable {
      * @throws AlgebricksException
      *              For example, if the filter with the same name in the same dataverse already exists
      */
-    void addFullTextFilter(TxnId txnId, IFullTextFilterDescriptor filterDescriptor)
+    void addFullTextFilter(TxnId txnId, AbstractFullTextFilterDescriptor filterDescriptor)
             throws RemoteException, AlgebricksException;
 
     /**
@@ -468,7 +468,7 @@ public interface IMetadataNode extends Remote, Serializable {
      * @throws AlgebricksException
      *              For example, if the filter doesn't exist
      */
-    IFullTextFilterDescriptor getFullTextFilter(TxnId txnId, DataverseName dataverseName, String filterName)
+    AbstractFullTextFilterDescriptor getFullTextFilter(TxnId txnId, DataverseName dataverseName, String filterName)
             throws RemoteException, AlgebricksException;
 
     /**
@@ -494,7 +494,7 @@ public interface IMetadataNode extends Remote, Serializable {
      * @throws AlgebricksException
      *              For example, if the config with the same name in the same dataverse already exists
      */
-    void addFullTextConfig(TxnId txnId, IFullTextConfigDescriptor configDescriptor)
+    void addFullTextConfig(TxnId txnId, FullTextConfigDescriptor configDescriptor)
             throws AlgebricksException, RemoteException;
 
     /**
@@ -507,7 +507,7 @@ public interface IMetadataNode extends Remote, Serializable {
      * @throws AlgebricksException
      *              For example, if the full-text config doesn't exist
      */
-    IFullTextConfigDescriptor getFullTextConfig(TxnId txnId, DataverseName dataverseName, String configName)
+    FullTextConfigDescriptor getFullTextConfig(TxnId txnId, DataverseName dataverseName, String configName)
             throws AlgebricksException, RemoteException;
 
     /**

@@ -19,7 +19,7 @@
 
 package org.apache.asterix.metadata;
 
-import static org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.FullTextConfigDescriptor.DEFAULT_FULL_TEXT_CONFIG_NAME;
+import static org.apache.asterix.runtime.fulltext.FullTextConfigDescriptor.DEFAULT_FULL_TEXT_CONFIG_NAME;
 
 import java.rmi.RemoteException;
 import java.util.Collection;
@@ -58,12 +58,11 @@ import org.apache.asterix.metadata.entities.Library;
 import org.apache.asterix.metadata.entities.Node;
 import org.apache.asterix.metadata.entities.NodeGroup;
 import org.apache.asterix.metadata.entities.Synonym;
+import org.apache.asterix.runtime.fulltext.AbstractFullTextFilterDescriptor;
+import org.apache.asterix.runtime.fulltext.FullTextConfigDescriptor;
 import org.apache.asterix.transaction.management.opcallbacks.AbstractIndexModificationOperationCallback.Operation;
 import org.apache.hyracks.algebricks.common.exceptions.AlgebricksException;
 import org.apache.hyracks.api.exceptions.HyracksDataException;
-import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.FullTextConfigDescriptor;
-import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextConfigDescriptor;
-import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextFilterDescriptor;
 import org.apache.hyracks.util.ExitUtil;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -630,7 +629,7 @@ public abstract class MetadataManager implements IMetadataManager {
     }
 
     @Override
-    public void addFullTextFilter(MetadataTransactionContext mdTxnCtx, IFullTextFilterDescriptor filter)
+    public void addFullTextFilter(MetadataTransactionContext mdTxnCtx, AbstractFullTextFilterDescriptor filter)
             throws AlgebricksException {
         try {
             metadataNode.addFullTextFilter(mdTxnCtx.getTxnId(), filter);
@@ -650,8 +649,8 @@ public abstract class MetadataManager implements IMetadataManager {
     }
 
     @Override
-    public IFullTextFilterDescriptor getFullTextFilter(MetadataTransactionContext mdTxnCtx, DataverseName dataverseName,
-            String filterName) throws AlgebricksException {
+    public AbstractFullTextFilterDescriptor getFullTextFilter(MetadataTransactionContext mdTxnCtx,
+            DataverseName dataverseName, String filterName) throws AlgebricksException {
         try {
             return metadataNode.getFullTextFilter(mdTxnCtx.getTxnId(), dataverseName, filterName);
         } catch (AlgebricksException | RemoteException e) {
@@ -660,7 +659,7 @@ public abstract class MetadataManager implements IMetadataManager {
     }
 
     @Override
-    public void addFullTextConfig(MetadataTransactionContext mdTxnCtx, IFullTextConfigDescriptor configDescriptor)
+    public void addFullTextConfig(MetadataTransactionContext mdTxnCtx, FullTextConfigDescriptor configDescriptor)
             throws AlgebricksException {
         if (configDescriptor.getName().equals(DEFAULT_FULL_TEXT_CONFIG_NAME)) {
             throw new AsterixException(ErrorCode.FULL_TEXT_CONFIG_ALREADY_EXISTS, DEFAULT_FULL_TEXT_CONFIG_NAME);
@@ -674,7 +673,7 @@ public abstract class MetadataManager implements IMetadataManager {
     }
 
     @Override
-    public IFullTextConfigDescriptor getFullTextConfig(MetadataTransactionContext mdTxnCtx, DataverseName dataverseName,
+    public FullTextConfigDescriptor getFullTextConfig(MetadataTransactionContext mdTxnCtx, DataverseName dataverseName,
             String configName) throws AlgebricksException {
         if (Strings.isNullOrEmpty(configName) || configName.equals(DEFAULT_FULL_TEXT_CONFIG_NAME)) {
             return FullTextConfigDescriptor.getDefaultFullTextConfig();

@@ -43,9 +43,7 @@ import org.apache.hyracks.storage.am.common.datagen.DataGenThread;
 import org.apache.hyracks.storage.am.common.impls.IndexAccessParameters;
 import org.apache.hyracks.storage.am.config.AccessMethodTestsConfig;
 import org.apache.hyracks.storage.am.lsm.invertedindex.api.IInvertedIndexSearchModifier;
-import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.FullTextConfigDescriptor;
-import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextConfigEvaluator;
-import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.TokenizerCategory;
+import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.FullTextConfigEvaluatorFactory;
 import org.apache.hyracks.storage.am.lsm.invertedindex.impls.LSMInvertedIndex;
 import org.apache.hyracks.storage.am.lsm.invertedindex.impls.LSMInvertedIndexAccessor;
 import org.apache.hyracks.storage.am.lsm.invertedindex.search.ConjunctiveSearchModifier;
@@ -56,8 +54,6 @@ import org.apache.hyracks.storage.am.lsm.invertedindex.util.LSMInvertedIndexTest
 import org.apache.hyracks.storage.common.IIndex;
 import org.apache.hyracks.storage.common.IIndexAccessParameters;
 import org.apache.hyracks.storage.common.IIndexCursor;
-
-import com.google.common.collect.ImmutableList;
 
 public class LSMInvertedIndexTestWorker extends AbstractIndexTestWorker {
 
@@ -94,9 +90,8 @@ public class LSMInvertedIndexTestWorker extends AbstractIndexTestWorker {
         RangePredicate rangePred = new RangePredicate(null, null, true, true, null, null);
         IBinaryTokenizerFactory tokenizerFactory = invIndex.getTokenizerFactory();
         int searchModifierIndex = Math.abs(rnd.nextInt()) % TEST_SEARCH_MODIFIERS.length;
-        InvertedIndexSearchPredicate searchPred = new InvertedIndexSearchPredicate(
-                tokenizerFactory.createTokenizer(), (IFullTextConfigEvaluator) new FullTextConfigDescriptor("", "",
-                        TokenizerCategory.WORD, ImmutableList.of()).createEvaluatorFactory(),
+        InvertedIndexSearchPredicate searchPred = new InvertedIndexSearchPredicate(tokenizerFactory.createTokenizer(),
+                FullTextConfigEvaluatorFactory.getDefaultFactory().createFullTextConfigEvaluator(),
                 TEST_SEARCH_MODIFIERS[searchModifierIndex]);
 
         switch (op) {

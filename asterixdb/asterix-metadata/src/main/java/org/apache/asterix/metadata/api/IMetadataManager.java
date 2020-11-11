@@ -42,9 +42,9 @@ import org.apache.asterix.metadata.entities.Library;
 import org.apache.asterix.metadata.entities.Node;
 import org.apache.asterix.metadata.entities.NodeGroup;
 import org.apache.asterix.metadata.entities.Synonym;
+import org.apache.asterix.runtime.fulltext.AbstractFullTextFilterDescriptor;
+import org.apache.asterix.runtime.fulltext.FullTextConfigDescriptor;
 import org.apache.hyracks.algebricks.common.exceptions.AlgebricksException;
-import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextConfigDescriptor;
-import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextFilterDescriptor;
 
 /**
  * A metadata manager provides user access to Asterix metadata (e.g., types,
@@ -427,7 +427,7 @@ public interface IMetadataManager extends IMetadataBootstrap {
      * @throws AlgebricksException
      *              For example, if the filter with the same name in the same dataverse already exists
      */
-    void addFullTextFilter(MetadataTransactionContext mdTxnCtx, IFullTextFilterDescriptor filterDescriptor)
+    void addFullTextFilter(MetadataTransactionContext mdTxnCtx, AbstractFullTextFilterDescriptor filterDescriptor)
             throws AlgebricksException;
 
     /**
@@ -440,7 +440,7 @@ public interface IMetadataManager extends IMetadataBootstrap {
      * @throws AlgebricksException
      *              For example, if the filter doesn't exist
      */
-    IFullTextFilterDescriptor getFullTextFilter(MetadataTransactionContext mdTxnCtx, DataverseName dataverseName,
+    AbstractFullTextFilterDescriptor getFullTextFilter(MetadataTransactionContext mdTxnCtx, DataverseName dataverseName,
             String filterName) throws AlgebricksException;
 
     /**
@@ -466,7 +466,7 @@ public interface IMetadataManager extends IMetadataBootstrap {
      * @throws AlgebricksException
      *              For example, if the config with the same name in the same dataverse already exists
      */
-    void addFullTextConfig(MetadataTransactionContext mdTxnCtx, IFullTextConfigDescriptor configDescriptor)
+    void addFullTextConfig(MetadataTransactionContext mdTxnCtx, FullTextConfigDescriptor configDescriptor)
             throws AlgebricksException;
 
     /**
@@ -479,7 +479,7 @@ public interface IMetadataManager extends IMetadataBootstrap {
      * @throws AlgebricksException
      *              For example, if the full-text config doesn't exist
      */
-    IFullTextConfigDescriptor getFullTextConfig(MetadataTransactionContext mdTxnCtx, DataverseName dataverseName,
+    FullTextConfigDescriptor getFullTextConfig(MetadataTransactionContext mdTxnCtx, DataverseName dataverseName,
             String configName) throws AlgebricksException;
 
     /**
