@@ -49,7 +49,8 @@ public class FullTextConfigEvaluatorFactory implements IFullTextConfigEvaluatorF
     }
 
     public static IFullTextConfigEvaluatorFactory getDefaultFactory() {
-        return new FullTextConfigEvaluatorFactory("default_config_evaluator_factory", TokenizerCategory.WORD, ImmutableList.of());
+        return new FullTextConfigEvaluatorFactory("default_config_evaluator_factory", TokenizerCategory.WORD,
+                ImmutableList.of());
     }
 
     private static final String FIELD_NAME = "name";

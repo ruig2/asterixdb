@@ -19,14 +19,10 @@
 
 package org.apache.hyracks.storage.am.lsm.invertedindex.fulltext;
 
-import java.security.InvalidParameterException;
-
 import org.apache.hyracks.storage.am.lsm.invertedindex.tokenizers.IBinaryTokenizer;
 import org.apache.hyracks.storage.am.lsm.invertedindex.tokenizers.IToken;
 
 import com.google.common.collect.ImmutableList;
-
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 // FullTextConfigEvaluator is a run-time evaluator while the IFullTextConfigDescriptor is a compile-time descriptor
 //
@@ -151,9 +147,8 @@ public class FullTextConfigEvaluator implements IFullTextConfigEvaluator {
                 this.tokenizer = null;
                 break;
             case NGRAM:
-                throw new NotImplementedException();
             default:
-                throw new InvalidParameterException();
+                throw new IllegalArgumentException();
         }
     }
 }

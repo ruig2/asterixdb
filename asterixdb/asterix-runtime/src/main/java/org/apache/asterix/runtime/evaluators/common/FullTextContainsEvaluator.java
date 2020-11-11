@@ -86,8 +86,8 @@ public class FullTextContainsEvaluator implements IScalarEvaluator {
     private final IBinaryComparator strLowerCaseCmp =
             BinaryComparatorFactoryProvider.UTF8STRING_LOWERCASE_POINTABLE_INSTANCE.createBinaryComparator();
 
-    private IFullTextConfigEvaluator analyzerLeft = null;
-    private IFullTextConfigEvaluator analyzerRight = null;
+    private IFullTextConfigEvaluator ftEvaluatorLeft;
+    private IFullTextConfigEvaluator ftEvaluatorRight;
 
     // Case insensitive hash for full-text search
     private IBinaryHashFunction hashFunc = null;
@@ -129,8 +129,8 @@ public class FullTextContainsEvaluator implements IScalarEvaluator {
         this.argOptions = new TaggedValuePointable[optionArgsLength];
 
         // fullTextConfig is shared by multiple threads on the NC node, so each thread needs a local copy
-        this.analyzerLeft = fullTextConfigDescriptor.createEvaluatorFactory().createFullTextConfigEvaluator();
-        this.analyzerRight = fullTextConfigDescriptor.createEvaluatorFactory().createFullTextConfigEvaluator();
+        this.ftEvaluatorLeft = fullTextConfigDescriptor.createEvaluatorFactory().createFullTextConfigEvaluator();
+        this.ftEvaluatorRight = fullTextConfigDescriptor.createEvaluatorFactory().createFullTextConfigEvaluator();
 
         for (int i = 0; i < optionArgsLength; i++) {
             this.evalOptions[i] = args[i + 2].createScalarEvaluator(context);
@@ -255,7 +255,7 @@ public class FullTextContainsEvaluator implements IScalarEvaluator {
         rightHashSet = new BinaryHashSet(HASH_SET_SLOT_SIZE, HASH_SET_FRAME_SIZE, hashFunc, strLowerCaseTokenCmp, null);
         IBinaryTokenizer tokenizerForLeftArray = BinaryTokenizerFactoryProvider.INSTANCE
                 .getWordTokenizerFactory(ATypeTag.STRING, true, true).createTokenizer();
-        analyzerLeft.setTokenizer(tokenizerForLeftArray);
+        ftEvaluatorLeft.setTokenizer(tokenizerForLeftArray);
     }
 
     void resetQueryArrayAndRight(byte[] arg2Array, ATypeTag typeTag2, IPointable arg2)
@@ -279,7 +279,7 @@ public class FullTextContainsEvaluator implements IScalarEvaluator {
             default:
                 break;
         }
-        analyzerRight.setTokenizer(tokenizerForRightArray);
+        ftEvaluatorRight.setTokenizer(tokenizerForRightArray);
 
         queryArray = arg2Array;
         queryArrayStartOffset = arg2.getStartOffset();
@@ -303,14 +303,14 @@ public class FullTextContainsEvaluator implements IScalarEvaluator {
             queryArrayStartOffset = queryArrayStartOffset + numBytesToStoreLength;
             queryArrayLength = queryArrayLength - numBytesToStoreLength;
         }
-        analyzerRight.reset(queryArray, queryArrayStartOffset, queryArrayLength);
+        ftEvaluatorRight.reset(queryArray, queryArrayStartOffset, queryArrayLength);
 
         // Create tokens from the given query predicate
-        while (analyzerRight.hasNext()) {
-            analyzerRight.next();
+        while (ftEvaluatorRight.hasNext()) {
+            ftEvaluatorRight.next();
             queryTokenCount++;
 
-            IToken token = analyzerRight.getToken();
+            IToken token = ftEvaluatorRight.getToken();
             // Insert the starting position and the length of the current token into the hash set.
             // We don't store the actual value of this token since we can access it via offset and length.
             int tokenOffset = token.getStartOffset();
@@ -414,13 +414,13 @@ public class FullTextContainsEvaluator implements IScalarEvaluator {
         // The left side: field (document)
         // Resets the tokenizer for the given keywords in a document.
 
-        analyzerLeft.reset(arg1.getByteArray(), arg1.getStartOffset(), arg1.getLength());
+        ftEvaluatorLeft.reset(arg1.getByteArray(), arg1.getStartOffset(), arg1.getLength());
 
         // Creates tokens from a field in the left side (document)
-        while (analyzerLeft.hasNext()) {
-            analyzerLeft.next();
+        while (ftEvaluatorLeft.hasNext()) {
+            ftEvaluatorLeft.next();
 
-            IToken token = analyzerLeft.getToken();
+            IToken token = ftEvaluatorLeft.getToken();
             // Records the starting position and the length of the current token.
             keyEntry.set(token.getStartOffset(), token.getTokenLength());
 

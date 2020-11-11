@@ -19,11 +19,11 @@
 
 package org.apache.hyracks.storage.am.lsm.invertedindex.fulltext;
 
+import java.io.Serializable;
+
 import org.apache.hyracks.api.io.IJsonSerializable;
 import org.apache.hyracks.storage.am.lsm.invertedindex.tokenizers.IToken;
 import org.apache.hyracks.storage.am.lsm.invertedindex.tokenizers.TokenizerInfo;
-
-import java.io.Serializable;
 
 // The full-text filter evaluator needs to be stored in the index local resource, so it needs to be IJsonSerializable
 // Also, it needs to be distributed from CC (compile-time) to NC (run-time), so it needs to be Serializable
