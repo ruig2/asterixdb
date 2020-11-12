@@ -1263,8 +1263,8 @@ public class QueryTranslator extends AbstractLangTranslator implements IStatemen
                 IFullTextFilterDescriptor filterDescriptor =
                         MetadataManager.INSTANCE.getFullTextFilter(mdTxnCtx, dataverseName, filterName);
                 if (filterDescriptor == null) {
-                    throw new CompilationException(ErrorCode.FULL_TEXT_FAIL_TO_GET_FILTER_FROM_METADATA,
-                            "Full-text filter " + filterName + " not found");
+                    throw new CompilationException(ErrorCode.FULL_TEXT_FILTER_NOT_FOUND, stmtCreateConfig.getSourceLocation(),
+                            filterName);
                 }
                 filterDescriptorsBuilder.add(filterDescriptor);
             }
@@ -2076,8 +2076,17 @@ public class QueryTranslator extends AbstractLangTranslator implements IStatemen
         MetadataTransactionContext mdTxnCtx = MetadataManager.INSTANCE.beginTransaction();
         metadataProvider.setMetadataTxnContext(mdTxnCtx);
         try {
-            MetadataManager.INSTANCE.dropFullTextFilter(mdTxnCtx, dataverseName, fullTextFilterName,
-                    stmtFilterDrop.getIfExists());
+            IFullTextFilterDescriptor filter = MetadataManager.INSTANCE.getFullTextFilter(mdTxnCtx, dataverseName, fullTextFilterName);
+            if (filter == null) {
+                if (stmtFilterDrop.getIfExists()) {
+                    MetadataManager.INSTANCE.commitTransaction(mdTxnCtx);
+                    return;
+                } else {
+                    throw new CompilationException(ErrorCode.FULL_TEXT_FILTER_NOT_FOUND, stmtFilterDrop.getSourceLocation(), fullTextFilterName);
+                }
+            }
+
+            MetadataManager.INSTANCE.dropFullTextFilter(mdTxnCtx, dataverseName, fullTextFilterName);
             MetadataManager.INSTANCE.commitTransaction(mdTxnCtx);
         } catch (Exception e) {
             abort(e, e, mdTxnCtx);
@@ -2104,17 +2113,26 @@ public class QueryTranslator extends AbstractLangTranslator implements IStatemen
             IHyracksClientConnection hcc, IRequestParameters requestParameters)
             throws RemoteException, AlgebricksException {
         if (stmtConfigDrop.getConfigName().equalsIgnoreCase(FullTextConfigDescriptor.DEFAULT_FULL_TEXT_CONFIG_NAME)) {
-            throw CompilationException.create(ErrorCode.COMPILATION_ERROR,
-                    "Not allowed to drop the default full-text config");
+            throw CompilationException.create(ErrorCode.FULL_TEXT_DEFAULT_CONFIG_CANNOT_BE_DELETED, stmtConfigDrop.getSourceLocation());
         }
 
         DataverseName dataverseName = getActiveDataverseName(stmtConfigDrop.getDataverseName());
         MetadataTransactionContext mdTxnCtx = MetadataManager.INSTANCE.beginTransaction();
         metadataProvider.setMetadataTxnContext(mdTxnCtx);
+        String fullTextConfigName = stmtConfigDrop.getConfigName();
 
         try {
-            MetadataManager.INSTANCE.dropFullTextConfig(mdTxnCtx, dataverseName, stmtConfigDrop.getConfigName(),
-                    stmtConfigDrop.getIfExists());
+            IFullTextConfigDescriptor config = MetadataManager.INSTANCE.getFullTextConfig(mdTxnCtx, dataverseName, fullTextConfigName);
+            if (config == null) {
+                if (stmtConfigDrop.getIfExists()) {
+                    MetadataManager.INSTANCE.commitTransaction(mdTxnCtx);
+                    return;
+                } else {
+                    throw new CompilationException(ErrorCode.FULL_TEXT_CONFIG_NOT_FOUND, stmtConfigDrop.getSourceLocation(), fullTextConfigName);
+                }
+            }
+
+            MetadataManager.INSTANCE.dropFullTextConfig(mdTxnCtx, dataverseName, fullTextConfigName);
             MetadataManager.INSTANCE.commitTransaction(mdTxnCtx);
         } catch (Exception e) {
             abort(e, e, mdTxnCtx);

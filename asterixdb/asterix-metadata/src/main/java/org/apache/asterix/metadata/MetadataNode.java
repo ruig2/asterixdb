@@ -485,13 +485,12 @@ public class MetadataNode implements IMetadataNode {
     }
 
     @Override
-    public void dropFullTextFilter(TxnId txnId, DataverseName dataverseName, String filterName, boolean ifExists)
+    public void dropFullTextFilter(TxnId txnId, DataverseName dataverseName, String filterName)
             throws AlgebricksException {
-        dropFullTextFilterDescriptor(txnId, dataverseName, filterName, ifExists, false);
+        dropFullTextFilterDescriptor(txnId, dataverseName, filterName, false);
     }
 
-    private void dropFullTextFilterDescriptor(TxnId txnId, DataverseName dataverseName, String filterName,
-            boolean ifExists, boolean force) throws AlgebricksException {
+    private void dropFullTextFilterDescriptor(TxnId txnId, DataverseName dataverseName, String filterName, boolean force) throws AlgebricksException {
         if (!force) {
             confirmFullTextFilterCanBeDeleted(txnId, dataverseName, filterName);
         }
@@ -503,10 +502,6 @@ public class MetadataNode implements IMetadataNode {
             ITupleReference key = translator.createTupleAsIndex(dataverseName.getCanonicalForm(), filterName);
             deleteTupleFromIndex(txnId, MetadataPrimaryIndexes.FULL_TEXT_FILTER_DATASET, key);
         } catch (HyracksDataException e) {
-            if (e.getComponent().equals(ErrorCode.HYRACKS)
-                    && e.getErrorCode() == ErrorCode.UPDATE_OR_DELETE_NON_EXISTENT_KEY && ifExists) {
-                return;
-            }
             throw new AlgebricksException(e);
         }
     }
@@ -572,13 +567,12 @@ public class MetadataNode implements IMetadataNode {
     }
 
     @Override
-    public void dropFullTextConfig(TxnId txnId, DataverseName dataverseName, String configName, boolean ifExists)
+    public void dropFullTextConfig(TxnId txnId, DataverseName dataverseName, String configName)
             throws AlgebricksException {
-        dropFullTextConfigDescriptor(txnId, dataverseName, configName, ifExists, false);
+        dropFullTextConfigDescriptor(txnId, dataverseName, configName, false);
     }
 
-    private void dropFullTextConfigDescriptor(TxnId txnId, DataverseName dataverseName, String configName,
-            boolean ifExists, boolean force) throws AlgebricksException {
+    private void dropFullTextConfigDescriptor(TxnId txnId, DataverseName dataverseName, String configName, boolean force) throws AlgebricksException {
         if (!force) {
             confirmFullTextConfigCanBeDeleted(txnId, dataverseName, configName);
         }
@@ -590,10 +584,6 @@ public class MetadataNode implements IMetadataNode {
             ITupleReference key = translator.createTupleAsIndex(dataverseName.getCanonicalForm(), configName);
             deleteTupleFromIndex(txnId, MetadataPrimaryIndexes.FULL_TEXT_CONFIG_DATASET, key);
         } catch (HyracksDataException e) {
-            if (e.getComponent().equals(ErrorCode.HYRACKS)
-                    && e.getErrorCode() == ErrorCode.UPDATE_OR_DELETE_NON_EXISTENT_KEY && ifExists) {
-                return;
-            }
             throw new AlgebricksException(e);
         }
         return;
@@ -724,12 +714,12 @@ public class MetadataNode implements IMetadataNode {
 
             List<FullTextConfigDescriptor> configs = getAllFullTextConfigDescriptors(txnId);
             for (IFullTextConfigDescriptor config : configs) {
-                dropFullTextConfigDescriptor(txnId, dataverseName, config.getName(), true, true);
+                dropFullTextConfigDescriptor(txnId, dataverseName, config.getName(), true);
             }
 
             List<AbstractFullTextFilterDescriptor> filters = getAllFullTextFilterDescriptors(txnId);
             for (AbstractFullTextFilterDescriptor filter : filters) {
-                dropFullTextFilterDescriptor(txnId, dataverseName, filter.getName(), true, true);
+                dropFullTextFilterDescriptor(txnId, dataverseName, filter.getName(), true);
             }
 
             // Drop all types in this dataverse.

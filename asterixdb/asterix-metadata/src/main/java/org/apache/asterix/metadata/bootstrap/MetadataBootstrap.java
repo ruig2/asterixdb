@@ -321,15 +321,8 @@ public class MetadataBootstrap {
     // So here, let's try to insert if not exists
     private static void insertFullTextConfigAndFilterIfNotExist(MetadataTransactionContext mdTxnCtx)
             throws AlgebricksException {
-        if (MetadataManager.INSTANCE.getDataset(mdTxnCtx, MetadataConstants.METADATA_DATAVERSE_NAME,
-                MetadataConstants.FULL_TEXT_CONFIG_DATASET_NAME) == null) {
-            insertMetadataDatasets(mdTxnCtx, new IMetadataIndex[] { MetadataPrimaryIndexes.FULL_TEXT_CONFIG_DATASET });
-        }
-        if (MetadataManager.INSTANCE.getDataset(mdTxnCtx, MetadataConstants.METADATA_DATAVERSE_NAME,
-                MetadataConstants.FULL_TEXT_FILTER_DATASET_NAME) == null) {
-            insertMetadataDatasets(mdTxnCtx, new IMetadataIndex[] { MetadataPrimaryIndexes.FULL_TEXT_FILTER_DATASET });
-        }
 
+        // We need to insert data types first because datasets depend on data types
         // ToDo: create a new function to reduce duplicated code here: addDatatypeIfNotExist()
         IAType fullTextConfigRecordType = MetadataPrimaryIndexes.FULL_TEXT_CONFIG_DATASET.getPayloadRecordType();
         if (MetadataManager.INSTANCE.getDatatype(mdTxnCtx, MetadataConstants.METADATA_DATAVERSE_NAME,
@@ -342,6 +335,15 @@ public class MetadataBootstrap {
                 fullTextFilterRecordType.getTypeName()) == null) {
             MetadataManager.INSTANCE.addDatatype(mdTxnCtx, new Datatype(MetadataConstants.METADATA_DATAVERSE_NAME,
                     fullTextFilterRecordType.getTypeName(), fullTextFilterRecordType, false));
+        }
+
+        if (MetadataManager.INSTANCE.getDataset(mdTxnCtx, MetadataConstants.METADATA_DATAVERSE_NAME,
+                MetadataConstants.FULL_TEXT_CONFIG_DATASET_NAME) == null) {
+            insertMetadataDatasets(mdTxnCtx, new IMetadataIndex[] { MetadataPrimaryIndexes.FULL_TEXT_CONFIG_DATASET });
+        }
+        if (MetadataManager.INSTANCE.getDataset(mdTxnCtx, MetadataConstants.METADATA_DATAVERSE_NAME,
+                MetadataConstants.FULL_TEXT_FILTER_DATASET_NAME) == null) {
+            insertMetadataDatasets(mdTxnCtx, new IMetadataIndex[] { MetadataPrimaryIndexes.FULL_TEXT_FILTER_DATASET });
         }
     }
 

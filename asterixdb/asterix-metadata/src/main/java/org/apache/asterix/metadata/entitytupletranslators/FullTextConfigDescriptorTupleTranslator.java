@@ -112,7 +112,7 @@ public class FullTextConfigDescriptorTupleTranslator extends AbstractTupleTransl
             try {
                 MetadataManager.INSTANCE.abortTransaction(mdTxnCtx);
             } catch (RemoteException remoteException) {
-                throw new MetadataException(ErrorCode.FULL_TEXT_FAIL_TO_GET_FILTER_FROM_METADATA, remoteException);
+                throw new MetadataException(ErrorCode.FULL_TEXT_FILTER_NOT_FOUND, remoteException);
             }
         }
 

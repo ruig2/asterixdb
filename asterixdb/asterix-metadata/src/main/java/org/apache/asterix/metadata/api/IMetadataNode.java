@@ -478,12 +478,10 @@ public interface IMetadataNode extends Remote, Serializable {
      *            the name of the dataverse where the full-text filter belongs
      * @param filterName
      *            the name of the full-text filter to be dropped
-     * @param ifExists
-     *            if set to true, don't throw an exception if the filter doesn't exist
      * @throws AlgebricksException
      *              For example, if ifExists is set to false and the filter doesn't exist
      */
-    void dropFullTextFilter(TxnId txnId, DataverseName dataverseName, String filterName, boolean ifExists)
+    void dropFullTextFilter(TxnId txnId, DataverseName dataverseName, String filterName)
             throws RemoteException, AlgebricksException;
 
     /**
@@ -517,12 +515,10 @@ public interface IMetadataNode extends Remote, Serializable {
      *            the name of the dataverse where the full-text filter belongs
      * @param configName
      *            the name of the full-text config to be dropped
-     * @param ifExists
-     *            if set to true, don't throw an exception if the config doesn't exist
      * @throws AlgebricksException
      *              For example, if ifExists is set to false and the config doesn't exist
      */
-    void dropFullTextConfig(TxnId txnId, DataverseName dataverseName, String configName, boolean ifExists)
+    void dropFullTextConfig(TxnId txnId, DataverseName dataverseName, String configName)
             throws RemoteException, AlgebricksException;
 
     /**
