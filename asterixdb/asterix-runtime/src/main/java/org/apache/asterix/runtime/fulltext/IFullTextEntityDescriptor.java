@@ -17,7 +17,9 @@
  * under the License.
  */
 
-package org.apache.hyracks.storage.am.lsm.invertedindex.fulltext;
+package org.apache.asterix.runtime.fulltext;
+
+import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.FullTextEntityCategory;
 
 import java.io.Serializable;
 

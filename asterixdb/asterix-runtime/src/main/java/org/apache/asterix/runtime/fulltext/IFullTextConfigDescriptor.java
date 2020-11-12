@@ -17,9 +17,11 @@
  * under the License.
  */
 
-package org.apache.hyracks.storage.am.lsm.invertedindex.fulltext;
+package org.apache.asterix.runtime.fulltext;
 
 import com.google.common.collect.ImmutableList;
+import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextConfigEvaluatorFactory;
+import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.TokenizerCategory;
 
 public interface IFullTextConfigDescriptor extends IFullTextEntityDescriptor {
     TokenizerCategory getTokenizerCategory();
