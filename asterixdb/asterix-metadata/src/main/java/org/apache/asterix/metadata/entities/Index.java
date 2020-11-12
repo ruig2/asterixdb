@@ -61,9 +61,9 @@ public class Index implements IMetadataEntity<Index>, Comparable<Index> {
     private final boolean isPrimaryIndex;
     // Specific to NGRAM indexes.
     private final int gramLength;
+    // ToDo: to allow index to access the full-text config in another dataverse,
+    //   maybe we need to add a new field here fullTextConfigDataverseName for the dataverse name of the full-text config
     // Specific to FullText indexes.
-    // ToDo: maybe put the dataverse name in the fullTextConfigName
-    //  so that the index can access the full-text config in another dataverse
     private final String fullTextConfigName;
     // Type of pending operations with respect to atomic DDL operation
     private int pendingOp;

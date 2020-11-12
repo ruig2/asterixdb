@@ -98,8 +98,8 @@ public class FullTextConfigDescriptorTupleTranslator extends AbstractTupleTransl
         }
 
         // Need to access metadata to get filters
-        MetadataTransactionContext mdTxnCtx = null;
         ImmutableList.Builder<IFullTextFilterDescriptor> filterDescriptorsBuilder = ImmutableList.builder();
+        MetadataTransactionContext mdTxnCtx = null;
         try {
             mdTxnCtx = MetadataManager.INSTANCE.beginTransaction();
             for (String filterName : filterNames) {

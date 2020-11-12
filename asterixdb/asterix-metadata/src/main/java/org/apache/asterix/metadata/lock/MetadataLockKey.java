@@ -110,12 +110,12 @@ final class MetadataLockKey implements IMetadataLock.LockKey {
         return new MetadataLockKey(EntityKind.FUNCTION, null, dataverseName, functionName);
     }
 
-    static MetadataLockKey createFullTextConfigLockKey(DataverseName dataverseName, String functionName) {
-        return new MetadataLockKey(EntityKind.FULL_TEXT_CONFIG, null, dataverseName, functionName);
+    static MetadataLockKey createFullTextConfigLockKey(DataverseName dataverseName, String fullTextConfigName) {
+        return new MetadataLockKey(EntityKind.FULL_TEXT_CONFIG, null, dataverseName, fullTextConfigName);
     }
 
-    static MetadataLockKey createFullTextFilterLockKey(DataverseName dataverseName, String functionName) {
-        return new MetadataLockKey(EntityKind.FULL_TEXT_FILTER, null, dataverseName, functionName);
+    static MetadataLockKey createFullTextFilterLockKey(DataverseName dataverseName, String fullTextFilterName) {
+        return new MetadataLockKey(EntityKind.FULL_TEXT_FILTER, null, dataverseName, fullTextFilterName);
     }
 
     static MetadataLockKey createLibraryLockKey(DataverseName dataverseName, String libraryName) {

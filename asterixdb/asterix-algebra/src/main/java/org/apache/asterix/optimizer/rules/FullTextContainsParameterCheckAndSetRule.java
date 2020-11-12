@@ -23,6 +23,7 @@ import java.util.List;
 
 import org.apache.asterix.common.exceptions.CompilationException;
 import org.apache.asterix.common.exceptions.ErrorCode;
+import org.apache.asterix.common.metadata.DataverseName;
 import org.apache.asterix.metadata.declared.MetadataProvider;
 import org.apache.asterix.om.base.AString;
 import org.apache.asterix.om.constants.AsterixConstantValue;
@@ -175,7 +176,8 @@ public class FullTextContainsParameterCheckAndSetRule implements IAlgebraicRewri
                 }
 
                 MetadataProvider metadataProvider = (MetadataProvider) context.getMetadataProvider();
-                funcExpr.setOpaqueParameters(new Object[] {metadataProvider.findFullTextConfigDescriptor(ftConfigName) });
+                DataverseName dataverseName = metadataProvider.getDefaultDataverseName();
+                funcExpr.setOpaqueParameters(new Object[] {metadataProvider.findFullTextConfigDescriptor(dataverseName, ftConfigName) });
                 // Resets the last argument.
                 funcExpr.getArguments().clear();
                 funcExpr.getArguments().addAll(newExprs);

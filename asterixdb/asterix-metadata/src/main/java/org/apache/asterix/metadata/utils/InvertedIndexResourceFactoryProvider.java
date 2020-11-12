@@ -122,7 +122,7 @@ public class InvertedIndexResourceFactoryProvider implements IResourceFactoryPro
                 getTokenComparatorFactories(dataset, index, recordType, metaType);
         IBinaryTokenizerFactory tokenizerFactory = getTokenizerFactory(dataset, index, recordType, metaType);
         IFullTextConfigDescriptor fullTextConfigDescriptor =
-                mdProvider.findFullTextConfigDescriptor(index.getFullTextConfigName());
+                mdProvider.findFullTextConfigDescriptor(index.getDataverseName(), index.getFullTextConfigName());
         IFullTextConfigEvaluatorFactory fullTextConfigEvaluatorFactory =
                 fullTextConfigDescriptor.createEvaluatorFactory();
 

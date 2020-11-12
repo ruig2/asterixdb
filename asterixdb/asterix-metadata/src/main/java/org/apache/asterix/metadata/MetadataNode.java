@@ -1344,7 +1344,7 @@ public class MetadataNode implements IMetadataNode {
                 if (filterDescriptor.getName().equals(fullTextFilterName)) {
                     throw new AlgebricksException("Cannot drop full-text filter "
                             + TypeUtil.getFullyQualifiedDisplayName(dataverseName, fullTextFilterName)
-                            + " being used by type "
+                            + " being used by full-text config "
                             + TypeUtil.getFullyQualifiedDisplayName(dataverseName, config.getName()));
                 }
             }
