@@ -534,14 +534,13 @@ public final class MetadataRecordTypes {
     // Stemmer Filter
     public static final int FULLTEXT_ENTITY_ARECORD_STEMMER_LANGUAGE_FIELD_INDEX = 3;
 
-    // For now the fields of a full-text config is fixed, so let's make it CLOSE (NOT OPEN)
     public static final String RECORD_NAME_FULL_TEXT_CONFIG = "FullTextConfigRecordType";
     public static final ARecordType FULL_TEXT_CONFIG_RECORDTYPE = createRecordType(RECORD_NAME_FULL_TEXT_CONFIG,
             new String[] { FIELD_NAME_DATAVERSE_NAME, FIELD_NAME_FULL_TEXT_CONFIG_NAME, FIELD_NAME_FULL_TEXT_TOKENIZER,
                     FIELD_NAME_FULL_TEXT_FILTER_PIPELINE },
             new IAType[] { BuiltinType.ASTRING, BuiltinType.ASTRING, BuiltinType.ASTRING,
                     new AOrderedListType(BuiltinType.ASTRING, "FullTextFilterPipeline") },
-            false);
+            true);
 
     public static final String RECORD_NAME_FULL_TEXT_FILTER = "FullTextFilterRecordType";
     // Different filters may have different fields, e.g.
@@ -549,7 +548,7 @@ public final class MetadataRecordTypes {
     public static final ARecordType FULL_TEXT_FILTER_RECORDTYPE = createRecordType(RECORD_NAME_FULL_TEXT_FILTER,
             new String[] { FIELD_NAME_DATAVERSE_NAME, FIELD_NAME_FULL_TEXT_FILTER_NAME,
                     FIELD_NAME_FULL_TEXT_FILTER_TYPE },
-            new IAType[] { BuiltinType.ASTRING, BuiltinType.ASTRING, BuiltinType.ASTRING }, true);
+            new IAType[] { BuiltinType.ASTRING, AUnionType.createNullableType(BuiltinType.ASTRING), AUnionType.createNullableType(BuiltinType.ASTRING) }, true);
 
     // private members
     private MetadataRecordTypes() {
