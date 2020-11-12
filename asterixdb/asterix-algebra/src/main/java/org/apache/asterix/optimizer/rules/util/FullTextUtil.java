@@ -74,7 +74,7 @@ public class FullTextUtil {
         // Originally, the full-text search option is an Asterix record such as
         //     {"mode": "all", "config": "DEFAULT_FULL_TEXT_CONFIG"}
         for (int i = 2; i < arguments.size(); i += 2) {
-            // The the full-text search option arguments are already checked in FullTextContainsParameterCheckRule,
+            // The the full-text search option arguments are already checked in FullTextContainsParameterCheckAndSetRule,
             String optionName = ConstantExpressionUtil.getStringConstant(arguments.get(i).getValue());
 
             if (optionName.equalsIgnoreCase(FullTextContainsDescriptor.FULLTEXT_CONFIG_OPTION)) {

@@ -50,7 +50,7 @@ import com.google.common.base.Strings;
 /**
  * Checks whether the given parameters of the ftcontains() function are correct during the compilation.
  */
-public class FullTextContainsParameterCheckRule implements IAlgebraicRewriteRule {
+public class FullTextContainsParameterCheckAndSetRule implements IAlgebraicRewriteRule {
 
     // Visitor for checking and transforming ftcontains() expression
     protected FullTextContainsExpressionVisitor ftcontainsExprVisitor = new FullTextContainsExpressionVisitor();
