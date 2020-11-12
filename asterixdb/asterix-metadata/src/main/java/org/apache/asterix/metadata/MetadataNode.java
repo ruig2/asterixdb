@@ -712,11 +712,18 @@ public class MetadataNode implements IMetadataNode {
                 dropDataset(txnId, dataverseName, ds.getDatasetName(), true);
             }
 
+            // Drop full-text configs in this dataverse.
+            // Note that full-text configs are utilized by the index, and we need to always drop index first
+            // and then full-text config
             List<FullTextConfigDescriptor> configs = getAllFullTextConfigDescriptors(txnId);
             for (IFullTextConfigDescriptor config : configs) {
                 dropFullTextConfigDescriptor(txnId, dataverseName, config.getName(), true);
             }
 
+            // Drop full-text filters in this dataverse.
+            // Note that full-text filters are utilized by the full-text configs,
+            // and we need to always drop full-text configs first
+            // and then full-text filter
             List<AbstractFullTextFilterDescriptor> filters = getAllFullTextFilterDescriptors(txnId);
             for (AbstractFullTextFilterDescriptor filter : filters) {
                 dropFullTextFilterDescriptor(txnId, dataverseName, filter.getName(), true);
