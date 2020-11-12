@@ -337,10 +337,9 @@ public final class FunctionTypeInferers {
         @Override
         public void infer(ILogicalExpression expr, IFunctionDescriptor fd, IVariableTypeEnvironment context,
                 CompilerProperties compilerProps, IMetadataProvider metadataProvider) throws AlgebricksException {
-            IFullTextConfigDescriptor configDescriptor =
-                    metadataProvider.findFullTextConfigDescriptor(getFullTextConfigNameFromExpr(expr));
-
-            fd.setImmutableStates(configDescriptor);
+            AbstractFunctionCallExpression funcExpr = (AbstractFunctionCallExpression) expr;
+            // set the full-text config which is
+            fd.setImmutableStates(funcExpr.getOpaqueParameters()[0]);
         }
     }
 

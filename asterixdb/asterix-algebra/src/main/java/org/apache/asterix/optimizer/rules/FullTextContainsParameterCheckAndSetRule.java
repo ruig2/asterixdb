@@ -48,12 +48,10 @@ import org.apache.hyracks.api.exceptions.SourceLocation;
 import com.google.common.base.Strings;
 
 /**
- * Checks whether the given parameters of the ftcontains() function are correct during the compilation.
+ * Checks whether the given parameters of the ftcontains() function are correct during the compilation,
+ * and fetch the full-text config from metadata which is necessary for the ftcontains() function
  */
 public class FullTextContainsParameterCheckAndSetRule implements IAlgebraicRewriteRule {
-
-    // Visitor for checking and transforming ftcontains() expression
-    protected FullTextContainsExpressionVisitor ftcontainsExprVisitor = new FullTextContainsExpressionVisitor();
 
     @Override
     public boolean rewritePre(Mutable<ILogicalOperator> opRef, IOptimizationContext context)
@@ -61,7 +59,7 @@ public class FullTextContainsParameterCheckAndSetRule implements IAlgebraicRewri
         if (context.checkIfInDontApplySet(this, opRef.getValue())) {
             return false;
         }
-        if (checkParameter(opRef, context)) {
+        if (checkAndSetParameter(opRef, context)) {
             OperatorPropertiesUtil.typeOpRec(opRef, context);
             return true;
         }
@@ -71,9 +69,15 @@ public class FullTextContainsParameterCheckAndSetRule implements IAlgebraicRewri
     /**
      * Check the correctness of the parameters of the ftcontains(). Also rearrange options as arguments.
      * The expected form of ftcontains() is ftcontains(expression1, expression2, parameters as a record).
+     *
+     * If ftcontains() has the full-text config argument, this method will also fetch it (FullTextConfigDescriptor) from metadata
+     * and set it in the function expression so that the full-text config can be utilized later at run-time.
      */
-    private boolean checkParameter(Mutable<ILogicalOperator> opRef, IOptimizationContext context)
+    private boolean checkAndSetParameter(Mutable<ILogicalOperator> opRef, IOptimizationContext context)
             throws AlgebricksException {
+        // Visitor for checking and transforming ftcontains() expression
+        FullTextContainsExpressionVisitor ftcontainsExprVisitor = new FullTextContainsExpressionVisitor(context);
+
         AbstractLogicalOperator op = (AbstractLogicalOperator) opRef.getValue();
         boolean modified = op.acceptExpressionTransform(ftcontainsExprVisitor);
         if (modified) {
@@ -94,8 +98,11 @@ public class FullTextContainsParameterCheckAndSetRule implements IAlgebraicRewri
         // The number of anticipated arguments for a full-text query when a user provide option(s) as a record.
         private static final int FULLTEXT_QUERY_WITH_OPTION_NO_OF_ARGUMENTS = 3;
 
-        public FullTextContainsExpressionVisitor() {
-            // no parameter is needed.
+        private final IOptimizationContext context;
+        String ftConfigName;
+
+        public FullTextContainsExpressionVisitor(IOptimizationContext context) {
+            this.context = context;
         }
 
         @Override
@@ -160,12 +167,14 @@ public class FullTextContainsParameterCheckAndSetRule implements IAlgebraicRewri
 
                 // Checks and transforms the actual full-text parameters.
                 if (numberOfCorrectArguments == FULLTEXT_QUERY_WITH_OPTION_NO_OF_ARGUMENTS) {
-                    checkValueForThirdParameter(oldExprs.get(2), newExprs, functionName);
+                    checkAndGetFullTextConfigForThirdParameter(oldExprs.get(2), newExprs, functionName);
                 } else {
                     // no option provided case: sets the default option here.
                     setDefaultValueForThirdParameter(newExprs);
                 }
 
+                funcExpr.setOpaqueParameters(new Object[] {
+                        context.getMetadataProvider().findFullTextConfigDescriptor(ftConfigName) });
                 // Resets the last argument.
                 funcExpr.getArguments().clear();
                 funcExpr.getArguments().addAll(newExprs);
@@ -212,8 +221,9 @@ public class FullTextContainsParameterCheckAndSetRule implements IAlgebraicRewri
          * @param expr
          * @throws AlgebricksException
          */
-        private void checkValueForThirdParameter(Mutable<ILogicalExpression> expr,
-                List<Mutable<ILogicalExpression>> newArgs, String functionName) throws AlgebricksException {
+        private void checkAndGetFullTextConfigForThirdParameter(Mutable<ILogicalExpression> expr,
+                List<Mutable<ILogicalExpression>> newArgs, String functionName)
+                throws AlgebricksException {
             // Get the last parameter - this should be a record-constructor.
             AbstractFunctionCallExpression openRecConsExpr = (AbstractFunctionCallExpression) expr.getValue();
             FunctionIdentifier openRecConsFi = openRecConsExpr.getFunctionIdentifier();
@@ -275,8 +285,8 @@ public class FullTextContainsParameterCheckAndSetRule implements IAlgebraicRewri
                             checkSearchModeOption(optionTypeStringVal, functionName, optionExprVal.getSourceLocation());
                             break;
                         case FullTextContainsDescriptor.FULLTEXT_CONFIG_OPTION:
-                            checkFullTextConfigOption(optionTypeStringVal, functionName,
-                                    optionExprVal.getSourceLocation());
+                            checkFullTextConfigOption(optionTypeStringVal, functionName, optionExprVal.getSourceLocation());
+                            ftConfigName = optionTypeStringVal;
                             break;
                         default:
                             throw CompilationException.create(ErrorCode.TYPE_UNSUPPORTED,
