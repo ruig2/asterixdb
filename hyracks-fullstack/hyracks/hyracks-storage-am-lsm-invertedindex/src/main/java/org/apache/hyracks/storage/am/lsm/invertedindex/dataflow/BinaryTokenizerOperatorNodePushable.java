@@ -43,7 +43,6 @@ import org.apache.hyracks.storage.am.lsm.invertedindex.tokenizers.IToken;
 public class BinaryTokenizerOperatorNodePushable extends AbstractUnaryInputUnaryOutputOperatorNodePushable {
 
     private final IHyracksTaskContext ctx;
-    // ToDo: remove tokenizer because now we use fullTextConfig instead
     private final IFullTextConfigEvaluator fullTextEvaluator;
     private final int docField;
     private final int[] keyFields;

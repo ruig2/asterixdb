@@ -40,8 +40,8 @@ public class FullTextConfigEvaluator implements IFullTextConfigEvaluator {
     private IBinaryTokenizer tokenizer;
     private final ImmutableList<IFullTextFilterEvaluator> filters;
 
-    private IToken currentToken = null;
-    private IToken nextToken = null;
+    private IToken currentToken;
+    private IToken nextToken;
 
     @Override
     public IBinaryTokenizer getTokenizer() {

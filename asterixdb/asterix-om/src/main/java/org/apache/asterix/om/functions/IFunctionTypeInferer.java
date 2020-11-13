@@ -28,9 +28,4 @@ import org.apache.hyracks.algebricks.core.algebra.metadata.IMetadataProvider;
 public interface IFunctionTypeInferer {
     void infer(ILogicalExpression expr, IFunctionDescriptor fd, IVariableTypeEnvironment context,
             CompilerProperties compilerProps) throws AlgebricksException;
-
-    default void infer(ILogicalExpression expr, IFunctionDescriptor fd, IVariableTypeEnvironment context,
-            CompilerProperties compilerProps, IMetadataProvider metadataProvider) throws AlgebricksException {
-        infer(expr, fd, context, compilerProps);
-    }
 }

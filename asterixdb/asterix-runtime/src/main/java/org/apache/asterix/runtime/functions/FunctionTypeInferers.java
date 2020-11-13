@@ -325,17 +325,9 @@ public final class FunctionTypeInferers {
     }
 
     public static final class FullTextContainsTypeInferer implements IFunctionTypeInferer {
-
         @Override
         public void infer(ILogicalExpression expr, IFunctionDescriptor fd, IVariableTypeEnvironment context,
                 CompilerProperties compilerProps) throws AlgebricksException {
-            // Call the following infer() method to get the metadata provider
-            throw new NotImplementedException();
-        }
-
-        @Override
-        public void infer(ILogicalExpression expr, IFunctionDescriptor fd, IVariableTypeEnvironment context,
-                CompilerProperties compilerProps, IMetadataProvider metadataProvider) throws AlgebricksException {
             AbstractFunctionCallExpression funcExpr = (AbstractFunctionCallExpression) expr;
             // set the full-text config which is
             fd.setImmutableStates(funcExpr.getOpaqueParameters()[0]);

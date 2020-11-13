@@ -196,7 +196,7 @@ public class FullTextContainsEvaluator implements IScalarEvaluator {
         try {
             ABoolean b = fullTextContainsWithArg(typeTag2, argLeft, argRight) ? ABoolean.TRUE : ABoolean.FALSE;
             serde.serialize(b, out);
-        } catch (AlgebricksException | RemoteException e) {
+        } catch (AlgebricksException e) {
             throw new HyracksDataException(e, ErrorCode.ERROR_PROCESSING_TUPLE);
         }
 
@@ -212,7 +212,7 @@ public class FullTextContainsEvaluator implements IScalarEvaluator {
      * After traversing all tokens and still the foundCount is less than the given threshold, then returns false.
      */
     private boolean fullTextContainsWithArg(ATypeTag typeTag2, IPointable arg1, IPointable arg2)
-            throws HyracksDataException, AlgebricksException, RemoteException {
+            throws HyracksDataException, AlgebricksException {
         // The main logic
 
         // Since a fulltext search form is "ftcontains(X,Y,options)",
@@ -259,7 +259,7 @@ public class FullTextContainsEvaluator implements IScalarEvaluator {
     }
 
     void resetQueryArrayAndRight(byte[] arg2Array, ATypeTag typeTag2, IPointable arg2)
-            throws HyracksDataException, AlgebricksException, RemoteException {
+            throws HyracksDataException {
 
         IBinaryTokenizer tokenizerForRightArray = null;
         // If the right side is an (un)ordered list, we need to apply the (un)ordered list tokenizer.

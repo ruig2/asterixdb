@@ -21,7 +21,7 @@ package org.apache.hyracks.storage.am.lsm.invertedindex.fulltext;
 
 public abstract class AbstractFullTextFilterEvaluator implements IFullTextFilterEvaluator {
     protected final String name;
-    protected FullTextFilterType type;
+    protected final FullTextFilterType type;
 
     public AbstractFullTextFilterEvaluator(String name, FullTextFilterType type) {
         this.name = name;
