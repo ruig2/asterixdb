@@ -1020,6 +1020,21 @@ public class MetadataNode implements IMetadataNode {
         }
     }
 
+    private List<FullTextConfigDescriptor> getDataverseFullTextConfigDescriptors(TxnId txnId, DataverseName dataverseName) throws AlgebricksException {
+        ITupleReference searchKey = createTuple(dataverseName);
+        FullTextConfigDescriptorTupleTranslator tupleReaderWriter =
+                tupleTranslatorProvider.getFullTextConfigTupleTranslator(true);
+        IValueExtractor<FullTextConfigDescriptor> valueExtractor =
+                new MetadataEntityValueExtractor<>(tupleReaderWriter);
+        List<FullTextConfigDescriptor> results = new ArrayList<>();
+        try {
+            searchIndex(txnId, MetadataPrimaryIndexes.FULL_TEXT_CONFIG_DATASET, searchKey, valueExtractor, results);
+        } catch (HyracksDataException e) {
+            throw new AlgebricksException(e);
+        }
+        return results;
+    }
+
     @Override
     public Dataset getDataset(TxnId txnId, DataverseName dataverseName, String datasetName) throws AlgebricksException {
         try {
@@ -1230,7 +1245,7 @@ public class MetadataNode implements IMetadataNode {
         }
     }
 
-    private void confirmFullTextConfigCanBeDeleted(TxnId txnId, DataverseName dataverseName, String configName)
+    private void confirmFullTextConfigCanBeDeleted(TxnId txnId, DataverseName dataverseNameFullTextConfig, String configName)
             throws AlgebricksException {
         if (configName.equals(FullTextConfigDescriptor.DEFAULT_FULL_TEXT_CONFIG_NAME)) {
             throw new MetadataException(FULL_TEXT_DEFAULT_CONFIG_CANNOT_BE_DELETED);
@@ -1242,10 +1257,12 @@ public class MetadataNode implements IMetadataNode {
             List<Index> indexes = getDatasetIndexes(txnId, dataset.getDataverseName(), dataset.getDatasetName());
             for (Index index : indexes) {
                 // ToDo: to support index to access full-text config in another dataverse,
-                // we may need to include the dataverse of the full-text config in the index.getFullTextConfigName()
-                // and check it here
+                //   we may need to include the dataverse of the full-text config in the index.getFullTextConfigDataverse()
+                //   and instead of checking index.getDataverseName(), we need to check index.getFullTextConfigDataverse()
+                //   to see if it is the same as the dataverse of the full-text config
                 String indexConfigName = index.getFullTextConfigName();
-                if (!Strings.isNullOrEmpty(indexConfigName) && indexConfigName.equals(configName)) {
+                if (index.getDataverseName().equals(dataverseNameFullTextConfig) &&
+                        !Strings.isNullOrEmpty(indexConfigName) && indexConfigName.equals(configName)) {
                     throw new AlgebricksException("Cannot drop full-text config "
                             + " because it is being used by index " + index.getIndexName());
                 }
@@ -1345,7 +1362,7 @@ public class MetadataNode implements IMetadataNode {
 
     private void confirmFullTextFilterCanBeDeleted(TxnId txnId, DataverseName dataverseName, String fullTextFilterName)
             throws AlgebricksException {
-        List<FullTextConfigDescriptor> configs = getAllFullTextConfigDescriptors(txnId);
+        List<FullTextConfigDescriptor> configs = getDataverseFullTextConfigDescriptors(txnId, dataverseName);
         for (IFullTextConfigDescriptor config : configs) {
             for (IFullTextFilterDescriptor filterDescriptor : config.getFilterDescriptors()) {
                 if (filterDescriptor.getName().equals(fullTextFilterName)) {

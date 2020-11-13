@@ -69,7 +69,13 @@ public class BinaryTokenizerOperatorNodePushable extends AbstractUnaryInputUnary
         // 1. The tokenizer is of TokenizerCategory.NGram rather than Word
         // 2. If the tokenizer is a TokenizerCategory.Word one, then its parameters
         //    (e.g. boolean ignoreTokenCount, boolean sourceHasTypeTag) may be different
-        //    from the tokenizer in the default full-text config
+        //    from the tokenizer in the default full-text config.
+        //
+        //    Note that those parameters might be call-site specific, for example, one string byte array may contains
+        //    the ATypeTag.String in it while some doesn't. Even though the tokenizers are both Word tokenizer,
+        //    we still need to set different tokenizer here.
+        //    The different tokeniers are defined in BinaryTokenizerFactoryProvider.
+        //    The big plan is to remove the tokenizer from this interface and use fullTextEvaluator only.
         this.fullTextEvaluator.setTokenizer(tokenizer);
 
         this.docField = docField;
