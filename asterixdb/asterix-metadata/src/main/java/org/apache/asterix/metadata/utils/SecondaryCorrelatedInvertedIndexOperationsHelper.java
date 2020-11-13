@@ -29,6 +29,7 @@ import org.apache.asterix.metadata.entities.InternalDatasetDetails;
 import org.apache.asterix.om.types.ARecordType;
 import org.apache.asterix.om.types.IAType;
 import org.apache.asterix.om.utils.NonTaggedFormatUtil;
+import org.apache.asterix.runtime.fulltext.IFullTextConfigDescriptor;
 import org.apache.asterix.runtime.utils.RuntimeUtils;
 import org.apache.hyracks.algebricks.common.constraints.AlgebricksPartitionConstraintHelper;
 import org.apache.hyracks.algebricks.common.exceptions.AlgebricksException;
@@ -55,7 +56,6 @@ import org.apache.hyracks.dataflow.std.base.AbstractSingleActivityOperatorDescri
 import org.apache.hyracks.dataflow.std.connectors.OneToOneConnectorDescriptor;
 import org.apache.hyracks.dataflow.std.sort.ExternalSortOperatorDescriptor;
 import org.apache.hyracks.storage.am.lsm.invertedindex.dataflow.BinaryTokenizerOperatorDescriptor;
-import org.apache.asterix.runtime.fulltext.IFullTextConfigDescriptor;
 import org.apache.hyracks.storage.am.lsm.invertedindex.tokenizers.IBinaryTokenizerFactory;
 
 public class SecondaryCorrelatedInvertedIndexOperationsHelper extends SecondaryCorrelatedTreeIndexOperationsHelper {
@@ -152,7 +152,8 @@ public class SecondaryCorrelatedInvertedIndexOperationsHelper extends SecondaryC
         // and add the choice to the index metadata.
         tokenizerFactory = NonTaggedFormatUtil.getBinaryTokenizerFactory(secondaryKeyType.getTypeTag(), indexType,
                 index.getGramLength());
-        fullTextConfigDescriptor = metadataProvider.findFullTextConfigDescriptor(index.getDataverseName(), index.getFullTextConfigName());
+        fullTextConfigDescriptor =
+                metadataProvider.findFullTextConfigDescriptor(index.getDataverseName(), index.getFullTextConfigName());
         // Type traits for inverted-list elements. Inverted lists contain
         // primary keys.
         invListsTypeTraits = new ITypeTraits[numPrimaryKeys];

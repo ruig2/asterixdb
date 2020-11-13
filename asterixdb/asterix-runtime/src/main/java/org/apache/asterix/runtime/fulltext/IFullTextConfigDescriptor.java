@@ -19,9 +19,10 @@
 
 package org.apache.asterix.runtime.fulltext;
 
-import com.google.common.collect.ImmutableList;
 import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextConfigEvaluatorFactory;
 import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.TokenizerCategory;
+
+import com.google.common.collect.ImmutableList;
 
 public interface IFullTextConfigDescriptor extends IFullTextEntityDescriptor {
     TokenizerCategory getTokenizerCategory();

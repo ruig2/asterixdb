@@ -31,6 +31,7 @@ import org.apache.asterix.om.types.ATypeTag;
 import org.apache.asterix.optimizer.rules.am.InvertedIndexAccessMethod;
 import org.apache.asterix.optimizer.rules.am.InvertedIndexAccessMethod.SearchModifierType;
 import org.apache.asterix.optimizer.rules.am.InvertedIndexJobGenParams;
+import org.apache.asterix.runtime.fulltext.IFullTextConfigDescriptor;
 import org.apache.hyracks.algebricks.common.constraints.AlgebricksPartitionConstraint;
 import org.apache.hyracks.algebricks.common.exceptions.AlgebricksException;
 import org.apache.hyracks.algebricks.common.utils.Pair;
@@ -59,7 +60,6 @@ import org.apache.hyracks.storage.am.common.dataflow.IndexDataflowHelperFactory;
 import org.apache.hyracks.storage.am.common.ophelpers.IndexOperation;
 import org.apache.hyracks.storage.am.lsm.invertedindex.api.IInvertedIndexSearchModifierFactory;
 import org.apache.hyracks.storage.am.lsm.invertedindex.dataflow.LSMInvertedIndexSearchOperatorDescriptor;
-import org.apache.asterix.runtime.fulltext.IFullTextConfigDescriptor;
 import org.apache.hyracks.storage.am.lsm.invertedindex.tokenizers.IBinaryTokenizerFactory;
 
 /**
@@ -169,8 +169,8 @@ public class InvertedIndexPOperator extends IndexSearchPOperator {
                 InvertedIndexAccessMethod.getSearchModifierFactory(searchModifierType, simThresh, secondaryIndex);
         IBinaryTokenizerFactory queryTokenizerFactory =
                 InvertedIndexAccessMethod.getBinaryTokenizerFactory(searchModifierType, searchKeyType, secondaryIndex);
-        IFullTextConfigDescriptor fullTextConfigDescriptor =
-                metadataProvider.findFullTextConfigDescriptor(secondaryIndex.getDataverseName(), secondaryIndex.getFullTextConfigName());
+        IFullTextConfigDescriptor fullTextConfigDescriptor = metadataProvider.findFullTextConfigDescriptor(
+                secondaryIndex.getDataverseName(), secondaryIndex.getFullTextConfigName());
         IIndexDataflowHelperFactory dataflowHelperFactory = new IndexDataflowHelperFactory(
                 metadataProvider.getStorageComponentProvider().getStorageManager(), secondarySplitsAndConstraint.first);
 

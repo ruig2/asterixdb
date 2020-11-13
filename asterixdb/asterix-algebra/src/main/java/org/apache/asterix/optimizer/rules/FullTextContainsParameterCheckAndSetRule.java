@@ -177,7 +177,8 @@ public class FullTextContainsParameterCheckAndSetRule implements IAlgebraicRewri
 
                 MetadataProvider metadataProvider = (MetadataProvider) context.getMetadataProvider();
                 DataverseName dataverseName = metadataProvider.getDefaultDataverseName();
-                funcExpr.setOpaqueParameters(new Object[] {metadataProvider.findFullTextConfigDescriptor(dataverseName, ftConfigName) });
+                funcExpr.setOpaqueParameters(
+                        new Object[] { metadataProvider.findFullTextConfigDescriptor(dataverseName, ftConfigName) });
                 // Resets the last argument.
                 funcExpr.getArguments().clear();
                 funcExpr.getArguments().addAll(newExprs);
@@ -225,8 +226,7 @@ public class FullTextContainsParameterCheckAndSetRule implements IAlgebraicRewri
          * @throws AlgebricksException
          */
         private void checkAndGetFullTextConfigForThirdParameter(Mutable<ILogicalExpression> expr,
-                List<Mutable<ILogicalExpression>> newArgs, String functionName)
-                throws AlgebricksException {
+                List<Mutable<ILogicalExpression>> newArgs, String functionName) throws AlgebricksException {
             // Get the last parameter - this should be a record-constructor.
             AbstractFunctionCallExpression openRecConsExpr = (AbstractFunctionCallExpression) expr.getValue();
             FunctionIdentifier openRecConsFi = openRecConsExpr.getFunctionIdentifier();
@@ -288,7 +288,8 @@ public class FullTextContainsParameterCheckAndSetRule implements IAlgebraicRewri
                             checkSearchModeOption(optionTypeStringVal, functionName, optionExprVal.getSourceLocation());
                             break;
                         case FullTextContainsDescriptor.FULLTEXT_CONFIG_OPTION:
-                            checkFullTextConfigOption(optionTypeStringVal, functionName, optionExprVal.getSourceLocation());
+                            checkFullTextConfigOption(optionTypeStringVal, functionName,
+                                    optionExprVal.getSourceLocation());
                             ftConfigName = optionTypeStringVal;
                             break;
                         default:

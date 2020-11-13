@@ -105,6 +105,8 @@ import org.apache.asterix.om.types.BuiltinType;
 import org.apache.asterix.om.types.IAType;
 import org.apache.asterix.runtime.fulltext.AbstractFullTextFilterDescriptor;
 import org.apache.asterix.runtime.fulltext.FullTextConfigDescriptor;
+import org.apache.asterix.runtime.fulltext.IFullTextConfigDescriptor;
+import org.apache.asterix.runtime.fulltext.IFullTextFilterDescriptor;
 import org.apache.asterix.transaction.management.opcallbacks.AbstractIndexModificationOperationCallback.Operation;
 import org.apache.asterix.transaction.management.opcallbacks.SecondaryIndexModificationOperationCallback;
 import org.apache.asterix.transaction.management.opcallbacks.UpsertOperationCallback;
@@ -127,8 +129,6 @@ import org.apache.hyracks.storage.am.common.impls.NoOpOperationCallback;
 import org.apache.hyracks.storage.am.lsm.common.api.ILSMIndex;
 import org.apache.hyracks.storage.am.lsm.common.api.ILSMIndexAccessor;
 import org.apache.hyracks.storage.am.lsm.common.impls.AbstractLSMIndex;
-import org.apache.asterix.runtime.fulltext.IFullTextConfigDescriptor;
-import org.apache.asterix.runtime.fulltext.IFullTextFilterDescriptor;
 import org.apache.hyracks.storage.common.IIndex;
 import org.apache.hyracks.storage.common.IIndexAccessParameters;
 import org.apache.hyracks.storage.common.IIndexAccessor;
@@ -490,7 +490,8 @@ public class MetadataNode implements IMetadataNode {
         dropFullTextFilterDescriptor(txnId, dataverseName, filterName, false);
     }
 
-    private void dropFullTextFilterDescriptor(TxnId txnId, DataverseName dataverseName, String filterName, boolean force) throws AlgebricksException {
+    private void dropFullTextFilterDescriptor(TxnId txnId, DataverseName dataverseName, String filterName,
+            boolean force) throws AlgebricksException {
         if (!force) {
             confirmFullTextFilterCanBeDeleted(txnId, dataverseName, filterName);
         }
@@ -572,7 +573,8 @@ public class MetadataNode implements IMetadataNode {
         dropFullTextConfigDescriptor(txnId, dataverseName, configName, false);
     }
 
-    private void dropFullTextConfigDescriptor(TxnId txnId, DataverseName dataverseName, String configName, boolean force) throws AlgebricksException {
+    private void dropFullTextConfigDescriptor(TxnId txnId, DataverseName dataverseName, String configName,
+            boolean force) throws AlgebricksException {
         if (!force) {
             confirmFullTextConfigCanBeDeleted(txnId, dataverseName, configName);
         }
@@ -1020,7 +1022,8 @@ public class MetadataNode implements IMetadataNode {
         }
     }
 
-    private List<FullTextConfigDescriptor> getDataverseFullTextConfigDescriptors(TxnId txnId, DataverseName dataverseName) throws AlgebricksException {
+    private List<FullTextConfigDescriptor> getDataverseFullTextConfigDescriptors(TxnId txnId,
+            DataverseName dataverseName) throws AlgebricksException {
         ITupleReference searchKey = createTuple(dataverseName);
         FullTextConfigDescriptorTupleTranslator tupleReaderWriter =
                 tupleTranslatorProvider.getFullTextConfigTupleTranslator(true);
@@ -1245,8 +1248,8 @@ public class MetadataNode implements IMetadataNode {
         }
     }
 
-    private void confirmFullTextConfigCanBeDeleted(TxnId txnId, DataverseName dataverseNameFullTextConfig, String configName)
-            throws AlgebricksException {
+    private void confirmFullTextConfigCanBeDeleted(TxnId txnId, DataverseName dataverseNameFullTextConfig,
+            String configName) throws AlgebricksException {
         if (configName.equals(FullTextConfigDescriptor.DEFAULT_FULL_TEXT_CONFIG_NAME)) {
             throw new MetadataException(FULL_TEXT_DEFAULT_CONFIG_CANNOT_BE_DELETED);
         }
@@ -1261,8 +1264,8 @@ public class MetadataNode implements IMetadataNode {
                 //   and instead of checking index.getDataverseName(), we need to check index.getFullTextConfigDataverse()
                 //   to see if it is the same as the dataverse of the full-text config
                 String indexConfigName = index.getFullTextConfigName();
-                if (index.getDataverseName().equals(dataverseNameFullTextConfig) &&
-                        !Strings.isNullOrEmpty(indexConfigName) && indexConfigName.equals(configName)) {
+                if (index.getDataverseName().equals(dataverseNameFullTextConfig)
+                        && !Strings.isNullOrEmpty(indexConfigName) && indexConfigName.equals(configName)) {
                     throw new AlgebricksException("Cannot drop full-text config "
                             + " because it is being used by index " + index.getIndexName());
                 }

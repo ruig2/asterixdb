@@ -23,7 +23,6 @@ import org.apache.asterix.common.config.CompilerProperties;
 import org.apache.hyracks.algebricks.common.exceptions.AlgebricksException;
 import org.apache.hyracks.algebricks.core.algebra.base.ILogicalExpression;
 import org.apache.hyracks.algebricks.core.algebra.expressions.IVariableTypeEnvironment;
-import org.apache.hyracks.algebricks.core.algebra.metadata.IMetadataProvider;
 
 public interface IFunctionTypeInferer {
     void infer(ILogicalExpression expr, IFunctionDescriptor fd, IVariableTypeEnvironment context,

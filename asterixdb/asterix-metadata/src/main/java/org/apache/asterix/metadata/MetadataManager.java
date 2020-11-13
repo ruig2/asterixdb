@@ -639,7 +639,8 @@ public abstract class MetadataManager implements IMetadataManager {
     }
 
     @Override
-    public void dropFullTextFilter(MetadataTransactionContext mdTxnCtx, DataverseName dataverseName, String filterName) throws AlgebricksException {
+    public void dropFullTextFilter(MetadataTransactionContext mdTxnCtx, DataverseName dataverseName, String filterName)
+            throws AlgebricksException {
         try {
             metadataNode.dropFullTextFilter(mdTxnCtx.getTxnId(), dataverseName, filterName);
         } catch (RemoteException e) {
@@ -686,7 +687,8 @@ public abstract class MetadataManager implements IMetadataManager {
     }
 
     @Override
-    public void dropFullTextConfig(MetadataTransactionContext mdTxnCtx, DataverseName dataverseName, String configName) throws AlgebricksException {
+    public void dropFullTextConfig(MetadataTransactionContext mdTxnCtx, DataverseName dataverseName, String configName)
+            throws AlgebricksException {
         try {
             metadataNode.dropFullTextConfig(mdTxnCtx.getTxnId(), dataverseName, configName);
         } catch (RemoteException e) {

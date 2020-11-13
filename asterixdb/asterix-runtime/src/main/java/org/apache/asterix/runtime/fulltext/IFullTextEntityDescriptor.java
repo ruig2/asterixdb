@@ -19,9 +19,9 @@
 
 package org.apache.asterix.runtime.fulltext;
 
-import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.FullTextEntityCategory;
-
 import java.io.Serializable;
+
+import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.FullTextEntityCategory;
 
 public interface IFullTextEntityDescriptor extends Serializable {
     String getName();

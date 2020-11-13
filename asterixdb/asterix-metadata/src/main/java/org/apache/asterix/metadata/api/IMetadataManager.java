@@ -453,7 +453,8 @@ public interface IMetadataManager extends IMetadataBootstrap {
      * @throws AlgebricksException
      *              For example, if ifExists is set to false and the filter doesn't exist
      */
-    void dropFullTextFilter(MetadataTransactionContext mdTxnCtx, DataverseName dataverseName, String filterName) throws AlgebricksException;
+    void dropFullTextFilter(MetadataTransactionContext mdTxnCtx, DataverseName dataverseName, String filterName)
+            throws AlgebricksException;
 
     /**
      * @param mdTxnCtx
@@ -489,7 +490,8 @@ public interface IMetadataManager extends IMetadataBootstrap {
      * @throws AlgebricksException
      *              For example, if ifExists is set to false and the config doesn't exist
      */
-    void dropFullTextConfig(MetadataTransactionContext mdTxnCtx, DataverseName dataverseName, String configName) throws AlgebricksException;
+    void dropFullTextConfig(MetadataTransactionContext mdTxnCtx, DataverseName dataverseName, String configName)
+            throws AlgebricksException;
 
     /**
      * @param mdTxnCtx

@@ -45,6 +45,7 @@ import org.apache.asterix.om.base.IACursor;
 import org.apache.asterix.om.types.AOrderedListType;
 import org.apache.asterix.om.types.BuiltinType;
 import org.apache.asterix.runtime.fulltext.FullTextConfigDescriptor;
+import org.apache.asterix.runtime.fulltext.IFullTextFilterDescriptor;
 import org.apache.commons.lang3.EnumUtils;
 import org.apache.hyracks.algebricks.common.exceptions.AlgebricksException;
 import org.apache.hyracks.api.dataflow.value.ISerializerDeserializer;
@@ -53,7 +54,6 @@ import org.apache.hyracks.data.std.util.ArrayBackedValueStorage;
 import org.apache.hyracks.dataflow.common.comm.io.ArrayTupleBuilder;
 import org.apache.hyracks.dataflow.common.comm.io.ArrayTupleReference;
 import org.apache.hyracks.dataflow.common.data.accessors.ITupleReference;
-import org.apache.asterix.runtime.fulltext.IFullTextFilterDescriptor;
 import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.TokenizerCategory;
 
 import com.google.common.collect.ImmutableList;

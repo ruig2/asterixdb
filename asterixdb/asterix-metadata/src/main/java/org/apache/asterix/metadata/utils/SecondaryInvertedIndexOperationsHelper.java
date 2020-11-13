@@ -30,6 +30,7 @@ import org.apache.asterix.metadata.entities.InternalDatasetDetails;
 import org.apache.asterix.om.types.ARecordType;
 import org.apache.asterix.om.types.IAType;
 import org.apache.asterix.om.utils.NonTaggedFormatUtil;
+import org.apache.asterix.runtime.fulltext.IFullTextConfigDescriptor;
 import org.apache.asterix.runtime.utils.RuntimeUtils;
 import org.apache.hyracks.algebricks.common.constraints.AlgebricksPartitionConstraintHelper;
 import org.apache.hyracks.algebricks.common.exceptions.AlgebricksException;
@@ -58,7 +59,6 @@ import org.apache.hyracks.dataflow.std.sort.ExternalSortOperatorDescriptor;
 import org.apache.hyracks.storage.am.common.dataflow.IIndexDataflowHelperFactory;
 import org.apache.hyracks.storage.am.common.dataflow.IndexDataflowHelperFactory;
 import org.apache.hyracks.storage.am.lsm.invertedindex.dataflow.BinaryTokenizerOperatorDescriptor;
-import org.apache.asterix.runtime.fulltext.IFullTextConfigDescriptor;
 import org.apache.hyracks.storage.am.lsm.invertedindex.tokenizers.IBinaryTokenizerFactory;
 
 public class SecondaryInvertedIndexOperationsHelper extends SecondaryTreeIndexOperationsHelper {
@@ -81,7 +81,8 @@ public class SecondaryInvertedIndexOperationsHelper extends SecondaryTreeIndexOp
     protected SecondaryInvertedIndexOperationsHelper(Dataset dataset, Index index, MetadataProvider metadataProvider,
             SourceLocation sourceLoc) throws AlgebricksException {
         super(dataset, index, metadataProvider, sourceLoc);
-        this.fullTextConfigDescriptor = metadataProvider.findFullTextConfigDescriptor(index.getDataverseName(), index.getFullTextConfigName());
+        this.fullTextConfigDescriptor =
+                metadataProvider.findFullTextConfigDescriptor(index.getDataverseName(), index.getFullTextConfigName());
     }
 
     @Override

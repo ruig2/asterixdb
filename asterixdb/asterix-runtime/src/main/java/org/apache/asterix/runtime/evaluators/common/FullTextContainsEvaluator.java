@@ -19,7 +19,6 @@
 package org.apache.asterix.runtime.evaluators.common;
 
 import java.io.DataOutput;
-import java.rmi.RemoteException;
 
 import org.apache.asterix.formats.nontagged.BinaryComparatorFactoryProvider;
 import org.apache.asterix.formats.nontagged.BinaryTokenizerFactoryProvider;
@@ -32,6 +31,7 @@ import org.apache.asterix.om.types.EnumDeserializer;
 import org.apache.asterix.om.types.hierachy.ATypeHierarchy;
 import org.apache.asterix.runtime.evaluators.functions.FullTextContainsDescriptor;
 import org.apache.asterix.runtime.evaluators.functions.PointableHelper;
+import org.apache.asterix.runtime.fulltext.IFullTextConfigDescriptor;
 import org.apache.hyracks.algebricks.common.exceptions.AlgebricksException;
 import org.apache.hyracks.algebricks.runtime.base.IEvaluatorContext;
 import org.apache.hyracks.algebricks.runtime.base.IScalarEvaluator;
@@ -50,7 +50,6 @@ import org.apache.hyracks.data.std.util.ArrayBackedValueStorage;
 import org.apache.hyracks.data.std.util.BinaryEntry;
 import org.apache.hyracks.data.std.util.BinaryHashSet;
 import org.apache.hyracks.dataflow.common.data.accessors.IFrameTupleReference;
-import org.apache.asterix.runtime.fulltext.IFullTextConfigDescriptor;
 import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextConfigEvaluator;
 import org.apache.hyracks.storage.am.lsm.invertedindex.tokenizers.DelimitedUTF8StringBinaryTokenizer;
 import org.apache.hyracks.storage.am.lsm.invertedindex.tokenizers.IBinaryTokenizer;
@@ -258,8 +257,7 @@ public class FullTextContainsEvaluator implements IScalarEvaluator {
         ftEvaluatorLeft.setTokenizer(tokenizerForLeftArray);
     }
 
-    void resetQueryArrayAndRight(byte[] arg2Array, ATypeTag typeTag2, IPointable arg2)
-            throws HyracksDataException {
+    void resetQueryArrayAndRight(byte[] arg2Array, ATypeTag typeTag2, IPointable arg2) throws HyracksDataException {
 
         IBinaryTokenizer tokenizerForRightArray = null;
         // If the right side is an (un)ordered list, we need to apply the (un)ordered list tokenizer.

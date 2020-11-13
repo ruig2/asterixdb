@@ -111,10 +111,5 @@
       <artifactId>junit</artifactId>
       <scope>test</scope>
     </dependency>
-      <dependency>
-          <groupId>org.apache.hyracks</groupId>
-          <artifactId>hyracks-storage-am-lsm-invertedindex</artifactId>
-          <version>${project.version}</version>
-      </dependency>
   </dependencies>
 </project>

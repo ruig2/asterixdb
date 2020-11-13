@@ -98,6 +98,7 @@ import org.apache.asterix.om.types.IAType;
 import org.apache.asterix.om.utils.NonTaggedFormatUtil;
 import org.apache.asterix.runtime.base.AsterixTupleFilterFactory;
 import org.apache.asterix.runtime.formats.FormatUtils;
+import org.apache.asterix.runtime.fulltext.IFullTextConfigDescriptor;
 import org.apache.asterix.runtime.operators.LSMIndexBulkLoadOperatorDescriptor;
 import org.apache.asterix.runtime.operators.LSMIndexBulkLoadOperatorDescriptor.BulkLoadUsage;
 import org.apache.asterix.runtime.operators.LSMPrimaryInsertOperatorDescriptor;
@@ -156,7 +157,6 @@ import org.apache.hyracks.storage.am.common.dataflow.IndexDataflowHelperFactory;
 import org.apache.hyracks.storage.am.common.ophelpers.IndexOperation;
 import org.apache.hyracks.storage.am.lsm.btree.dataflow.LSMBTreeBatchPointSearchOperatorDescriptor;
 import org.apache.hyracks.storage.am.lsm.invertedindex.dataflow.BinaryTokenizerOperatorDescriptor;
-import org.apache.asterix.runtime.fulltext.IFullTextConfigDescriptor;
 import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextConfigEvaluatorFactory;
 import org.apache.hyracks.storage.am.lsm.invertedindex.tokenizers.IBinaryTokenizerFactory;
 import org.apache.hyracks.storage.am.rtree.dataflow.RTreeSearchOperatorDescriptor;
@@ -447,7 +447,8 @@ public class MetadataProvider implements IMetadataProvider<DataSourceId, String>
         return MetadataManagerUtil.findSynonym(mdTxnCtx, dataverseName, synonymName);
     }
 
-    public IFullTextConfigDescriptor findFullTextConfigDescriptor(DataverseName dataverseName, String ftConfigName) throws AlgebricksException {
+    public IFullTextConfigDescriptor findFullTextConfigDescriptor(DataverseName dataverseName, String ftConfigName)
+            throws AlgebricksException {
         return MetadataManagerUtil.findFullTextConfigDescriptor(mdTxnCtx, dataverseName, ftConfigName);
     }
 
@@ -1651,8 +1652,8 @@ public class MetadataProvider implements IMetadataProvider<DataSourceId, String>
 
             IBinaryTokenizerFactory tokenizerFactory = NonTaggedFormatUtil.getBinaryTokenizerFactory(
                     secondaryKeyType.getTypeTag(), indexType, secondaryIndex.getGramLength());
-            IFullTextConfigDescriptor configDescriptor =
-                    findFullTextConfigDescriptor(secondaryIndex.getDataverseName(), secondaryIndex.getFullTextConfigName());
+            IFullTextConfigDescriptor configDescriptor = findFullTextConfigDescriptor(secondaryIndex.getDataverseName(),
+                    secondaryIndex.getFullTextConfigName());
             IFullTextConfigEvaluatorFactory fullTextConfigEvaluatorFactory = configDescriptor.createEvaluatorFactory();
 
             Pair<IFileSplitProvider, AlgebricksPartitionConstraint> splitsAndConstraint =

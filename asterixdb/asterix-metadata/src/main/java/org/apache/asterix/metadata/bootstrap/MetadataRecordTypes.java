@@ -548,7 +548,9 @@ public final class MetadataRecordTypes {
     public static final ARecordType FULL_TEXT_FILTER_RECORDTYPE = createRecordType(RECORD_NAME_FULL_TEXT_FILTER,
             new String[] { FIELD_NAME_DATAVERSE_NAME, FIELD_NAME_FULL_TEXT_FILTER_NAME,
                     FIELD_NAME_FULL_TEXT_FILTER_TYPE },
-            new IAType[] { BuiltinType.ASTRING, AUnionType.createNullableType(BuiltinType.ASTRING), AUnionType.createNullableType(BuiltinType.ASTRING) }, true);
+            new IAType[] { BuiltinType.ASTRING, AUnionType.createNullableType(BuiltinType.ASTRING),
+                    AUnionType.createNullableType(BuiltinType.ASTRING) },
+            true);
 
     // private members
     private MetadataRecordTypes() {

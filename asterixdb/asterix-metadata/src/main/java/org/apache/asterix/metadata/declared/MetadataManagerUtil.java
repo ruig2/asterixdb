@@ -40,10 +40,10 @@ import org.apache.asterix.metadata.entities.Synonym;
 import org.apache.asterix.metadata.utils.MetadataConstants;
 import org.apache.asterix.om.types.ARecordType;
 import org.apache.asterix.om.types.IAType;
+import org.apache.asterix.runtime.fulltext.IFullTextConfigDescriptor;
 import org.apache.hyracks.algebricks.common.exceptions.AlgebricksException;
 import org.apache.hyracks.algebricks.core.algebra.properties.DefaultNodeGroupDomain;
 import org.apache.hyracks.algebricks.core.algebra.properties.INodeDomain;
-import org.apache.asterix.runtime.fulltext.IFullTextConfigDescriptor;
 
 public class MetadataManagerUtil {
 
