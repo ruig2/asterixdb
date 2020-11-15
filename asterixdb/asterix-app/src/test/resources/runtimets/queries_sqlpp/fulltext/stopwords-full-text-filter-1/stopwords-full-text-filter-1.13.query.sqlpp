@@ -20,6 +20,8 @@
 ///////////////////////////////////////
 // Step 5c: Select with ft_config
 
+USE MyDataVerse;
+
 // With FT Config my_second_stopword_config and `yyy`
 SELECT VALUE myMessage from MyMessageDataset myMessage
     WHERE ftcontains(myMessage.myMessageBody, ["yyy", "cat"], {"mode":"all", "config": "my_second_stopword_config"})

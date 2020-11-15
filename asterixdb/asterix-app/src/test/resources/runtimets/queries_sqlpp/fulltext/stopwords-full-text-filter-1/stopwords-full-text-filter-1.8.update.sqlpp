@@ -20,6 +20,8 @@
 ///////////////////////////////////////
 // Step 4: Insert after index created
 
+USE MyDataVerse;
+
 UPSERT INTO MyMessageDataset ([
   {
       "myMessageId":    3,

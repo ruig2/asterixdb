@@ -20,6 +20,8 @@
 ///////////////////////////////////////
 // Step 5a: Select with ft_config
 
+USE MyDataVerse;
+
 // With FT Config my_first_stopword_config and `the`
 SELECT VALUE myMessage from MyMessageDataset myMessage
     WHERE ftcontains(myMessage.myMessageBody, ["the", "smart", "black"], {"mode":"all", "config": "my_first_stopword_config"})

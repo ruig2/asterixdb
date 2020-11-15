@@ -20,6 +20,8 @@
 ///////////////////////////////////////
 // Step 5b: Select with ft_config
 
+USE MyDataVerse;
+
 // With FT Config my_first_stopword_config and `xxx`
 SELECT VALUE myMessage from MyMessageDataset myMessage
     WHERE ftcontains(myMessage.myMessageBody, ["xxx", "cat"], {"mode":"all", "config": "my_first_stopword_config"})

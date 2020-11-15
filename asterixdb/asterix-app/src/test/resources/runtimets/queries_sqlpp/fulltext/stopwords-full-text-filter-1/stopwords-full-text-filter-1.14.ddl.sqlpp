@@ -20,6 +20,8 @@
 /////////////////////////////////////////
 // Step 6: Do a full-scan when no index with the same config
 
+USE MyDataVerse;
+
 DROP FULLTEXT CONFIG my_third_stopword_config IF EXISTS;
 CREATE FULLTEXT CONFIG my_third_stopword_config IF NOT EXISTS AS {
     "tokenizer": "Word",

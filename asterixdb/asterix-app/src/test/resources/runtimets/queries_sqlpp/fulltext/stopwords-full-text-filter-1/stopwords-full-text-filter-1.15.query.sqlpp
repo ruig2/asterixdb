@@ -20,6 +20,7 @@
 /////////////////////////////////////////
 // Step 6: Do a full-scan when no index with the same config
 
-SELECT VALUE count(myMessage) from MyMessageDataset myMessage
-   WHERE ftcontains(myMessage.myMessageBody, ["xxx", "smart", "black"], {"mode":"all", "config": "my_third_stopword_config"})
-   ORDER BY myMessage.myMessageId;
+USE MyDataVerse;
+
+SELECT count(myMessage) from MyMessageDataset myMessage
+   WHERE ftcontains(myMessage.myMessageBody, ["xxx", "smart", "black"], {"mode":"all", "config": "my_third_stopword_config"});

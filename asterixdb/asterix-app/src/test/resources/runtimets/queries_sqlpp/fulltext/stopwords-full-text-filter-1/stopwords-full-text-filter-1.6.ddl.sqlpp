@@ -19,6 +19,9 @@
 
 ///////////////////////////////////////
 // Step 3: Create 3 FullText Indices
+
+USE MyDataVerse;
+
 DROP INDEX MyMessageDataset.message_ft_index_0 IF EXISTS;
 DROP INDEX MyMessageDataset.message_ft_index_1 IF EXISTS;
 DROP INDEX MyMessageDataset.message_ft_index_2 IF EXISTS;

@@ -20,6 +20,8 @@
 ///////////////////////////////////////
 // Step 5: Select with ft_config
 
+USE MyDataVerse;
+
 // Without FT Config
 SELECT VALUE myMessage from MyMessageDataset myMessage
     WHERE ftcontains(myMessage.myMessageBody, ["the", "smart", "black"], {"mode":"all"}) ORDER BY myMessage.myMessageId;

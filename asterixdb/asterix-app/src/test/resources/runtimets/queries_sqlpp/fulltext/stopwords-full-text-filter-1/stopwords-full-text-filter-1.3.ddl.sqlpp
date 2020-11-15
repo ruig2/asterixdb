@@ -17,6 +17,8 @@
  * under the License.
  */
 
+USE MyDataVerse;
+
 DROP FULLTEXT CONFIG my_stopword_config IF EXISTS;
 DROP FULLTEXT CONFIG my_first_stopword_config IF EXISTS;
 DROP FULLTEXT CONFIG my_second_stopword_config IF EXISTS;
