@@ -17,9 +17,9 @@
  * under the License.
  */
 
-///////////////////////////////////////
-// Step 5: Select with ft_config
+/////////////////////////////////////////
+// Step 6: Do a full-scan when no index with the same config
 
-// Without FT Config
-SELECT VALUE myMessage from MyMessageDataset myMessage
-    WHERE ftcontains(myMessage.myMessageBody, ["the", "smart", "black"], {"mode":"all"}) ORDER BY myMessage.myMessageId;
+SELECT VALUE count(myMessage) from MyMessageDataset myMessage
+   WHERE ftcontains(myMessage.myMessageBody, ["xxx", "smart", "black"], {"mode":"all", "config": "my_third_stopword_config"})
+   ORDER BY myMessage.myMessageId;

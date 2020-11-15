@@ -18,8 +18,9 @@
  */
 
 ///////////////////////////////////////
-// Step 5: Select with ft_config
+// Step 5c: Select with ft_config
 
-// Without FT Config
+// With FT Config my_second_stopword_config and `yyy`
 SELECT VALUE myMessage from MyMessageDataset myMessage
-    WHERE ftcontains(myMessage.myMessageBody, ["the", "smart", "black"], {"mode":"all"}) ORDER BY myMessage.myMessageId;
+    WHERE ftcontains(myMessage.myMessageBody, ["yyy", "cat"], {"mode":"all", "config": "my_second_stopword_config"})
+    ORDER BY myMessage.myMessageId;

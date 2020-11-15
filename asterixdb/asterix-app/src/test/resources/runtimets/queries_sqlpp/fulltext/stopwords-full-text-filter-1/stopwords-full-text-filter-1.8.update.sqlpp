@@ -18,9 +18,18 @@
  */
 
 ///////////////////////////////////////
-// Step 5c: Select with ft_config
+// Step 4: Insert after index created
 
-USE MyDataVerse;
-// SELECT "With FT Config my_second_stopword_config and `yyy`";
-SELECT VALUE myMessage from MyMessageDataset myMessage
-    WHERE ftcontains(myMessage.myMessageBody, ["yyy", "cat"], {"mode":"all", "config": "my_second_stopword_config"});
+UPSERT INTO MyMessageDataset ([
+  {
+      "myMessageId":    3,
+      "myMessageBody":  "xxx cute cat"
+  }
+]);
+
+UPSERT INTO MyMessageDataset ([
+  {
+      "myMessageId":    4,
+      "myMessageBody":  "yyy crazy cat"
+  }
+]);

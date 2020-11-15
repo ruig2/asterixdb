@@ -17,21 +17,18 @@
  * under the License.
  */
 
-///////////////////////////////////////
-// Step 4: Insert after index created
-
 USE MyDataVerse;
-UPSERT INTO MyMessageDataset ([
+
+INSERT INTO MyMessageDataset ([
   {
-      "myMessageId":    3,
-      "myMessageBody":  "xxx cute cat"
+      "myMessageId":    1,
+      "myMessageBody":  "a smart black dog"
   }
 ]);
 
-USE MyDataVerse;
 UPSERT INTO MyMessageDataset ([
   {
-      "myMessageId":    4,
-      "myMessageBody":  "yyy crazy cat"
+      "myMessageId":    2,
+      "myMessageBody":  "the smart black dog"
   }
 ]);

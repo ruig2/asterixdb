@@ -17,10 +17,6 @@
  * under the License.
  */
 
-///////////////////////////////////////
-// Step 2: Create full-text filter and config
-USE MyDataVerse;
-
 DROP FULLTEXT CONFIG my_stopword_config IF EXISTS;
 DROP FULLTEXT CONFIG my_first_stopword_config IF EXISTS;
 DROP FULLTEXT CONFIG my_second_stopword_config IF EXISTS;
@@ -44,6 +40,3 @@ CREATE FULLTEXT CONFIG my_second_stopword_config IF NOT EXISTS AS {
     "tokenizer": "Word", // built-in tokenizers: "Word" or "NGram"
     "filterPipeline": ["my_second_stopword_filter"]
 };
-
-SELECT VALUE ix FROM Metadata.`FullTextConfig` ix;
-SELECT VALUE ix FROM Metadata.`FullTextFilter` ix;

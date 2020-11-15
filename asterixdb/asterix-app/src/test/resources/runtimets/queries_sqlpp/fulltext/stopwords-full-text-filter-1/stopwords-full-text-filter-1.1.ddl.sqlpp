@@ -24,24 +24,11 @@ DROP DATAVERSE MyDataVerse IF EXISTS;
 CREATE DATAVERSE MyDataVerse;
 
 USE MyDataVerse;
-DROP DATASET MyMessageDataset  IF EXISTS;
+
+DROP DATASET MyMessageDataset IF EXISTS;
 CREATE TYPE MyMessageType AS {
     myMessageId:   int,
     myMessageBody: string
 };
 CREATE DATASET MyMessageDataset(MyMessageType)
     PRIMARY KEY myMessageId;
-
-INSERT INTO MyMessageDataset ([
-  {
-      "myMessageId":    1,
-      "myMessageBody":  "a smart black dog"
-  }
-]);
-
-UPSERT INTO MyMessageDataset ([
-  {
-      "myMessageId":    2,
-      "myMessageBody":  "the smart black dog"
-  }
-]);

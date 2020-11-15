@@ -18,16 +18,9 @@
  */
 
 ///////////////////////////////////////
-// Step 3: Create 3 FullText Indices
-USE MyDataVerse;
-DROP INDEX MyMessageDataset.message_ft_index_0 IF EXISTS;
-DROP INDEX MyMessageDataset.message_ft_index_1 IF EXISTS;
-DROP INDEX MyMessageDataset.message_ft_index_2 IF EXISTS;
+// Step 5b: Select with ft_config
 
-CREATE INDEX message_ft_index_0  IF NOT EXISTS on MyMessageDataset(myMessageBody) TYPE FULLTEXT;
-CREATE INDEX message_ft_index_1  IF NOT EXISTS on MyMessageDataset(myMessageBody) TYPE FULLTEXT USING my_first_stopword_config;
-CREATE INDEX message_ft_index_2  IF NOT EXISTS on MyMessageDataset(myMessageBody) TYPE FULLTEXT USING my_second_stopword_config;
-
-SELECT Value v from Metadata.`Index` v;
-SELECT VALUE ix FROM Metadata.`FullTextConfig` ix;
-SELECT VALUE ix FROM Metadata.`FullTextFilter` ix;
+// With FT Config my_first_stopword_config and `xxx`
+SELECT VALUE myMessage from MyMessageDataset myMessage
+    WHERE ftcontains(myMessage.myMessageBody, ["xxx", "cat"], {"mode":"all", "config": "my_first_stopword_config"})
+    ORDER BY myMessage.myMessageId;
