@@ -222,7 +222,7 @@ public class ErrorCode {
     public static final int SYNONYM_EXISTS = 1131;
     public static final int FULL_TEXT_CONFIG_NOT_FOUND = 1132;
     public static final int FULL_TEXT_FILTER_NOT_FOUND = 1133;
-    public static final int FULL_TEXT_DEFAULT_CONFIG_CANNOT_BE_DELETED = 1134;
+    public static final int FULL_TEXT_DEFAULT_CONFIG_CANNOT_BE_DELETED_OR_CREATED = 1134;
     public static final int FULL_TEXT_CONFIG_ALREADY_EXISTS = 1135;
     public static final int FULL_TEXT_FILTER_ALREADY_EXISTS = 1136;
 

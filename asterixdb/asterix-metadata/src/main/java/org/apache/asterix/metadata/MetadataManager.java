@@ -19,8 +19,6 @@
 
 package org.apache.asterix.metadata;
 
-import static org.apache.asterix.runtime.fulltext.FullTextConfigDescriptor.DEFAULT_FULL_TEXT_CONFIG_NAME;
-
 import java.rmi.RemoteException;
 import java.util.Collection;
 import java.util.Collections;
@@ -696,8 +694,8 @@ public abstract class MetadataManager implements IMetadataManager {
     @Override
     public void addFullTextConfig(MetadataTransactionContext mdTxnCtx, FullTextConfigDescriptor config)
             throws AlgebricksException {
-        if (config.getName().equals(DEFAULT_FULL_TEXT_CONFIG_NAME)) {
-            throw new AsterixException(ErrorCode.FULL_TEXT_CONFIG_ALREADY_EXISTS, DEFAULT_FULL_TEXT_CONFIG_NAME);
+        if (Strings.isNullOrEmpty(config.getName())) {
+            throw new AsterixException(ErrorCode.FULL_TEXT_CONFIG_ALREADY_EXISTS);
         }
 
         try {

@@ -63,7 +63,7 @@ public class FullTextUtil {
             return null;
         }
 
-        String configName = FullTextConfigDescriptor.DEFAULT_FULL_TEXT_CONFIG_NAME;
+        String configName = null;
         List<Mutable<ILogicalExpression>> arguments = funcExpr.getArguments();
 
         // The first two arguments are

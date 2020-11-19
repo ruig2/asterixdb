@@ -19,8 +19,6 @@
 
 package org.apache.asterix.metadata;
 
-import static org.apache.asterix.common.exceptions.ErrorCode.FULL_TEXT_DEFAULT_CONFIG_CANNOT_BE_DELETED;
-
 import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -33,6 +31,7 @@ import org.apache.asterix.common.api.INcApplicationContext;
 import org.apache.asterix.common.config.DatasetConfig.DatasetType;
 import org.apache.asterix.common.config.DatasetConfig.IndexType;
 import org.apache.asterix.common.dataflow.LSMIndexUtil;
+import static org.apache.asterix.common.exceptions.ErrorCode.FULL_TEXT_DEFAULT_CONFIG_CANNOT_BE_DELETED_OR_CREATED;
 import org.apache.asterix.common.exceptions.MetadataException;
 import org.apache.asterix.common.functions.FunctionSignature;
 import org.apache.asterix.common.metadata.DataverseName;
@@ -1250,8 +1249,8 @@ public class MetadataNode implements IMetadataNode {
 
     private void confirmFullTextConfigCanBeDeleted(TxnId txnId, DataverseName dataverseNameFullTextConfig,
             String configName) throws AlgebricksException {
-        if (configName.equals(FullTextConfigDescriptor.DEFAULT_FULL_TEXT_CONFIG_NAME)) {
-            throw new MetadataException(FULL_TEXT_DEFAULT_CONFIG_CANNOT_BE_DELETED);
+        if (Strings.isNullOrEmpty(configName)) {
+            throw new MetadataException(FULL_TEXT_DEFAULT_CONFIG_CANNOT_BE_DELETED_OR_CREATED);
         }
 
         // If any index uses this full-text config, throw an error

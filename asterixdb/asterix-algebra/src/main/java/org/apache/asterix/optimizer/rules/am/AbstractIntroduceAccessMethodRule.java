@@ -83,6 +83,7 @@ import org.apache.hyracks.algebricks.core.algebra.typing.ITypingContext;
 import org.apache.hyracks.algebricks.core.rewriter.base.IAlgebraicRewriteRule;
 
 import com.google.common.collect.ImmutableSet;
+import org.apache.parquet.Strings;
 
 /**
  * Class that embodies the commonalities between rewrite rules for access
@@ -296,10 +297,9 @@ public abstract class AbstractIntroduceAccessMethodRule implements IAlgebraicRew
             // besides ftcontains(), there are other functions that utilize the full-text inverted-index,
             // e.g. edit_distance_check(),
             // for now, we don't accept users to specify the full-text config in those functions,
-            // that means, we assume the full-text config used in those function is always the DEFAULT_FULL_TEXT_CONFIG_NAME,
-            // so here we simply check if the index uses the DEFAULT_FULL_TEXT_CONFIG_NAME,
-            // and if yes, then this index can be utilized by the function
-            if (indexFullTextConfig.equals(FullTextConfigDescriptor.DEFAULT_FULL_TEXT_CONFIG_NAME)) {
+            // that means, we assume the full-text config used in those function is always the default one with the name null,
+            // and if the index full-text config name is also null, the index can be utilized
+            if (Strings.isNullOrEmpty(indexFullTextConfig)) {
                 return true;
             }
         }

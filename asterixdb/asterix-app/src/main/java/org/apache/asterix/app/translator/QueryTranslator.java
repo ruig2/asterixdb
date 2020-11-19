@@ -245,6 +245,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import com.google.common.collect.ImmutableList;
+import org.apache.parquet.Strings;
 
 /*
  * Provides functionality for executing a batch of Query statements (queries included)
@@ -2115,8 +2116,9 @@ public class QueryTranslator extends AbstractLangTranslator implements IStatemen
     private void doDropFullTextConfig(MetadataProvider metadataProvider, FullTextConfigDropStatement stmtConfigDrop,
             IHyracksClientConnection hcc, IRequestParameters requestParameters)
             throws RemoteException, AlgebricksException {
-        if (stmtConfigDrop.getConfigName().equalsIgnoreCase(FullTextConfigDescriptor.DEFAULT_FULL_TEXT_CONFIG_NAME)) {
-            throw CompilationException.create(ErrorCode.FULL_TEXT_DEFAULT_CONFIG_CANNOT_BE_DELETED,
+        // If the config name is null, then it means the default config
+        if (Strings.isNullOrEmpty(stmtConfigDrop.getConfigName())) {
+            throw CompilationException.create(ErrorCode.FULL_TEXT_DEFAULT_CONFIG_CANNOT_BE_DELETED_OR_CREATED,
                     stmtConfigDrop.getSourceLocation());
         }
 

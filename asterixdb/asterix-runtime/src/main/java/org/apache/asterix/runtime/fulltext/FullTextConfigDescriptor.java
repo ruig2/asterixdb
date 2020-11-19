@@ -36,8 +36,6 @@ public class FullTextConfigDescriptor implements IFullTextConfigDescriptor {
     private final TokenizerCategory tokenizerCategory;
     private final ImmutableList<IFullTextFilterDescriptor> filterDescriptors;
 
-    public static final String DEFAULT_FULL_TEXT_CONFIG_NAME = "DEFAULT_FULL_TEXT_CONFIG";
-
     public FullTextConfigDescriptor(DataverseName dataverseName, String name, TokenizerCategory tokenizerCategory,
             ImmutableList<IFullTextFilterDescriptor> filterDescriptors) {
         this.dataverseName = dataverseName;
