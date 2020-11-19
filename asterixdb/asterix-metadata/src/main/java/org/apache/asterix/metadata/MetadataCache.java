@@ -43,6 +43,10 @@ import org.apache.asterix.metadata.entities.Library;
 import org.apache.asterix.metadata.entities.NodeGroup;
 import org.apache.asterix.metadata.entities.Synonym;
 import org.apache.asterix.metadata.utils.IndexUtil;
+import org.apache.asterix.runtime.fulltext.AbstractFullTextFilterDescriptor;
+import org.apache.asterix.runtime.fulltext.FullTextConfigDescriptor;
+import org.apache.asterix.runtime.fulltext.IFullTextConfigDescriptor;
+import org.apache.asterix.runtime.fulltext.IFullTextFilterDescriptor;
 
 /**
  * Caches metadata entities such that the MetadataManager does not have to
@@ -79,6 +83,11 @@ public class MetadataCache {
     protected final Map<DataverseName, Map<String, FeedConnection>> feedConnections = new HashMap<>();
     // Key is synonym dataverse. Key of value map is the synonym name
     protected final Map<DataverseName, Map<String, Synonym>> synonyms = new HashMap<>();
+    // Key is DataverseName. Key of value map is the full-text filter name
+    protected final Map<DataverseName, Map<String, AbstractFullTextFilterDescriptor>> fullTextFilters = new HashMap<>();
+    // Key is DataverseName. Key of value map is the full-text config name
+    protected final Map<DataverseName, Map<String, FullTextConfigDescriptor>> fullTextConfigs = new HashMap<>();
+
 
     // Atomically executes all metadata operations in ctx's log.
     public void commit(MetadataTransactionContext ctx) {
@@ -113,20 +122,26 @@ public class MetadataCache {
                     synchronized (indexes) {
                         synchronized (datatypes) {
                             synchronized (functions) {
-                                synchronized (adapters) {
-                                    synchronized (libraries) {
-                                        synchronized (compactionPolicies) {
-                                            synchronized (synonyms) {
-                                                dataverses.clear();
-                                                nodeGroups.clear();
-                                                datasets.clear();
-                                                indexes.clear();
-                                                datatypes.clear();
-                                                functions.clear();
-                                                adapters.clear();
-                                                libraries.clear();
-                                                compactionPolicies.clear();
-                                                synonyms.clear();
+                                synchronized (fullTextConfigs) {
+                                    synchronized (fullTextFilters) {
+                                        synchronized (adapters) {
+                                            synchronized (libraries) {
+                                                synchronized (compactionPolicies) {
+                                                    synchronized (synonyms) {
+                                                        dataverses.clear();
+                                                        nodeGroups.clear();
+                                                        datasets.clear();
+                                                        indexes.clear();
+                                                        datatypes.clear();
+                                                        functions.clear();
+                                                        fullTextConfigs.clear();
+                                                        fullTextFilters.clear();
+                                                        adapters.clear();
+                                                        libraries.clear();
+                                                        compactionPolicies.clear();
+                                                        synonyms.clear();
+                                                    }
+                                                }
                                             }
                                         }
                                     }
@@ -433,6 +448,62 @@ public class MetadataCache {
                 return null;
             }
             return functions.remove(signature);
+        }
+    }
+
+    public AbstractFullTextFilterDescriptor addFullTextFilterIfNotExists(AbstractFullTextFilterDescriptor filter) {
+        DataverseName dataverseName = filter.getDataverseName();
+        String filterName = filter.getName();
+        synchronized (fullTextFilters) {
+            Map<String, AbstractFullTextFilterDescriptor> m = fullTextFilters.get(dataverseName);
+            if (m == null) {
+                m = new HashMap<>();
+                fullTextFilters.put(dataverseName, m);
+            }
+            if (!m.containsKey(filterName)) {
+                return m.put(filterName, filter);
+            }
+            return null;
+        }
+    }
+
+    public AbstractFullTextFilterDescriptor dropFullTextFilter(AbstractFullTextFilterDescriptor filter) {
+        DataverseName dataverseName = filter.getDataverseName();
+        String filterName = filter.getName();
+        synchronized (fullTextFilters) {
+            Map<String, AbstractFullTextFilterDescriptor> m = fullTextFilters.get(dataverseName);
+            if (m == null) {
+                return null;
+            }
+            return m.remove(filterName);
+        }
+    }
+
+    public FullTextConfigDescriptor addFullTextConfigIfNotExists(FullTextConfigDescriptor config) {
+        DataverseName dataverseName = config.getDataverseName();
+        String configName = config.getName();
+        synchronized (fullTextConfigs) {
+            Map<String, FullTextConfigDescriptor> m = fullTextConfigs.get(dataverseName);
+            if (m == null) {
+                m = new HashMap<>();
+                fullTextConfigs.put(dataverseName, m);
+            }
+            if (!m.containsKey(configName)) {
+                return m.put(configName, config);
+            }
+            return null;
+        }
+    }
+
+    public FullTextConfigDescriptor dropFullTextConfig(FullTextConfigDescriptor config) {
+        DataverseName dataverseName = config.getDataverseName();
+        String configName = config.getName();
+        synchronized (fullTextConfigs) {
+            Map<String, FullTextConfigDescriptor> m = fullTextConfigs.get(dataverseName);
+            if (m == null) {
+                return null;
+            }
+            return m.remove(configName);
         }
     }
 
