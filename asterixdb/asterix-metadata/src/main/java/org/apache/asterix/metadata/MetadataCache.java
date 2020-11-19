@@ -45,8 +45,6 @@ import org.apache.asterix.metadata.entities.Synonym;
 import org.apache.asterix.metadata.utils.IndexUtil;
 import org.apache.asterix.runtime.fulltext.AbstractFullTextFilterDescriptor;
 import org.apache.asterix.runtime.fulltext.FullTextConfigDescriptor;
-import org.apache.asterix.runtime.fulltext.IFullTextConfigDescriptor;
-import org.apache.asterix.runtime.fulltext.IFullTextFilterDescriptor;
 
 /**
  * Caches metadata entities such that the MetadataManager does not have to
@@ -87,7 +85,6 @@ public class MetadataCache {
     protected final Map<DataverseName, Map<String, AbstractFullTextFilterDescriptor>> fullTextFilters = new HashMap<>();
     // Key is DataverseName. Key of value map is the full-text config name
     protected final Map<DataverseName, Map<String, FullTextConfigDescriptor>> fullTextConfigs = new HashMap<>();
-
 
     // Atomically executes all metadata operations in ctx's log.
     public void commit(MetadataTransactionContext ctx) {
@@ -388,6 +385,26 @@ public class MetadataCache {
     public Function getFunction(FunctionSignature functionSignature) {
         synchronized (functions) {
             return functions.get(functionSignature);
+        }
+    }
+
+    public FullTextConfigDescriptor getFullTextConfig(DataverseName dataverseName, String configName) {
+        synchronized (fullTextConfigs) {
+            Map<String, FullTextConfigDescriptor> m = fullTextConfigs.get(dataverseName);
+            if (m == null) {
+                return null;
+            }
+            return m.get(configName);
+        }
+    }
+
+    public AbstractFullTextFilterDescriptor getFullTextFilter(DataverseName dataverseName, String filterName) {
+        synchronized (fullTextFilters) {
+            Map<String, AbstractFullTextFilterDescriptor> m = fullTextFilters.get(dataverseName);
+            if (m == null) {
+                return null;
+            }
+            return m.get(filterName);
         }
     }
 

@@ -36,11 +36,6 @@ public class FullTextConfigDescriptor implements IFullTextConfigDescriptor {
     private final TokenizerCategory tokenizerCategory;
     private final ImmutableList<IFullTextFilterDescriptor> filterDescriptors;
 
-    // This built-in default full-text config will be used only when no full-text config is specified by the user
-    // Note that the default ft config descriptor is not stored in metadata catalog,
-    // and if we are trying to get a ft config descriptor with no name or this default name,
-    // the metadata manager will return a default one without looking into the metadata catalog
-    // In this way we avoid the edge cases to insert or delete the default config in the catalog
     public static final String DEFAULT_FULL_TEXT_CONFIG_NAME = "DEFAULT_FULL_TEXT_CONFIG";
 
     public FullTextConfigDescriptor(DataverseName dataverseName, String name, TokenizerCategory tokenizerCategory,
@@ -51,9 +46,13 @@ public class FullTextConfigDescriptor implements IFullTextConfigDescriptor {
         this.filterDescriptors = filterDescriptors;
     }
 
+    // This built-in default full-text config will be used only when no full-text config is specified by the user.
+    // Note that the default ft config descriptor is not stored in metadata catalog,
+    // and if we are trying to get a full-text config descriptor with a name of null or empty string,
+    // the metadata manager will return this default full-text config without looking into the metadata catalog
+    // In this way we avoid the edge cases to insert or delete the default config in the metadata catalog
     public static FullTextConfigDescriptor getDefaultFullTextConfig() {
-        return new FullTextConfigDescriptor(null, DEFAULT_FULL_TEXT_CONFIG_NAME, TokenizerCategory.WORD,
-                ImmutableList.of());
+        return new FullTextConfigDescriptor(null, null, TokenizerCategory.WORD, ImmutableList.of());
     }
 
     public DataverseName getDataverseName() {

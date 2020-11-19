@@ -34,11 +34,16 @@ import org.apache.asterix.metadata.entities.Dataverse;
 import org.apache.asterix.metadata.entities.Feed;
 import org.apache.asterix.metadata.entities.FeedConnection;
 import org.apache.asterix.metadata.entities.FeedPolicyEntity;
+import org.apache.asterix.metadata.entities.FullTextConfigMetadataEntity;
+import org.apache.asterix.metadata.entities.FullTextFilterMetadataEntity;
 import org.apache.asterix.metadata.entities.Function;
 import org.apache.asterix.metadata.entities.Index;
 import org.apache.asterix.metadata.entities.Library;
 import org.apache.asterix.metadata.entities.NodeGroup;
 import org.apache.asterix.metadata.utils.MetadataUtil;
+import org.apache.asterix.runtime.fulltext.AbstractFullTextFilterDescriptor;
+import org.apache.asterix.runtime.fulltext.FullTextConfigDescriptor;
+import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextFilterEvaluator;
 
 /**
  * Used to implement serializable transactions against the MetadataCache.
@@ -110,6 +115,16 @@ public class MetadataTransactionContext extends MetadataCache {
         logAndApply(new MetadataLogicalOperation(function, true));
     }
 
+    public void addFullTextFilter(AbstractFullTextFilterDescriptor filter) {
+        droppedCache.dropFullTextFilter(filter);
+        logAndApply(new MetadataLogicalOperation(new FullTextFilterMetadataEntity(filter), true));
+    }
+
+    public void addFullTextConfig(FullTextConfigDescriptor config) {
+        droppedCache.dropFullTextConfig(config);
+        logAndApply(new MetadataLogicalOperation(new FullTextConfigMetadataEntity(config), true));
+    }
+
     public void addAdapter(DatasourceAdapter adapter) {
         droppedCache.dropAdapterIfExists(adapter);
         logAndApply(new MetadataLogicalOperation(adapter, true));
@@ -164,6 +179,23 @@ public class MetadataTransactionContext extends MetadataCache {
         logAndApply(new MetadataLogicalOperation(function, false));
     }
 
+    public void dropFullTextConfig(DataverseName dataverseName, String configName) {
+        FullTextConfigDescriptor config = new FullTextConfigDescriptor(dataverseName, configName, null, null);
+        droppedCache.addFullTextConfigIfNotExists(config);
+        logAndApply(new MetadataLogicalOperation(new FullTextConfigMetadataEntity(config), false));
+    }
+
+    public void dropFullTextFilter(DataverseName dataverseName, String filterName) {
+        AbstractFullTextFilterDescriptor filter = new AbstractFullTextFilterDescriptor(dataverseName, filterName) {
+            @Override
+            public IFullTextFilterEvaluator createEvaluator() {
+                return null;
+            }
+        };
+        droppedCache.addFullTextFilterIfNotExists(filter);
+        logAndApply(new MetadataLogicalOperation(new FullTextFilterMetadataEntity(filter), false));
+    }
+
     public void dropAdapter(DataverseName dataverseName, String adapterName) {
         AdapterIdentifier adapterIdentifier = new AdapterIdentifier(dataverseName, adapterName);
         DatasourceAdapter adapter = new DatasourceAdapter(adapterIdentifier, null, null, null, null);
@@ -216,6 +248,14 @@ public class MetadataTransactionContext extends MetadataCache {
 
     public boolean functionIsDropped(FunctionSignature functionSignature) {
         return droppedCache.getFunction(functionSignature) != null;
+    }
+
+    public boolean fullTextConfigIsDropped(DataverseName dataverseName, String configName) {
+        return droppedCache.getFullTextConfig(dataverseName, configName) != null;
+    }
+
+    public boolean fullTextFilterIsDropped(DataverseName dataverseName, String filterName) {
+        return droppedCache.getFullTextFilter(dataverseName, filterName) != null;
     }
 
     public List<MetadataLogicalOperation> getOpLog() {

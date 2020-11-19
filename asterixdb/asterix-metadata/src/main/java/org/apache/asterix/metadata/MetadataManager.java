@@ -586,7 +586,7 @@ public abstract class MetadataManager implements IMetadataManager {
         // requested function itself (but the function is still uncommitted).
         Function function = ctx.getFunction(functionSignature);
         if (function != null) {
-            // Don't add this dataverse to the cache, since it is still
+            // Don't add this function to the cache, since it is still
             // uncommitted.
             return function;
         }
@@ -636,6 +636,7 @@ public abstract class MetadataManager implements IMetadataManager {
         } catch (RemoteException e) {
             throw new MetadataException(ErrorCode.REMOTE_EXCEPTION_WHEN_CALLING_METADATA_NODE, e);
         }
+        mdTxnCtx.addFullTextFilter(filter);
     }
 
     @Override
@@ -646,44 +647,114 @@ public abstract class MetadataManager implements IMetadataManager {
         } catch (RemoteException e) {
             throw new MetadataException(ErrorCode.REMOTE_EXCEPTION_WHEN_CALLING_METADATA_NODE, e);
         }
+        mdTxnCtx.dropFullTextFilter(dataverseName, filterName);
     }
 
     @Override
-    public AbstractFullTextFilterDescriptor getFullTextFilter(MetadataTransactionContext mdTxnCtx,
+    public AbstractFullTextFilterDescriptor getFullTextFilter(MetadataTransactionContext ctx,
             DataverseName dataverseName, String filterName) throws AlgebricksException {
+        // First look in the context to see if this transaction created the
+        // requested full-text filter itself (but the full-text filter is still uncommitted).
+        AbstractFullTextFilterDescriptor filter = ctx.getFullTextFilter(dataverseName, filterName);
+        if (filter != null) {
+            // Don't add this filter to the cache, since it is still
+            // uncommitted.
+            return filter;
+        }
+
+        if (ctx.fullTextFilterIsDropped(dataverseName, filterName)) {
+            // Filter has been dropped by this transaction but could still be
+            // in the cache.
+            return null;
+        }
+
+        if (ctx.getDataverse(dataverseName) != null) {
+            // This transaction has dropped and subsequently created the same
+            // dataverse.
+            return null;
+        }
+
+        filter = cache.getFullTextFilter(dataverseName, filterName);
+        if (filter != null) {
+            // filter is already in the cache, don't add it again.
+            return filter;
+        }
+
         try {
-            return metadataNode.getFullTextFilter(mdTxnCtx.getTxnId(), dataverseName, filterName);
-        } catch (AlgebricksException | RemoteException e) {
+            filter = metadataNode.getFullTextFilter(ctx.getTxnId(), dataverseName, filterName);
+        } catch (RemoteException e) {
             throw new MetadataException(ErrorCode.REMOTE_EXCEPTION_WHEN_CALLING_METADATA_NODE, e);
         }
+        // We fetched the filter from the MetadataNode. Add it to the cache
+        // when this transaction commits.
+        if (filter != null) {
+            ctx.addFullTextFilter(filter);
+        }
+        return filter;
     }
 
     @Override
-    public void addFullTextConfig(MetadataTransactionContext mdTxnCtx, FullTextConfigDescriptor configDescriptor)
+    public void addFullTextConfig(MetadataTransactionContext mdTxnCtx, FullTextConfigDescriptor config)
             throws AlgebricksException {
-        if (configDescriptor.getName().equals(DEFAULT_FULL_TEXT_CONFIG_NAME)) {
+        if (config.getName().equals(DEFAULT_FULL_TEXT_CONFIG_NAME)) {
             throw new AsterixException(ErrorCode.FULL_TEXT_CONFIG_ALREADY_EXISTS, DEFAULT_FULL_TEXT_CONFIG_NAME);
         }
 
         try {
-            metadataNode.addFullTextConfig(mdTxnCtx.getTxnId(), configDescriptor);
+            metadataNode.addFullTextConfig(mdTxnCtx.getTxnId(), config);
         } catch (RemoteException e) {
             throw new MetadataException(ErrorCode.REMOTE_EXCEPTION_WHEN_CALLING_METADATA_NODE, e);
         }
+        mdTxnCtx.addFullTextConfig(config);
     }
 
     @Override
-    public FullTextConfigDescriptor getFullTextConfig(MetadataTransactionContext mdTxnCtx, DataverseName dataverseName,
+    public FullTextConfigDescriptor getFullTextConfig(MetadataTransactionContext ctx, DataverseName dataverseName,
             String configName) throws AlgebricksException {
-        if (Strings.isNullOrEmpty(configName) || configName.equals(DEFAULT_FULL_TEXT_CONFIG_NAME)) {
+
+        if (Strings.isNullOrEmpty(configName)) {
             return FullTextConfigDescriptor.getDefaultFullTextConfig();
         }
-        try {
-            return metadataNode.getFullTextConfig(mdTxnCtx.getTxnId(), dataverseName, configName);
-        } catch (AlgebricksException | RemoteException e) {
-            throw new AlgebricksException("Error when getting full-text config " + configName,
-                    ErrorCode.FULL_TEXT_CONFIG_NOT_FOUND, e);
+
+        // First look in the context to see if this transaction created the
+        // requested full-text config itself (but the full-text config is still uncommitted).
+        FullTextConfigDescriptor config = ctx.getFullTextConfig(dataverseName, configName);
+        if (config != null) {
+            // Don't add this config to the cache, since it is still
+            // uncommitted.
+            return config;
         }
+
+        if (ctx.fullTextConfigIsDropped(dataverseName, configName)) {
+            // Config has been dropped by this transaction but could still be
+            // in the cache.
+            return null;
+        }
+
+        if (ctx.getDataverse(dataverseName) != null) {
+            // This transaction has dropped and subsequently created the same
+            // dataverse.
+            return null;
+        }
+
+        config = cache.getFullTextConfig(dataverseName, configName);
+        if (config != null) {
+            // config is already in the cache, don't add it again.
+            return config;
+        }
+
+        try {
+            config = metadataNode.getFullTextConfig(ctx.getTxnId(), dataverseName, configName);
+        } catch (RemoteException e) {
+            throw new MetadataException(ErrorCode.REMOTE_EXCEPTION_WHEN_CALLING_METADATA_NODE, e);
+        }
+
+        // We fetched the config from the MetadataNode. Add it to the cache
+        // when this transaction commits.
+        if (config != null) {
+            ctx.addFullTextConfig(config);
+        }
+        return config;
     }
 
     @Override
@@ -692,8 +763,9 @@ public abstract class MetadataManager implements IMetadataManager {
         try {
             metadataNode.dropFullTextConfig(mdTxnCtx.getTxnId(), dataverseName, configName);
         } catch (RemoteException e) {
-            throw new AlgebricksException(e);
+            throw new MetadataException(ErrorCode.REMOTE_EXCEPTION_WHEN_CALLING_METADATA_NODE, e);
         }
+        mdTxnCtx.dropFullTextConfig(dataverseName, configName);
     }
 
     @Override
