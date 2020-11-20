@@ -29,6 +29,7 @@ import org.apache.asterix.metadata.entities.InternalDatasetDetails;
 import org.apache.asterix.om.types.ARecordType;
 import org.apache.asterix.om.types.IAType;
 import org.apache.asterix.om.utils.NonTaggedFormatUtil;
+import org.apache.asterix.runtime.fulltext.IFullTextConfigDescriptor;
 import org.apache.asterix.runtime.utils.RuntimeUtils;
 import org.apache.hyracks.algebricks.common.constraints.AlgebricksPartitionConstraintHelper;
 import org.apache.hyracks.algebricks.common.exceptions.AlgebricksException;
@@ -64,6 +65,7 @@ public class SecondaryCorrelatedInvertedIndexOperationsHelper extends SecondaryC
     private IBinaryComparatorFactory[] tokenComparatorFactories;
     private ITypeTraits[] tokenTypeTraits;
     private IBinaryTokenizerFactory tokenizerFactory;
+    private IFullTextConfigDescriptor fullTextConfigDescriptor;
     // For tokenization, sorting and loading. Represents <token, primary keys>.
     private int numTokenKeyPairFields;
     private IBinaryComparatorFactory[] tokenKeyPairComparatorFactories;
@@ -150,6 +152,8 @@ public class SecondaryCorrelatedInvertedIndexOperationsHelper extends SecondaryC
         // and add the choice to the index metadata.
         tokenizerFactory = NonTaggedFormatUtil.getBinaryTokenizerFactory(secondaryKeyType.getTypeTag(), indexType,
                 index.getGramLength());
+        fullTextConfigDescriptor = metadataProvider
+                .findFullTextConfig(index.getDataverseName(), index.getFullTextConfigName()).getFullTextConfig();
         // Type traits for inverted-list elements. Inverted lists contain
         // primary keys.
         invListsTypeTraits = new ITypeTraits[numPrimaryKeys];
@@ -278,9 +282,10 @@ public class SecondaryCorrelatedInvertedIndexOperationsHelper extends SecondaryC
         for (int i = NUM_TAG_FIELDS; i < keyFields.length; i++) {
             keyFields[i] = i + numSecondaryKeys;
         }
-        BinaryTokenizerOperatorDescriptor tokenizerOp = new BinaryTokenizerOperatorDescriptor(spec,
-                getTaggedRecordDescriptor(tokenKeyPairRecDesc), tokenizerFactory, docField, keyFields, isPartitioned,
-                false, true, MissingWriterFactory.INSTANCE);
+        BinaryTokenizerOperatorDescriptor tokenizerOp =
+                new BinaryTokenizerOperatorDescriptor(spec, getTaggedRecordDescriptor(tokenKeyPairRecDesc),
+                        tokenizerFactory, fullTextConfigDescriptor.createEvaluatorFactory(), docField, keyFields,
+                        isPartitioned, false, true, MissingWriterFactory.INSTANCE);
         AlgebricksPartitionConstraintHelper.setPartitionConstraintInJobSpec(spec, tokenizerOp,
                 primaryPartitionConstraint);
         return tokenizerOp;

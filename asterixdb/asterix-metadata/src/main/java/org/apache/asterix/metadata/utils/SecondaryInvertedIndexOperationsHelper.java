@@ -30,6 +30,7 @@ import org.apache.asterix.metadata.entities.InternalDatasetDetails;
 import org.apache.asterix.om.types.ARecordType;
 import org.apache.asterix.om.types.IAType;
 import org.apache.asterix.om.utils.NonTaggedFormatUtil;
+import org.apache.asterix.runtime.fulltext.IFullTextConfigDescriptor;
 import org.apache.asterix.runtime.utils.RuntimeUtils;
 import org.apache.hyracks.algebricks.common.constraints.AlgebricksPartitionConstraintHelper;
 import org.apache.hyracks.algebricks.common.exceptions.AlgebricksException;
@@ -67,6 +68,7 @@ public class SecondaryInvertedIndexOperationsHelper extends SecondaryTreeIndexOp
     private IBinaryComparatorFactory[] tokenComparatorFactories;
     private ITypeTraits[] tokenTypeTraits;
     private IBinaryTokenizerFactory tokenizerFactory;
+    private IFullTextConfigDescriptor fullTextConfigDescriptor;
     // For tokenization, sorting and loading. Represents <token, primary keys>.
     private int numTokenKeyPairFields;
     private IBinaryComparatorFactory[] tokenKeyPairComparatorFactories;
@@ -79,6 +81,9 @@ public class SecondaryInvertedIndexOperationsHelper extends SecondaryTreeIndexOp
     protected SecondaryInvertedIndexOperationsHelper(Dataset dataset, Index index, MetadataProvider metadataProvider,
             SourceLocation sourceLoc) throws AlgebricksException {
         super(dataset, index, metadataProvider, sourceLoc);
+        this.fullTextConfigDescriptor =
+                metadataProvider.findFullTextConfig(index.getDataverseName(), index.getFullTextConfigName())
+                        .fetchFilterDescriptorsFromMetadata(metadataProvider).getFullTextConfig();
     }
 
     @Override
@@ -275,9 +280,9 @@ public class SecondaryInvertedIndexOperationsHelper extends SecondaryTreeIndexOp
         for (int i = 0; i < primaryKeyFields.length; i++) {
             primaryKeyFields[i] = numSecondaryKeys + i;
         }
-        BinaryTokenizerOperatorDescriptor tokenizerOp =
-                new BinaryTokenizerOperatorDescriptor(spec, tokenKeyPairRecDesc, tokenizerFactory, docField,
-                        primaryKeyFields, isPartitioned, false, false, MissingWriterFactory.INSTANCE);
+        BinaryTokenizerOperatorDescriptor tokenizerOp = new BinaryTokenizerOperatorDescriptor(spec, tokenKeyPairRecDesc,
+                tokenizerFactory, fullTextConfigDescriptor.createEvaluatorFactory(), docField, primaryKeyFields,
+                isPartitioned, false, false, MissingWriterFactory.INSTANCE);
         tokenizerOp.setSourceLocation(sourceLoc);
         AlgebricksPartitionConstraintHelper.setPartitionConstraintInJobSpec(spec, tokenizerOp,
                 primaryPartitionConstraint);

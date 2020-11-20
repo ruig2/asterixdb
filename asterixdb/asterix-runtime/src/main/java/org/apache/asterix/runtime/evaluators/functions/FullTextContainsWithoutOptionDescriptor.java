@@ -23,42 +23,16 @@ import org.apache.asterix.common.annotations.MissingNullInOutFunction;
 import org.apache.asterix.om.functions.BuiltinFunctions;
 import org.apache.asterix.om.functions.IFunctionDescriptor;
 import org.apache.asterix.om.functions.IFunctionDescriptorFactory;
-import org.apache.asterix.runtime.evaluators.base.AbstractScalarFunctionDynamicDescriptor;
-import org.apache.asterix.runtime.evaluators.common.FullTextContainsEvaluator;
-import org.apache.hyracks.algebricks.common.exceptions.AlgebricksException;
+import org.apache.asterix.om.functions.IFunctionTypeInferer;
+import org.apache.asterix.runtime.functions.FunctionTypeInferers;
 import org.apache.hyracks.algebricks.core.algebra.functions.FunctionIdentifier;
-import org.apache.hyracks.algebricks.runtime.base.IEvaluatorContext;
-import org.apache.hyracks.algebricks.runtime.base.IScalarEvaluator;
-import org.apache.hyracks.algebricks.runtime.base.IScalarEvaluatorFactory;
-import org.apache.hyracks.api.exceptions.HyracksDataException;
 
 @MissingNullInOutFunction
-public class FullTextContainsWithoutOptionDescriptor extends AbstractScalarFunctionDynamicDescriptor {
-    private static final long serialVersionUID = 1L;
+public class FullTextContainsWithoutOptionDescriptor extends FullTextContainsDescriptor {
+    private static final long serialVersionUID = 2L;
 
-    public static final IFunctionDescriptorFactory FACTORY = new IFunctionDescriptorFactory() {
-        @Override
-        public IFunctionDescriptor createFunctionDescriptor() {
-            return new FullTextContainsWithoutOptionDescriptor();
-        }
-    };
-
-    /**
-     * Creates full-text search evaluator. There are two arguments:
-     * arg0: Expression1 - search field
-     * arg1: Expression2 - search predicate
-     */
-    @Override
-    public IScalarEvaluatorFactory createEvaluatorFactory(final IScalarEvaluatorFactory[] args)
-            throws AlgebricksException {
-        return new IScalarEvaluatorFactory() {
-            private static final long serialVersionUID = 1L;
-
-            @Override
-            public IScalarEvaluator createScalarEvaluator(IEvaluatorContext ctx) throws HyracksDataException {
-                return new FullTextContainsEvaluator(args, ctx);
-            }
-        };
+    public FullTextContainsWithoutOptionDescriptor() {
+        super();
     }
 
     @Override
@@ -66,4 +40,16 @@ public class FullTextContainsWithoutOptionDescriptor extends AbstractScalarFunct
         return BuiltinFunctions.FULLTEXT_CONTAINS_WO_OPTION;
     }
 
+    public static final IFunctionDescriptorFactory FACTORY = new IFunctionDescriptorFactory() {
+
+        @Override
+        public IFunctionDescriptor createFunctionDescriptor() {
+            return new FullTextContainsWithoutOptionDescriptor();
+        }
+
+        @Override
+        public IFunctionTypeInferer createFunctionTypeInferer() {
+            return new FunctionTypeInferers.FullTextContainsTypeInferer();
+        }
+    };
 }

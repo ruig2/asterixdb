@@ -34,6 +34,8 @@ import org.apache.asterix.metadata.entities.Datatype;
 import org.apache.asterix.metadata.entities.Feed;
 import org.apache.asterix.metadata.entities.FeedConnection;
 import org.apache.asterix.metadata.entities.FeedPolicyEntity;
+import org.apache.asterix.metadata.entities.FullTextConfigMetadataEntity;
+import org.apache.asterix.metadata.entities.FullTextFilterMetadataEntity;
 import org.apache.asterix.metadata.entities.Index;
 import org.apache.asterix.metadata.entities.NodeGroup;
 import org.apache.asterix.metadata.entities.Synonym;
@@ -146,6 +148,16 @@ public class MetadataManagerUtil {
     public static Synonym findSynonym(MetadataTransactionContext mdTxnCtx, DataverseName dataverseName,
             String synonymName) throws AlgebricksException {
         return MetadataManager.INSTANCE.getSynonym(mdTxnCtx, dataverseName, synonymName);
+    }
+
+    public static FullTextConfigMetadataEntity findFullTextConfigDescriptor(MetadataTransactionContext mdTxnCtx,
+            DataverseName dataverseName, String ftConfigName) throws AlgebricksException {
+        return MetadataManager.INSTANCE.getFullTextConfig(mdTxnCtx, dataverseName, ftConfigName);
+    }
+
+    public static FullTextFilterMetadataEntity findFullTextFilterDescriptor(MetadataTransactionContext mdTxnCtx,
+            DataverseName dataverseName, String ftFilterName) throws AlgebricksException {
+        return MetadataManager.INSTANCE.getFullTextFilter(mdTxnCtx, dataverseName, ftFilterName);
     }
 
     public static List<Index> getDatasetIndexes(MetadataTransactionContext mdTxnCtx, DataverseName dataverseName,

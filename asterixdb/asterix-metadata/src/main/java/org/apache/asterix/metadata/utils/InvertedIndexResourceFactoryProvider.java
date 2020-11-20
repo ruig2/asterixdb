@@ -31,6 +31,7 @@ import org.apache.asterix.common.exceptions.ErrorCode;
 import org.apache.asterix.metadata.api.IResourceFactoryProvider;
 import org.apache.asterix.metadata.declared.MetadataProvider;
 import org.apache.asterix.metadata.entities.Dataset;
+import org.apache.asterix.metadata.entities.FullTextConfigMetadataEntity;
 import org.apache.asterix.metadata.entities.Index;
 import org.apache.asterix.om.types.ARecordType;
 import org.apache.asterix.om.types.IAType;
@@ -48,6 +49,7 @@ import org.apache.hyracks.storage.am.lsm.common.api.ILSMMergePolicyFactory;
 import org.apache.hyracks.storage.am.lsm.common.api.ILSMOperationTrackerFactory;
 import org.apache.hyracks.storage.am.lsm.common.api.ILSMPageWriteCallbackFactory;
 import org.apache.hyracks.storage.am.lsm.invertedindex.dataflow.LSMInvertedIndexLocalResourceFactory;
+import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextConfigEvaluatorFactory;
 import org.apache.hyracks.storage.am.lsm.invertedindex.tokenizers.IBinaryTokenizerFactory;
 import org.apache.hyracks.storage.common.IResourceFactory;
 import org.apache.hyracks.storage.common.IStorageManager;
@@ -119,12 +121,18 @@ public class InvertedIndexResourceFactoryProvider implements IResourceFactoryPro
         IBinaryComparatorFactory[] tokenCmpFactories =
                 getTokenComparatorFactories(dataset, index, recordType, metaType);
         IBinaryTokenizerFactory tokenizerFactory = getTokenizerFactory(dataset, index, recordType, metaType);
+        FullTextConfigMetadataEntity configMetadataEntity =
+                mdProvider.findFullTextConfig(index.getDataverseName(), index.getFullTextConfigName());
+        IFullTextConfigEvaluatorFactory fullTextConfigEvaluatorFactory = configMetadataEntity
+                .fetchFilterDescriptorsFromMetadata(mdProvider).getFullTextConfig().createEvaluatorFactory();
+
         return new LSMInvertedIndexLocalResourceFactory(storageManager, typeTraits, cmpFactories, filterTypeTraits,
                 filterCmpFactories, secondaryFilterFields, opTrackerFactory, ioOpCallbackFactory,
                 pageWriteCallbackFactory, metadataPageManagerFactory, vbcProvider, ioSchedulerProvider,
                 mergePolicyFactory, mergePolicyProperties, true, tokenTypeTraits, tokenCmpFactories, tokenizerFactory,
-                isPartitioned, invertedIndexFields, secondaryFilterFieldsForNonBulkLoadOps,
-                invertedIndexFieldsForNonBulkLoadOps, bloomFilterFalsePositiveRate);
+                fullTextConfigEvaluatorFactory, isPartitioned, invertedIndexFields,
+                secondaryFilterFieldsForNonBulkLoadOps, invertedIndexFieldsForNonBulkLoadOps,
+                bloomFilterFalsePositiveRate);
     }
 
     // Returns an array of the type traits of the inverted list elements
