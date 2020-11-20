@@ -50,6 +50,7 @@ import org.apache.asterix.metadata.entities.Dataverse;
 import org.apache.asterix.metadata.entities.Feed;
 import org.apache.asterix.metadata.entities.FeedConnection;
 import org.apache.asterix.metadata.entities.FeedPolicyEntity;
+import org.apache.asterix.metadata.entities.FullTextConfigMetadataEntity;
 import org.apache.asterix.metadata.entities.Function;
 import org.apache.asterix.metadata.entities.Index;
 import org.apache.asterix.metadata.entities.Library;
@@ -57,7 +58,6 @@ import org.apache.asterix.metadata.entities.Node;
 import org.apache.asterix.metadata.entities.NodeGroup;
 import org.apache.asterix.metadata.entities.Synonym;
 import org.apache.asterix.runtime.fulltext.AbstractFullTextFilterDescriptor;
-import org.apache.asterix.runtime.fulltext.FullTextConfigDescriptor;
 import org.apache.asterix.transaction.management.opcallbacks.AbstractIndexModificationOperationCallback.Operation;
 import org.apache.hyracks.algebricks.common.exceptions.AlgebricksException;
 import org.apache.hyracks.api.exceptions.HyracksDataException;
@@ -692,39 +692,39 @@ public abstract class MetadataManager implements IMetadataManager {
     }
 
     @Override
-    public void addFullTextConfig(MetadataTransactionContext mdTxnCtx, FullTextConfigDescriptor config)
-            throws AlgebricksException {
-        if (Strings.isNullOrEmpty(config.getName())) {
+    public void addFullTextConfig(MetadataTransactionContext mdTxnCtx,
+            FullTextConfigMetadataEntity configMetadataEntity) throws AlgebricksException {
+        if (Strings.isNullOrEmpty(configMetadataEntity.getFullTextConfig().getName())) {
             throw new AsterixException(ErrorCode.FULL_TEXT_CONFIG_ALREADY_EXISTS);
         }
 
         try {
-            metadataNode.addFullTextConfig(mdTxnCtx.getTxnId(), config);
+            metadataNode.addFullTextConfig(mdTxnCtx.getTxnId(), configMetadataEntity);
         } catch (RemoteException e) {
             throw new MetadataException(ErrorCode.REMOTE_EXCEPTION_WHEN_CALLING_METADATA_NODE, e);
         }
-        mdTxnCtx.addFullTextConfig(config);
+        mdTxnCtx.addFullTextConfig(configMetadataEntity);
     }
 
     @Override
-    public FullTextConfigDescriptor getFullTextConfig(MetadataTransactionContext ctx, DataverseName dataverseName,
+    public FullTextConfigMetadataEntity getFullTextConfig(MetadataTransactionContext ctx, DataverseName dataverseName,
             String configName) throws AlgebricksException {
 
         if (Strings.isNullOrEmpty(configName)) {
-            return FullTextConfigDescriptor.getDefaultFullTextConfig();
+            return FullTextConfigMetadataEntity.getDefaultFullTextConfigMetadataEntity();
         }
 
         // First look in the context to see if this transaction created the
         // requested full-text config itself (but the full-text config is still uncommitted).
-        FullTextConfigDescriptor config = ctx.getFullTextConfig(dataverseName, configName);
-        if (config != null) {
+        FullTextConfigMetadataEntity configMetadataEntity = ctx.getFullTextConfig(dataverseName, configName);
+        if (configMetadataEntity != null) {
             // Don't add this config to the cache, since it is still
             // uncommitted.
-            return config;
+            return configMetadataEntity;
         }
 
         if (ctx.fullTextConfigIsDropped(dataverseName, configName)) {
-            // Config has been dropped by this transaction but could still be
+            // config has been dropped by this transaction but could still be
             // in the cache.
             return null;
         }
@@ -735,24 +735,24 @@ public abstract class MetadataManager implements IMetadataManager {
             return null;
         }
 
-        config = cache.getFullTextConfig(dataverseName, configName);
-        if (config != null) {
+        configMetadataEntity = cache.getFullTextConfig(dataverseName, configName);
+        if (configMetadataEntity != null) {
             // config is already in the cache, don't add it again.
-            return config;
+            return configMetadataEntity;
         }
 
         try {
-            config = metadataNode.getFullTextConfig(ctx.getTxnId(), dataverseName, configName);
+            configMetadataEntity = metadataNode.getFullTextConfig(ctx.getTxnId(), dataverseName, configName);
         } catch (RemoteException e) {
             throw new MetadataException(ErrorCode.REMOTE_EXCEPTION_WHEN_CALLING_METADATA_NODE, e);
         }
 
         // We fetched the config from the MetadataNode. Add it to the cache
         // when this transaction commits.
-        if (config != null) {
-            ctx.addFullTextConfig(config);
+        if (configMetadataEntity != null) {
+            ctx.addFullTextConfig(configMetadataEntity);
         }
-        return config;
+        return configMetadataEntity;
     }
 
     @Override

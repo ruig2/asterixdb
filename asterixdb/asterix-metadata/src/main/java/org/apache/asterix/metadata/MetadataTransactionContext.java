@@ -120,9 +120,9 @@ public class MetadataTransactionContext extends MetadataCache {
         logAndApply(new MetadataLogicalOperation(new FullTextFilterMetadataEntity(filter), true));
     }
 
-    public void addFullTextConfig(FullTextConfigDescriptor config) {
-        droppedCache.dropFullTextConfig(config);
-        logAndApply(new MetadataLogicalOperation(new FullTextConfigMetadataEntity(config), true));
+    public void addFullTextConfig(FullTextConfigMetadataEntity configMetadataEntity) {
+        droppedCache.dropFullTextConfig(configMetadataEntity);
+        logAndApply(new MetadataLogicalOperation(configMetadataEntity, true));
     }
 
     public void addAdapter(DatasourceAdapter adapter) {
@@ -181,8 +181,10 @@ public class MetadataTransactionContext extends MetadataCache {
 
     public void dropFullTextConfig(DataverseName dataverseName, String configName) {
         FullTextConfigDescriptor config = new FullTextConfigDescriptor(dataverseName, configName, null, null);
-        droppedCache.addFullTextConfigIfNotExists(config);
-        logAndApply(new MetadataLogicalOperation(new FullTextConfigMetadataEntity(config), false));
+        FullTextConfigMetadataEntity configMetadataEntity = new FullTextConfigMetadataEntity(config);
+
+        droppedCache.addFullTextConfigIfNotExists(configMetadataEntity);
+        logAndApply(new MetadataLogicalOperation(configMetadataEntity, false));
     }
 
     public void dropFullTextFilter(DataverseName dataverseName, String filterName) {

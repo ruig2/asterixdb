@@ -19,6 +19,8 @@
 
 package org.apache.asterix.metadata;
 
+import static org.apache.asterix.common.exceptions.ErrorCode.FULL_TEXT_DEFAULT_CONFIG_CANNOT_BE_DELETED_OR_CREATED;
+
 import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -31,7 +33,6 @@ import org.apache.asterix.common.api.INcApplicationContext;
 import org.apache.asterix.common.config.DatasetConfig.DatasetType;
 import org.apache.asterix.common.config.DatasetConfig.IndexType;
 import org.apache.asterix.common.dataflow.LSMIndexUtil;
-import static org.apache.asterix.common.exceptions.ErrorCode.FULL_TEXT_DEFAULT_CONFIG_CANNOT_BE_DELETED_OR_CREATED;
 import org.apache.asterix.common.exceptions.MetadataException;
 import org.apache.asterix.common.functions.FunctionSignature;
 import org.apache.asterix.common.metadata.DataverseName;
@@ -64,6 +65,7 @@ import org.apache.asterix.metadata.entities.Dataverse;
 import org.apache.asterix.metadata.entities.Feed;
 import org.apache.asterix.metadata.entities.FeedConnection;
 import org.apache.asterix.metadata.entities.FeedPolicyEntity;
+import org.apache.asterix.metadata.entities.FullTextConfigMetadataEntity;
 import org.apache.asterix.metadata.entities.Function;
 import org.apache.asterix.metadata.entities.Index;
 import org.apache.asterix.metadata.entities.InternalDatasetDetails;
@@ -80,7 +82,7 @@ import org.apache.asterix.metadata.entitytupletranslators.ExternalFileTupleTrans
 import org.apache.asterix.metadata.entitytupletranslators.FeedConnectionTupleTranslator;
 import org.apache.asterix.metadata.entitytupletranslators.FeedPolicyTupleTranslator;
 import org.apache.asterix.metadata.entitytupletranslators.FeedTupleTranslator;
-import org.apache.asterix.metadata.entitytupletranslators.FullTextConfigDescriptorTupleTranslator;
+import org.apache.asterix.metadata.entitytupletranslators.FullTextConfigMetadataEntityTupleTranslator;
 import org.apache.asterix.metadata.entitytupletranslators.FullTextFilterDescriptorTupleTranslator;
 import org.apache.asterix.metadata.entitytupletranslators.FunctionTupleTranslator;
 import org.apache.asterix.metadata.entitytupletranslators.IndexTupleTranslator;
@@ -104,7 +106,6 @@ import org.apache.asterix.om.types.BuiltinType;
 import org.apache.asterix.om.types.IAType;
 import org.apache.asterix.runtime.fulltext.AbstractFullTextFilterDescriptor;
 import org.apache.asterix.runtime.fulltext.FullTextConfigDescriptor;
-import org.apache.asterix.runtime.fulltext.IFullTextConfigDescriptor;
 import org.apache.asterix.runtime.fulltext.IFullTextFilterDescriptor;
 import org.apache.asterix.transaction.management.opcallbacks.AbstractIndexModificationOperationCallback.Operation;
 import org.apache.asterix.transaction.management.opcallbacks.SecondaryIndexModificationOperationCallback;
@@ -506,12 +507,12 @@ public class MetadataNode implements IMetadataNode {
         }
     }
 
-    private void insertFullTextConfigDescriptorToCatalog(TxnId txnId, FullTextConfigDescriptor configDescriptor)
+    private void insertFullTextConfigDescriptorToCatalog(TxnId txnId, FullTextConfigMetadataEntity config)
             throws AlgebricksException {
         try {
-            FullTextConfigDescriptorTupleTranslator tupleReaderWriter =
+            FullTextConfigMetadataEntityTupleTranslator tupleReaderWriter =
                     tupleTranslatorProvider.getFullTextConfigTupleTranslator(true);
-            ITupleReference configTuple = tupleReaderWriter.getTupleFromMetadataEntity(configDescriptor);
+            ITupleReference configTuple = tupleReaderWriter.getTupleFromMetadataEntity(config);
             insertTupleIntoIndex(txnId, MetadataPrimaryIndexes.FULL_TEXT_CONFIG_DATASET, configTuple);
         } catch (HyracksDataException e) {
             throw new AlgebricksException(e);
@@ -531,10 +532,10 @@ public class MetadataNode implements IMetadataNode {
     }
 
     @Override
-    public void addFullTextConfig(TxnId txnId, FullTextConfigDescriptor configDescriptor)
+    public void addFullTextConfig(TxnId txnId, FullTextConfigMetadataEntity config)
             throws AlgebricksException, RemoteException {
         try {
-            insertFullTextConfigDescriptorToCatalog(txnId, configDescriptor);
+            insertFullTextConfigDescriptorToCatalog(txnId, config);
         } catch (AlgebricksException e) {
             throw new AlgebricksException(e, ErrorCode.ERROR_PROCESSING_TUPLE);
         }
@@ -543,16 +544,17 @@ public class MetadataNode implements IMetadataNode {
     }
 
     @Override
-    public FullTextConfigDescriptor getFullTextConfig(TxnId txnId, DataverseName dataverseName, String configName)
+    public FullTextConfigMetadataEntity getFullTextConfig(TxnId txnId, DataverseName dataverseName, String configName)
             throws AlgebricksException {
-        FullTextConfigDescriptorTupleTranslator translator =
+        FullTextConfigMetadataEntityTupleTranslator translator =
                 tupleTranslatorProvider.getFullTextConfigTupleTranslator(true);
 
         ITupleReference searchKey = null;
-        List<FullTextConfigDescriptor> results = new ArrayList<>();
+        List<FullTextConfigMetadataEntity> results = new ArrayList<>();
         try {
             searchKey = translator.createTupleAsIndex(dataverseName.getCanonicalForm(), configName);
-            IValueExtractor<FullTextConfigDescriptor> valueExtractor = new MetadataEntityValueExtractor<>(translator);
+            IValueExtractor<FullTextConfigMetadataEntity> valueExtractor =
+                    new MetadataEntityValueExtractor<>(translator);
             searchIndex(txnId, MetadataPrimaryIndexes.FULL_TEXT_CONFIG_DATASET, searchKey, valueExtractor, results);
         } catch (HyracksDataException e) {
             throw new AlgebricksException(e);
@@ -562,7 +564,7 @@ public class MetadataNode implements IMetadataNode {
             return null;
         }
 
-        FullTextConfigDescriptor result = results.get(0);
+        FullTextConfigMetadataEntity result = results.get(0);
         return result;
     }
 
@@ -579,7 +581,7 @@ public class MetadataNode implements IMetadataNode {
         }
 
         try {
-            FullTextConfigDescriptorTupleTranslator translator =
+            FullTextConfigMetadataEntityTupleTranslator translator =
                     tupleTranslatorProvider.getFullTextConfigTupleTranslator(true);
 
             ITupleReference key = translator.createTupleAsIndex(dataverseName.getCanonicalForm(), configName);
@@ -716,9 +718,10 @@ public class MetadataNode implements IMetadataNode {
             // Drop full-text configs in this dataverse.
             // Note that full-text configs are utilized by the index, and we need to always drop index first
             // and then full-text config
-            List<FullTextConfigDescriptor> configs = getAllFullTextConfigDescriptors(txnId);
-            for (IFullTextConfigDescriptor config : configs) {
-                dropFullTextConfigDescriptor(txnId, dataverseName, config.getName(), true);
+            List<FullTextConfigMetadataEntity> configMetadataEntities = getAllFullTextConfigs(txnId);
+            for (FullTextConfigMetadataEntity configMetadataEntity : configMetadataEntities) {
+                dropFullTextConfigDescriptor(txnId, dataverseName, configMetadataEntity.getFullTextConfig().getName(),
+                        true);
             }
 
             // Drop full-text filters in this dataverse.
@@ -1021,14 +1024,14 @@ public class MetadataNode implements IMetadataNode {
         }
     }
 
-    private List<FullTextConfigDescriptor> getDataverseFullTextConfigDescriptors(TxnId txnId,
-            DataverseName dataverseName) throws AlgebricksException {
+    private List<FullTextConfigMetadataEntity> getDataverseFullTextConfigs(TxnId txnId, DataverseName dataverseName)
+            throws AlgebricksException {
         ITupleReference searchKey = createTuple(dataverseName);
-        FullTextConfigDescriptorTupleTranslator tupleReaderWriter =
+        FullTextConfigMetadataEntityTupleTranslator tupleReaderWriter =
                 tupleTranslatorProvider.getFullTextConfigTupleTranslator(true);
-        IValueExtractor<FullTextConfigDescriptor> valueExtractor =
+        IValueExtractor<FullTextConfigMetadataEntity> valueExtractor =
                 new MetadataEntityValueExtractor<>(tupleReaderWriter);
-        List<FullTextConfigDescriptor> results = new ArrayList<>();
+        List<FullTextConfigMetadataEntity> results = new ArrayList<>();
         try {
             searchIndex(txnId, MetadataPrimaryIndexes.FULL_TEXT_CONFIG_DATASET, searchKey, valueExtractor, results);
         } catch (HyracksDataException e) {
@@ -1109,12 +1112,12 @@ public class MetadataNode implements IMetadataNode {
         }
     }
 
-    private List<FullTextConfigDescriptor> getAllFullTextConfigDescriptors(TxnId txnId) throws AlgebricksException {
-        FullTextConfigDescriptorTupleTranslator tupleReaderWriter =
+    private List<FullTextConfigMetadataEntity> getAllFullTextConfigs(TxnId txnId) throws AlgebricksException {
+        FullTextConfigMetadataEntityTupleTranslator tupleReaderWriter =
                 tupleTranslatorProvider.getFullTextConfigTupleTranslator(true);
-        IValueExtractor<FullTextConfigDescriptor> valueExtractor =
+        IValueExtractor<FullTextConfigMetadataEntity> valueExtractor =
                 new MetadataEntityValueExtractor<>(tupleReaderWriter);
-        List<FullTextConfigDescriptor> results = new ArrayList<>();
+        List<FullTextConfigMetadataEntity> results = new ArrayList<>();
         try {
             searchIndex(txnId, MetadataPrimaryIndexes.FULL_TEXT_CONFIG_DATASET, null, valueExtractor, results);
         } catch (HyracksDataException e) {
@@ -1364,8 +1367,9 @@ public class MetadataNode implements IMetadataNode {
 
     private void confirmFullTextFilterCanBeDeleted(TxnId txnId, DataverseName dataverseName, String fullTextFilterName)
             throws AlgebricksException {
-        List<FullTextConfigDescriptor> configs = getDataverseFullTextConfigDescriptors(txnId, dataverseName);
-        for (IFullTextConfigDescriptor config : configs) {
+        List<FullTextConfigMetadataEntity> configMetadataEntities = getDataverseFullTextConfigs(txnId, dataverseName);
+        for (FullTextConfigMetadataEntity configMetadataEntity : configMetadataEntities) {
+            FullTextConfigDescriptor config = configMetadataEntity.getFullTextConfig();
             for (IFullTextFilterDescriptor filterDescriptor : config.getFilterDescriptors()) {
                 if (filterDescriptor.getName().equals(fullTextFilterName)) {
                     throw new AlgebricksException("Cannot drop full-text filter "

@@ -37,6 +37,7 @@ import org.apache.asterix.metadata.entities.Dataverse;
 import org.apache.asterix.metadata.entities.Feed;
 import org.apache.asterix.metadata.entities.FeedConnection;
 import org.apache.asterix.metadata.entities.FeedPolicyEntity;
+import org.apache.asterix.metadata.entities.FullTextConfigMetadataEntity;
 import org.apache.asterix.metadata.entities.Function;
 import org.apache.asterix.metadata.entities.Index;
 import org.apache.asterix.metadata.entities.Library;
@@ -84,7 +85,7 @@ public class MetadataCache {
     // Key is DataverseName. Key of value map is the full-text filter name
     protected final Map<DataverseName, Map<String, AbstractFullTextFilterDescriptor>> fullTextFilters = new HashMap<>();
     // Key is DataverseName. Key of value map is the full-text config name
-    protected final Map<DataverseName, Map<String, FullTextConfigDescriptor>> fullTextConfigs = new HashMap<>();
+    protected final Map<DataverseName, Map<String, FullTextConfigMetadataEntity>> fullTextConfigs = new HashMap<>();
 
     // Atomically executes all metadata operations in ctx's log.
     public void commit(MetadataTransactionContext ctx) {
@@ -388,9 +389,9 @@ public class MetadataCache {
         }
     }
 
-    public FullTextConfigDescriptor getFullTextConfig(DataverseName dataverseName, String configName) {
+    public FullTextConfigMetadataEntity getFullTextConfig(DataverseName dataverseName, String configName) {
         synchronized (fullTextConfigs) {
-            Map<String, FullTextConfigDescriptor> m = fullTextConfigs.get(dataverseName);
+            Map<String, FullTextConfigMetadataEntity> m = fullTextConfigs.get(dataverseName);
             if (m == null) {
                 return null;
             }
@@ -496,27 +497,30 @@ public class MetadataCache {
         }
     }
 
-    public FullTextConfigDescriptor addFullTextConfigIfNotExists(FullTextConfigDescriptor config) {
+    public FullTextConfigMetadataEntity addFullTextConfigIfNotExists(
+            FullTextConfigMetadataEntity configMetadataEntity) {
+        FullTextConfigDescriptor config = configMetadataEntity.getFullTextConfig();
         DataverseName dataverseName = config.getDataverseName();
         String configName = config.getName();
         synchronized (fullTextConfigs) {
-            Map<String, FullTextConfigDescriptor> m = fullTextConfigs.get(dataverseName);
+            Map<String, FullTextConfigMetadataEntity> m = fullTextConfigs.get(dataverseName);
             if (m == null) {
                 m = new HashMap<>();
                 fullTextConfigs.put(dataverseName, m);
             }
             if (!m.containsKey(configName)) {
-                return m.put(configName, config);
+                return m.put(configName, configMetadataEntity);
             }
             return null;
         }
     }
 
-    public FullTextConfigDescriptor dropFullTextConfig(FullTextConfigDescriptor config) {
+    public FullTextConfigMetadataEntity dropFullTextConfig(FullTextConfigMetadataEntity configMetadataEntity) {
+        FullTextConfigDescriptor config = configMetadataEntity.getFullTextConfig();
         DataverseName dataverseName = config.getDataverseName();
         String configName = config.getName();
         synchronized (fullTextConfigs) {
-            Map<String, FullTextConfigDescriptor> m = fullTextConfigs.get(dataverseName);
+            Map<String, FullTextConfigMetadataEntity> m = fullTextConfigs.get(dataverseName);
             if (m == null) {
                 return null;
             }

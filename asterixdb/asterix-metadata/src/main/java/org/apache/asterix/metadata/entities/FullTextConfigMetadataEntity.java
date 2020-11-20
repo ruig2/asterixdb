@@ -23,20 +23,29 @@ import org.apache.asterix.metadata.MetadataCache;
 import org.apache.asterix.metadata.api.IMetadataEntity;
 import org.apache.asterix.runtime.fulltext.FullTextConfigDescriptor;
 
-public class FullTextConfigMetadataEntity implements IMetadataEntity<FullTextConfigDescriptor> {
+public class FullTextConfigMetadataEntity implements IMetadataEntity<FullTextConfigMetadataEntity> {
     private final FullTextConfigDescriptor fullTextConfig;
 
     public FullTextConfigMetadataEntity(FullTextConfigDescriptor config) {
         this.fullTextConfig = config;
     }
 
-    @Override
-    public FullTextConfigDescriptor addToCache(MetadataCache cache) {
-        return cache.addFullTextConfigIfNotExists(fullTextConfig);
+    public FullTextConfigDescriptor getFullTextConfig() {
+        return fullTextConfig;
     }
 
     @Override
-    public FullTextConfigDescriptor dropFromCache(MetadataCache cache) {
-        return cache.dropFullTextConfig(fullTextConfig);
+    public FullTextConfigMetadataEntity addToCache(MetadataCache cache) {
+        return cache.addFullTextConfigIfNotExists(this);
     }
+
+    @Override
+    public FullTextConfigMetadataEntity dropFromCache(MetadataCache cache) {
+        return cache.dropFullTextConfig(this);
+    }
+
+    public static FullTextConfigMetadataEntity getDefaultFullTextConfigMetadataEntity() {
+        return new FullTextConfigMetadataEntity(FullTextConfigDescriptor.getDefaultFullTextConfig());
+    }
+
 }

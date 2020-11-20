@@ -54,7 +54,6 @@ import org.apache.asterix.om.utils.ConstantExpressionUtil;
 import org.apache.asterix.optimizer.base.AnalysisUtil;
 import org.apache.asterix.optimizer.rules.am.OptimizableOperatorSubTree.DataSourceType;
 import org.apache.asterix.optimizer.rules.util.FullTextUtil;
-import org.apache.asterix.runtime.fulltext.FullTextConfigDescriptor;
 import org.apache.commons.lang3.mutable.Mutable;
 import org.apache.commons.lang3.mutable.MutableInt;
 import org.apache.hyracks.algebricks.common.exceptions.AlgebricksException;
@@ -81,9 +80,9 @@ import org.apache.hyracks.algebricks.core.algebra.operators.logical.UnnestOperat
 import org.apache.hyracks.algebricks.core.algebra.operators.logical.visitors.VariableUtilities;
 import org.apache.hyracks.algebricks.core.algebra.typing.ITypingContext;
 import org.apache.hyracks.algebricks.core.rewriter.base.IAlgebraicRewriteRule;
+import org.apache.parquet.Strings;
 
 import com.google.common.collect.ImmutableSet;
-import org.apache.parquet.Strings;
 
 /**
  * Class that embodies the commonalities between rewrite rules for access
@@ -290,7 +289,9 @@ public abstract class AbstractIntroduceAccessMethodRule implements IAlgebraicRew
         if (FullTextUtil.isFullTextContainsFunctionExpr(expr)) {
             // ftcontains()
             String expectedConfig = FullTextUtil.getFullTextConfigNameFromExpr(expr);
-            if (expectedConfig.equals(indexFullTextConfig)) {
+            if (Strings.isNullOrEmpty(expectedConfig)) {
+                return Strings.isNullOrEmpty(indexFullTextConfig);
+            } else if (expectedConfig.equals(indexFullTextConfig)) {
                 return true;
             }
         } else {

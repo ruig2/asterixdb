@@ -81,6 +81,7 @@ import org.apache.asterix.metadata.entities.ExternalDatasetDetails;
 import org.apache.asterix.metadata.entities.Feed;
 import org.apache.asterix.metadata.entities.FeedConnection;
 import org.apache.asterix.metadata.entities.FeedPolicyEntity;
+import org.apache.asterix.metadata.entities.FullTextConfigMetadataEntity;
 import org.apache.asterix.metadata.entities.Function;
 import org.apache.asterix.metadata.entities.Index;
 import org.apache.asterix.metadata.entities.Synonym;
@@ -98,7 +99,6 @@ import org.apache.asterix.om.types.IAType;
 import org.apache.asterix.om.utils.NonTaggedFormatUtil;
 import org.apache.asterix.runtime.base.AsterixTupleFilterFactory;
 import org.apache.asterix.runtime.formats.FormatUtils;
-import org.apache.asterix.runtime.fulltext.IFullTextConfigDescriptor;
 import org.apache.asterix.runtime.operators.LSMIndexBulkLoadOperatorDescriptor;
 import org.apache.asterix.runtime.operators.LSMIndexBulkLoadOperatorDescriptor.BulkLoadUsage;
 import org.apache.asterix.runtime.operators.LSMPrimaryInsertOperatorDescriptor;
@@ -447,7 +447,7 @@ public class MetadataProvider implements IMetadataProvider<DataSourceId, String>
         return MetadataManagerUtil.findSynonym(mdTxnCtx, dataverseName, synonymName);
     }
 
-    public IFullTextConfigDescriptor findFullTextConfigDescriptor(DataverseName dataverseName, String ftConfigName)
+    public FullTextConfigMetadataEntity findFullTextConfig(DataverseName dataverseName, String ftConfigName)
             throws AlgebricksException {
         return MetadataManagerUtil.findFullTextConfigDescriptor(mdTxnCtx, dataverseName, ftConfigName);
     }
@@ -1652,9 +1652,10 @@ public class MetadataProvider implements IMetadataProvider<DataSourceId, String>
 
             IBinaryTokenizerFactory tokenizerFactory = NonTaggedFormatUtil.getBinaryTokenizerFactory(
                     secondaryKeyType.getTypeTag(), indexType, secondaryIndex.getGramLength());
-            IFullTextConfigDescriptor configDescriptor = findFullTextConfigDescriptor(secondaryIndex.getDataverseName(),
-                    secondaryIndex.getFullTextConfigName());
-            IFullTextConfigEvaluatorFactory fullTextConfigEvaluatorFactory = configDescriptor.createEvaluatorFactory();
+            FullTextConfigMetadataEntity configMetadataEntity =
+                    findFullTextConfig(secondaryIndex.getDataverseName(), secondaryIndex.getFullTextConfigName());
+            IFullTextConfigEvaluatorFactory fullTextConfigEvaluatorFactory =
+                    configMetadataEntity.getFullTextConfig().createEvaluatorFactory();
 
             Pair<IFileSplitProvider, AlgebricksPartitionConstraint> splitsAndConstraint =
                     getSplitProviderAndConstraints(dataset, secondaryIndex.getIndexName());

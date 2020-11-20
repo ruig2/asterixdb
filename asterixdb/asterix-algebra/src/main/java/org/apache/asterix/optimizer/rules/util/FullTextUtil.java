@@ -25,7 +25,6 @@ import org.apache.asterix.om.utils.ConstantExpressionUtil;
 import org.apache.asterix.optimizer.rules.am.IOptimizableFuncExpr;
 import org.apache.asterix.optimizer.rules.am.InvertedIndexAccessMethod;
 import org.apache.asterix.runtime.evaluators.functions.FullTextContainsDescriptor;
-import org.apache.asterix.runtime.fulltext.FullTextConfigDescriptor;
 import org.apache.commons.lang3.mutable.Mutable;
 import org.apache.hyracks.algebricks.core.algebra.base.ILogicalExpression;
 import org.apache.hyracks.algebricks.core.algebra.expressions.AbstractFunctionCallExpression;

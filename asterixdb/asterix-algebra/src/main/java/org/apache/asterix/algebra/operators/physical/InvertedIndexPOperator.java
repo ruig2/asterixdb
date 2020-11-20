@@ -31,7 +31,7 @@ import org.apache.asterix.om.types.ATypeTag;
 import org.apache.asterix.optimizer.rules.am.InvertedIndexAccessMethod;
 import org.apache.asterix.optimizer.rules.am.InvertedIndexAccessMethod.SearchModifierType;
 import org.apache.asterix.optimizer.rules.am.InvertedIndexJobGenParams;
-import org.apache.asterix.runtime.fulltext.IFullTextConfigDescriptor;
+import org.apache.asterix.runtime.fulltext.FullTextConfigDescriptor;
 import org.apache.hyracks.algebricks.common.constraints.AlgebricksPartitionConstraint;
 import org.apache.hyracks.algebricks.common.exceptions.AlgebricksException;
 import org.apache.hyracks.algebricks.common.utils.Pair;
@@ -169,8 +169,9 @@ public class InvertedIndexPOperator extends IndexSearchPOperator {
                 InvertedIndexAccessMethod.getSearchModifierFactory(searchModifierType, simThresh, secondaryIndex);
         IBinaryTokenizerFactory queryTokenizerFactory =
                 InvertedIndexAccessMethod.getBinaryTokenizerFactory(searchModifierType, searchKeyType, secondaryIndex);
-        IFullTextConfigDescriptor fullTextConfigDescriptor = metadataProvider.findFullTextConfigDescriptor(
-                secondaryIndex.getDataverseName(), secondaryIndex.getFullTextConfigName());
+        FullTextConfigDescriptor fullTextConfigDescriptor = metadataProvider
+                .findFullTextConfig(secondaryIndex.getDataverseName(), secondaryIndex.getFullTextConfigName())
+                .getFullTextConfig();
         IIndexDataflowHelperFactory dataflowHelperFactory = new IndexDataflowHelperFactory(
                 metadataProvider.getStorageComponentProvider().getStorageManager(), secondarySplitsAndConstraint.first);
 

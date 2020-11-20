@@ -163,6 +163,7 @@ import org.apache.asterix.metadata.entities.ExternalDatasetDetails;
 import org.apache.asterix.metadata.entities.Feed;
 import org.apache.asterix.metadata.entities.FeedConnection;
 import org.apache.asterix.metadata.entities.FeedPolicyEntity;
+import org.apache.asterix.metadata.entities.FullTextConfigMetadataEntity;
 import org.apache.asterix.metadata.entities.Function;
 import org.apache.asterix.metadata.entities.Index;
 import org.apache.asterix.metadata.entities.InternalDatasetDetails;
@@ -187,7 +188,6 @@ import org.apache.asterix.om.types.IAType;
 import org.apache.asterix.om.types.TypeSignature;
 import org.apache.asterix.runtime.fulltext.AbstractFullTextFilterDescriptor;
 import org.apache.asterix.runtime.fulltext.FullTextConfigDescriptor;
-import org.apache.asterix.runtime.fulltext.IFullTextConfigDescriptor;
 import org.apache.asterix.runtime.fulltext.IFullTextFilterDescriptor;
 import org.apache.asterix.runtime.fulltext.StopwordsFullTextFilterDescriptor;
 import org.apache.asterix.transaction.management.service.transaction.DatasetIdFactory;
@@ -243,9 +243,9 @@ import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.TokenizerCategor
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.apache.parquet.Strings;
 
 import com.google.common.collect.ImmutableList;
-import org.apache.parquet.Strings;
 
 /*
  * Provides functionality for executing a batch of Query statements (queries included)
@@ -1247,7 +1247,7 @@ public class QueryTranslator extends AbstractLangTranslator implements IStatemen
         metadataProvider.setMetadataTxnContext(mdTxnCtx);
 
         try {
-            IFullTextConfigDescriptor existingConfig =
+            FullTextConfigMetadataEntity existingConfig =
                     MetadataManager.INSTANCE.getFullTextConfig(mdTxnCtx, dataverseName, configName);
             if (existingConfig != null) {
                 if (stmtCreateConfig.getIfNotExists()) {
@@ -1274,8 +1274,9 @@ public class QueryTranslator extends AbstractLangTranslator implements IStatemen
             TokenizerCategory tokenizerCategory = stmtCreateConfig.getTokenizerCategory();
             FullTextConfigDescriptor configDescriptor = new FullTextConfigDescriptor(dataverseName, configName,
                     tokenizerCategory, filterDescriptorsBuilder.build());
+            FullTextConfigMetadataEntity configMetadataEntity = new FullTextConfigMetadataEntity(configDescriptor);
 
-            MetadataManager.INSTANCE.addFullTextConfig(mdTxnCtx, configDescriptor);
+            MetadataManager.INSTANCE.addFullTextConfig(mdTxnCtx, configMetadataEntity);
             MetadataManager.INSTANCE.commitTransaction(mdTxnCtx);
         } catch (Exception e) {
             abort(e, e, mdTxnCtx);
@@ -2128,9 +2129,9 @@ public class QueryTranslator extends AbstractLangTranslator implements IStatemen
         String fullTextConfigName = stmtConfigDrop.getConfigName();
 
         try {
-            IFullTextConfigDescriptor config =
+            FullTextConfigMetadataEntity configMetadataEntity =
                     MetadataManager.INSTANCE.getFullTextConfig(mdTxnCtx, dataverseName, fullTextConfigName);
-            if (config == null) {
+            if (configMetadataEntity == null) {
                 if (stmtConfigDrop.getIfExists()) {
                     MetadataManager.INSTANCE.commitTransaction(mdTxnCtx);
                     return;

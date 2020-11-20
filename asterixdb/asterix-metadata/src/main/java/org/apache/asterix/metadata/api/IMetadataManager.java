@@ -36,6 +36,7 @@ import org.apache.asterix.metadata.entities.Dataverse;
 import org.apache.asterix.metadata.entities.Feed;
 import org.apache.asterix.metadata.entities.FeedConnection;
 import org.apache.asterix.metadata.entities.FeedPolicyEntity;
+import org.apache.asterix.metadata.entities.FullTextConfigMetadataEntity;
 import org.apache.asterix.metadata.entities.Function;
 import org.apache.asterix.metadata.entities.Index;
 import org.apache.asterix.metadata.entities.Library;
@@ -43,7 +44,6 @@ import org.apache.asterix.metadata.entities.Node;
 import org.apache.asterix.metadata.entities.NodeGroup;
 import org.apache.asterix.metadata.entities.Synonym;
 import org.apache.asterix.runtime.fulltext.AbstractFullTextFilterDescriptor;
-import org.apache.asterix.runtime.fulltext.FullTextConfigDescriptor;
 import org.apache.hyracks.algebricks.common.exceptions.AlgebricksException;
 
 /**
@@ -459,12 +459,12 @@ public interface IMetadataManager extends IMetadataBootstrap {
     /**
      * @param mdTxnCtx
      *            MetadataTransactionContext of an active metadata transaction.
-     * @param configDescriptor
+     * @param configMetadataEntity
      *            the full-text config descriptor to be added
      * @throws AlgebricksException
      *              For example, if the config with the same name in the same dataverse already exists
      */
-    void addFullTextConfig(MetadataTransactionContext mdTxnCtx, FullTextConfigDescriptor configDescriptor)
+    void addFullTextConfig(MetadataTransactionContext mdTxnCtx, FullTextConfigMetadataEntity configMetadataEntity)
             throws AlgebricksException;
 
     /**
@@ -476,8 +476,9 @@ public interface IMetadataManager extends IMetadataBootstrap {
      *            the name of the full-text config to be fetched
      * @throws AlgebricksException
      *              For example, if the full-text config doesn't exist
+     * @return
      */
-    FullTextConfigDescriptor getFullTextConfig(MetadataTransactionContext mdTxnCtx, DataverseName dataverseName,
+    FullTextConfigMetadataEntity getFullTextConfig(MetadataTransactionContext mdTxnCtx, DataverseName dataverseName,
             String configName) throws AlgebricksException;
 
     /**

@@ -36,6 +36,7 @@ import org.apache.asterix.metadata.entities.Dataverse;
 import org.apache.asterix.metadata.entities.Feed;
 import org.apache.asterix.metadata.entities.FeedConnection;
 import org.apache.asterix.metadata.entities.FeedPolicyEntity;
+import org.apache.asterix.metadata.entities.FullTextConfigMetadataEntity;
 import org.apache.asterix.metadata.entities.Function;
 import org.apache.asterix.metadata.entities.Index;
 import org.apache.asterix.metadata.entities.Library;
@@ -43,7 +44,6 @@ import org.apache.asterix.metadata.entities.Node;
 import org.apache.asterix.metadata.entities.NodeGroup;
 import org.apache.asterix.metadata.entities.Synonym;
 import org.apache.asterix.runtime.fulltext.AbstractFullTextFilterDescriptor;
-import org.apache.asterix.runtime.fulltext.FullTextConfigDescriptor;
 import org.apache.asterix.transaction.management.opcallbacks.AbstractIndexModificationOperationCallback;
 import org.apache.hyracks.algebricks.common.exceptions.AlgebricksException;
 
@@ -487,12 +487,12 @@ public interface IMetadataNode extends Remote, Serializable {
     /**
      * @param txnId
      *            Metadata transaction id of an active metadata transaction.
-     * @param configDescriptor
+     * @param configMetadataEntity
      *            the full-text config descriptor to be added
      * @throws AlgebricksException
      *              For example, if the config with the same name in the same dataverse already exists
      */
-    void addFullTextConfig(TxnId txnId, FullTextConfigDescriptor configDescriptor)
+    void addFullTextConfig(TxnId txnId, FullTextConfigMetadataEntity configMetadataEntity)
             throws AlgebricksException, RemoteException;
 
     /**
@@ -505,7 +505,7 @@ public interface IMetadataNode extends Remote, Serializable {
      * @throws AlgebricksException
      *              For example, if the full-text config doesn't exist
      */
-    FullTextConfigDescriptor getFullTextConfig(TxnId txnId, DataverseName dataverseName, String configName)
+    FullTextConfigMetadataEntity getFullTextConfig(TxnId txnId, DataverseName dataverseName, String configName)
             throws AlgebricksException, RemoteException;
 
     /**
