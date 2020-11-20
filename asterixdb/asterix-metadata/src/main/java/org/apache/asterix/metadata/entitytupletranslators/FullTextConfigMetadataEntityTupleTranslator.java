@@ -91,34 +91,15 @@ public class FullTextConfigMetadataEntityTupleTranslator extends AbstractTupleTr
                                 .getValueByPos(MetadataRecordTypes.FULL_TEXT_ARECORD_CONFIG_TOKENIZER_FIELD_INDEX))
                                         .getStringValue());
 
-        List<String> filterNames = new ArrayList<>();
+        ImmutableList.Builder<String> filterNamesBuilder = ImmutableList.builder();
         IACursor filterNamesCursor = ((AOrderedList) (aRecord
                 .getValueByPos(MetadataRecordTypes.FULL_TEXT_ARECORD_FILTER_PIPELINE_FIELD_INDEX))).getCursor();
         while (filterNamesCursor.next()) {
-            filterNames.add(((AString) filterNamesCursor.get()).getStringValue());
-        }
-
-        // Need to access metadata to get filters
-        ImmutableList.Builder<IFullTextFilterDescriptor> filterDescriptorsBuilder = ImmutableList.builder();
-        MetadataTransactionContext mdTxnCtx = null;
-        try {
-            mdTxnCtx = MetadataManager.INSTANCE.beginTransaction();
-            for (String filterName : filterNames) {
-                IFullTextFilterDescriptor filterDescriptor =
-                        MetadataManager.INSTANCE.getFullTextFilter(mdTxnCtx, dataverseName, filterName);
-                filterDescriptorsBuilder.add(filterDescriptor);
-            }
-            MetadataManager.INSTANCE.commitTransaction(mdTxnCtx);
-        } catch (RemoteException | AlgebricksException e) {
-            try {
-                MetadataManager.INSTANCE.abortTransaction(mdTxnCtx);
-            } catch (RemoteException remoteException) {
-                throw new MetadataException(ErrorCode.FULL_TEXT_FILTER_NOT_FOUND, remoteException);
-            }
+            filterNamesBuilder.add(((AString) filterNamesCursor.get()).getStringValue());
         }
 
         FullTextConfigDescriptor configDescriptor =
-                new FullTextConfigDescriptor(dataverseName, name, tokenizerCategory, filterDescriptorsBuilder.build());
+                new FullTextConfigDescriptor(dataverseName, name, tokenizerCategory, filterNamesBuilder.build());
         FullTextConfigMetadataEntity configMetadataEntity = new FullTextConfigMetadataEntity(configDescriptor);
         return configMetadataEntity;
     }
@@ -164,10 +145,7 @@ public class FullTextConfigMetadataEntityTupleTranslator extends AbstractTupleTr
         recordBuilder.addField(FULL_TEXT_ARECORD_CONFIG_TOKENIZER_FIELD_INDEX, fieldValue);
 
         // set filter pipeline
-        List<String> filterNames = new ArrayList<>();
-        for (IFullTextFilterDescriptor f : configDescriptor.getFilterDescriptors()) {
-            filterNames.add(f.getName());
-        }
+        List<String> filterNames = configDescriptor.getFilterNames();
 
         OrderedListBuilder listBuilder = new OrderedListBuilder();
         listBuilder.reset(new AOrderedListType(BuiltinType.ASTRING, null));

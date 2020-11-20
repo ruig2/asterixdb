@@ -34,14 +34,15 @@ public class FullTextConfigDescriptor implements IFullTextConfigDescriptor {
     private final DataverseName dataverseName;
     private final String name;
     private final TokenizerCategory tokenizerCategory;
-    private final ImmutableList<IFullTextFilterDescriptor> filterDescriptors;
+    private ImmutableList<AbstractFullTextFilterDescriptor> filterDescriptors = null;
+    private final ImmutableList<String> filterNames;
 
     public FullTextConfigDescriptor(DataverseName dataverseName, String name, TokenizerCategory tokenizerCategory,
-            ImmutableList<IFullTextFilterDescriptor> filterDescriptors) {
+            ImmutableList<String> filterNames) {
         this.dataverseName = dataverseName;
         this.name = name;
         this.tokenizerCategory = tokenizerCategory;
-        this.filterDescriptors = filterDescriptors;
+        this.filterNames = filterNames;
     }
 
     // This built-in default full-text config will be used only when no full-text config is specified by the user.
@@ -82,9 +83,14 @@ public class FullTextConfigDescriptor implements IFullTextConfigDescriptor {
         return tokenizerCategory;
     }
 
-    @Override
-    public ImmutableList<IFullTextFilterDescriptor> getFilterDescriptors() {
-        return filterDescriptors;
+    public void setFilterDescriptors(ImmutableList<AbstractFullTextFilterDescriptor> filterDescriptors) {
+        if (this.filterDescriptors == null) {
+            this.filterDescriptors = filterDescriptors;
+        }
     }
 
+    @Override
+    public ImmutableList<String> getFilterNames() {
+        return filterNames;
+    }
 }

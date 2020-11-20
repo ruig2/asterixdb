@@ -38,6 +38,7 @@ import org.apache.asterix.metadata.entities.Feed;
 import org.apache.asterix.metadata.entities.FeedConnection;
 import org.apache.asterix.metadata.entities.FeedPolicyEntity;
 import org.apache.asterix.metadata.entities.FullTextConfigMetadataEntity;
+import org.apache.asterix.metadata.entities.FullTextFilterMetadataEntity;
 import org.apache.asterix.metadata.entities.Function;
 import org.apache.asterix.metadata.entities.Index;
 import org.apache.asterix.metadata.entities.Library;
@@ -83,7 +84,7 @@ public class MetadataCache {
     // Key is synonym dataverse. Key of value map is the synonym name
     protected final Map<DataverseName, Map<String, Synonym>> synonyms = new HashMap<>();
     // Key is DataverseName. Key of value map is the full-text filter name
-    protected final Map<DataverseName, Map<String, AbstractFullTextFilterDescriptor>> fullTextFilters = new HashMap<>();
+    protected final Map<DataverseName, Map<String, FullTextFilterMetadataEntity>> fullTextFilters = new HashMap<>();
     // Key is DataverseName. Key of value map is the full-text config name
     protected final Map<DataverseName, Map<String, FullTextConfigMetadataEntity>> fullTextConfigs = new HashMap<>();
 
@@ -399,9 +400,9 @@ public class MetadataCache {
         }
     }
 
-    public AbstractFullTextFilterDescriptor getFullTextFilter(DataverseName dataverseName, String filterName) {
+    public FullTextFilterMetadataEntity getFullTextFilter(DataverseName dataverseName, String filterName) {
         synchronized (fullTextFilters) {
-            Map<String, AbstractFullTextFilterDescriptor> m = fullTextFilters.get(dataverseName);
+            Map<String, FullTextFilterMetadataEntity> m = fullTextFilters.get(dataverseName);
             if (m == null) {
                 return null;
             }
@@ -469,11 +470,11 @@ public class MetadataCache {
         }
     }
 
-    public AbstractFullTextFilterDescriptor addFullTextFilterIfNotExists(AbstractFullTextFilterDescriptor filter) {
-        DataverseName dataverseName = filter.getDataverseName();
-        String filterName = filter.getName();
+    public FullTextFilterMetadataEntity addFullTextFilterIfNotExists(FullTextFilterMetadataEntity filter) {
+        DataverseName dataverseName = filter.getFullTextFilter().getDataverseName();
+        String filterName = filter.getFullTextFilter().getName();
         synchronized (fullTextFilters) {
-            Map<String, AbstractFullTextFilterDescriptor> m = fullTextFilters.get(dataverseName);
+            Map<String, FullTextFilterMetadataEntity> m = fullTextFilters.get(dataverseName);
             if (m == null) {
                 m = new HashMap<>();
                 fullTextFilters.put(dataverseName, m);
@@ -485,11 +486,11 @@ public class MetadataCache {
         }
     }
 
-    public AbstractFullTextFilterDescriptor dropFullTextFilter(AbstractFullTextFilterDescriptor filter) {
-        DataverseName dataverseName = filter.getDataverseName();
-        String filterName = filter.getName();
+    public FullTextFilterMetadataEntity dropFullTextFilter(FullTextFilterMetadataEntity filterMetadataEntity) {
+        DataverseName dataverseName = filterMetadataEntity.getFullTextFilter().getDataverseName();
+        String filterName = filterMetadataEntity.getFullTextFilter().getName();
         synchronized (fullTextFilters) {
-            Map<String, AbstractFullTextFilterDescriptor> m = fullTextFilters.get(dataverseName);
+            Map<String, FullTextFilterMetadataEntity> m = fullTextFilters.get(dataverseName);
             if (m == null) {
                 return null;
             }

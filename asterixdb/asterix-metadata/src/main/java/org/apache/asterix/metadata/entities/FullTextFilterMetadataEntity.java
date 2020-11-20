@@ -23,7 +23,7 @@ import org.apache.asterix.metadata.MetadataCache;
 import org.apache.asterix.metadata.api.IMetadataEntity;
 import org.apache.asterix.runtime.fulltext.AbstractFullTextFilterDescriptor;
 
-public class FullTextFilterMetadataEntity implements IMetadataEntity<AbstractFullTextFilterDescriptor> {
+public class FullTextFilterMetadataEntity implements IMetadataEntity<FullTextFilterMetadataEntity> {
     private final AbstractFullTextFilterDescriptor filterDescriptor;
 
     public FullTextFilterMetadataEntity(AbstractFullTextFilterDescriptor filterDescriptor) {
@@ -31,12 +31,16 @@ public class FullTextFilterMetadataEntity implements IMetadataEntity<AbstractFul
     }
 
     @Override
-    public AbstractFullTextFilterDescriptor addToCache(MetadataCache cache) {
-        return cache.addFullTextFilterIfNotExists(filterDescriptor);
+    public FullTextFilterMetadataEntity addToCache(MetadataCache cache) {
+        return cache.addFullTextFilterIfNotExists(this);
     }
 
     @Override
-    public AbstractFullTextFilterDescriptor dropFromCache(MetadataCache cache) {
-        return cache.dropFullTextFilter(filterDescriptor);
+    public FullTextFilterMetadataEntity dropFromCache(MetadataCache cache) {
+        return cache.dropFullTextFilter(this);
+    }
+
+    public AbstractFullTextFilterDescriptor getFullTextFilter() {
+        return filterDescriptor;
     }
 }

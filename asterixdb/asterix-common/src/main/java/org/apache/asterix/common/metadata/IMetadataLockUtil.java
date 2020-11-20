@@ -21,6 +21,7 @@ package org.apache.asterix.common.metadata;
 
 import java.util.List;
 
+import com.google.common.collect.ImmutableList;
 import org.apache.asterix.common.api.IMetadataLockManager;
 import org.apache.asterix.common.config.DatasetConfig;
 import org.apache.hyracks.algebricks.common.exceptions.AlgebricksException;
@@ -101,7 +102,7 @@ public interface IMetadataLockUtil {
     // Full-text config helpers
 
     void createFullTextConfigBegin(IMetadataLockManager lockManager, LockList locks, DataverseName dataverseName,
-            String fullTextConfigName, List<String> fullTextFilterNames) throws AlgebricksException;
+            String fullTextConfigName, ImmutableList<String> fullTextFilterNames) throws AlgebricksException;
 
     void dropFullTextConfigBegin(IMetadataLockManager lockManager, LockList locks, DataverseName dataverseName,
             String fullTextFilterName) throws AlgebricksException;

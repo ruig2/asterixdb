@@ -51,6 +51,7 @@ import org.apache.asterix.metadata.entities.Feed;
 import org.apache.asterix.metadata.entities.FeedConnection;
 import org.apache.asterix.metadata.entities.FeedPolicyEntity;
 import org.apache.asterix.metadata.entities.FullTextConfigMetadataEntity;
+import org.apache.asterix.metadata.entities.FullTextFilterMetadataEntity;
 import org.apache.asterix.metadata.entities.Function;
 import org.apache.asterix.metadata.entities.Index;
 import org.apache.asterix.metadata.entities.Library;
@@ -627,7 +628,7 @@ public abstract class MetadataManager implements IMetadataManager {
     }
 
     @Override
-    public void addFullTextFilter(MetadataTransactionContext mdTxnCtx, AbstractFullTextFilterDescriptor filter)
+    public void addFullTextFilter(MetadataTransactionContext mdTxnCtx, FullTextFilterMetadataEntity filter)
             throws AlgebricksException {
         try {
             metadataNode.addFullTextFilter(mdTxnCtx.getTxnId(), filter);
@@ -649,11 +650,11 @@ public abstract class MetadataManager implements IMetadataManager {
     }
 
     @Override
-    public AbstractFullTextFilterDescriptor getFullTextFilter(MetadataTransactionContext ctx,
+    public FullTextFilterMetadataEntity getFullTextFilter(MetadataTransactionContext ctx,
             DataverseName dataverseName, String filterName) throws AlgebricksException {
         // First look in the context to see if this transaction created the
         // requested full-text filter itself (but the full-text filter is still uncommitted).
-        AbstractFullTextFilterDescriptor filter = ctx.getFullTextFilter(dataverseName, filterName);
+        FullTextFilterMetadataEntity filter = ctx.getFullTextFilter(dataverseName, filterName);
         if (filter != null) {
             // Don't add this filter to the cache, since it is still
             // uncommitted.

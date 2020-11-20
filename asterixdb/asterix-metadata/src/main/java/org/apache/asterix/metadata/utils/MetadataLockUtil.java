@@ -18,9 +18,11 @@
  */
 package org.apache.asterix.metadata.utils;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import com.google.common.collect.ImmutableList;
 import org.apache.asterix.common.api.IMetadataLockManager;
 import org.apache.asterix.common.config.DatasetConfig;
 import org.apache.asterix.common.metadata.DataverseName;
@@ -176,14 +178,19 @@ public class MetadataLockUtil implements IMetadataLockUtil {
 
     @Override
     public void createFullTextConfigBegin(IMetadataLockManager lockMgr, LockList locks, DataverseName dataverseName,
-            String fullTextConfigName, List<String> fullTextFilterNames) throws AlgebricksException {
+            String fullTextConfigName, ImmutableList<String> fullTextFilterNames) throws AlgebricksException {
         lockMgr.acquireDataverseReadLock(locks, dataverseName);
         lockMgr.acquireFullTextConfigWriteLock(locks, dataverseName, fullTextConfigName);
 
+        List<String> fullTextFilterNamesMutable = new ArrayList<>();
+        for (String s : fullTextFilterNames) {
+            fullTextFilterNamesMutable.add(s);
+        }
+
         // sort the filters to guarantee locks are always fetched in the same order
         // so that we can avoid dead lock between filters
-        Collections.sort(fullTextFilterNames);
-        for (String filterName : fullTextFilterNames) {
+        Collections.sort(fullTextFilterNamesMutable);
+        for (String filterName : fullTextFilterNamesMutable) {
             lockMgr.acquireFullTextFilterReadLock(locks, dataverseName, filterName);
         }
     }

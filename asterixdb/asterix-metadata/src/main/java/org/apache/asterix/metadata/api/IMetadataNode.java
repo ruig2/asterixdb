@@ -37,6 +37,7 @@ import org.apache.asterix.metadata.entities.Feed;
 import org.apache.asterix.metadata.entities.FeedConnection;
 import org.apache.asterix.metadata.entities.FeedPolicyEntity;
 import org.apache.asterix.metadata.entities.FullTextConfigMetadataEntity;
+import org.apache.asterix.metadata.entities.FullTextFilterMetadataEntity;
 import org.apache.asterix.metadata.entities.Function;
 import org.apache.asterix.metadata.entities.Index;
 import org.apache.asterix.metadata.entities.Library;
@@ -450,12 +451,12 @@ public interface IMetadataNode extends Remote, Serializable {
     /**
      * @param txnId
      *            Metadata transaction id of an active metadata transaction.
-     * @param filterDescriptor
-     *            the full-text filter descriptor to be added
+     * @param filterMetadataEntity
+     *            the full-text filter metadata entity to be added
      * @throws AlgebricksException
      *              For example, if the filter with the same name in the same dataverse already exists
      */
-    void addFullTextFilter(TxnId txnId, AbstractFullTextFilterDescriptor filterDescriptor)
+    void addFullTextFilter(TxnId txnId, FullTextFilterMetadataEntity filterMetadataEntity)
             throws RemoteException, AlgebricksException;
 
     /**
@@ -468,7 +469,7 @@ public interface IMetadataNode extends Remote, Serializable {
      * @throws AlgebricksException
      *              For example, if the filter doesn't exist
      */
-    AbstractFullTextFilterDescriptor getFullTextFilter(TxnId txnId, DataverseName dataverseName, String filterName)
+    FullTextFilterMetadataEntity getFullTextFilter(TxnId txnId, DataverseName dataverseName, String filterName)
             throws RemoteException, AlgebricksException;
 
     /**

@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import com.google.common.collect.ImmutableList;
 import org.apache.asterix.common.exceptions.CompilationException;
 import org.apache.asterix.common.metadata.DataverseName;
 import org.apache.asterix.lang.common.base.AbstractStatement;
@@ -88,16 +89,16 @@ public class CreateFullTextConfigStatement extends AbstractStatement {
         return tokenizerCategory;
     }
 
-    public List<String> getFilterNames() throws AlgebricksException {
+    public ImmutableList<String> getFilterNames() {
         AdmArrayNode arrayNode = (AdmArrayNode) configNode.get(FIELD_NAME_FILTER_PIPELINE);
-        List<String> results = new ArrayList<>();
+        ImmutableList.Builder<String> filterNamesBuilder = ImmutableList.builder();
 
         Iterator<IAdmNode> iterator = arrayNode.iterator();
         while (iterator.hasNext()) {
-            results.add(((AdmStringNode) iterator.next()).get());
+            filterNamesBuilder.add(((AdmStringNode) iterator.next()).get());
         }
 
-        return results;
+        return filterNamesBuilder.build();
     }
 
 }

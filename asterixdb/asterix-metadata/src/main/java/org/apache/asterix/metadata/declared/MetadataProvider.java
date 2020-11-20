@@ -82,6 +82,7 @@ import org.apache.asterix.metadata.entities.Feed;
 import org.apache.asterix.metadata.entities.FeedConnection;
 import org.apache.asterix.metadata.entities.FeedPolicyEntity;
 import org.apache.asterix.metadata.entities.FullTextConfigMetadataEntity;
+import org.apache.asterix.metadata.entities.FullTextFilterMetadataEntity;
 import org.apache.asterix.metadata.entities.Function;
 import org.apache.asterix.metadata.entities.Index;
 import org.apache.asterix.metadata.entities.Synonym;
@@ -450,6 +451,11 @@ public class MetadataProvider implements IMetadataProvider<DataSourceId, String>
     public FullTextConfigMetadataEntity findFullTextConfig(DataverseName dataverseName, String ftConfigName)
             throws AlgebricksException {
         return MetadataManagerUtil.findFullTextConfigDescriptor(mdTxnCtx, dataverseName, ftConfigName);
+    }
+
+    public FullTextFilterMetadataEntity findFullTextFilter(DataverseName dataverseName, String ftFilterName)
+            throws AlgebricksException {
+        return MetadataManagerUtil.findFullTextFilterDescriptor(mdTxnCtx, dataverseName, ftFilterName);
     }
 
     @Override

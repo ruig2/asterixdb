@@ -124,7 +124,7 @@ public class InvertedIndexResourceFactoryProvider implements IResourceFactoryPro
         FullTextConfigMetadataEntity configMetadataEntity =
                 mdProvider.findFullTextConfig(index.getDataverseName(), index.getFullTextConfigName());
         IFullTextConfigEvaluatorFactory fullTextConfigEvaluatorFactory =
-                configMetadataEntity.getFullTextConfig().createEvaluatorFactory();
+                configMetadataEntity.fetchFilterDescriptorsFromMetadata(mdProvider).getFullTextConfig().createEvaluatorFactory();
 
         return new LSMInvertedIndexLocalResourceFactory(storageManager, typeTraits, cmpFactories, filterTypeTraits,
                 filterCmpFactories, secondaryFilterFields, opTrackerFactory, ioOpCallbackFactory,

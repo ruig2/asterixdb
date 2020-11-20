@@ -171,6 +171,7 @@ public class InvertedIndexPOperator extends IndexSearchPOperator {
                 InvertedIndexAccessMethod.getBinaryTokenizerFactory(searchModifierType, searchKeyType, secondaryIndex);
         FullTextConfigDescriptor fullTextConfigDescriptor = metadataProvider
                 .findFullTextConfig(secondaryIndex.getDataverseName(), secondaryIndex.getFullTextConfigName())
+                .fetchFilterDescriptorsFromMetadata(metadataProvider)
                 .getFullTextConfig();
         IIndexDataflowHelperFactory dataflowHelperFactory = new IndexDataflowHelperFactory(
                 metadataProvider.getStorageComponentProvider().getStorageManager(), secondarySplitsAndConstraint.first);

@@ -164,6 +164,7 @@ import org.apache.asterix.metadata.entities.Feed;
 import org.apache.asterix.metadata.entities.FeedConnection;
 import org.apache.asterix.metadata.entities.FeedPolicyEntity;
 import org.apache.asterix.metadata.entities.FullTextConfigMetadataEntity;
+import org.apache.asterix.metadata.entities.FullTextFilterMetadataEntity;
 import org.apache.asterix.metadata.entities.Function;
 import org.apache.asterix.metadata.entities.Index;
 import org.apache.asterix.metadata.entities.InternalDatasetDetails;
@@ -1202,7 +1203,7 @@ public class QueryTranslator extends AbstractLangTranslator implements IStatemen
             }
 
             String filterName = stmtCreateFilter.getFilterName();
-            IFullTextFilterDescriptor existingFilter =
+            FullTextFilterMetadataEntity existingFilter =
                     MetadataManager.INSTANCE.getFullTextFilter(mdTxnCtx, dataverseName, filterName);
             if (existingFilter != null) {
                 if (stmtCreateFilter.getIfNotExists()) {
@@ -1214,7 +1215,7 @@ public class QueryTranslator extends AbstractLangTranslator implements IStatemen
                 }
             }
 
-            MetadataManager.INSTANCE.addFullTextFilter(mdTxnCtx, filterDescriptor);
+            MetadataManager.INSTANCE.addFullTextFilter(mdTxnCtx, new FullTextFilterMetadataEntity(filterDescriptor));
             MetadataManager.INSTANCE.commitTransaction(mdTxnCtx);
         } catch (Exception e) {
             abort(e, e, mdTxnCtx);
@@ -1228,7 +1229,7 @@ public class QueryTranslator extends AbstractLangTranslator implements IStatemen
         DataverseName dataverseName = getActiveDataverseName(stmtCreateConfig.getDataverseName());
         String configName = stmtCreateConfig.getConfigName();
         validateDatabaseObjectName(configName, stmt.getSourceLocation());
-        List<String> filterNames = stmtCreateConfig.getFilterNames();
+        ImmutableList<String> filterNames = stmtCreateConfig.getFilterNames();
 
         lockUtil.createFullTextConfigBegin(lockManager, metadataProvider.getLocks(), dataverseName, configName,
                 filterNames);
@@ -1241,7 +1242,7 @@ public class QueryTranslator extends AbstractLangTranslator implements IStatemen
 
     protected void doCreateFullTextConfig(MetadataProvider metadataProvider,
             CreateFullTextConfigStatement stmtCreateConfig, DataverseName dataverseName, String configName,
-            List<String> filterNames) throws Exception {
+            ImmutableList<String> filterNames) throws Exception {
 
         MetadataTransactionContext mdTxnCtx = MetadataManager.INSTANCE.beginTransaction();
         metadataProvider.setMetadataTxnContext(mdTxnCtx);
@@ -1262,18 +1263,17 @@ public class QueryTranslator extends AbstractLangTranslator implements IStatemen
             ImmutableList.Builder<IFullTextFilterDescriptor> filterDescriptorsBuilder =
                     ImmutableList.<IFullTextFilterDescriptor> builder();
             for (String filterName : filterNames) {
-                IFullTextFilterDescriptor filterDescriptor =
+                FullTextFilterMetadataEntity filterMetadataEntity =
                         MetadataManager.INSTANCE.getFullTextFilter(mdTxnCtx, dataverseName, filterName);
-                if (filterDescriptor == null) {
+                if (filterMetadataEntity == null) {
                     throw new CompilationException(ErrorCode.FULL_TEXT_FILTER_NOT_FOUND,
                             stmtCreateConfig.getSourceLocation(), filterName);
                 }
-                filterDescriptorsBuilder.add(filterDescriptor);
             }
 
             TokenizerCategory tokenizerCategory = stmtCreateConfig.getTokenizerCategory();
             FullTextConfigDescriptor configDescriptor = new FullTextConfigDescriptor(dataverseName, configName,
-                    tokenizerCategory, filterDescriptorsBuilder.build());
+                    tokenizerCategory, filterNames);
             FullTextConfigMetadataEntity configMetadataEntity = new FullTextConfigMetadataEntity(configDescriptor);
 
             MetadataManager.INSTANCE.addFullTextConfig(mdTxnCtx, configMetadataEntity);
@@ -2079,7 +2079,7 @@ public class QueryTranslator extends AbstractLangTranslator implements IStatemen
         MetadataTransactionContext mdTxnCtx = MetadataManager.INSTANCE.beginTransaction();
         metadataProvider.setMetadataTxnContext(mdTxnCtx);
         try {
-            IFullTextFilterDescriptor filter =
+            FullTextFilterMetadataEntity filter =
                     MetadataManager.INSTANCE.getFullTextFilter(mdTxnCtx, dataverseName, fullTextFilterName);
             if (filter == null) {
                 if (stmtFilterDrop.getIfExists()) {

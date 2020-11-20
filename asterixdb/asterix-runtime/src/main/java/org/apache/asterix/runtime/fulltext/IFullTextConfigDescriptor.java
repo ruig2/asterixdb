@@ -27,7 +27,7 @@ import com.google.common.collect.ImmutableList;
 public interface IFullTextConfigDescriptor extends IFullTextEntityDescriptor {
     TokenizerCategory getTokenizerCategory();
 
-    ImmutableList<IFullTextFilterDescriptor> getFilterDescriptors();
+    ImmutableList<String> getFilterNames();
 
     IFullTextConfigEvaluatorFactory createEvaluatorFactory();
 }
