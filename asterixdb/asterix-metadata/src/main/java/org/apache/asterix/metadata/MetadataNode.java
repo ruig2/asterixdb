@@ -105,7 +105,6 @@ import org.apache.asterix.om.types.AUnionType;
 import org.apache.asterix.om.types.AbstractComplexType;
 import org.apache.asterix.om.types.BuiltinType;
 import org.apache.asterix.om.types.IAType;
-import org.apache.asterix.runtime.fulltext.AbstractFullTextFilterDescriptor;
 import org.apache.asterix.runtime.fulltext.FullTextConfigDescriptor;
 import org.apache.asterix.transaction.management.opcallbacks.AbstractIndexModificationOperationCallback.Operation;
 import org.apache.asterix.transaction.management.opcallbacks.SecondaryIndexModificationOperationCallback;
@@ -464,8 +463,8 @@ public class MetadataNode implements IMetadataNode {
     }
 
     @Override
-    public FullTextFilterMetadataEntity getFullTextFilter(TxnId txnId, DataverseName dataverseName,
-            String filterName) throws AlgebricksException {
+    public FullTextFilterMetadataEntity getFullTextFilter(TxnId txnId, DataverseName dataverseName, String filterName)
+            throws AlgebricksException {
         try {
             FullTextFilterDescriptorTupleTranslator translator =
                     tupleTranslatorProvider.getFullTextFilterTupleTranslator(true);
@@ -1126,8 +1125,7 @@ public class MetadataNode implements IMetadataNode {
         return results;
     }
 
-    private List<FullTextFilterMetadataEntity> getAllFullTextFilterDescriptors(TxnId txnId)
-            throws AlgebricksException {
+    private List<FullTextFilterMetadataEntity> getAllFullTextFilterDescriptors(TxnId txnId) throws AlgebricksException {
         FullTextFilterDescriptorTupleTranslator tupleReaderWriter =
                 tupleTranslatorProvider.getFullTextFilterTupleTranslator(true);
         IValueExtractor<FullTextFilterMetadataEntity> valueExtractor =

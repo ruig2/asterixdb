@@ -1272,8 +1272,8 @@ public class QueryTranslator extends AbstractLangTranslator implements IStatemen
             }
 
             TokenizerCategory tokenizerCategory = stmtCreateConfig.getTokenizerCategory();
-            FullTextConfigDescriptor configDescriptor = new FullTextConfigDescriptor(dataverseName, configName,
-                    tokenizerCategory, filterNames);
+            FullTextConfigDescriptor configDescriptor =
+                    new FullTextConfigDescriptor(dataverseName, configName, tokenizerCategory, filterNames);
             FullTextConfigMetadataEntity configMetadataEntity = new FullTextConfigMetadataEntity(configDescriptor);
 
             MetadataManager.INSTANCE.addFullTextConfig(mdTxnCtx, configMetadataEntity);

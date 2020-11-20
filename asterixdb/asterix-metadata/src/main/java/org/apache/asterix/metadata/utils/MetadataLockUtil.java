@@ -22,13 +22,14 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import com.google.common.collect.ImmutableList;
 import org.apache.asterix.common.api.IMetadataLockManager;
 import org.apache.asterix.common.config.DatasetConfig;
 import org.apache.asterix.common.metadata.DataverseName;
 import org.apache.asterix.common.metadata.IMetadataLockUtil;
 import org.apache.asterix.common.metadata.LockList;
 import org.apache.hyracks.algebricks.common.exceptions.AlgebricksException;
+
+import com.google.common.collect.ImmutableList;
 
 public class MetadataLockUtil implements IMetadataLockUtil {
 

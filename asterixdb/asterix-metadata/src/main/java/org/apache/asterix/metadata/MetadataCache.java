@@ -45,7 +45,6 @@ import org.apache.asterix.metadata.entities.Library;
 import org.apache.asterix.metadata.entities.NodeGroup;
 import org.apache.asterix.metadata.entities.Synonym;
 import org.apache.asterix.metadata.utils.IndexUtil;
-import org.apache.asterix.runtime.fulltext.AbstractFullTextFilterDescriptor;
 import org.apache.asterix.runtime.fulltext.FullTextConfigDescriptor;
 
 /**

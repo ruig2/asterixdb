@@ -18,11 +18,8 @@
  */
 package org.apache.asterix.lang.common.statement;
 
-import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.List;
 
-import com.google.common.collect.ImmutableList;
 import org.apache.asterix.common.exceptions.CompilationException;
 import org.apache.asterix.common.metadata.DataverseName;
 import org.apache.asterix.lang.common.base.AbstractStatement;
@@ -33,9 +30,10 @@ import org.apache.asterix.object.base.AdmArrayNode;
 import org.apache.asterix.object.base.AdmObjectNode;
 import org.apache.asterix.object.base.AdmStringNode;
 import org.apache.asterix.object.base.IAdmNode;
-import org.apache.hyracks.algebricks.common.exceptions.AlgebricksException;
 import org.apache.hyracks.api.exceptions.HyracksDataException;
 import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.TokenizerCategory;
+
+import com.google.common.collect.ImmutableList;
 
 public class CreateFullTextConfigStatement extends AbstractStatement {
 

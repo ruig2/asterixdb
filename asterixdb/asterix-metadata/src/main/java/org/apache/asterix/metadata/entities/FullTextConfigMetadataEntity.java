@@ -19,7 +19,6 @@
 
 package org.apache.asterix.metadata.entities;
 
-import com.google.common.collect.ImmutableList;
 import org.apache.asterix.common.metadata.DataverseName;
 import org.apache.asterix.metadata.MetadataCache;
 import org.apache.asterix.metadata.api.IMetadataEntity;
@@ -27,6 +26,8 @@ import org.apache.asterix.metadata.declared.MetadataProvider;
 import org.apache.asterix.runtime.fulltext.AbstractFullTextFilterDescriptor;
 import org.apache.asterix.runtime.fulltext.FullTextConfigDescriptor;
 import org.apache.hyracks.algebricks.common.exceptions.AlgebricksException;
+
+import com.google.common.collect.ImmutableList;
 
 public class FullTextConfigMetadataEntity implements IMetadataEntity<FullTextConfigMetadataEntity> {
     private final FullTextConfigDescriptor fullTextConfig;
@@ -58,7 +59,8 @@ public class FullTextConfigMetadataEntity implements IMetadataEntity<FullTextCon
         ImmutableList.Builder<AbstractFullTextFilterDescriptor> filterDescriptorsBuilder = ImmutableList.builder();
         DataverseName dataverseName = fullTextConfig.getDataverseName();
         for (String filterName : fullTextConfig.getFilterNames()) {
-            filterDescriptorsBuilder.add(metadataProvider.findFullTextFilter(dataverseName, filterName).getFullTextFilter());
+            filterDescriptorsBuilder
+                    .add(metadataProvider.findFullTextFilter(dataverseName, filterName).getFullTextFilter());
         }
 
         fullTextConfig.setFilterDescriptors(filterDescriptorsBuilder.build());

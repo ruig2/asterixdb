@@ -24,17 +24,11 @@ import static org.apache.asterix.metadata.bootstrap.MetadataRecordTypes.FULL_TEX
 import static org.apache.asterix.metadata.bootstrap.MetadataRecordTypes.FULL_TEXT_ARECORD_DATAVERSE_NAME_FIELD_INDEX;
 import static org.apache.asterix.metadata.bootstrap.MetadataRecordTypes.FULL_TEXT_ARECORD_FILTER_PIPELINE_FIELD_INDEX;
 
-import java.rmi.RemoteException;
-import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.asterix.builders.OrderedListBuilder;
-import org.apache.asterix.common.exceptions.ErrorCode;
-import org.apache.asterix.common.exceptions.MetadataException;
 import org.apache.asterix.common.metadata.DataverseName;
 import org.apache.asterix.formats.nontagged.SerializerDeserializerProvider;
-import org.apache.asterix.metadata.MetadataManager;
-import org.apache.asterix.metadata.MetadataTransactionContext;
 import org.apache.asterix.metadata.bootstrap.MetadataPrimaryIndexes;
 import org.apache.asterix.metadata.bootstrap.MetadataRecordTypes;
 import org.apache.asterix.metadata.entities.FullTextConfigMetadataEntity;
@@ -46,7 +40,6 @@ import org.apache.asterix.om.base.IACursor;
 import org.apache.asterix.om.types.AOrderedListType;
 import org.apache.asterix.om.types.BuiltinType;
 import org.apache.asterix.runtime.fulltext.FullTextConfigDescriptor;
-import org.apache.asterix.runtime.fulltext.IFullTextFilterDescriptor;
 import org.apache.commons.lang3.EnumUtils;
 import org.apache.hyracks.algebricks.common.exceptions.AlgebricksException;
 import org.apache.hyracks.api.dataflow.value.ISerializerDeserializer;

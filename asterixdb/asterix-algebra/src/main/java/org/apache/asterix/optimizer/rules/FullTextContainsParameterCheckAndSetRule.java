@@ -178,7 +178,8 @@ public class FullTextContainsParameterCheckAndSetRule implements IAlgebraicRewri
                 MetadataProvider metadataProvider = (MetadataProvider) context.getMetadataProvider();
                 DataverseName dataverseName = metadataProvider.getDefaultDataverseName();
                 funcExpr.setOpaqueParameters(
-                        new Object[] { metadataProvider.findFullTextConfig(dataverseName, ftConfigName).fetchFilterDescriptorsFromMetadata(metadataProvider).getFullTextConfig() });
+                        new Object[] { metadataProvider.findFullTextConfig(dataverseName, ftConfigName)
+                                .fetchFilterDescriptorsFromMetadata(metadataProvider).getFullTextConfig() });
                 // Resets the last argument.
                 funcExpr.getArguments().clear();
                 funcExpr.getArguments().addAll(newExprs);

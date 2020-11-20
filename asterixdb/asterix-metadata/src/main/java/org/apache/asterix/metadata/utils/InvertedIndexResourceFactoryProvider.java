@@ -123,8 +123,8 @@ public class InvertedIndexResourceFactoryProvider implements IResourceFactoryPro
         IBinaryTokenizerFactory tokenizerFactory = getTokenizerFactory(dataset, index, recordType, metaType);
         FullTextConfigMetadataEntity configMetadataEntity =
                 mdProvider.findFullTextConfig(index.getDataverseName(), index.getFullTextConfigName());
-        IFullTextConfigEvaluatorFactory fullTextConfigEvaluatorFactory =
-                configMetadataEntity.fetchFilterDescriptorsFromMetadata(mdProvider).getFullTextConfig().createEvaluatorFactory();
+        IFullTextConfigEvaluatorFactory fullTextConfigEvaluatorFactory = configMetadataEntity
+                .fetchFilterDescriptorsFromMetadata(mdProvider).getFullTextConfig().createEvaluatorFactory();
 
         return new LSMInvertedIndexLocalResourceFactory(storageManager, typeTraits, cmpFactories, filterTypeTraits,
                 filterCmpFactories, secondaryFilterFields, opTrackerFactory, ioOpCallbackFactory,

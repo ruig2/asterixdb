@@ -70,8 +70,7 @@ public class FullTextFilterDescriptorTupleTranslator extends AbstractTupleTransl
     }
 
     @Override
-    protected FullTextFilterMetadataEntity createMetadataEntityFromARecord(ARecord aRecord)
-            throws AlgebricksException {
+    protected FullTextFilterMetadataEntity createMetadataEntityFromARecord(ARecord aRecord) throws AlgebricksException {
         AString dataverseName = (AString) aRecord.getValueByPos(FULL_TEXT_ARECORD_DATAVERSE_NAME_FIELD_INDEX);
         AString filterName = (AString) aRecord.getValueByPos(FULL_TEXT_ARECORD_FILTER_NAME_FIELD_INDEX);
         AString filterTypeAString = (AString) aRecord.getValueByPos(FULL_TEXT_ARECORD_FILTER_TYPE_FIELD_INDEX);
@@ -88,8 +87,8 @@ public class FullTextFilterDescriptorTupleTranslator extends AbstractTupleTransl
         }
     }
 
-    public FullTextFilterMetadataEntity createStopwordsFilterDescriptorFromARecord(AString dataverseName,
-            AString name, ARecord aRecord) {
+    public FullTextFilterMetadataEntity createStopwordsFilterDescriptorFromARecord(AString dataverseName, AString name,
+            ARecord aRecord) {
         ImmutableList.Builder<String> stopwordsBuilder = ImmutableList.<String> builder();
         IACursor stopwordsCursor = ((AOrderedList) (aRecord
                 .getValueByPos(MetadataRecordTypes.FULLTEXT_ENTITY_ARECORD_STOPWORD_LIST_FIELD_INDEX))).getCursor();
@@ -183,7 +182,8 @@ public class FullTextFilterDescriptorTupleTranslator extends AbstractTupleTransl
             throws HyracksDataException {
         tupleBuilder.reset();
 
-        writeIndex(filterMetadataEntity.getFullTextFilter().getDataverseName().getCanonicalForm(), filterMetadataEntity.getFullTextFilter().getName(), tupleBuilder);
+        writeIndex(filterMetadataEntity.getFullTextFilter().getDataverseName().getCanonicalForm(),
+                filterMetadataEntity.getFullTextFilter().getName(), tupleBuilder);
 
         // Write the record
         recordBuilder.reset(MetadataRecordTypes.FULL_TEXT_FILTER_RECORDTYPE);

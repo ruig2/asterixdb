@@ -58,7 +58,6 @@ import org.apache.asterix.metadata.entities.Library;
 import org.apache.asterix.metadata.entities.Node;
 import org.apache.asterix.metadata.entities.NodeGroup;
 import org.apache.asterix.metadata.entities.Synonym;
-import org.apache.asterix.runtime.fulltext.AbstractFullTextFilterDescriptor;
 import org.apache.asterix.transaction.management.opcallbacks.AbstractIndexModificationOperationCallback.Operation;
 import org.apache.hyracks.algebricks.common.exceptions.AlgebricksException;
 import org.apache.hyracks.api.exceptions.HyracksDataException;
@@ -650,8 +649,8 @@ public abstract class MetadataManager implements IMetadataManager {
     }
 
     @Override
-    public FullTextFilterMetadataEntity getFullTextFilter(MetadataTransactionContext ctx,
-            DataverseName dataverseName, String filterName) throws AlgebricksException {
+    public FullTextFilterMetadataEntity getFullTextFilter(MetadataTransactionContext ctx, DataverseName dataverseName,
+            String filterName) throws AlgebricksException {
         // First look in the context to see if this transaction created the
         // requested full-text filter itself (but the full-text filter is still uncommitted).
         FullTextFilterMetadataEntity filter = ctx.getFullTextFilter(dataverseName, filterName);
