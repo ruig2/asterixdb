@@ -34,7 +34,6 @@ public class FullTextConfigDescriptor implements IFullTextConfigDescriptor {
     private final DataverseName dataverseName;
     private final String name;
     private final TokenizerCategory tokenizerCategory;
-    private ImmutableList<AbstractFullTextFilterDescriptor> filterDescriptors = null;
     private final ImmutableList<String> filterNames;
 
     public FullTextConfigDescriptor(DataverseName dataverseName, String name, TokenizerCategory tokenizerCategory,
@@ -63,8 +62,13 @@ public class FullTextConfigDescriptor implements IFullTextConfigDescriptor {
         return name;
     }
 
+    // We need to exclude the full-text filter descriptors from the full-text config because both of them
+    // would be in the metadata cache, that means they should be immutable to guarantee consistency
+    // So we decide to let the caller to be responsible for fetching the filter descriptors from metadata,
+    // and pass the filters as an argument here
     @Override
-    public IFullTextConfigEvaluatorFactory createEvaluatorFactory() {
+    public IFullTextConfigEvaluatorFactory createEvaluatorFactory(
+            ImmutableList<AbstractFullTextFilterDescriptor> filterDescriptors) {
         ImmutableList.Builder<IFullTextFilterEvaluator> filtersBuilder = new ImmutableList.Builder<>();
         for (IFullTextFilterDescriptor filterDescriptor : filterDescriptors) {
             filtersBuilder.add(filterDescriptor.createEvaluator());
@@ -81,12 +85,6 @@ public class FullTextConfigDescriptor implements IFullTextConfigDescriptor {
     @Override
     public TokenizerCategory getTokenizerCategory() {
         return tokenizerCategory;
-    }
-
-    public void setFilterDescriptors(ImmutableList<AbstractFullTextFilterDescriptor> filterDescriptors) {
-        if (this.filterDescriptors == null) {
-            this.filterDescriptors = filterDescriptors;
-        }
     }
 
     @Override

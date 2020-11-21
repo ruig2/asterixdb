@@ -89,6 +89,7 @@ import org.apache.asterix.metadata.entities.Synonym;
 import org.apache.asterix.metadata.feeds.FeedMetadataUtil;
 import org.apache.asterix.metadata.lock.ExternalDatasetsRegistry;
 import org.apache.asterix.metadata.utils.DatasetUtil;
+import org.apache.asterix.metadata.utils.FullTextUtil;
 import org.apache.asterix.metadata.utils.MetadataConstants;
 import org.apache.asterix.metadata.utils.SplitsAndConstraintsUtil;
 import org.apache.asterix.om.functions.BuiltinFunctions;
@@ -1658,10 +1659,9 @@ public class MetadataProvider implements IMetadataProvider<DataSourceId, String>
 
             IBinaryTokenizerFactory tokenizerFactory = NonTaggedFormatUtil.getBinaryTokenizerFactory(
                     secondaryKeyType.getTypeTag(), indexType, secondaryIndex.getGramLength());
-            FullTextConfigMetadataEntity configMetadataEntity =
-                    findFullTextConfig(secondaryIndex.getDataverseName(), secondaryIndex.getFullTextConfigName());
             IFullTextConfigEvaluatorFactory fullTextConfigEvaluatorFactory =
-                    configMetadataEntity.getFullTextConfig().createEvaluatorFactory();
+                    FullTextUtil.fetchFilterAndCreateConfigEvaluator(this, secondaryIndex.getDataverseName(),
+                            secondaryIndex.getFullTextConfigName());
 
             Pair<IFileSplitProvider, AlgebricksPartitionConstraint> splitsAndConstraint =
                     getSplitProviderAndConstraints(dataset, secondaryIndex.getIndexName());

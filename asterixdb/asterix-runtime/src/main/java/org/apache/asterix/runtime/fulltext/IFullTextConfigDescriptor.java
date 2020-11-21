@@ -29,5 +29,6 @@ public interface IFullTextConfigDescriptor extends IFullTextEntityDescriptor {
 
     ImmutableList<String> getFilterNames();
 
-    IFullTextConfigEvaluatorFactory createEvaluatorFactory();
+    IFullTextConfigEvaluatorFactory createEvaluatorFactory(
+            ImmutableList<AbstractFullTextFilterDescriptor> filterDescriptors);
 }

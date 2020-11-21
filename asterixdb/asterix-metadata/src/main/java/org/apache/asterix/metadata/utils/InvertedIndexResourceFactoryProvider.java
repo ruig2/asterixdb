@@ -31,7 +31,6 @@ import org.apache.asterix.common.exceptions.ErrorCode;
 import org.apache.asterix.metadata.api.IResourceFactoryProvider;
 import org.apache.asterix.metadata.declared.MetadataProvider;
 import org.apache.asterix.metadata.entities.Dataset;
-import org.apache.asterix.metadata.entities.FullTextConfigMetadataEntity;
 import org.apache.asterix.metadata.entities.Index;
 import org.apache.asterix.om.types.ARecordType;
 import org.apache.asterix.om.types.IAType;
@@ -121,10 +120,9 @@ public class InvertedIndexResourceFactoryProvider implements IResourceFactoryPro
         IBinaryComparatorFactory[] tokenCmpFactories =
                 getTokenComparatorFactories(dataset, index, recordType, metaType);
         IBinaryTokenizerFactory tokenizerFactory = getTokenizerFactory(dataset, index, recordType, metaType);
-        FullTextConfigMetadataEntity configMetadataEntity =
-                mdProvider.findFullTextConfig(index.getDataverseName(), index.getFullTextConfigName());
-        IFullTextConfigEvaluatorFactory fullTextConfigEvaluatorFactory = configMetadataEntity
-                .fetchFilterDescriptorsFromMetadata(mdProvider).getFullTextConfig().createEvaluatorFactory();
+        IFullTextConfigEvaluatorFactory fullTextConfigEvaluatorFactory =
+                FullTextUtil.fetchFilterAndCreateConfigEvaluator(mdProvider, index.getDataverseName(),
+                        index.getFullTextConfigName());
 
         return new LSMInvertedIndexLocalResourceFactory(storageManager, typeTraits, cmpFactories, filterTypeTraits,
                 filterCmpFactories, secondaryFilterFields, opTrackerFactory, ioOpCallbackFactory,

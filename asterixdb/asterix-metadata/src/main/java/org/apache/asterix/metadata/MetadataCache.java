@@ -262,7 +262,8 @@ public class MetadataCache {
                                                         datatypes.remove(dataverse.getDataverseName());
                                                         adapters.remove(dataverse.getDataverseName());
                                                         compactionPolicies.remove(dataverse.getDataverseName());
-                                                        List<FunctionSignature> markedFunctionsForRemoval = new ArrayList<>();
+                                                        List<FunctionSignature> markedFunctionsForRemoval =
+                                                                new ArrayList<>();
                                                         for (FunctionSignature signature : functions.keySet()) {
                                                             if (signature.getDataverseName()
                                                                     .equals(dataverse.getDataverseName())) {

@@ -24,6 +24,7 @@ import org.apache.asterix.metadata.declared.DataSourceId;
 import org.apache.asterix.metadata.declared.MetadataProvider;
 import org.apache.asterix.metadata.entities.Dataset;
 import org.apache.asterix.metadata.entities.Index;
+import org.apache.asterix.metadata.utils.FullTextUtil;
 import org.apache.asterix.om.base.IAObject;
 import org.apache.asterix.om.constants.AsterixConstantValue;
 import org.apache.asterix.om.functions.BuiltinFunctions;
@@ -31,7 +32,6 @@ import org.apache.asterix.om.types.ATypeTag;
 import org.apache.asterix.optimizer.rules.am.InvertedIndexAccessMethod;
 import org.apache.asterix.optimizer.rules.am.InvertedIndexAccessMethod.SearchModifierType;
 import org.apache.asterix.optimizer.rules.am.InvertedIndexJobGenParams;
-import org.apache.asterix.runtime.fulltext.FullTextConfigDescriptor;
 import org.apache.hyracks.algebricks.common.constraints.AlgebricksPartitionConstraint;
 import org.apache.hyracks.algebricks.common.exceptions.AlgebricksException;
 import org.apache.hyracks.algebricks.common.utils.Pair;
@@ -60,6 +60,7 @@ import org.apache.hyracks.storage.am.common.dataflow.IndexDataflowHelperFactory;
 import org.apache.hyracks.storage.am.common.ophelpers.IndexOperation;
 import org.apache.hyracks.storage.am.lsm.invertedindex.api.IInvertedIndexSearchModifierFactory;
 import org.apache.hyracks.storage.am.lsm.invertedindex.dataflow.LSMInvertedIndexSearchOperatorDescriptor;
+import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextConfigEvaluatorFactory;
 import org.apache.hyracks.storage.am.lsm.invertedindex.tokenizers.IBinaryTokenizerFactory;
 
 /**
@@ -169,16 +170,16 @@ public class InvertedIndexPOperator extends IndexSearchPOperator {
                 InvertedIndexAccessMethod.getSearchModifierFactory(searchModifierType, simThresh, secondaryIndex);
         IBinaryTokenizerFactory queryTokenizerFactory =
                 InvertedIndexAccessMethod.getBinaryTokenizerFactory(searchModifierType, searchKeyType, secondaryIndex);
-        FullTextConfigDescriptor fullTextConfigDescriptor = metadataProvider
-                .findFullTextConfig(secondaryIndex.getDataverseName(), secondaryIndex.getFullTextConfigName())
-                .fetchFilterDescriptorsFromMetadata(metadataProvider).getFullTextConfig();
+        IFullTextConfigEvaluatorFactory fullTextConfigEvaluatorFactory =
+                FullTextUtil.fetchFilterAndCreateConfigEvaluator(metadataProvider, secondaryIndex.getDataverseName(),
+                        secondaryIndex.getFullTextConfigName());
         IIndexDataflowHelperFactory dataflowHelperFactory = new IndexDataflowHelperFactory(
                 metadataProvider.getStorageComponentProvider().getStorageManager(), secondarySplitsAndConstraint.first);
 
         LSMInvertedIndexSearchOperatorDescriptor invIndexSearchOp =
                 new LSMInvertedIndexSearchOperatorDescriptor(jobSpec, outputRecDesc, queryField, dataflowHelperFactory,
-                        queryTokenizerFactory, fullTextConfigDescriptor.createEvaluatorFactory(), searchModifierFactory,
-                        retainInput, retainMissing, context.getMissingWriterFactory(),
+                        queryTokenizerFactory, fullTextConfigEvaluatorFactory, searchModifierFactory, retainInput,
+                        retainMissing, context.getMissingWriterFactory(),
                         dataset.getSearchCallbackFactory(metadataProvider.getStorageComponentProvider(), secondaryIndex,
                                 IndexOperation.SEARCH, null),
                         minFilterFieldIndexes, maxFilterFieldIndexes, isFullTextSearchQuery, numPrimaryKeys,

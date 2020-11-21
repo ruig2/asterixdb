@@ -31,7 +31,6 @@ import org.apache.asterix.om.types.EnumDeserializer;
 import org.apache.asterix.om.types.hierachy.ATypeHierarchy;
 import org.apache.asterix.runtime.evaluators.functions.FullTextContainsDescriptor;
 import org.apache.asterix.runtime.evaluators.functions.PointableHelper;
-import org.apache.asterix.runtime.fulltext.IFullTextConfigDescriptor;
 import org.apache.hyracks.algebricks.common.exceptions.AlgebricksException;
 import org.apache.hyracks.algebricks.runtime.base.IEvaluatorContext;
 import org.apache.hyracks.algebricks.runtime.base.IScalarEvaluator;
@@ -51,6 +50,7 @@ import org.apache.hyracks.data.std.util.BinaryEntry;
 import org.apache.hyracks.data.std.util.BinaryHashSet;
 import org.apache.hyracks.dataflow.common.data.accessors.IFrameTupleReference;
 import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextConfigEvaluator;
+import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextConfigEvaluatorFactory;
 import org.apache.hyracks.storage.am.lsm.invertedindex.tokenizers.DelimitedUTF8StringBinaryTokenizer;
 import org.apache.hyracks.storage.am.lsm.invertedindex.tokenizers.IBinaryTokenizer;
 import org.apache.hyracks.storage.am.lsm.invertedindex.tokenizers.IToken;
@@ -118,7 +118,7 @@ public class FullTextContainsEvaluator implements IScalarEvaluator {
             SerializerDeserializerProvider.INSTANCE.getSerializerDeserializer(BuiltinType.ANULL);
 
     public FullTextContainsEvaluator(IScalarEvaluatorFactory[] args, IEvaluatorContext context,
-            IFullTextConfigDescriptor fullTextConfigDescriptor) throws HyracksDataException {
+            IFullTextConfigEvaluatorFactory fullTextConfigEvaluatorFactory) throws HyracksDataException {
 
         evalLeft = args[0].createScalarEvaluator(context);
         evalRight = args[1].createScalarEvaluator(context);
@@ -127,9 +127,12 @@ public class FullTextContainsEvaluator implements IScalarEvaluator {
         this.outOptions = new IPointable[optionArgsLength];
         this.argOptions = new TaggedValuePointable[optionArgsLength];
 
-        // fullTextConfig is shared by multiple threads on the NC node, so each thread needs a local copy
-        this.ftEvaluatorLeft = fullTextConfigDescriptor.createEvaluatorFactory().createFullTextConfigEvaluator();
-        this.ftEvaluatorRight = fullTextConfigDescriptor.createEvaluatorFactory().createFullTextConfigEvaluator();
+        // We need to have two dedicated ftEvaluatorLeft and ftEvaluatorRight to let them have dedicated tokenizers.
+        //
+        // ftEvaluatorLeft and ftEvaluatorRight are shared by multiple threads on the NC node,
+        // so each thread needs a local copy of them here
+        this.ftEvaluatorLeft = fullTextConfigEvaluatorFactory.createFullTextConfigEvaluator();
+        this.ftEvaluatorRight = fullTextConfigEvaluatorFactory.createFullTextConfigEvaluator();
 
         for (int i = 0; i < optionArgsLength; i++) {
             this.evalOptions[i] = args[i + 2].createScalarEvaluator(context);

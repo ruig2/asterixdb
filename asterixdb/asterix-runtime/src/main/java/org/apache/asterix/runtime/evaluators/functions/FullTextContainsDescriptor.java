@@ -30,7 +30,6 @@ import org.apache.asterix.om.functions.IFunctionTypeInferer;
 import org.apache.asterix.om.types.ATypeTag;
 import org.apache.asterix.runtime.evaluators.base.AbstractScalarFunctionDynamicDescriptor;
 import org.apache.asterix.runtime.evaluators.common.FullTextContainsEvaluator;
-import org.apache.asterix.runtime.fulltext.IFullTextConfigDescriptor;
 import org.apache.asterix.runtime.functions.FunctionTypeInferers;
 import org.apache.hyracks.algebricks.common.exceptions.AlgebricksException;
 import org.apache.hyracks.algebricks.core.algebra.functions.FunctionIdentifier;
@@ -38,6 +37,7 @@ import org.apache.hyracks.algebricks.runtime.base.IEvaluatorContext;
 import org.apache.hyracks.algebricks.runtime.base.IScalarEvaluator;
 import org.apache.hyracks.algebricks.runtime.base.IScalarEvaluatorFactory;
 import org.apache.hyracks.api.exceptions.HyracksDataException;
+import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextConfigEvaluatorFactory;
 import org.apache.hyracks.util.string.UTF8StringUtil;
 
 @MissingNullInOutFunction
@@ -72,7 +72,7 @@ public class FullTextContainsDescriptor extends AbstractScalarFunctionDynamicDes
     public static final String FULLTEXT_CONFIG_OPTION = "config";
     private static final byte[] FULLTEXT_CONFIG_OPTION_ARRAY =
             UTF8StringUtil.writeStringToBytes(FULLTEXT_CONFIG_OPTION);
-    private IFullTextConfigDescriptor configDescriptor;
+    private IFullTextConfigEvaluatorFactory fullTextConfigEvaluatorFactory;
 
     static {
         paramTypeMap.put(SEARCH_MODE_OPTION, ATypeTag.STRING);
@@ -99,8 +99,8 @@ public class FullTextContainsDescriptor extends AbstractScalarFunctionDynamicDes
     public void setImmutableStates(Object... states) {
         super.setImmutableStates(states);
 
-        IFullTextConfigDescriptor configDescriptor = (IFullTextConfigDescriptor) states[0];
-        this.configDescriptor = configDescriptor;
+        IFullTextConfigEvaluatorFactory fullTextConfigEvaluatorFactory = (IFullTextConfigEvaluatorFactory) states[0];
+        this.fullTextConfigEvaluatorFactory = fullTextConfigEvaluatorFactory;
     }
 
     /**
@@ -117,7 +117,7 @@ public class FullTextContainsDescriptor extends AbstractScalarFunctionDynamicDes
 
             @Override
             public IScalarEvaluator createScalarEvaluator(IEvaluatorContext ctx) throws HyracksDataException {
-                return new FullTextContainsEvaluator(args, ctx, configDescriptor);
+                return new FullTextContainsEvaluator(args, ctx, fullTextConfigEvaluatorFactory);
             }
         };
     }
