@@ -250,30 +250,36 @@ public class MetadataCache {
                 synchronized (indexes) {
                     synchronized (datatypes) {
                         synchronized (functions) {
-                            synchronized (adapters) {
-                                synchronized (libraries) {
-                                    synchronized (feeds) {
-                                        synchronized (compactionPolicies) {
-                                            synchronized (synonyms) {
-                                                datasets.remove(dataverse.getDataverseName());
-                                                indexes.remove(dataverse.getDataverseName());
-                                                datatypes.remove(dataverse.getDataverseName());
-                                                adapters.remove(dataverse.getDataverseName());
-                                                compactionPolicies.remove(dataverse.getDataverseName());
-                                                List<FunctionSignature> markedFunctionsForRemoval = new ArrayList<>();
-                                                for (FunctionSignature signature : functions.keySet()) {
-                                                    if (signature.getDataverseName()
-                                                            .equals(dataverse.getDataverseName())) {
-                                                        markedFunctionsForRemoval.add(signature);
+                            synchronized (fullTextConfigs) {
+                                synchronized (fullTextFilters) {
+                                    synchronized (adapters) {
+                                        synchronized (libraries) {
+                                            synchronized (feeds) {
+                                                synchronized (compactionPolicies) {
+                                                    synchronized (synonyms) {
+                                                        datasets.remove(dataverse.getDataverseName());
+                                                        indexes.remove(dataverse.getDataverseName());
+                                                        datatypes.remove(dataverse.getDataverseName());
+                                                        adapters.remove(dataverse.getDataverseName());
+                                                        compactionPolicies.remove(dataverse.getDataverseName());
+                                                        List<FunctionSignature> markedFunctionsForRemoval = new ArrayList<>();
+                                                        for (FunctionSignature signature : functions.keySet()) {
+                                                            if (signature.getDataverseName()
+                                                                    .equals(dataverse.getDataverseName())) {
+                                                                markedFunctionsForRemoval.add(signature);
+                                                            }
+                                                        }
+                                                        for (FunctionSignature signature : markedFunctionsForRemoval) {
+                                                            functions.remove(signature);
+                                                        }
+                                                        fullTextConfigs.remove(dataverse.getDataverseName());
+                                                        fullTextFilters.remove(dataverse.getDataverseName());
+                                                        libraries.remove(dataverse.getDataverseName());
+                                                        feeds.remove(dataverse.getDataverseName());
+                                                        synonyms.remove(dataverse.getDataverseName());
+                                                        return dataverses.remove(dataverse.getDataverseName());
                                                     }
                                                 }
-                                                for (FunctionSignature signature : markedFunctionsForRemoval) {
-                                                    functions.remove(signature);
-                                                }
-                                                libraries.remove(dataverse.getDataverseName());
-                                                feeds.remove(dataverse.getDataverseName());
-                                                synonyms.remove(dataverse.getDataverseName());
-                                                return dataverses.remove(dataverse.getDataverseName());
                                             }
                                         }
                                     }
