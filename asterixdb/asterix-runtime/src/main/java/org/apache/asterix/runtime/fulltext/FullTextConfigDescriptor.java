@@ -28,6 +28,9 @@ import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.TokenizerCategor
 
 import com.google.common.collect.ImmutableList;
 
+// Full-text config that contains a tokenizer (e.g. a WORK tokenizer) and multiple full-text filters (e.g. stopwords filter)
+// to tokenize and process tokens of full-text documents
+// When running the ftcontains() function, the full-text config can be used with or without a full-text index
 public class FullTextConfigDescriptor implements IFullTextConfigDescriptor {
     private static final long serialVersionUID = 1L;
 
@@ -66,6 +69,9 @@ public class FullTextConfigDescriptor implements IFullTextConfigDescriptor {
     // would be in the metadata cache, that means they should be immutable to guarantee consistency
     // So we decide to let the caller to be responsible for fetching the filter descriptors from metadata,
     // and pass the filters as an argument here
+    //
+    // Use the util function org.apache.asterix.metadata.utils.FullTextUtil.fetchFilterAndCreateConfigEvaluator()
+    // to fetch filters according to the filter names and create full-text config evaluator
     @Override
     public IFullTextConfigEvaluatorFactory createEvaluatorFactory(
             ImmutableList<AbstractFullTextFilterDescriptor> filterDescriptors) {
