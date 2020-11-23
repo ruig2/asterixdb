@@ -19,10 +19,10 @@
 
 package org.apache.asterix.runtime.fulltext;
 
+import java.io.Serializable;
+
 import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.FullTextFilterType;
 import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextFilterEvaluator;
-
-import java.io.Serializable;
 
 public interface IFullTextFilterDescriptor extends Serializable {
     String getName();

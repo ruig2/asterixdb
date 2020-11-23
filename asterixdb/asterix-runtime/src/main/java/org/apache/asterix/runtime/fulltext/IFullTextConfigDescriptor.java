@@ -19,12 +19,12 @@
 
 package org.apache.asterix.runtime.fulltext;
 
+import java.io.Serializable;
+
 import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextConfigEvaluatorFactory;
 import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.TokenizerCategory;
 
 import com.google.common.collect.ImmutableList;
-
-import java.io.Serializable;
 
 public interface IFullTextConfigDescriptor extends Serializable {
     String getName();
