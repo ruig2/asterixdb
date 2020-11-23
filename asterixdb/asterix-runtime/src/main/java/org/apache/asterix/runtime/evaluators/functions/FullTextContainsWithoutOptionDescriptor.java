@@ -28,7 +28,7 @@ import org.apache.asterix.runtime.functions.FunctionTypeInferers;
 import org.apache.hyracks.algebricks.core.algebra.functions.FunctionIdentifier;
 
 @MissingNullInOutFunction
-public class FullTextContainsWithoutOptionDescriptor extends FullTextContainsDescriptor {
+public class FullTextContainsWithoutOptionDescriptor extends FullTextContainsFunctionDescriptor {
     private static final long serialVersionUID = 2L;
 
     public FullTextContainsWithoutOptionDescriptor() {

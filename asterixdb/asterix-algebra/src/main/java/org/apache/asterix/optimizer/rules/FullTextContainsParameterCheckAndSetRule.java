@@ -31,7 +31,7 @@ import org.apache.asterix.om.constants.AsterixConstantValue;
 import org.apache.asterix.om.functions.BuiltinFunctions;
 import org.apache.asterix.om.types.ATypeTag;
 import org.apache.asterix.om.utils.ConstantExpressionUtil;
-import org.apache.asterix.runtime.evaluators.functions.FullTextContainsDescriptor;
+import org.apache.asterix.runtime.evaluators.functions.FullTextContainsFunctionDescriptor;
 import org.apache.commons.lang3.mutable.Mutable;
 import org.apache.commons.lang3.mutable.MutableObject;
 import org.apache.hyracks.algebricks.common.exceptions.AlgebricksException;
@@ -178,9 +178,8 @@ public class FullTextContainsParameterCheckAndSetRule implements IAlgebraicRewri
 
                 MetadataProvider metadataProvider = (MetadataProvider) context.getMetadataProvider();
                 DataverseName dataverseName = metadataProvider.getDefaultDataverseName();
-                funcExpr.setOpaqueParameters(new Object[] {
-                        FullTextUtil.fetchFilterAndCreateConfigEvaluator(metadataProvider, dataverseName, ftConfigName)
-                                });
+                funcExpr.setOpaqueParameters(new Object[] { FullTextUtil
+                        .fetchFilterAndCreateConfigEvaluator(metadataProvider, dataverseName, ftConfigName) });
                 // Resets the last argument.
                 funcExpr.getArguments().clear();
                 funcExpr.getArguments().addAll(newExprs);
@@ -239,7 +238,8 @@ public class FullTextContainsParameterCheckAndSetRule implements IAlgebraicRewri
             }
 
             // We multiply 2 because the layout of the arguments are: [expr, val, expr1, val1, ...]
-            if (openRecConsExpr.getArguments().size() > FullTextContainsDescriptor.getParamTypeMap().size() * 2) {
+            if (openRecConsExpr.getArguments().size() > FullTextContainsFunctionDescriptor.getParamTypeMap().size()
+                    * 2) {
                 throw CompilationException.create(ErrorCode.TOO_MANY_OPTIONS_FOR_FUNCTION,
                         openRecConsExpr.getSourceLocation(), functionName);
             }
@@ -261,7 +261,7 @@ public class FullTextContainsParameterCheckAndSetRule implements IAlgebraicRewri
                 }
 
                 option = option.toLowerCase();
-                if (!FullTextContainsDescriptor.getParamTypeMap().containsKey(option)) {
+                if (!FullTextContainsFunctionDescriptor.getParamTypeMap().containsKey(option)) {
                     throw CompilationException.create(ErrorCode.TYPE_UNSUPPORTED, optionExprVal.getSourceLocation(),
                             functionName, option);
                 }
@@ -269,7 +269,7 @@ public class FullTextContainsParameterCheckAndSetRule implements IAlgebraicRewri
                 String optionTypeStringVal = null;
                 // If the option value is a constant, then we can check here.
                 if (optionExprVal.getExpressionTag() == LogicalExpressionTag.CONSTANT) {
-                    switch (FullTextContainsDescriptor.getParamTypeMap().get(option)) {
+                    switch (FullTextContainsFunctionDescriptor.getParamTypeMap().get(option)) {
                         case STRING:
                             optionTypeStringVal = ConstantExpressionUtil.getStringConstant(optionExprVal);
                             if (optionTypeStringVal == null) {
@@ -286,10 +286,10 @@ public class FullTextContainsParameterCheckAndSetRule implements IAlgebraicRewri
 
                     // Check the validity of option value
                     switch (option) {
-                        case FullTextContainsDescriptor.SEARCH_MODE_OPTION:
+                        case FullTextContainsFunctionDescriptor.SEARCH_MODE_OPTION:
                             checkSearchModeOption(optionTypeStringVal, functionName, optionExprVal.getSourceLocation());
                             break;
-                        case FullTextContainsDescriptor.FULLTEXT_CONFIG_OPTION:
+                        case FullTextContainsFunctionDescriptor.FULLTEXT_CONFIG_OPTION:
                             checkFullTextConfigOption(optionTypeStringVal, functionName,
                                     optionExprVal.getSourceLocation());
                             ftConfigName = optionTypeStringVal;
@@ -308,8 +308,8 @@ public class FullTextContainsParameterCheckAndSetRule implements IAlgebraicRewri
 
         private void checkSearchModeOption(String optionVal, String functionName, SourceLocation sourceLoc)
                 throws AlgebricksException {
-            if (optionVal.equals(FullTextContainsDescriptor.SEARCH_MODE.ALL.getValue())
-                    || optionVal.equals(FullTextContainsDescriptor.SEARCH_MODE.ANY.getValue())) {
+            if (optionVal.equals(FullTextContainsFunctionDescriptor.SEARCH_MODE.ALL.getValue())
+                    || optionVal.equals(FullTextContainsFunctionDescriptor.SEARCH_MODE.ANY.getValue())) {
                 return;
             } else {
                 throw CompilationException.create(ErrorCode.TYPE_UNSUPPORTED, sourceLoc, functionName, optionVal);
@@ -333,9 +333,9 @@ public class FullTextContainsParameterCheckAndSetRule implements IAlgebraicRewri
         void setDefaultValueForThirdParameter(List<Mutable<ILogicalExpression>> newArgs) throws AlgebricksException {
             // Sets the search mode option: the default option is conjunctive search.
             ILogicalExpression searchModeOptionExpr = new ConstantExpression(
-                    new AsterixConstantValue(new AString(FullTextContainsDescriptor.SEARCH_MODE_OPTION)));
-            ILogicalExpression searchModeValExpr = new ConstantExpression(
-                    new AsterixConstantValue(new AString(FullTextContainsDescriptor.SEARCH_MODE.ALL.getValue())));
+                    new AsterixConstantValue(new AString(FullTextContainsFunctionDescriptor.SEARCH_MODE_OPTION)));
+            ILogicalExpression searchModeValExpr = new ConstantExpression(new AsterixConstantValue(
+                    new AString(FullTextContainsFunctionDescriptor.SEARCH_MODE.ALL.getValue())));
 
             // Add this option as arguments to the ftcontains().
             newArgs.add(new MutableObject<ILogicalExpression>(searchModeOptionExpr));

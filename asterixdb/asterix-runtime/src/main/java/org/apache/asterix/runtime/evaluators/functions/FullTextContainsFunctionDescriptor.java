@@ -40,8 +40,9 @@ import org.apache.hyracks.api.exceptions.HyracksDataException;
 import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextConfigEvaluatorFactory;
 import org.apache.hyracks.util.string.UTF8StringUtil;
 
+// Descriptor for the ftcontains() function
 @MissingNullInOutFunction
-public class FullTextContainsDescriptor extends AbstractScalarFunctionDynamicDescriptor {
+public class FullTextContainsFunctionDescriptor extends AbstractScalarFunctionDynamicDescriptor {
     private static final long serialVersionUID = 2L;
 
     // parameter name and its type - based on the order of parameters in this map, parameters will be re-arranged.
@@ -83,7 +84,7 @@ public class FullTextContainsDescriptor extends AbstractScalarFunctionDynamicDes
 
         @Override
         public IFunctionDescriptor createFunctionDescriptor() {
-            return new FullTextContainsDescriptor();
+            return new FullTextContainsFunctionDescriptor();
         }
 
         @Override
@@ -92,7 +93,7 @@ public class FullTextContainsDescriptor extends AbstractScalarFunctionDynamicDes
         }
     };
 
-    public FullTextContainsDescriptor() {
+    public FullTextContainsFunctionDescriptor() {
     }
 
     @Override

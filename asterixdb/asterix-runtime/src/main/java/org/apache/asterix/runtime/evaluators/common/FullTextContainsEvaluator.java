@@ -29,7 +29,7 @@ import org.apache.asterix.om.types.ATypeTag;
 import org.apache.asterix.om.types.BuiltinType;
 import org.apache.asterix.om.types.EnumDeserializer;
 import org.apache.asterix.om.types.hierachy.ATypeHierarchy;
-import org.apache.asterix.runtime.evaluators.functions.FullTextContainsDescriptor;
+import org.apache.asterix.runtime.evaluators.functions.FullTextContainsFunctionDescriptor;
 import org.apache.asterix.runtime.evaluators.functions.PointableHelper;
 import org.apache.hyracks.algebricks.common.exceptions.AlgebricksException;
 import org.apache.hyracks.algebricks.runtime.base.IEvaluatorContext;
@@ -74,7 +74,7 @@ public class FullTextContainsEvaluator implements IScalarEvaluator {
     protected IPointable[] outOptions;
     protected int optionArgsLength;
     // By default, we conduct a conjunctive search.
-    protected FullTextContainsDescriptor.SEARCH_MODE mode = FullTextContainsDescriptor.SEARCH_MODE.ALL;
+    protected FullTextContainsFunctionDescriptor.SEARCH_MODE mode = FullTextContainsFunctionDescriptor.SEARCH_MODE.ALL;
 
     // To conduct a full-text search, we convert all strings to the lower case.
     // In addition, since each token does not include the length information (2 bytes) in the beginning,
@@ -352,7 +352,7 @@ public class FullTextContainsEvaluator implements IScalarEvaluator {
         }
 
         // Based on the search mode option - "any" or "all", set the occurrence threshold of tokens.
-        if (mode == FullTextContainsDescriptor.SEARCH_MODE.ANY) {
+        if (mode == FullTextContainsFunctionDescriptor.SEARCH_MODE.ANY) {
             occurrenceThreshold = 1;
         } else {
             occurrenceThreshold = uniqueQueryTokenCount;
@@ -391,16 +391,18 @@ public class FullTextContainsEvaluator implements IScalarEvaluator {
         // Maybe using a JSON parser here can make things easier?
         for (int i = 0; i < optionArgsLength; i = i + 2) {
             // mode option
-            if (compareStrInByteArrayAndPointable(FullTextContainsDescriptor.getSearchModeOptionArray(), argOptions[i],
-                    true) == 0) {
-                if (compareStrInByteArrayAndPointable(FullTextContainsDescriptor.getDisjunctiveFTSearchOptionArray(),
-                        argOptions[i + 1], true) == 0) {
+            if (compareStrInByteArrayAndPointable(FullTextContainsFunctionDescriptor.getSearchModeOptionArray(),
+                    argOptions[i], true) == 0) {
+                if (compareStrInByteArrayAndPointable(
+                        FullTextContainsFunctionDescriptor.getDisjunctiveFTSearchOptionArray(), argOptions[i + 1],
+                        true) == 0) {
                     // ANY
-                    mode = FullTextContainsDescriptor.SEARCH_MODE.ANY;
+                    mode = FullTextContainsFunctionDescriptor.SEARCH_MODE.ANY;
                 } else if (compareStrInByteArrayAndPointable(
-                        FullTextContainsDescriptor.getConjunctiveFTSearchOptionArray(), argOptions[i + 1], true) == 0) {
+                        FullTextContainsFunctionDescriptor.getConjunctiveFTSearchOptionArray(), argOptions[i + 1],
+                        true) == 0) {
                     // ALL
-                    mode = FullTextContainsDescriptor.SEARCH_MODE.ALL;
+                    mode = FullTextContainsFunctionDescriptor.SEARCH_MODE.ALL;
                 }
             }
         }

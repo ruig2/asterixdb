@@ -24,7 +24,7 @@ import org.apache.asterix.om.functions.BuiltinFunctions;
 import org.apache.asterix.om.utils.ConstantExpressionUtil;
 import org.apache.asterix.optimizer.rules.am.IOptimizableFuncExpr;
 import org.apache.asterix.optimizer.rules.am.InvertedIndexAccessMethod;
-import org.apache.asterix.runtime.evaluators.functions.FullTextContainsDescriptor;
+import org.apache.asterix.runtime.evaluators.functions.FullTextContainsFunctionDescriptor;
 import org.apache.commons.lang3.mutable.Mutable;
 import org.apache.hyracks.algebricks.core.algebra.base.ILogicalExpression;
 import org.apache.hyracks.algebricks.core.algebra.expressions.AbstractFunctionCallExpression;
@@ -76,7 +76,7 @@ public class FullTextUtil {
             // The the full-text search option arguments are already checked in FullTextContainsParameterCheckAndSetRule,
             String optionName = ConstantExpressionUtil.getStringConstant(arguments.get(i).getValue());
 
-            if (optionName.equalsIgnoreCase(FullTextContainsDescriptor.FULLTEXT_CONFIG_OPTION)) {
+            if (optionName.equalsIgnoreCase(FullTextContainsFunctionDescriptor.FULLTEXT_CONFIG_OPTION)) {
                 configName = ConstantExpressionUtil.getStringConstant(arguments.get(i + 1).getValue());
                 break;
             }
@@ -92,10 +92,10 @@ public class FullTextUtil {
         for (int i = 2; i < funcExpr.getArguments().size(); i = i + 2) {
             String optionName = ConstantExpressionUtil.getStringArgument(funcExpr, i);
 
-            if (optionName.equals(FullTextContainsDescriptor.SEARCH_MODE_OPTION)) {
+            if (optionName.equals(FullTextContainsFunctionDescriptor.SEARCH_MODE_OPTION)) {
                 String searchType = ConstantExpressionUtil.getStringArgument(funcExpr, i + 1);
 
-                if (searchType.equals(FullTextContainsDescriptor.SEARCH_MODE.ALL.getValue())) {
+                if (searchType.equals(FullTextContainsFunctionDescriptor.SEARCH_MODE.ALL.getValue())) {
                     return InvertedIndexAccessMethod.SearchModifierType.CONJUNCTIVE;
                 } else {
                     return InvertedIndexAccessMethod.SearchModifierType.DISJUNCTIVE;
