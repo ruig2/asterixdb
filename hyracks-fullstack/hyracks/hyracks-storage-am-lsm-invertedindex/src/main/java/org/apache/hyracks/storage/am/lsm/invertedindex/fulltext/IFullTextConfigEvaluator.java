@@ -25,6 +25,7 @@ import org.apache.hyracks.storage.am.lsm.invertedindex.tokenizers.IToken;
 import com.google.common.collect.ImmutableList;
 
 public interface IFullTextConfigEvaluator extends IFullTextEntityEvaluator {
+    String getName();
 
     TokenizerCategory getTokenizerCategory();
 

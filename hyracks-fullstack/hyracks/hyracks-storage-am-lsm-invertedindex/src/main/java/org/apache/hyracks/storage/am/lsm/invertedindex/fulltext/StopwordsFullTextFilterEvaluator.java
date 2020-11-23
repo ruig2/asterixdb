@@ -37,7 +37,7 @@ import com.google.common.collect.ImmutableList;
 public class StopwordsFullTextFilterEvaluator extends AbstractFullTextFilterEvaluator {
     private static final long serialVersionUID = 1L;
 
-    ImmutableList<String> stopwordList;
+    private final ImmutableList<String> stopwordList;
 
     public StopwordsFullTextFilterEvaluator(String name, ImmutableList<String> stopwordList) {
         super(name, FullTextFilterType.STOPWORDS);

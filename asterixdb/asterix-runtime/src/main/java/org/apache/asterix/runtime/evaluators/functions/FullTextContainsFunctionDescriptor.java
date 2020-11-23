@@ -29,7 +29,7 @@ import org.apache.asterix.om.functions.IFunctionDescriptorFactory;
 import org.apache.asterix.om.functions.IFunctionTypeInferer;
 import org.apache.asterix.om.types.ATypeTag;
 import org.apache.asterix.runtime.evaluators.base.AbstractScalarFunctionDynamicDescriptor;
-import org.apache.asterix.runtime.evaluators.common.FullTextContainsEvaluator;
+import org.apache.asterix.runtime.evaluators.common.FullTextContainsFunctionEvaluator;
 import org.apache.asterix.runtime.functions.FunctionTypeInferers;
 import org.apache.hyracks.algebricks.common.exceptions.AlgebricksException;
 import org.apache.hyracks.algebricks.core.algebra.functions.FunctionIdentifier;
@@ -118,7 +118,7 @@ public class FullTextContainsFunctionDescriptor extends AbstractScalarFunctionDy
 
             @Override
             public IScalarEvaluator createScalarEvaluator(IEvaluatorContext ctx) throws HyracksDataException {
-                return new FullTextContainsEvaluator(args, ctx, fullTextConfigEvaluatorFactory);
+                return new FullTextContainsFunctionEvaluator(args, ctx, fullTextConfigEvaluatorFactory);
             }
         };
     }

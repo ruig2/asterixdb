@@ -219,7 +219,6 @@ public class LSMInvertedIndexTestContext extends OrderedIndexTestContext {
             case INMEMORY:
             case ONDISK:
             case LSM: {
-                //FullTextConfigEvaluator fullTextConfigEvaluator = new FullTextConfigEvaluator(fullTextConfigDescriptor);
                 indexTupleIter = new InvertedIndexTokenizingTupleIterator(invIndex.getTokenTypeTraits().length,
                         invIndex.getInvListTypeTraits().length, tokenizerFactory.createTokenizer(),
                         fullTextConfigEvaluatorFactory.createFullTextConfigEvaluator());
@@ -228,7 +227,6 @@ public class LSMInvertedIndexTestContext extends OrderedIndexTestContext {
             case PARTITIONED_INMEMORY:
             case PARTITIONED_ONDISK:
             case PARTITIONED_LSM: {
-                // FullTextConfigEvaluator analyzer = new FullTextConfigEvaluator(fullTextConfigDescriptor);
                 indexTupleIter =
                         new PartitionedInvertedIndexTokenizingTupleIterator(invIndex.getTokenTypeTraits().length,
                                 invIndex.getInvListTypeTraits().length, tokenizerFactory.createTokenizer(),

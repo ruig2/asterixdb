@@ -31,6 +31,8 @@ import org.apache.hyracks.storage.am.lsm.invertedindex.tokenizers.TokenizerInfo;
 // For the full-text config evaluator, we distribute and store the config evaluator factory in the index local resource instead.
 // So the config evaluator IFullTextConfigEvaluator is not IJsonSerializable nor Serializable
 public interface IFullTextFilterEvaluator extends IFullTextEntityEvaluator, IJsonSerializable, Serializable {
+    String getName();
+
     FullTextFilterType getFilterType();
 
     IToken processToken(TokenizerInfo.TokenizerType tokenizerType, IToken token);

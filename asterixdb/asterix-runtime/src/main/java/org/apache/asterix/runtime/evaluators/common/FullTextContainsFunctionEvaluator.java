@@ -56,7 +56,7 @@ import org.apache.hyracks.storage.am.lsm.invertedindex.tokenizers.IBinaryTokeniz
 import org.apache.hyracks.storage.am.lsm.invertedindex.tokenizers.IToken;
 import org.apache.hyracks.util.string.UTF8StringUtil;
 
-public class FullTextContainsEvaluator implements IScalarEvaluator {
+public class FullTextContainsFunctionEvaluator implements IScalarEvaluator {
 
     // assuming type indicator in serde format
     protected static final int TYPE_INDICATOR_SIZE = 1;
@@ -117,7 +117,7 @@ public class FullTextContainsEvaluator implements IScalarEvaluator {
     protected ISerializerDeserializer<ANull> nullSerde =
             SerializerDeserializerProvider.INSTANCE.getSerializerDeserializer(BuiltinType.ANULL);
 
-    public FullTextContainsEvaluator(IScalarEvaluatorFactory[] args, IEvaluatorContext context,
+    public FullTextContainsFunctionEvaluator(IScalarEvaluatorFactory[] args, IEvaluatorContext context,
             IFullTextConfigEvaluatorFactory fullTextConfigEvaluatorFactory) throws HyracksDataException {
 
         evalLeft = args[0].createScalarEvaluator(context);
