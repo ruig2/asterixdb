@@ -21,7 +21,6 @@ package org.apache.asterix.runtime.fulltext;
 
 import org.apache.asterix.common.metadata.DataverseName;
 import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.FullTextConfigEvaluatorFactory;
-import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.FullTextEntityCategory;
 import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextConfigEvaluatorFactory;
 import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextFilterEvaluator;
 import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.TokenizerCategory;
@@ -81,11 +80,6 @@ public class FullTextConfigDescriptor implements IFullTextConfigDescriptor {
         }
 
         return new FullTextConfigEvaluatorFactory(name, tokenizerCategory, filtersBuilder.build());
-    }
-
-    @Override
-    public FullTextEntityCategory getCategory() {
-        return FullTextEntityCategory.CONFIG;
     }
 
     @Override

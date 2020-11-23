@@ -20,7 +20,6 @@
 package org.apache.asterix.runtime.fulltext;
 
 import org.apache.asterix.common.metadata.DataverseName;
-import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.FullTextEntityCategory;
 import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.FullTextFilterType;
 
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
@@ -46,10 +45,5 @@ public abstract class AbstractFullTextFilterDescriptor implements IFullTextFilte
     @Override
     public FullTextFilterType getFilterType() {
         throw new NotImplementedException();
-    }
-
-    @Override
-    public FullTextEntityCategory getCategory() {
-        return FullTextEntityCategory.FILTER;
     }
 }

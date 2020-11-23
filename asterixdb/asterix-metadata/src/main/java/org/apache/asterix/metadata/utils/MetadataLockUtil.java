@@ -28,9 +28,9 @@ import org.apache.asterix.common.metadata.DataverseName;
 import org.apache.asterix.common.metadata.IMetadataLockUtil;
 import org.apache.asterix.common.metadata.LockList;
 import org.apache.hyracks.algebricks.common.exceptions.AlgebricksException;
+import org.apache.parquet.Strings;
 
 import com.google.common.collect.ImmutableList;
-import org.apache.parquet.Strings;
 
 public class MetadataLockUtil implements IMetadataLockUtil {
 

@@ -19,7 +19,6 @@
 
 package org.apache.asterix.metadata;
 
-import com.google.common.base.Strings;
 import static org.apache.asterix.common.exceptions.ErrorCode.FULL_TEXT_DEFAULT_CONFIG_CANNOT_BE_DELETED_OR_CREATED;
 
 import java.rmi.RemoteException;
@@ -138,6 +137,8 @@ import org.apache.hyracks.storage.common.MultiComparator;
 import org.apache.hyracks.util.ExitUtil;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+
+import com.google.common.base.Strings;
 
 public class MetadataNode implements IMetadataNode {
     private static final long serialVersionUID = 1L;
@@ -713,7 +714,8 @@ public class MetadataNode implements IMetadataNode {
             // Drop full-text configs in this dataverse.
             // Note that full-text configs are utilized by the index, and we need to always drop index first
             // and then full-text config
-            List<FullTextConfigMetadataEntity> configMetadataEntities = getDataverseFullTextConfigs(txnId, dataverseName);
+            List<FullTextConfigMetadataEntity> configMetadataEntities =
+                    getDataverseFullTextConfigs(txnId, dataverseName);
             for (FullTextConfigMetadataEntity configMetadataEntity : configMetadataEntities) {
                 dropFullTextConfigDescriptor(txnId, dataverseName, configMetadataEntity.getFullTextConfig().getName(),
                         true);

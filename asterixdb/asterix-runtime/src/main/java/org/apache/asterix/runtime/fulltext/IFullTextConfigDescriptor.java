@@ -24,7 +24,9 @@ import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.TokenizerCategor
 
 import com.google.common.collect.ImmutableList;
 
-public interface IFullTextConfigDescriptor extends IFullTextEntityDescriptor {
+public interface IFullTextConfigDescriptor {
+    String getName();
+
     TokenizerCategory getTokenizerCategory();
 
     ImmutableList<String> getFilterNames();

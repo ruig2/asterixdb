@@ -64,11 +64,6 @@ public class FullTextConfigEvaluator implements IFullTextConfigEvaluator {
     }
 
     @Override
-    public FullTextEntityCategory getCategory() {
-        return FullTextEntityCategory.CONFIG;
-    }
-
-    @Override
     public String getName() {
         return name;
     }

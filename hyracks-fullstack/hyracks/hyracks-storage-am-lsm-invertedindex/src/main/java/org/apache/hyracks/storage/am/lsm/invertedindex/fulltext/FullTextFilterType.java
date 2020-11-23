@@ -25,7 +25,7 @@ public enum FullTextFilterType {
     SYNONYM("Synonym"),
     STEMMER("Stemmer");
 
-    private String value;
+    private final String value;
 
     FullTextFilterType(String value) {
         this.value = value;

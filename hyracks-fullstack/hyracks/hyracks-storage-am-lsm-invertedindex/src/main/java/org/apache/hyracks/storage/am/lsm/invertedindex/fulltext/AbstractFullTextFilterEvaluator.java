@@ -20,17 +20,14 @@
 package org.apache.hyracks.storage.am.lsm.invertedindex.fulltext;
 
 public abstract class AbstractFullTextFilterEvaluator implements IFullTextFilterEvaluator {
+    private static final long serialVersionUID = 1L;
+
     protected final String name;
     protected final FullTextFilterType type;
 
     public AbstractFullTextFilterEvaluator(String name, FullTextFilterType type) {
         this.name = name;
         this.type = type;
-    }
-
-    @Override
-    public FullTextEntityCategory getCategory() {
-        return FullTextEntityCategory.FILTER;
     }
 
     @Override
