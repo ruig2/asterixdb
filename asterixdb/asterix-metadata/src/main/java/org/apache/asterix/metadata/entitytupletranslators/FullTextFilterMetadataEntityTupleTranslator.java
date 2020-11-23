@@ -54,14 +54,14 @@ import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.FullTextFilterTy
 
 import com.google.common.collect.ImmutableList;
 
-public class FullTextFilterDescriptorTupleTranslator extends AbstractTupleTranslator<FullTextFilterMetadataEntity> {
+public class FullTextFilterMetadataEntityTupleTranslator extends AbstractTupleTranslator<FullTextFilterMetadataEntity> {
 
     private static final int FULLTEXT_FILTER_PAYLOAD_TUPLE_FIELD_INDEX = 2;
     protected final ArrayTupleReference tuple;
     protected final ISerializerDeserializer<AInt8> int8Serde =
             SerializerDeserializerProvider.INSTANCE.getSerializerDeserializer(BuiltinType.AINT8);
 
-    protected FullTextFilterDescriptorTupleTranslator(boolean getTuple) {
+    protected FullTextFilterMetadataEntityTupleTranslator(boolean getTuple) {
         super(getTuple, MetadataPrimaryIndexes.FULL_TEXT_FILTER_DATASET, FULLTEXT_FILTER_PAYLOAD_TUPLE_FIELD_INDEX);
         if (getTuple) {
             tuple = new ArrayTupleReference();

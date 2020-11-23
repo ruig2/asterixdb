@@ -30,6 +30,7 @@ import org.apache.asterix.common.metadata.LockList;
 import org.apache.hyracks.algebricks.common.exceptions.AlgebricksException;
 
 import com.google.common.collect.ImmutableList;
+import org.apache.parquet.Strings;
 
 public class MetadataLockUtil implements IMetadataLockUtil {
 
@@ -98,7 +99,9 @@ public class MetadataLockUtil implements IMetadataLockUtil {
             String datasetName, String fullTextConfigName) throws AlgebricksException {
         lockMgr.acquireDataverseReadLock(locks, dataverseName);
         lockMgr.acquireDatasetCreateIndexLock(locks, dataverseName, datasetName);
-        lockMgr.acquireFullTextConfigReadLock(locks, dataverseName, fullTextConfigName);
+        if (!Strings.isNullOrEmpty(fullTextConfigName)) {
+            lockMgr.acquireFullTextConfigReadLock(locks, dataverseName, fullTextConfigName);
+        }
     }
 
     @Override
