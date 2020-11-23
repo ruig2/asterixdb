@@ -324,8 +324,8 @@ public class FullTextContainsParameterCheckAndSetRule implements IAlgebraicRewri
             // Currently, here we only check if the full-text config is null or empty string
             // We will check if the full-text config exists at run time
             if (Strings.isNullOrEmpty(optionVal)) {
-                throw CompilationException.create(ErrorCode.COMPILATION_INVALID_EXPRESSION, sourceLoc,
-                        functionName, FullTextContainsFunctionDescriptor.FULLTEXT_CONFIG_OPTION, "not-null", "null");
+                throw CompilationException.create(ErrorCode.COMPILATION_INVALID_EXPRESSION, sourceLoc, functionName,
+                        FullTextContainsFunctionDescriptor.FULLTEXT_CONFIG_OPTION, "not-null", "null");
             } else {
                 return;
             }

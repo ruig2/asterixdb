@@ -709,11 +709,6 @@ public abstract class MetadataManager implements IMetadataManager {
     @Override
     public FullTextConfigMetadataEntity getFullTextConfig(MetadataTransactionContext ctx, DataverseName dataverseName,
             String configName) throws AlgebricksException {
-
-        if (Strings.isNullOrEmpty(configName)) {
-            return FullTextConfigMetadataEntity.getDefaultFullTextConfigMetadataEntity();
-        }
-
         // First look in the context to see if this transaction created the
         // requested full-text config itself (but the full-text config is still uncommitted).
         FullTextConfigMetadataEntity configMetadataEntity = ctx.getFullTextConfig(dataverseName, configName);

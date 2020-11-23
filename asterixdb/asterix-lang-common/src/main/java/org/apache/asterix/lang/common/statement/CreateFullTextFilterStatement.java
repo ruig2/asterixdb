@@ -21,6 +21,7 @@ package org.apache.asterix.lang.common.statement;
 import java.util.Iterator;
 
 import org.apache.asterix.common.exceptions.CompilationException;
+import org.apache.asterix.common.exceptions.ErrorCode;
 import org.apache.asterix.common.metadata.DataverseName;
 import org.apache.asterix.lang.common.base.AbstractStatement;
 import org.apache.asterix.lang.common.expression.RecordConstructor;
@@ -43,8 +44,7 @@ public class CreateFullTextFilterStatement extends AbstractStatement {
 
     public static final String FIELD_NAME_TYPE = "type";
     public static final String FIELD_NAME_STOPWORDS_LIST = "stopwordsList";
-    public static final String FIELD_NAME_STOPWORDS = "stopwords";
-    public static final String FIELD_NAME_STEMMER = "stemmer";
+    public static final String FIELD_TYPE_STOPWORDS = "stopwords";
 
     public CreateFullTextFilterStatement(DataverseName dataverseName, String filterName, boolean ifNotExists,
             RecordConstructor expr) throws CompilationException {
@@ -70,12 +70,17 @@ public class CreateFullTextFilterStatement extends AbstractStatement {
         return filterNode.getString(FIELD_NAME_TYPE);
     }
 
-    public ImmutableList<String> getStopwordsList() {
+    public ImmutableList<String> getStopwordsList() throws CompilationException {
         ImmutableList.Builder listBuiler = ImmutableList.<String> builder();
         AdmArrayNode arrayNode = (AdmArrayNode) filterNode.get(FIELD_NAME_STOPWORDS_LIST);
 
         Iterator<IAdmNode> iterator = arrayNode.iterator();
         while (iterator.hasNext()) {
+            if (!(iterator instanceof AdmStringNode)) {
+                throw new CompilationException(ErrorCode.PARSE_ERROR, getSourceLocation(),
+                        "error when parsing stopwords list");
+            }
+
             listBuiler.add(((AdmStringNode) iterator.next()).get());
         }
 

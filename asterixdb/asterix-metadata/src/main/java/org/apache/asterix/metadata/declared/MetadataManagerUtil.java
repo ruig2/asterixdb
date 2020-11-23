@@ -45,6 +45,7 @@ import org.apache.asterix.om.types.IAType;
 import org.apache.hyracks.algebricks.common.exceptions.AlgebricksException;
 import org.apache.hyracks.algebricks.core.algebra.properties.DefaultNodeGroupDomain;
 import org.apache.hyracks.algebricks.core.algebra.properties.INodeDomain;
+import org.apache.parquet.Strings;
 
 public class MetadataManagerUtil {
 
@@ -152,6 +153,11 @@ public class MetadataManagerUtil {
 
     public static FullTextConfigMetadataEntity findFullTextConfigDescriptor(MetadataTransactionContext mdTxnCtx,
             DataverseName dataverseName, String ftConfigName) throws AlgebricksException {
+        // If the config name is null, then the default config will be returned
+        if (Strings.isNullOrEmpty(ftConfigName)) {
+            return FullTextConfigMetadataEntity.getDefaultFullTextConfigMetadataEntity();
+        }
+
         return MetadataManager.INSTANCE.getFullTextConfig(mdTxnCtx, dataverseName, ftConfigName);
     }
 

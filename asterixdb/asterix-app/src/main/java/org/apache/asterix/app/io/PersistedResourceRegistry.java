@@ -277,7 +277,7 @@ public class PersistedResourceRegistry implements IPersistedResourceRegistry {
 
         // IFullTextConfigFactory
         registeredClasses.put("FullTextConfigEvaluatorFactory", FullTextConfigEvaluatorFactory.class);
-        registeredClasses.put("StopwordsFullTextFilterDescriptor", StopwordsFullTextFilterEvaluator.class);
+        registeredClasses.put("StopwordsFullTextFilterEvaluator", StopwordsFullTextFilterEvaluator.class);
 
         // ITokenFactory
         registeredClasses.put("AListElementTokenFactory", AListElementTokenFactory.class);

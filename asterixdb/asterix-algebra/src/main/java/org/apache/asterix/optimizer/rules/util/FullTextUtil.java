@@ -45,10 +45,6 @@ public class FullTextUtil {
         return false;
     }
 
-    public static String getFullTextConfigDataverseNameFromExpr(AbstractFunctionCallExpression expr) {
-        return expr.getFunctionIdentifier().getNamespace();
-    }
-
     // If not a full-text function expression, then return null
     // Otherwise, return the full-text config if one exists in the expression, otherwise return the default config
     public static String getFullTextConfigNameFromExpr(IOptimizableFuncExpr expr) {

@@ -1036,7 +1036,7 @@ CreateIndexStatement IndexSpecification(Token startStmtToken) throws ParseExcept
     if (indexType != null) {
       stmt.setIndexType(indexType.type);
       stmt.setGramLength(indexType.gramLength);
-      stmt.setFullTextConfig(indexType.fullTextConfig);
+      stmt.setFullTextConfigName(indexType.fullTextConfig);
     }
     stmt.setEnforced(enforced);
     return addSourceLocation(stmt, startStmtToken);

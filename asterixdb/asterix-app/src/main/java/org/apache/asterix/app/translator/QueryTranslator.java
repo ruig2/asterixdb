@@ -18,7 +18,7 @@
  */
 package org.apache.asterix.app.translator;
 
-import static org.apache.asterix.lang.common.statement.CreateFullTextFilterStatement.FIELD_NAME_STOPWORDS;
+import static org.apache.asterix.lang.common.statement.CreateFullTextFilterStatement.FIELD_TYPE_STOPWORDS;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -1182,14 +1182,19 @@ public class QueryTranslator extends AbstractLangTranslator implements IStatemen
         AbstractFullTextFilterDescriptor filterDescriptor;
 
         String filterType = stmtCreateFilter.getFilterType();
+        if (filterType == null) {
+            throw new CompilationException(ErrorCode.PARSE_ERROR, stmtCreateFilter.getSourceLocation(),
+                    "full-text filter type is null");
+        }
+
         switch (filterType) {
-            case FIELD_NAME_STOPWORDS: {
+            case FIELD_TYPE_STOPWORDS: {
                 filterDescriptor = new StopwordsFullTextFilterDescriptor(dataverseName,
                         stmtCreateFilter.getFilterName(), stmtCreateFilter.getStopwordsList());
                 break;
             }
             default:
-                throw CompilationException.create(ErrorCode.COMPILATION_ERROR, stmtCreateFilter.getSourceLocation(),
+                throw new CompilationException(ErrorCode.COMPILATION_ERROR, stmtCreateFilter.getSourceLocation(),
                         "Unexpected full-text filter type: " + filterType);
         }
 
@@ -2119,7 +2124,7 @@ public class QueryTranslator extends AbstractLangTranslator implements IStatemen
             throws RemoteException, AlgebricksException {
         // If the config name is null, then it means the default config
         if (Strings.isNullOrEmpty(stmtConfigDrop.getConfigName())) {
-            throw CompilationException.create(ErrorCode.FULL_TEXT_DEFAULT_CONFIG_CANNOT_BE_DELETED_OR_CREATED,
+            throw new CompilationException(ErrorCode.FULL_TEXT_DEFAULT_CONFIG_CANNOT_BE_DELETED_OR_CREATED,
                     stmtConfigDrop.getSourceLocation());
         }
 
