@@ -24,7 +24,9 @@ import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.TokenizerCategor
 
 import com.google.common.collect.ImmutableList;
 
-public interface IFullTextConfigDescriptor {
+import java.io.Serializable;
+
+public interface IFullTextConfigDescriptor extends Serializable {
     String getName();
 
     TokenizerCategory getTokenizerCategory();
