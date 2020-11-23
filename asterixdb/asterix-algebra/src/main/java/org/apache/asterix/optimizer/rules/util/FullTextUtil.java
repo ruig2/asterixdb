@@ -65,9 +65,9 @@ public class FullTextUtil {
         // 1) the full-text record field to be queried,
         // 2) the query keyword array
         // The next fields are the list of full-text search options,
-        // say, the next 4 fields can be "mode", "all", "config", "DEFAULT_FULL_TEXT_CONFIG"
+        // say, the next 4 fields can be "mode", "all", "config", "my_full_text_config"
         // Originally, the full-text search option is an Asterix record such as
-        //     {"mode": "all", "config": "DEFAULT_FULL_TEXT_CONFIG"}
+        //     {"mode": "all", "config": "my_full_text_config"}
         for (int i = 2; i < arguments.size(); i += 2) {
             // The the full-text search option arguments are already checked in FullTextContainsParameterCheckAndSetRule,
             String optionName = ConstantExpressionUtil.getStringConstant(arguments.get(i).getValue());
