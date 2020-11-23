@@ -27,7 +27,12 @@
   &AsyncDeferredQueries;
   &GeoQueries;
   &TemporalQueries;
-  <test-group name="flwor">
+  <test-group name="api">
+    <test-case FilePath="api">
+      <compilation-unit name="multiple-param-values">
+        <output-dir compare="Text">multiple-param-values</output-dir>
+      </compilation-unit>
+    </test-case>
     <test-case FilePath="api">
       <compilation-unit name="readonly-request">
         <output-dir compare="Text">readonly-request</output-dir>
@@ -12213,6 +12218,11 @@
       </compilation-unit>
     </test-case>
     <test-case FilePath="user-defined-functions">
+      <compilation-unit name="udf36_in_with">
+        <output-dir compare="Text">udf36_in_with</output-dir>
+      </compilation-unit>
+    </test-case>
+    <test-case FilePath="user-defined-functions">
       <compilation-unit name="f01">
         <output-dir compare="Text">f01</output-dir>
         <expected-error>ASX1081: Cannot find function with name test.tinyint</expected-error>
@@ -13946,6 +13956,21 @@
         <expected-error>ASX0021: Source value 9999999999 is out of range that integer can hold - integer.MAX_VALUE: 2147483647, integer.MIN_VALUE: -2147483648</expected-error>
         <expected-error>ASX0021: Source value 8888888888 is out of range that integer can hold - integer.MAX_VALUE: 2147483647, integer.MIN_VALUE: -2147483648</expected-error>
         <source-location>false</source-location>
+      </compilation-unit>
+    </test-case>
+    <test-case FilePath="limit">
+      <compilation-unit name="offset_without_limit">
+        <output-dir compare="Text">offset_without_limit</output-dir>
+      </compilation-unit>
+    </test-case>
+    <test-case FilePath="limit">
+      <compilation-unit name="push-limit-to-external-scan">
+        <output-dir compare="Text">push-limit-to-external-scan</output-dir>
+      </compilation-unit>
+    </test-case>
+    <test-case FilePath="limit">
+      <compilation-unit name="push-limit-to-external-scan-select">
+        <output-dir compare="Text">push-limit-to-external-scan-select</output-dir>
       </compilation-unit>
     </test-case>
     <test-case FilePath="limit">
