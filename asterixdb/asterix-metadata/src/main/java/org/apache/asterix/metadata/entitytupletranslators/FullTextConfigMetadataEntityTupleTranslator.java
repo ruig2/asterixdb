@@ -160,14 +160,4 @@ public class FullTextConfigMetadataEntityTupleTranslator extends AbstractTupleTr
         tuple.reset(tupleBuilder.getFieldEndOffsets(), tupleBuilder.getByteArray());
         return tuple;
     }
-
-    public ITupleReference createTupleAsIndex(String dataverseName, String configName) throws HyracksDataException {
-        // -1 to get the number of fields in index only
-        ArrayTupleBuilder tupleBuilder =
-                new ArrayTupleBuilder(MetadataPrimaryIndexes.FULL_TEXT_CONFIG_DATASET.getFieldCount() - 1);
-        writeIndex(dataverseName, configName, tupleBuilder);
-
-        tuple.reset(tupleBuilder.getFieldEndOffsets(), tupleBuilder.getByteArray());
-        return tuple;
-    }
 }

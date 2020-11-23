@@ -27,6 +27,8 @@ import static org.apache.asterix.metadata.bootstrap.MetadataRecordTypes.FULL_TEX
 import java.util.List;
 
 import org.apache.asterix.builders.OrderedListBuilder;
+import org.apache.asterix.common.exceptions.AsterixException;
+import org.apache.asterix.common.exceptions.ErrorCode;
 import org.apache.asterix.common.metadata.DataverseName;
 import org.apache.asterix.formats.nontagged.SerializerDeserializerProvider;
 import org.apache.asterix.metadata.bootstrap.MetadataPrimaryIndexes;
@@ -42,7 +44,6 @@ import org.apache.asterix.om.types.BuiltinType;
 import org.apache.asterix.runtime.fulltext.AbstractFullTextFilterDescriptor;
 import org.apache.asterix.runtime.fulltext.StopwordsFullTextFilterDescriptor;
 import org.apache.hyracks.algebricks.common.exceptions.AlgebricksException;
-import org.apache.hyracks.algebricks.common.exceptions.NotImplementedException;
 import org.apache.hyracks.api.dataflow.value.ISerializerDeserializer;
 import org.apache.hyracks.api.exceptions.HyracksDataException;
 import org.apache.hyracks.data.std.util.ArrayBackedValueStorage;
@@ -83,7 +84,7 @@ public class FullTextFilterDescriptorTupleTranslator extends AbstractTupleTransl
             case STEMMER:
             case SYNONYM:
             default:
-                throw new AlgebricksException("Not supported yet");
+                throw new AsterixException(ErrorCode.METADATA_ERROR, "Not supported yet");
         }
     }
 
@@ -139,7 +140,8 @@ public class FullTextFilterDescriptorTupleTranslator extends AbstractTupleTransl
                 stopwordsFullTextFilterDescriptor.getStopwordList());
     }
 
-    private void writeFulltextFilter(AbstractFullTextFilterDescriptor filterDescriptor) throws HyracksDataException {
+    private void writeFulltextFilter(AbstractFullTextFilterDescriptor filterDescriptor)
+            throws AsterixException, HyracksDataException {
         fieldValue.reset();
         aString.setValue(filterDescriptor.getDataverseName().getCanonicalForm());
         stringSerde.serialize(aString, fieldValue.getDataOutput());
@@ -162,7 +164,7 @@ public class FullTextFilterDescriptorTupleTranslator extends AbstractTupleTransl
             case STEMMER:
             case SYNONYM:
             default:
-                throw new NotImplementedException();
+                throw new AsterixException(ErrorCode.METADATA_ERROR, "Not supported yet");
         }
     }
 
@@ -179,7 +181,7 @@ public class FullTextFilterDescriptorTupleTranslator extends AbstractTupleTransl
 
     @Override
     public ITupleReference getTupleFromMetadataEntity(FullTextFilterMetadataEntity filterMetadataEntity)
-            throws HyracksDataException {
+            throws HyracksDataException, AsterixException {
         tupleBuilder.reset();
 
         writeIndex(filterMetadataEntity.getFullTextFilter().getDataverseName().getCanonicalForm(),
@@ -192,16 +194,6 @@ public class FullTextFilterDescriptorTupleTranslator extends AbstractTupleTransl
 
         recordBuilder.write(tupleBuilder.getDataOutput(), true);
         tupleBuilder.addFieldEndOffset();
-
-        tuple.reset(tupleBuilder.getFieldEndOffsets(), tupleBuilder.getByteArray());
-        return tuple;
-    }
-
-    public ITupleReference createTupleAsIndex(String dataverseName, String filterName) throws HyracksDataException {
-        // -1 to get the number of fields in index only
-        ArrayTupleBuilder tupleBuilder =
-                new ArrayTupleBuilder(MetadataPrimaryIndexes.FULL_TEXT_FILTER_DATASET.getFieldCount() - 1);
-        writeIndex(dataverseName, filterName, tupleBuilder);
 
         tuple.reset(tupleBuilder.getFieldEndOffsets(), tupleBuilder.getByteArray());
         return tuple;

@@ -76,12 +76,13 @@ public class CreateFullTextFilterStatement extends AbstractStatement {
 
         Iterator<IAdmNode> iterator = arrayNode.iterator();
         while (iterator.hasNext()) {
-            if (!(iterator instanceof AdmStringNode)) {
+            IAdmNode node = iterator.next();
+            if (!(node instanceof AdmStringNode)) {
                 throw new CompilationException(ErrorCode.PARSE_ERROR, getSourceLocation(),
                         "error when parsing stopwords list");
             }
 
-            listBuiler.add(((AdmStringNode) iterator.next()).get());
+            listBuiler.add(((AdmStringNode) node).get());
         }
 
         return listBuiler.build();

@@ -469,7 +469,7 @@ public class MetadataNode implements IMetadataNode {
             FullTextFilterDescriptorTupleTranslator translator =
                     tupleTranslatorProvider.getFullTextFilterTupleTranslator(true);
 
-            ITupleReference searchKey = translator.createTupleAsIndex(dataverseName.getCanonicalForm(), filterName);
+            ITupleReference searchKey = createTuple(dataverseName.getCanonicalForm(), filterName);
             IValueExtractor<FullTextFilterMetadataEntity> valueExtractor =
                     new MetadataEntityValueExtractor<>(translator);
             List<FullTextFilterMetadataEntity> results = new ArrayList<>();
@@ -499,7 +499,7 @@ public class MetadataNode implements IMetadataNode {
             FullTextFilterDescriptorTupleTranslator translator =
                     tupleTranslatorProvider.getFullTextFilterTupleTranslator(true);
 
-            ITupleReference key = translator.createTupleAsIndex(dataverseName.getCanonicalForm(), filterName);
+            ITupleReference key = createTuple(dataverseName.getCanonicalForm(), filterName);
             deleteTupleFromIndex(txnId, MetadataPrimaryIndexes.FULL_TEXT_FILTER_DATASET, key);
         } catch (HyracksDataException e) {
             throw new AlgebricksException(e);
@@ -551,7 +551,7 @@ public class MetadataNode implements IMetadataNode {
         ITupleReference searchKey = null;
         List<FullTextConfigMetadataEntity> results = new ArrayList<>();
         try {
-            searchKey = translator.createTupleAsIndex(dataverseName.getCanonicalForm(), configName);
+            searchKey = createTuple(dataverseName.getCanonicalForm(), configName);
             IValueExtractor<FullTextConfigMetadataEntity> valueExtractor =
                     new MetadataEntityValueExtractor<>(translator);
             searchIndex(txnId, MetadataPrimaryIndexes.FULL_TEXT_CONFIG_DATASET, searchKey, valueExtractor, results);
@@ -583,7 +583,7 @@ public class MetadataNode implements IMetadataNode {
             FullTextConfigMetadataEntityTupleTranslator translator =
                     tupleTranslatorProvider.getFullTextConfigTupleTranslator(true);
 
-            ITupleReference key = translator.createTupleAsIndex(dataverseName.getCanonicalForm(), configName);
+            ITupleReference key = createTuple(dataverseName.getCanonicalForm(), configName);
             deleteTupleFromIndex(txnId, MetadataPrimaryIndexes.FULL_TEXT_CONFIG_DATASET, key);
         } catch (HyracksDataException e) {
             throw new AlgebricksException(e);
