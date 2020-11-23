@@ -55,6 +55,8 @@ import com.google.common.base.Strings;
  * and fetch the full-text config from metadata which is necessary for the ftcontains() function
  */
 public class FullTextContainsParameterCheckAndSetRule implements IAlgebraicRewriteRule {
+    // Visitor for checking and transforming ftcontains() expression
+    protected FullTextContainsExpressionVisitor ftcontainsExprVisitor = new FullTextContainsExpressionVisitor();
 
     @Override
     public boolean rewritePre(Mutable<ILogicalOperator> opRef, IOptimizationContext context)
@@ -78,10 +80,8 @@ public class FullTextContainsParameterCheckAndSetRule implements IAlgebraicRewri
      */
     private boolean checkAndSetParameter(Mutable<ILogicalOperator> opRef, IOptimizationContext context)
             throws AlgebricksException {
-        // Visitor for checking and transforming ftcontains() expression
-        FullTextContainsExpressionVisitor ftcontainsExprVisitor = new FullTextContainsExpressionVisitor(context);
-
         AbstractLogicalOperator op = (AbstractLogicalOperator) opRef.getValue();
+        ftcontainsExprVisitor.setContext(context);
         boolean modified = op.acceptExpressionTransform(ftcontainsExprVisitor);
         if (modified) {
             context.addToDontApplySet(this, op);
@@ -101,10 +101,13 @@ public class FullTextContainsParameterCheckAndSetRule implements IAlgebraicRewri
         // The number of anticipated arguments for a full-text query when a user provide option(s) as a record.
         private static final int FULLTEXT_QUERY_WITH_OPTION_NO_OF_ARGUMENTS = 3;
 
-        private final IOptimizationContext context;
+        private IOptimizationContext context;
         String ftConfigName;
 
-        public FullTextContainsExpressionVisitor(IOptimizationContext context) {
+        public FullTextContainsExpressionVisitor() {
+        }
+
+        public void setContext(IOptimizationContext context) {
             this.context = context;
         }
 
@@ -320,26 +323,28 @@ public class FullTextContainsParameterCheckAndSetRule implements IAlgebraicRewri
                 throws AlgebricksException {
             // Currently, here we only check if the full-text config is null or empty string
             // We will check if the full-text config exists at run time
-            if (Strings.isNullOrEmpty(optionVal) == false) {
-                return;
+            if (Strings.isNullOrEmpty(optionVal)) {
+                throw CompilationException.create(ErrorCode.COMPILATION_INVALID_EXPRESSION, sourceLoc,
+                        functionName, FullTextContainsFunctionDescriptor.FULLTEXT_CONFIG_OPTION, "not-null", "null");
             } else {
-                throw CompilationException.create(ErrorCode.TYPE_UNSUPPORTED, sourceLoc, functionName, optionVal);
+                return;
             }
         }
 
         /**
          * Sets the default option value(s) when a user doesn't provide any option.
          */
-        void setDefaultValueForThirdParameter(List<Mutable<ILogicalExpression>> newArgs) throws AlgebricksException {
+        void setDefaultValueForThirdParameter(List<Mutable<ILogicalExpression>> newArgs) {
             // Sets the search mode option: the default option is conjunctive search.
             ILogicalExpression searchModeOptionExpr = new ConstantExpression(
                     new AsterixConstantValue(new AString(FullTextContainsFunctionDescriptor.SEARCH_MODE_OPTION)));
             ILogicalExpression searchModeValExpr = new ConstantExpression(new AsterixConstantValue(
                     new AString(FullTextContainsFunctionDescriptor.SEARCH_MODE.ALL.getValue())));
-
             // Add this option as arguments to the ftcontains().
             newArgs.add(new MutableObject<ILogicalExpression>(searchModeOptionExpr));
             newArgs.add(new MutableObject<ILogicalExpression>(searchModeValExpr));
+
+            // We don't set the full-text config option here because the default value should be null
         }
 
     }
