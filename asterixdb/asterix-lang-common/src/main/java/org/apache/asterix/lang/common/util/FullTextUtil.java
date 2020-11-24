@@ -67,13 +67,6 @@ public class FullTextUtil {
     //     "Type": "stopwords",
     //     "StopwordsList": ["xxx", "yyy", "zzz"]
     // };
-    private static ARecordType getFullTextFilterRecordType() {
-        final String[] fieldNames = { FIELD_NAME_TYPE };
-        final IAType[] fieldTypes = { BuiltinType.ASTRING };
-        return new ARecordType("fullTextFilterRecordType", fieldNames, fieldTypes, true);
-    }
-
-    private static final ARecordType FULL_TEXT_FILTER_RECORD_TYPE = getFullTextFilterRecordType();
 
     public static AdmObjectNode getFilterNode(RecordConstructor recordConstructor) throws CompilationException {
         // Skip validation here because the current validator only supports CLOSED record validate

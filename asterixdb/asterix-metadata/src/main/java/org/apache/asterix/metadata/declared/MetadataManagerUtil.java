@@ -21,6 +21,7 @@ package org.apache.asterix.metadata.declared;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.google.common.base.Strings;
 import org.apache.asterix.common.cluster.IClusterStateManager;
 import org.apache.asterix.common.config.DatasetConfig.DatasetType;
 import org.apache.asterix.common.exceptions.AsterixException;
@@ -45,7 +46,6 @@ import org.apache.asterix.om.types.IAType;
 import org.apache.hyracks.algebricks.common.exceptions.AlgebricksException;
 import org.apache.hyracks.algebricks.core.algebra.properties.DefaultNodeGroupDomain;
 import org.apache.hyracks.algebricks.core.algebra.properties.INodeDomain;
-import org.apache.parquet.Strings;
 
 public class MetadataManagerUtil {
 
