@@ -18,7 +18,6 @@
  */
 package org.apache.asterix.app.translator;
 
-import com.google.common.base.Strings;
 import static org.apache.asterix.lang.common.statement.CreateFullTextFilterStatement.FIELD_TYPE_STOPWORDS;
 
 import java.io.File;
@@ -246,6 +245,7 @@ import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
 
 /*

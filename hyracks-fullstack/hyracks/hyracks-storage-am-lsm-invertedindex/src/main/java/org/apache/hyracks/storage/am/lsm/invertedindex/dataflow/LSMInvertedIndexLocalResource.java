@@ -54,7 +54,6 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 public class LSMInvertedIndexLocalResource extends LsmResource {
-    // ToDo: add full-text filter and config here
 
     private static final long serialVersionUID = 1L;
     public static final String TOKEN_TYPE_TRAITS = "tokenTypeTraits";

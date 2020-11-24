@@ -186,13 +186,10 @@ public class MetadataLockUtil implements IMetadataLockUtil {
         lockMgr.acquireDataverseReadLock(locks, dataverseName);
         lockMgr.acquireFullTextConfigWriteLock(locks, dataverseName, fullTextConfigName);
 
-        List<String> fullTextFilterNamesMutable = new ArrayList<>();
-        for (String s : fullTextFilterNames) {
-            fullTextFilterNamesMutable.add(s);
-        }
+        // We should avoid sorting the original list, and the original list is immutable and cannot be sorted anyway
+        List<String> fullTextFilterNamesMutable = new ArrayList<>(fullTextFilterNames);
 
-        // sort the filters to guarantee locks are always fetched in the same order
-        // so that we can avoid dead lock between filters
+        // sort the filters to guarantee locks are always fetched in the same order to avoid dead lock between filters
         Collections.sort(fullTextFilterNamesMutable);
         for (String filterName : fullTextFilterNamesMutable) {
             lockMgr.acquireFullTextFilterReadLock(locks, dataverseName, filterName);

@@ -74,7 +74,7 @@ public class FullTextContainsFunctionEvaluator implements IScalarEvaluator {
     protected IPointable[] outOptions;
     protected int optionArgsLength;
     // By default, we conduct a conjunctive search.
-    protected FullTextContainsFunctionDescriptor.SEARCH_MODE mode = FullTextContainsFunctionDescriptor.SEARCH_MODE.ALL;
+    protected FullTextContainsFunctionDescriptor.SearchMode mode = FullTextContainsFunctionDescriptor.SearchMode.ALL;
 
     // To conduct a full-text search, we convert all strings to the lower case.
     // In addition, since each token does not include the length information (2 bytes) in the beginning,
@@ -352,7 +352,7 @@ public class FullTextContainsFunctionEvaluator implements IScalarEvaluator {
         }
 
         // Based on the search mode option - "any" or "all", set the occurrence threshold of tokens.
-        if (mode == FullTextContainsFunctionDescriptor.SEARCH_MODE.ANY) {
+        if (mode == FullTextContainsFunctionDescriptor.SearchMode.ANY) {
             occurrenceThreshold = 1;
         } else {
             occurrenceThreshold = uniqueQueryTokenCount;
@@ -397,12 +397,12 @@ public class FullTextContainsFunctionEvaluator implements IScalarEvaluator {
                         FullTextContainsFunctionDescriptor.getDisjunctiveFTSearchOptionArray(), argOptions[i + 1],
                         true) == 0) {
                     // ANY
-                    mode = FullTextContainsFunctionDescriptor.SEARCH_MODE.ANY;
+                    mode = FullTextContainsFunctionDescriptor.SearchMode.ANY;
                 } else if (compareStrInByteArrayAndPointable(
                         FullTextContainsFunctionDescriptor.getConjunctiveFTSearchOptionArray(), argOptions[i + 1],
                         true) == 0) {
                     // ALL
-                    mode = FullTextContainsFunctionDescriptor.SEARCH_MODE.ALL;
+                    mode = FullTextContainsFunctionDescriptor.SearchMode.ALL;
                 }
             }
         }

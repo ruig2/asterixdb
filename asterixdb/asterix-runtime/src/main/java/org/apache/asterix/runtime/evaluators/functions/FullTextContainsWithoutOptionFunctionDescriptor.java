@@ -27,13 +27,13 @@ import org.apache.asterix.om.functions.IFunctionTypeInferer;
 import org.apache.asterix.runtime.functions.FunctionTypeInferers;
 import org.apache.hyracks.algebricks.core.algebra.functions.FunctionIdentifier;
 
+// Descriptor for the ftcontains() function.
+//
+// This is different from the full-text config descriptor (FullTextConfigDescriptor)
+// which contains a tokenizer and full-text filter descriptors (AbstractFullTextFilterDescriptor).
 @MissingNullInOutFunction
-public class FullTextContainsWithoutOptionDescriptor extends FullTextContainsFunctionDescriptor {
+public class FullTextContainsWithoutOptionFunctionDescriptor extends FullTextContainsFunctionDescriptor {
     private static final long serialVersionUID = 2L;
-
-    public FullTextContainsWithoutOptionDescriptor() {
-        super();
-    }
 
     @Override
     public FunctionIdentifier getIdentifier() {
@@ -44,7 +44,7 @@ public class FullTextContainsWithoutOptionDescriptor extends FullTextContainsFun
 
         @Override
         public IFunctionDescriptor createFunctionDescriptor() {
-            return new FullTextContainsWithoutOptionDescriptor();
+            return new FullTextContainsWithoutOptionFunctionDescriptor();
         }
 
         @Override

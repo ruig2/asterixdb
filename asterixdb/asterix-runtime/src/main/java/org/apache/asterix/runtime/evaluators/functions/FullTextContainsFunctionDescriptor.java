@@ -40,7 +40,10 @@ import org.apache.hyracks.api.exceptions.HyracksDataException;
 import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextConfigEvaluatorFactory;
 import org.apache.hyracks.util.string.UTF8StringUtil;
 
-// Descriptor for the ftcontains() function
+// Descriptor for the ftcontains() function.
+//
+// This is different from the full-text config descriptor (FullTextConfigDescriptor)
+// which contains a tokenizer and full-text filter descriptors (AbstractFullTextFilterDescriptor).
 @MissingNullInOutFunction
 public class FullTextContainsFunctionDescriptor extends AbstractScalarFunctionDynamicDescriptor {
     private static final long serialVersionUID = 2L;
@@ -51,17 +54,17 @@ public class FullTextContainsFunctionDescriptor extends AbstractScalarFunctionDy
     public static final String SEARCH_MODE_OPTION = "mode";
     private static final byte[] SEARCH_MODE_OPTION_ARRAY = UTF8StringUtil.writeStringToBytes(SEARCH_MODE_OPTION);
     private static final byte[] DISJUNCTIVE_SEARCH_MODE_OPTION_ARRAY =
-            UTF8StringUtil.writeStringToBytes(SEARCH_MODE.ANY.getValue());
+            UTF8StringUtil.writeStringToBytes(SearchMode.ANY.getValue());
     private static final byte[] CONJUNCTIVE_SEARCH_MODE_OPTION_ARRAY =
-            UTF8StringUtil.writeStringToBytes(SEARCH_MODE.ALL.getValue());
+            UTF8StringUtil.writeStringToBytes(SearchMode.ALL.getValue());
 
-    public enum SEARCH_MODE {
+    public enum SearchMode {
         ANY("any"),
         ALL("all");
 
         private String value;
 
-        SEARCH_MODE(String value) {
+        SearchMode(String value) {
             this.value = value;
         }
 
@@ -71,8 +74,6 @@ public class FullTextContainsFunctionDescriptor extends AbstractScalarFunctionDy
     }
 
     public static final String FULLTEXT_CONFIG_OPTION = "config";
-    private static final byte[] FULLTEXT_CONFIG_OPTION_ARRAY =
-            UTF8StringUtil.writeStringToBytes(FULLTEXT_CONFIG_OPTION);
     private IFullTextConfigEvaluatorFactory fullTextConfigEvaluatorFactory;
 
     static {
@@ -130,10 +131,6 @@ public class FullTextContainsFunctionDescriptor extends AbstractScalarFunctionDy
 
     public static byte[] getSearchModeOptionArray() {
         return SEARCH_MODE_OPTION_ARRAY;
-    }
-
-    public static byte[] getFulltextConfigOptionArray() {
-        return FULLTEXT_CONFIG_OPTION_ARRAY;
     }
 
     public static byte[] getDisjunctiveFTSearchOptionArray() {

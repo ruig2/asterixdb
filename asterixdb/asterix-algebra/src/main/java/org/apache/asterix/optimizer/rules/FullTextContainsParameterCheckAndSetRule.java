@@ -175,7 +175,8 @@ public class FullTextContainsParameterCheckAndSetRule implements IAlgebraicRewri
                 String ftConfigName = null;
                 // Checks and transforms the actual full-text parameters.
                 if (numberOfCorrectArguments == FULLTEXT_QUERY_WITH_OPTION_NO_OF_ARGUMENTS) {
-                    ftConfigName = checkValueForThirdParameterAndGetFullTextConfig(oldExprs.get(2), newExprs, functionName);
+                    ftConfigName =
+                            checkValueForThirdParameterAndGetFullTextConfig(oldExprs.get(2), newExprs, functionName);
                 } else {
                     // no option provided case: sets the default option here.
                     setDefaultValueForThirdParameter(newExprs);
@@ -319,8 +320,8 @@ public class FullTextContainsParameterCheckAndSetRule implements IAlgebraicRewri
 
         private void checkSearchModeOption(String optionVal, String functionName, SourceLocation sourceLoc)
                 throws AlgebricksException {
-            if (optionVal.equals(FullTextContainsFunctionDescriptor.SEARCH_MODE.ALL.getValue())
-                    || optionVal.equals(FullTextContainsFunctionDescriptor.SEARCH_MODE.ANY.getValue())) {
+            if (optionVal.equals(FullTextContainsFunctionDescriptor.SearchMode.ALL.getValue())
+                    || optionVal.equals(FullTextContainsFunctionDescriptor.SearchMode.ANY.getValue())) {
                 return;
             } else {
                 throw CompilationException.create(ErrorCode.TYPE_UNSUPPORTED, sourceLoc, functionName, optionVal);
@@ -347,7 +348,7 @@ public class FullTextContainsParameterCheckAndSetRule implements IAlgebraicRewri
             ILogicalExpression searchModeOptionExpr = new ConstantExpression(
                     new AsterixConstantValue(new AString(FullTextContainsFunctionDescriptor.SEARCH_MODE_OPTION)));
             ILogicalExpression searchModeValExpr = new ConstantExpression(new AsterixConstantValue(
-                    new AString(FullTextContainsFunctionDescriptor.SEARCH_MODE.ALL.getValue())));
+                    new AString(FullTextContainsFunctionDescriptor.SearchMode.ALL.getValue())));
             // Add this option as arguments to the ftcontains().
             newArgs.add(new MutableObject<ILogicalExpression>(searchModeOptionExpr));
             newArgs.add(new MutableObject<ILogicalExpression>(searchModeValExpr));

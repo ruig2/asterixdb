@@ -43,6 +43,31 @@ public class FullTextConfigEvaluator implements IFullTextConfigEvaluator {
     private IToken currentToken;
     private IToken nextToken;
 
+    public FullTextConfigEvaluator(String name, TokenizerCategory tokenizerCategory,
+            ImmutableList<IFullTextFilterEvaluator> filters) {
+        this.name = name;
+        this.filters = filters;
+
+        switch (tokenizerCategory) {
+            case WORD:
+                // Currently, the tokenizer will be set later after the analyzer created
+                // This is because the tokenizer logic is complex,
+                // and we are already using a dedicated tokenizer factory to create tokenizer.
+                // One tricky part of tokenizer is that it can be call-site specific, e.g. the string in some call-site
+                // has the ATypeTag.String in the beginning of its byte array, and some doesn't,
+                // so if we only know the category of the tokenizer, e.g. a WORD tokenizer,
+                // we still cannot create a suitable tokenizer here as the tokenizer factory does.
+                //
+                // Finally we should get rid of the dedicated tokenizer factory and put its related logic
+                // in the full-text descriptor and analyzer
+                this.tokenizer = null;
+                break;
+            case NGRAM:
+            default:
+                throw new IllegalArgumentException();
+        }
+    }
+
     @Override
     public IBinaryTokenizer getTokenizer() {
         return tokenizer;
@@ -51,11 +76,6 @@ public class FullTextConfigEvaluator implements IFullTextConfigEvaluator {
     @Override
     public TokenizerCategory getTokenizerCategory() {
         return tokenizer.getTokenizerCategory();
-    }
-
-    @Override
-    public ImmutableList<IFullTextFilterEvaluator> getFilterEvaluators() {
-        return filters;
     }
 
     @Override
@@ -122,28 +142,4 @@ public class FullTextConfigEvaluator implements IFullTextConfigEvaluator {
         return tokenizer.getTokensCount();
     }
 
-    public FullTextConfigEvaluator(String name, TokenizerCategory tokenizerCategory,
-            ImmutableList<IFullTextFilterEvaluator> filters) {
-        this.name = name;
-        this.filters = filters;
-
-        switch (tokenizerCategory) {
-            case WORD:
-                // Currently, the tokenizer will be set later after the analyzer created
-                // This is because the tokenizer logic is complex,
-                // and we are already using a dedicated tokenizer factory to create tokenizer.
-                // One tricky part of tokenizer is that it can be call-site specific, e.g. the string in some call-site
-                // has the ATypeTag.String in the beginning of its byte array, and some doesn't,
-                // so if we only know the category of the tokenizer, e.g. a WORD tokenizer,
-                // we still cannot create a suitable tokenizer here as the tokenizer factory does.
-                //
-                // Finally we should get rid of the dedicated tokenizer factory and put its related logic
-                // in the full-text descriptor and analyzer
-                this.tokenizer = null;
-                break;
-            case NGRAM:
-            default:
-                throw new IllegalArgumentException();
-        }
-    }
 }

@@ -43,6 +43,7 @@ import org.apache.asterix.metadata.entities.NodeGroup;
 import org.apache.asterix.metadata.utils.MetadataUtil;
 import org.apache.asterix.runtime.fulltext.AbstractFullTextFilterDescriptor;
 import org.apache.asterix.runtime.fulltext.FullTextConfigDescriptor;
+import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.FullTextFilterType;
 import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextFilterEvaluator;
 
 /**
@@ -189,6 +190,11 @@ public class MetadataTransactionContext extends MetadataCache {
 
     public void dropFullTextFilter(DataverseName dataverseName, String filterName) {
         AbstractFullTextFilterDescriptor filter = new AbstractFullTextFilterDescriptor(dataverseName, filterName) {
+            @Override
+            public FullTextFilterType getFilterType() {
+                return null;
+            }
+
             @Override
             public IFullTextFilterEvaluator createEvaluator() {
                 return null;

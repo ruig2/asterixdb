@@ -20,7 +20,6 @@ package org.apache.asterix.lang.common.util;
 
 import static org.apache.asterix.lang.common.statement.CreateFullTextConfigStatement.FIELD_NAME_FILTER_PIPELINE;
 import static org.apache.asterix.lang.common.statement.CreateFullTextConfigStatement.FIELD_NAME_TOKENIZER;
-import static org.apache.asterix.lang.common.statement.CreateFullTextFilterStatement.FIELD_NAME_TYPE;
 
 import org.apache.asterix.common.exceptions.CompilationException;
 import org.apache.asterix.lang.common.expression.RecordConstructor;
