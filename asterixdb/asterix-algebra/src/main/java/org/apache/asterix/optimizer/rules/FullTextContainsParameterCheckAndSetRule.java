@@ -102,7 +102,6 @@ public class FullTextContainsParameterCheckAndSetRule implements IAlgebraicRewri
         private static final int FULLTEXT_QUERY_WITH_OPTION_NO_OF_ARGUMENTS = 3;
 
         private IOptimizationContext context;
-        String ftConfigName;
 
         public FullTextContainsExpressionVisitor() {
         }
@@ -171,9 +170,12 @@ public class FullTextContainsParameterCheckAndSetRule implements IAlgebraicRewri
                 // Sanity check for the types of the first two parameters
                 checkFirstAndSecondParamter(oldExprs, functionName);
 
+                // We cannot make ftConfigName a class-level variable in the visitor class
+                // because the visitor may be shared between multiple threads and such a variable may be corrupted
+                String ftConfigName = null;
                 // Checks and transforms the actual full-text parameters.
                 if (numberOfCorrectArguments == FULLTEXT_QUERY_WITH_OPTION_NO_OF_ARGUMENTS) {
-                    checkAndGetFullTextConfigForThirdParameter(oldExprs.get(2), newExprs, functionName);
+                    ftConfigName = checkValueForThirdParameterAndGetFullTextConfig(oldExprs.get(2), newExprs, functionName);
                 } else {
                     // no option provided case: sets the default option here.
                     setDefaultValueForThirdParameter(newExprs);
@@ -228,9 +230,14 @@ public class FullTextContainsParameterCheckAndSetRule implements IAlgebraicRewri
          *
          * @param expr
          * @throws AlgebricksException
+         *
+         * @return the full-text config name if specified in the function option,
+         * null if not specified which implies the default full-text config will be utilized later
          */
-        private void checkAndGetFullTextConfigForThirdParameter(Mutable<ILogicalExpression> expr,
+        private String checkValueForThirdParameterAndGetFullTextConfig(Mutable<ILogicalExpression> expr,
                 List<Mutable<ILogicalExpression>> newArgs, String functionName) throws AlgebricksException {
+            String ftConfigName = null;
+
             // Get the last parameter - this should be a record-constructor.
             AbstractFunctionCallExpression openRecConsExpr = (AbstractFunctionCallExpression) expr.getValue();
             FunctionIdentifier openRecConsFi = openRecConsExpr.getFunctionIdentifier();
@@ -307,6 +314,7 @@ public class FullTextContainsParameterCheckAndSetRule implements IAlgebraicRewri
                 newArgs.add(new MutableObject<ILogicalExpression>(optionExpr));
                 newArgs.add(new MutableObject<ILogicalExpression>(optionExprVal));
             }
+            return ftConfigName;
         }
 
         private void checkSearchModeOption(String optionVal, String functionName, SourceLocation sourceLoc)
