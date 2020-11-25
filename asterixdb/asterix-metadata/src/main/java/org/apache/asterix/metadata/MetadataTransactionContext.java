@@ -44,7 +44,7 @@ import org.apache.asterix.metadata.utils.MetadataUtil;
 import org.apache.asterix.runtime.fulltext.AbstractFullTextFilterDescriptor;
 import org.apache.asterix.runtime.fulltext.FullTextConfigDescriptor;
 import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.FullTextFilterType;
-import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextFilterEvaluator;
+import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextFilterEvaluatorFactory;
 
 /**
  * Used to implement serializable transactions against the MetadataCache.
@@ -196,7 +196,7 @@ public class MetadataTransactionContext extends MetadataCache {
             }
 
             @Override
-            public IFullTextFilterEvaluator createEvaluator() {
+            public IFullTextFilterEvaluatorFactory createEvaluatorFactory() {
                 return null;
             }
         };

@@ -19,12 +19,15 @@
 
 package org.apache.hyracks.storage.am.lsm.invertedindex.fulltext;
 
-import org.apache.hyracks.storage.am.lsm.invertedindex.tokenizers.IToken;
-import org.apache.hyracks.storage.am.lsm.invertedindex.tokenizers.TokenizerInfo;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
-// Full-text filter evaluator that process tokens
-// Such an evaluator is created via IFullTextFilterEvaluatorFactory,
-// and the run-time evaluator factory is created from IFullTextFilterDescriptor which is a compile-time concept.
-public interface IFullTextFilterEvaluator {
-    IToken processToken(TokenizerInfo.TokenizerType tokenizerType, IToken token);
+public abstract class AbstractFullTextFilterEvaluatorFactory implements IFullTextFilterEvaluatorFactory {
+    protected final String name;
+    protected final FullTextFilterType type;
+    protected static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+
+    protected AbstractFullTextFilterEvaluatorFactory(String name, FullTextFilterType type) {
+        this.name = name;
+        this.type = type;
+    }
 }

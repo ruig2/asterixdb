@@ -34,10 +34,10 @@ public class FullTextConfigEvaluatorFactory implements IFullTextConfigEvaluatorF
 
     private final String name;
     private final TokenizerCategory tokenizerCategory;
-    private final ImmutableList<IFullTextFilterEvaluator> filters;
+    private final ImmutableList<IFullTextFilterEvaluatorFactory> filters;
 
     public FullTextConfigEvaluatorFactory(String name, TokenizerCategory tokenizerCategory,
-            ImmutableList<IFullTextFilterEvaluator> filters) {
+            ImmutableList<IFullTextFilterEvaluatorFactory> filters) {
         this.name = name;
         this.tokenizerCategory = tokenizerCategory;
         this.filters = filters;
@@ -45,7 +45,11 @@ public class FullTextConfigEvaluatorFactory implements IFullTextConfigEvaluatorF
 
     @Override
     public IFullTextConfigEvaluator createFullTextConfigEvaluator() {
-        return new FullTextConfigEvaluator(name, tokenizerCategory, filters);
+        ImmutableList.Builder<IFullTextFilterEvaluator> filterEvaluatorsBuilder = ImmutableList.builder();
+        for (IFullTextFilterEvaluatorFactory factory : filters) {
+            filterEvaluatorsBuilder.add(factory.createFullTextFilterEvaluator());
+        }
+        return new FullTextConfigEvaluator(name, tokenizerCategory, filterEvaluatorsBuilder.build());
     }
 
     public static IFullTextConfigEvaluatorFactory getDefaultFactory() {
@@ -65,7 +69,7 @@ public class FullTextConfigEvaluatorFactory implements IFullTextConfigEvaluatorF
         json.put(FIELD_TOKENIZER_CATEGORY, tokenizerCategory.toString());
 
         final ArrayNode filterArray = OBJECT_MAPPER.createArrayNode();
-        for (IFullTextFilterEvaluator filter : filters) {
+        for (IFullTextFilterEvaluatorFactory filter : filters) {
             filterArray.add(filter.toJson(registry));
         }
         json.set(FIELD_FILTERS, filterArray);
@@ -80,9 +84,9 @@ public class FullTextConfigEvaluatorFactory implements IFullTextConfigEvaluatorF
         TokenizerCategory tc = TokenizerCategory.getEnumIgnoreCase(tokenizerCategoryStr);
 
         ArrayNode filtersJsonNode = (ArrayNode) json.get(FIELD_FILTERS);
-        ImmutableList.Builder<IFullTextFilterEvaluator> filtersBuilder = ImmutableList.builder();
+        ImmutableList.Builder<IFullTextFilterEvaluatorFactory> filtersBuilder = ImmutableList.builder();
         for (int i = 0; i < filtersJsonNode.size(); i++) {
-            filtersBuilder.add((IFullTextFilterEvaluator) registry.deserialize(filtersJsonNode.get(i)));
+            filtersBuilder.add((IFullTextFilterEvaluatorFactory) registry.deserialize(filtersJsonNode.get(i)));
         }
         return new FullTextConfigEvaluatorFactory(name, tc, filtersBuilder.build());
     }

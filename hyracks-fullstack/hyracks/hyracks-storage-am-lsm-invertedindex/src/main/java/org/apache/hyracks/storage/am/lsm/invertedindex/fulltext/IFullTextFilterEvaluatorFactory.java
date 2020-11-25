@@ -19,12 +19,17 @@
 
 package org.apache.hyracks.storage.am.lsm.invertedindex.fulltext;
 
-import org.apache.hyracks.storage.am.lsm.invertedindex.tokenizers.IToken;
-import org.apache.hyracks.storage.am.lsm.invertedindex.tokenizers.TokenizerInfo;
+import java.io.Serializable;
 
-// Full-text filter evaluator that process tokens
-// Such an evaluator is created via IFullTextFilterEvaluatorFactory,
-// and the run-time evaluator factory is created from IFullTextFilterDescriptor which is a compile-time concept.
-public interface IFullTextFilterEvaluator {
-    IToken processToken(TokenizerInfo.TokenizerType tokenizerType, IToken token);
+import org.apache.hyracks.api.io.IJsonSerializable;
+
+// This full-text filter evaluator factory would to be stored in the index local resource,
+// so it needs to be IJsonSerializable.
+// Also, it would to be distributed from CC (compile-time) to NC (run-time), so it needs to be Serializable.
+//
+// Such a IFullTextFilterEvaluatorFactory should always be wrapped in a IFullTextConfigEvaluatorFactory
+// because filter cannot live without a config: a full-text config is responsible to tokenize strings
+// and then feed the tokens into the filters.
+public interface IFullTextFilterEvaluatorFactory extends IJsonSerializable, Serializable {
+    IFullTextFilterEvaluator createFullTextFilterEvaluator();
 }

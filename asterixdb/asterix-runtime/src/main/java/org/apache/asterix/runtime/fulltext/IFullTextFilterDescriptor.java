@@ -22,12 +22,19 @@ package org.apache.asterix.runtime.fulltext;
 import java.io.Serializable;
 
 import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.FullTextFilterType;
-import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextFilterEvaluator;
+import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextFilterEvaluatorFactory;
 
+// Full-text filter descriptor that contains all the necessary information in the compile-time.
+// After compilation, a filter evaluator factory will be created at run-time,
+// and then a filter evaluator will be produced by the evaluator factory to process tokens after tokenization.
+//
+// Note that the filter concepts (descriptor, evaluator factory and evaluator)
+// are wrapped in the full-text config concepts accordingly.
+// The design of the filter is never to be called directly but via the full-text config.
 public interface IFullTextFilterDescriptor extends Serializable {
     String getName();
 
     FullTextFilterType getFilterType();
 
-    IFullTextFilterEvaluator createEvaluator();
+    IFullTextFilterEvaluatorFactory createEvaluatorFactory();
 }

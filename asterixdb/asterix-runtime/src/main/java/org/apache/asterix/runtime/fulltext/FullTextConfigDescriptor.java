@@ -22,7 +22,7 @@ package org.apache.asterix.runtime.fulltext;
 import org.apache.asterix.common.metadata.DataverseName;
 import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.FullTextConfigEvaluatorFactory;
 import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextConfigEvaluatorFactory;
-import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextFilterEvaluator;
+import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextFilterEvaluatorFactory;
 import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.TokenizerCategory;
 
 import com.google.common.collect.ImmutableList;
@@ -74,9 +74,9 @@ public class FullTextConfigDescriptor implements IFullTextConfigDescriptor {
     @Override
     public IFullTextConfigEvaluatorFactory createEvaluatorFactory(
             ImmutableList<AbstractFullTextFilterDescriptor> filterDescriptors) {
-        ImmutableList.Builder<IFullTextFilterEvaluator> filtersBuilder = new ImmutableList.Builder<>();
+        ImmutableList.Builder<IFullTextFilterEvaluatorFactory> filtersBuilder = new ImmutableList.Builder<>();
         for (IFullTextFilterDescriptor filterDescriptor : filterDescriptors) {
-            filtersBuilder.add(filterDescriptor.createEvaluator());
+            filtersBuilder.add(filterDescriptor.createEvaluatorFactory());
         }
 
         return new FullTextConfigEvaluatorFactory(name, tokenizerCategory, filtersBuilder.build());

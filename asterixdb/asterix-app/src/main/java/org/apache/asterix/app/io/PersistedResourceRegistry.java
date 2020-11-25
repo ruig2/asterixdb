@@ -112,7 +112,7 @@ import org.apache.hyracks.storage.am.lsm.common.impls.NoOpIOOperationCallbackFac
 import org.apache.hyracks.storage.am.lsm.common.impls.PrefixMergePolicyFactory;
 import org.apache.hyracks.storage.am.lsm.invertedindex.dataflow.LSMInvertedIndexLocalResource;
 import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.FullTextConfigEvaluatorFactory;
-import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.StopwordsFullTextFilterEvaluator;
+import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.StopwordsFullTextFilterEvaluatorFactory;
 import org.apache.hyracks.storage.am.lsm.invertedindex.tokenizers.DelimitedUTF8StringBinaryTokenizerFactory;
 import org.apache.hyracks.storage.am.lsm.invertedindex.tokenizers.HashedUTF8NGramTokenFactory;
 import org.apache.hyracks.storage.am.lsm.invertedindex.tokenizers.HashedUTF8WordTokenFactory;
@@ -277,7 +277,7 @@ public class PersistedResourceRegistry implements IPersistedResourceRegistry {
 
         // IFullTextConfigFactory
         registeredClasses.put("FullTextConfigEvaluatorFactory", FullTextConfigEvaluatorFactory.class);
-        registeredClasses.put("StopwordsFullTextFilterEvaluator", StopwordsFullTextFilterEvaluator.class);
+        registeredClasses.put("StopwordsFullTextFilterEvaluatorFactory", StopwordsFullTextFilterEvaluatorFactory.class);
 
         // ITokenFactory
         registeredClasses.put("AListElementTokenFactory", AListElementTokenFactory.class);

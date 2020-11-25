@@ -30,12 +30,10 @@ public abstract class AbstractFullTextFilterEvaluator implements IFullTextFilter
         this.type = type;
     }
 
-    @Override
     public String getName() {
         return name;
     }
 
-    @Override
     public FullTextFilterType getFilterType() {
         return type;
     }

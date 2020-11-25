@@ -23,8 +23,8 @@ import java.util.List;
 
 import org.apache.asterix.common.metadata.DataverseName;
 import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.FullTextFilterType;
-import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextFilterEvaluator;
-import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.StopwordsFullTextFilterEvaluator;
+import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.IFullTextFilterEvaluatorFactory;
+import org.apache.hyracks.storage.am.lsm.invertedindex.fulltext.StopwordsFullTextFilterEvaluatorFactory;
 
 import com.google.common.collect.ImmutableList;
 
@@ -49,7 +49,7 @@ public class StopwordsFullTextFilterDescriptor extends AbstractFullTextFilterDes
     }
 
     @Override
-    public IFullTextFilterEvaluator createEvaluator() {
-        return new StopwordsFullTextFilterEvaluator(name, stopwordList);
+    public IFullTextFilterEvaluatorFactory createEvaluatorFactory() {
+        return new StopwordsFullTextFilterEvaluatorFactory(name, stopwordList);
     }
 }
