@@ -19,6 +19,9 @@
 
 package org.apache.hyracks.storage.am.lsm.invertedindex.fulltext;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.List;
 
 import org.apache.hyracks.storage.am.lsm.invertedindex.tokenizers.IToken;
@@ -42,6 +45,13 @@ public class StopwordsFullTextFilterEvaluator extends AbstractFullTextFilterEval
 
     @Override
     public IToken processToken(TokenizerInfo.TokenizerType tokenizerType, IToken token) {
+        try {
+            String path = "/Users/ray/code/asterix/asterixdb/asterix-app/target/io/dir/asterix_nc2/target/tmp/asterix_nc2/iodevice1/applications/library/storage/udfs/stopwords-lib/rev_1/contents/stopwords_letter.txt";
+            Files.lines(Paths.get(path)).forEach(keyword -> System.out.println(keyword));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
         int start = token.getStartOffset();
         int length = token.getTokenLength();
 
