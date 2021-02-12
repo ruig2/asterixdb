@@ -78,11 +78,12 @@ public class UnionAllOperator extends AbstractLogicalOperator {
     @Override
     public void recomputeSchema() {
         // Assume input schemas are
-        // input0 = [a,b,c]
-        // input1 = [d,e,f,g,h]
+        // input0 (variables in the operator of inputs.get(0)) = [a,b,c]
+        // input1 (variables in the operator of inputs.get(1))= [d,e,f,g,h]
         // and
-        // UNION ALL mapping is
-        // [a,d -> X], [c,f -> Y]
+        // UNION ALL mapping (i.e. the two triples in the varMap) is
+        // [a,d -> X],
+        // [c,f -> Y]
         //
         // In order to compute the output schema we need to pick a larger input
         // out of these two and replace variables there using UNION ALL mappings.
