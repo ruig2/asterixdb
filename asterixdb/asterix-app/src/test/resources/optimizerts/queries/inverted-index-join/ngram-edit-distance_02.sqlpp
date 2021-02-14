@@ -22,41 +22,68 @@
  * Success        : Yes
  */
 
-drop dataverse test if exists;
-create dataverse test;
+drop  dataverse test if exists;
+create  dataverse test;
 
 use test;
 
-create type test.AType as
- closed {
-  id : integer,
-  text : string
+create type test.TwitterUserType as
+    closed {
+  `screen-name` : string,
+  lang : string,
+  `friends-count` : bigint,
+  `statuses-count` : bigint,
+  name : string,
+  `followers-count` : bigint
 };
 
-create type test.BType as
- closed {
-  id : integer,
-  text : string
+create type test.TweetMessageType as
+    closed {
+  tweetid : bigint,
+  user : TwitterUserType,
+  `sender-location` : point,
+  `send-time` : datetime,
+  `referred-topics` : {{string}},
+  `message-text` : string,
+  countA : bigint,
+  countB : bigint
 };
 
-create dataset ASet(AType) primary key id;
+create  dataset TweetMessages(TweetMessageType) primary key tweetid;
 
-create  dataset BSet(BType) primary key id;
+create  index twmSndLocIx  on TweetMessages (`sender-location`) type rtree;
 
-create index ngram_index  on BSet (text) type ngram (3);
+create  index msgCountAIx  on TweetMessages (countA) type btree;
 
-INSERT INTO ASet
-    ([
-    {"id": 123, "text":"text a"}
-    ]);
+create  index msgCountBIx  on TweetMessages (countB) type btree;
 
-INSERT INTO BSet
-    ([
-    {"id": 456, "text":"text b"}
-    ]);
+create  index msgKeywordIx  on TweetMessages (`message-text`) type keyword;
 
-select element {'a text':a,'b text':b}
-from  ASet as a,
-      BSet as b
-where ((test.`edit-distance`(a.text, b.text) < 10) and (a.id < b.id))
+create  index msgNgramIx  on TweetMessages (`message-text`) type ngram (3);
+
+create  index topicKeywordIx  on TweetMessages (`referred-topics`) type keyword;
+
+
+
+use test;
+
+
+load  dataset TweetMessages using localfs ((`path`=`asterix_nc1:///Users/ray/code/asterix/asterixdb/asterix-app/data/twitter/tw_for_indexleftouterjoin.adm`),(`format`=`adm`));
+
+
+
+use test;
+
+
+
+select element {'tweet':{'id':t1.tweetid,'topics':t1.`message-text`},'similar-tweets':(
+        select element {'id':t2.tweetid,'topics':t2.`message-text`}
+        from  TweetMessages as t2
+        with  sim as test.`edit-distance-check`(t1.`message-text`,t2.`message-text`,7)
+        where (sim[0] and (t2.tweetid != t1.tweetid))
+        order by t2.tweetid
+    )}
+from  TweetMessages as t1
+where (t1.tweetid > test.bigint('240'))
+order by t1.tweetid
 ;
