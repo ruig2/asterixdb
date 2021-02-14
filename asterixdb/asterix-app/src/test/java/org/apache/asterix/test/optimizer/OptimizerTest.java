@@ -83,7 +83,8 @@ public class OptimizerTest {
     protected static final String PATH_ACTUAL = "target" + File.separator + "opttest" + SEPARATOR;
 
     private static final ArrayList<String> ignore = AsterixTestHelper.readTestListFile(FILENAME_IGNORE, PATH_BASE);
-    private static final ArrayList<String> only = AsterixTestHelper.readTestListFile(FILENAME_ONLY, PATH_BASE);
+    //private static final ArrayList<String> only = AsterixTestHelper.readTestListFile(FILENAME_ONLY, PATH_BASE);
+    private static final ArrayList<String> only = new ArrayList<String>( Arrays.asList("inverted-index-join/ngram-edit-distance_02.sqlpp"));
     protected static final String TEST_CONFIG_FILE_NAME = "src/main/resources/cc.conf";
     private static final ILangCompilationProvider sqlppCompilationProvider = new SqlppCompilationProvider();
     protected static ILangCompilationProvider extensionLangCompilationProvider = null;

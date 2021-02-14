@@ -22,39 +22,41 @@
  * Success        : Yes
  */
 
-drop  dataverse test if exists;
-create  dataverse test;
+drop dataverse test if exists;
+create dataverse test;
 
 use test;
 
-
-create type test.DBLPType as
+create type test.AType as
  closed {
   id : integer,
-  dblpid : string,
-  title : string,
-  authors : string,
-  misc : string
+  text : string
 };
 
-create type test.CSXType as
+create type test.BType as
  closed {
   id : integer,
-  csxid : string,
-  title : string,
-  authors : string,
-  misc : string
+  text : string
 };
 
-create  dataset DBLP(DBLPType) primary key id;
+create dataset ASet(AType) primary key id;
 
-create  dataset CSX(CSXType) primary key id;
+create  dataset BSet(BType) primary key id;
 
-create  index ngram_index  on CSX (authors) type ngram (3);
+create index ngram_index  on BSet (text) type ngram (3);
 
-write output to asterix_nc1:"rttest/inverted-index-join_ngram-edit-distance_02.adm";
-select element {'arec':a,'brec':b}
-from  DBLP as a,
-      CSX as b
-where ((test.`edit-distance`(a.authors,b.authors) < 3) and (a.id < b.id))
+INSERT INTO ASet
+    ([
+    {"id": 123, "text":"text a"}
+    ]);
+
+INSERT INTO BSet
+    ([
+    {"id": 456, "text":"text b"}
+    ]);
+
+select element {'a text':a,'b text':b}
+from  ASet as a,
+      BSet as b
+where ((test.`edit-distance`(a.text, b.text) < 10) and (a.id < b.id))
 ;
