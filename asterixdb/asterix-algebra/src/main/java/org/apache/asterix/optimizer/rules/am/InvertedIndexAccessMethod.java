@@ -607,8 +607,6 @@ public class InvertedIndexAccessMethod implements IAccessMethod {
             unionAllOp.setSourceLocation(topOp.getSourceLocation());
             unionAllOp.getInputs().add(new MutableObject<ILogicalOperator>(topOp));
             unionAllOp.getInputs().add(panicJoinRef);
-            unionAllOp.setExecutionMode(ExecutionMode.PARTITIONED);
-            context.computeAndSetTypeEnvironmentForOperator(unionAllOp);
 
             Pair<ILogicalOperator, Map<LogicalVariable, LogicalVariable>> newUnionAllOperatorPair =
                     OperatorManipulationUtil.deepCopyWithNewVars(unionAllOp, context);
@@ -619,6 +617,8 @@ public class InvertedIndexAccessMethod implements IAccessMethod {
                 newVarMap.get(i).third = oldVarMap.get(i).third;
             }
 
+            newUnionAllOp.setExecutionMode(ExecutionMode.PARTITIONED);
+            context.computeAndSetTypeEnvironmentForOperator(newUnionAllOp);
             topOp = newUnionAllOp;
         }
 
@@ -627,7 +627,6 @@ public class InvertedIndexAccessMethod implements IAccessMethod {
         // This choice may not always be the most efficient, but it seems more robust than the alternative.
         Mutable<ILogicalExpression> eqJoinConditionRef =
                 createPrimaryKeysEqJoinCondition(originalProbeSubTreePKs, surrogateProbeSubTreePKs, topOp.getSourceLocation());
-
         InnerJoinOperator topEqJoin = new InnerJoinOperator(eqJoinConditionRef, copiedProbeSubTreeRootRef,
                 new MutableObject<ILogicalOperator>(topOp));
         topEqJoin.setSourceLocation(topOp.getSourceLocation());
