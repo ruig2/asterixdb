@@ -42,6 +42,6 @@ FROM Partsupp ps,
     ) sn
 WHERE ps.ps_suppkey = sn.s_suppkey
 GROUP BY ps.ps_partkey
-HAVING part_value > sum * 0.0001000
-ORDER BY part_value DESC
+HAVING SUM(ps.ps_supplycost * ps.ps_availqty) > sum * 0.0001000
+ORDER BY SUM(ps.ps_supplycost * ps.ps_availqty) DESC
 ;
