@@ -20,22 +20,21 @@ package org.apache.hyracks.api.dataflow;
 
 import java.nio.ByteBuffer;
 
+import org.apache.hyracks.api.com.job.profiling.counters.TimeCounter;
 import org.apache.hyracks.api.comm.IFrameWriter;
 import org.apache.hyracks.api.context.IHyracksTaskContext;
 import org.apache.hyracks.api.exceptions.HyracksDataException;
 import org.apache.hyracks.api.job.profiling.IStatsCollector;
-import org.apache.hyracks.api.job.profiling.counters.ICounter;
 
-public class TimedFrameWriter implements IFrameWriter, IPassableTimer {
+public class TimedFrameWriter implements IFrameWriter {
 
     // The downstream data consumer of this writer.
     private final IFrameWriter writer;
-    private long frameStart = 0;
-    final ICounter counter;
+    final TimeCounter counter;
     final IStatsCollector collector;
     final String name;
 
-    public TimedFrameWriter(IFrameWriter writer, IStatsCollector collector, String name, ICounter counter) {
+    public TimedFrameWriter(IFrameWriter writer, IStatsCollector collector, String name, TimeCounter counter) {
         this.writer = writer;
         this.collector = collector;
         this.name = name;
@@ -49,6 +48,7 @@ public class TimedFrameWriter implements IFrameWriter, IPassableTimer {
     @Override
     public final void open() throws HyracksDataException {
         try {
+            counter.setOpenTimeIfNotSet(System.nanoTime());
             startClock();
             writer.open();
         } finally {
@@ -60,9 +60,11 @@ public class TimedFrameWriter implements IFrameWriter, IPassableTimer {
     public final void nextFrame(ByteBuffer buffer) throws HyracksDataException {
         try {
             startClock();
+            counter.setFirstFrameTimeIfNotSet(System.nanoTime());
             writer.nextFrame(buffer);
         } finally {
             stopClock();
+            counter.setLastFrameTimeIfLater(System.nanoTime());
         }
     }
 
@@ -87,39 +89,22 @@ public class TimedFrameWriter implements IFrameWriter, IPassableTimer {
             startClock();
             writer.close();
         } finally {
+            counter.setCloseTimeIfLater(System.nanoTime());
             stopClock();
         }
     }
 
-    private void stopClock() {
-        pause();
-        collector.giveClock(this);
+    protected void stopClock() {
+        counter.pause();
+        collector.giveClock(counter);
     }
 
-    private void startClock() {
-        if (frameStart > 0) {
+    protected void startClock() {
+        if (counter.isCounting()) {
             return;
         }
-        frameStart = collector.takeClock(this);
-    }
-
-    @Override
-    public void resume() {
-        if (frameStart > 0) {
-            return;
-        }
-        long nt = System.nanoTime();
-        frameStart = nt;
-    }
-
-    @Override
-    public void pause() {
-        if (frameStart > 1) {
-            long nt = System.nanoTime();
-            long delta = nt - frameStart;
-            counter.update(delta);
-            frameStart = -1;
-        }
+        counter.resume();
+        collector.takeClock(counter);
     }
 
     public static IFrameWriter time(IFrameWriter writer, IHyracksTaskContext ctx, String name)

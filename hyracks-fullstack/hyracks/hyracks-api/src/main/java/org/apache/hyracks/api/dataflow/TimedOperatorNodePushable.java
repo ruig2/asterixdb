@@ -27,7 +27,7 @@ import org.apache.hyracks.api.exceptions.HyracksDataException;
 import org.apache.hyracks.api.job.profiling.IStatsCollector;
 import org.apache.hyracks.api.rewriter.runtime.SuperActivityOperatorNodePushable;
 
-public class TimedOperatorNodePushable extends TimedFrameWriter implements IOperatorNodePushable, IPassableTimer {
+public class TimedOperatorNodePushable extends TimedFrameWriter implements IOperatorNodePushable {
 
     IOperatorNodePushable op;
     HashMap<Integer, IFrameWriter> inputs;
@@ -80,37 +80,6 @@ public class TimedOperatorNodePushable extends TimedFrameWriter implements IOper
     @Override
     public String getDisplayName() {
         return op.getDisplayName();
-    }
-
-    private void stopClock() {
-        pause();
-        collector.giveClock(this);
-    }
-
-    private void startClock() {
-        if (frameStart > 0) {
-            return;
-        }
-        frameStart = collector.takeClock(this);
-    }
-
-    @Override
-    public void resume() {
-        if (frameStart > 0) {
-            return;
-        }
-        long nt = System.nanoTime();
-        frameStart = nt;
-    }
-
-    @Override
-    public void pause() {
-        if (frameStart > 0) {
-            long nt = System.nanoTime();
-            long delta = nt - frameStart;
-            counter.update(delta);
-            frameStart = -1;
-        }
     }
 
     public static IOperatorNodePushable time(IOperatorNodePushable op, IHyracksTaskContext ctx)

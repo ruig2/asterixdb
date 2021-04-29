@@ -23,6 +23,7 @@ import java.io.DataOutput;
 import java.io.IOException;
 
 import org.apache.hyracks.api.com.job.profiling.counters.Counter;
+import org.apache.hyracks.api.com.job.profiling.counters.TimeCounter;
 import org.apache.hyracks.api.job.profiling.counters.ICounter;
 
 public class OperatorStats implements IOperatorStats {
@@ -30,8 +31,8 @@ public class OperatorStats implements IOperatorStats {
 
     public final String operatorName;
     public final ICounter tupleCounter;
-    public final ICounter timeCounter;
     public final ICounter diskIoCounter;
+    public final TimeCounter timeCounter;
 
     public OperatorStats(String operatorName) {
         if (operatorName == null || operatorName.isEmpty()) {
@@ -39,8 +40,8 @@ public class OperatorStats implements IOperatorStats {
         }
         this.operatorName = operatorName;
         tupleCounter = new Counter("tupleCounter");
-        timeCounter = new Counter("timeCounter");
         diskIoCounter = new Counter("diskIoCounter");
+        timeCounter = new TimeCounter("timeCounter");
     }
 
     public static IOperatorStats create(DataInput input) throws IOException {
@@ -61,7 +62,7 @@ public class OperatorStats implements IOperatorStats {
     }
 
     @Override
-    public ICounter getTimeCounter() {
+    public TimeCounter getTimeCounter() {
         return timeCounter;
     }
 
@@ -74,15 +75,23 @@ public class OperatorStats implements IOperatorStats {
     public void writeFields(DataOutput output) throws IOException {
         output.writeUTF(operatorName);
         output.writeLong(tupleCounter.get());
-        output.writeLong(timeCounter.get());
         output.writeLong(diskIoCounter.get());
+        output.writeLong(timeCounter.get());
+        output.writeLong(timeCounter.getFrameWriterOpenTime());
+        output.writeLong(timeCounter.getFrameWriterFirstFrameTime());
+        output.writeLong(timeCounter.getFrameWriterLastFrameTime());
+        output.writeLong(timeCounter.getFrameWriterCloseTime());
     }
 
     @Override
     public void readFields(DataInput input) throws IOException {
         tupleCounter.set(input.readLong());
-        timeCounter.set(input.readLong());
         diskIoCounter.set(input.readLong());
+        timeCounter.set(input.readLong());
+        timeCounter.setOpenTimeIfNotSet(input.readLong());
+        timeCounter.setFirstFrameTimeIfNotSet(input.readLong());
+        timeCounter.setLastFrameTimeIfLater(input.readLong());
+        timeCounter.setCloseTimeIfLater(input.readLong());
     }
 
     @Override

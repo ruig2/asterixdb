@@ -67,8 +67,9 @@ public class TaskProfile extends AbstractProfile {
 
     }
 
-    public TaskProfile(TaskAttemptId taskAttemptId, String blocker, String connectorOutputClusterActivityId, Map<PartitionId, PartitionProfile> partitionSendProfile,
-            IStatsCollector statsCollector, Set<Warning> warnings, long totalWarningsCount) {
+    public TaskProfile(TaskAttemptId taskAttemptId, String blocker, String connectorOutputClusterActivityId,
+            Map<PartitionId, PartitionProfile> partitionSendProfile, IStatsCollector statsCollector,
+            Set<Warning> warnings, long totalWarningsCount) {
         this.taskAttemptId = taskAttemptId;
         this.blocker = blocker;
         this.connectorOutputClusterActivityId = connectorOutputClusterActivityId;
@@ -140,10 +141,14 @@ public class TaskProfile extends AbstractProfile {
             //jpe.put("start-time-stamp", yyy);
             //jpe.put("end-time-stamp", zzz);
             // the time counter unit is nano second, here we convert it to milli second
-            jpe.put("time", Double
-                    .parseDouble(new DecimalFormat("#.####").format((double) value.getTimeCounter().get() / 1000000)));
             jpe.put("disk-io", value.getDiskIoCounter().get());
             jpe.put("tuple-count", value.getTupleCounter().get());
+            jpe.put("time", Double
+                    .parseDouble(new DecimalFormat("#.####").format((double) value.getTimeCounter().get() / 1000000)));
+            jpe.put("time-open", value.getTimeCounter().getFrameWriterOpenTime());
+            jpe.put("time-first-frame", value.getTimeCounter().getFrameWriterFirstFrameTime());
+            jpe.put("time-last-frame", value.getTimeCounter().getFrameWriterLastFrameTime());
+            jpe.put("time-close", value.getTimeCounter().getFrameWriterCloseTime());
             countersObj.add(jpe);
         });
         json.set("counters", countersObj);
