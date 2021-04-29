@@ -392,14 +392,7 @@ public abstract class IndexSearchOperatorNodePushable extends AbstractUnaryInput
 
     @Override
     public String getDisplayName() {
-        String indexPath = "";
-        try {
-            indexPath = indexHelper.getResource().getPath().toString();
-        } catch (Exception e) {
-
-        }
-
-        return "Index Search:" + indexPath;
+        return "Index Search";
     }
 
 }

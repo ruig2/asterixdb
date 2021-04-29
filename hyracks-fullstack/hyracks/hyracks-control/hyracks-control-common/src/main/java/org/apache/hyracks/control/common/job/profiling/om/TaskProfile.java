@@ -45,10 +45,6 @@ public class TaskProfile extends AbstractProfile {
 
     private TaskAttemptId taskAttemptId;
 
-    private String blocker;
-
-    private String connectorOutputClusterActivityId;
-
     private Map<PartitionId, PartitionProfile> partitionSendProfile;
 
     private IStatsCollector statsCollector;
@@ -67,12 +63,9 @@ public class TaskProfile extends AbstractProfile {
 
     }
 
-    public TaskProfile(TaskAttemptId taskAttemptId, String blocker, String connectorOutputClusterActivityId,
-            Map<PartitionId, PartitionProfile> partitionSendProfile, IStatsCollector statsCollector,
-            Set<Warning> warnings, long totalWarningsCount) {
+    public TaskProfile(TaskAttemptId taskAttemptId, Map<PartitionId, PartitionProfile> partitionSendProfile,
+            IStatsCollector statsCollector, Set<Warning> warnings, long totalWarningsCount) {
         this.taskAttemptId = taskAttemptId;
-        this.blocker = blocker;
-        this.connectorOutputClusterActivityId = connectorOutputClusterActivityId;
         this.partitionSendProfile = new HashMap<>(partitionSendProfile);
         this.statsCollector = statsCollector;
         this.warnings = warnings;
@@ -95,8 +88,6 @@ public class TaskProfile extends AbstractProfile {
         json.put("activity-id", taskAttemptId.getTaskId().getActivityId().toString());
         json.put("partition", taskAttemptId.getTaskId().getPartition());
         json.put("attempt", taskAttemptId.getAttempt());
-        json.put("blocker", blocker);
-        json.put("connectorOutputClusterActivityId", connectorOutputClusterActivityId);
         if (partitionSendProfile != null) {
             ArrayNode pspArray = om.createArrayNode();
             for (PartitionProfile pp : partitionSendProfile.values()) {
@@ -137,18 +128,9 @@ public class TaskProfile extends AbstractProfile {
         opTimes.forEach((key, value) -> {
             ObjectNode jpe = om.createObjectNode();
             jpe.put("name", key);
-            //jpe.put("operator-id", xxx);
-            //jpe.put("start-time-stamp", yyy);
-            //jpe.put("end-time-stamp", zzz);
-            // the time counter unit is nano second, here we convert it to milli second
-            jpe.put("disk-io", value.getDiskIoCounter().get());
-            jpe.put("tuple-count", value.getTupleCounter().get());
             jpe.put("time", Double
                     .parseDouble(new DecimalFormat("#.####").format((double) value.getTimeCounter().get() / 1000000)));
-            jpe.put("time-open", value.getTimeCounter().getFrameWriterOpenTime());
-            jpe.put("time-first-frame", value.getTimeCounter().getFrameWriterFirstFrameTime());
-            jpe.put("time-last-frame", value.getTimeCounter().getFrameWriterLastFrameTime());
-            jpe.put("time-close", value.getTimeCounter().getFrameWriterCloseTime());
+            jpe.put("disk-io", value.getDiskIoCounter().get());
             countersObj.add(jpe);
         });
         json.set("counters", countersObj);
@@ -170,8 +152,6 @@ public class TaskProfile extends AbstractProfile {
     public void readFields(DataInput input) throws IOException {
         super.readFields(input);
         taskAttemptId = TaskAttemptId.create(input);
-        blocker = input.readUTF();
-        connectorOutputClusterActivityId = input.readUTF();
         int size = input.readInt();
         partitionSendProfile = new HashMap<>();
         for (int i = 0; i < size; i++) {
@@ -189,8 +169,6 @@ public class TaskProfile extends AbstractProfile {
     public void writeFields(DataOutput output) throws IOException {
         super.writeFields(output);
         taskAttemptId.writeFields(output);
-        output.writeUTF(blocker);
-        output.writeUTF(connectorOutputClusterActivityId);
         output.writeInt(partitionSendProfile.size());
         for (Entry<PartitionId, PartitionProfile> entry : partitionSendProfile.entrySet()) {
             entry.getKey().writeFields(output);
