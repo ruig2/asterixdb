@@ -21,15 +21,20 @@ package org.apache.hyracks.api.com.job.profiling.counters;
 import org.apache.hyracks.api.dataflow.IPassableTimer;
 
 public class TimeCounter extends Counter implements IPassableTimer {
+    // Since operators are organized in a pipeline style,
+    // one operator may resume and pause multiple times (i.e. the nextFrame() is called multiple times),
+    // so we need an internal stop watch to accumulate the operator execution time
     private long stopWatchStartTime;
     private final long INIT_VALUE = -1;
 
+    // Time stamps for the operator
     private long frameWriterOpenTime, frameWriterCloseTime, frameWriterFirstFrameTime, frameWriterLastFrameTime;
 
     public TimeCounter(String name) {
         super(name);
 
         stopWatchStartTime = INIT_VALUE;
+
         frameWriterOpenTime = INIT_VALUE;
         frameWriterCloseTime = INIT_VALUE;
         frameWriterFirstFrameTime = INIT_VALUE;
@@ -60,7 +65,7 @@ public class TimeCounter extends Counter implements IPassableTimer {
         return frameWriterCloseTime;
     }
 
-    public void setFirstFrameTimeIfNotSet(long firstFrameTime) {
+    public void setFrameWriterFirstFrameTimeIfNotSet(long firstFrameTime) {
         if (frameWriterFirstFrameTime <= INIT_VALUE) {
             frameWriterFirstFrameTime = firstFrameTime;
         }
@@ -70,7 +75,7 @@ public class TimeCounter extends Counter implements IPassableTimer {
         return frameWriterFirstFrameTime;
     }
 
-    public void setLastFrameTimeIfLater(long lastFrameTime) {
+    public void setFrameWriterLastFrameTimeIfLater(long lastFrameTime) {
         if (frameWriterLastFrameTime < lastFrameTime) {
             frameWriterLastFrameTime = lastFrameTime;
         }

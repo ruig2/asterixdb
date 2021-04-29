@@ -89,8 +89,8 @@ public class OperatorStats implements IOperatorStats {
         diskIoCounter.set(input.readLong());
         timeCounter.set(input.readLong());
         timeCounter.setOpenTimeIfNotSet(input.readLong());
-        timeCounter.setFirstFrameTimeIfNotSet(input.readLong());
-        timeCounter.setLastFrameTimeIfLater(input.readLong());
+        timeCounter.setFrameWriterFirstFrameTimeIfNotSet(input.readLong());
+        timeCounter.setFrameWriterLastFrameTimeIfLater(input.readLong());
         timeCounter.setCloseTimeIfLater(input.readLong());
     }
 

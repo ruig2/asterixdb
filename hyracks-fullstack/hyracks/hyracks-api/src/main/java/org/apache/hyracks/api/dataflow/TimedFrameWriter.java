@@ -60,11 +60,11 @@ public class TimedFrameWriter implements IFrameWriter {
     public final void nextFrame(ByteBuffer buffer) throws HyracksDataException {
         try {
             startClock();
-            counter.setFirstFrameTimeIfNotSet(System.nanoTime());
+            counter.setFrameWriterFirstFrameTimeIfNotSet(System.nanoTime());
             writer.nextFrame(buffer);
         } finally {
             stopClock();
-            counter.setLastFrameTimeIfLater(System.nanoTime());
+            counter.setFrameWriterLastFrameTimeIfLater(System.nanoTime());
         }
     }
 
