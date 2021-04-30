@@ -18,6 +18,8 @@
  */
 package org.apache.hyracks.control.nc.work;
 
+import org.apache.hyracks.api.dataflow.ActivityId;
+import org.apache.hyracks.api.job.ActivityCluster;
 import org.apache.hyracks.control.common.job.profiling.om.TaskProfile;
 import org.apache.hyracks.control.common.work.AbstractWork;
 import org.apache.hyracks.control.nc.NodeControllerService;
@@ -38,8 +40,29 @@ public class NotifyTaskCompleteWork extends AbstractWork {
 
     @Override
     public void run() {
-        TaskProfile taskProfile = new TaskProfile(task.getTaskAttemptId(), task.getPartitionSendProfile(),
-                task.getStatsCollector(), task.getWarnings(), task.getWarningCollector().getTotalWarningsCount());
+        ActivityId activityId = task.getTaskAttemptId().getTaskId().getActivityId();
+        String blocker = "";
+        ActivityCluster activityCluster = task.getJoblet().getActivityClusterGraph().getActivityMap().get(activityId);
+        try {
+            if (activityCluster.getBlocked2BlockerMap().size() > 0) {
+                if (activityCluster.getBlocked2BlockerMap().containsKey(activityId)) {
+                    for (ActivityId anid : activityCluster.getBlocked2BlockerMap().get(activityId)) {
+                        blocker += anid;
+                    }
+                }
+            }
+        } catch (Exception e) {
+            blocker = "error when getting blocker";
+        }
+
+        String connectorOutputODID = "";
+        if (task.getPartitionSendProfile().entrySet().size() > 0) {
+            connectorOutputODID += activityCluster.getActivityInputMap().keySet().toArray()[0].toString();
+        }
+
+        TaskProfile taskProfile = new TaskProfile(task.getTaskAttemptId(), blocker, connectorOutputODID,
+                task.getPartitionSendProfile(), task.getStatsCollector(), task.getWarnings(),
+                task.getWarningCollector().getTotalWarningsCount());
         try {
             ncs.getClusterController(task.getJobletContext().getJobId().getCcId()).notifyTaskComplete(
                     task.getJobletContext().getJobId(), task.getTaskAttemptId(), ncs.getId(), taskProfile);
