@@ -21,7 +21,12 @@ package org.apache.hyracks.control.common.job.profiling.om;
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -30,6 +35,7 @@ import org.apache.hyracks.api.dataflow.TaskAttemptId;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import org.apache.hyracks.api.job.profiling.IOperatorStats;
 
 public class JobletProfile extends AbstractProfile {
     private static final long serialVersionUID = 1L;
@@ -70,8 +76,40 @@ public class JobletProfile extends AbstractProfile {
         json.put("node-id", nodeId);
         populateCounters(json);
         ArrayNode tasks = om.createArrayNode();
-        for (TaskProfile p : taskProfiles.values()) {
-            tasks.add(p.toJSON());
+
+        List<Entry<TaskAttemptId, TaskProfile>> sortedTaskProfiles = new LinkedList<>(taskProfiles.entrySet());
+
+        // Sort the tasks by the partition id
+        Collections.sort(sortedTaskProfiles, new Comparator<Entry<TaskAttemptId, TaskProfile>>() {
+            @Override public int compare(Entry<TaskAttemptId, TaskProfile> o1, Entry<TaskAttemptId, TaskProfile> o2) {
+                int partitionId1 = o1.getKey().getTaskId().getPartition();
+                int partitionId2 = o2.getKey().getTaskId().getPartition();
+                if (partitionId1 - partitionId2 != 0) {
+                    return partitionId1 - partitionId2;
+                }
+
+                long lastCloseTimeStamp1 = 0;
+                for (IOperatorStats os : o1.getValue().getStatsCollector().getAllOperatorStats().values()) {
+                    long closeTime = os.getTimeCounter().getFrameWriterCloseTime();
+                    if (lastCloseTimeStamp1 < closeTime) {
+                        lastCloseTimeStamp1 = closeTime;
+                    }
+                }
+
+                long lastCloseTimeStamp2 = 0;
+                for (IOperatorStats os : o2.getValue().getStatsCollector().getAllOperatorStats().values()) {
+                    long closeTime = os.getTimeCounter().getFrameWriterCloseTime();
+                    if (lastCloseTimeStamp2 < closeTime) {
+                        lastCloseTimeStamp2 = closeTime;
+                    }
+                }
+
+                return (int) (lastCloseTimeStamp1 - lastCloseTimeStamp2);
+            }
+        });
+
+        for (Entry<TaskAttemptId, TaskProfile> entry : sortedTaskProfiles) {
+            tasks.add(entry.getValue().toJSON());
         }
         json.set("tasks", tasks);
 

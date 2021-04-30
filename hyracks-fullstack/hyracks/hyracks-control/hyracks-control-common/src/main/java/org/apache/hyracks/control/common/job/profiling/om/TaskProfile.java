@@ -137,9 +137,6 @@ public class TaskProfile extends AbstractProfile {
         opTimes.forEach((key, value) -> {
             ObjectNode jpe = om.createObjectNode();
             jpe.put("name", key);
-            //jpe.put("operator-id", xxx);
-            //jpe.put("start-time-stamp", yyy);
-            //jpe.put("end-time-stamp", zzz);
             // the time counter unit is nano second, here we convert it to milli second
             jpe.put("disk-io", value.getDiskIoCounter().get());
             jpe.put("tuple-count", value.getTupleCounter().get());
