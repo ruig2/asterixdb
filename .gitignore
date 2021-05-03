@@ -30,3 +30,5 @@ dist
 estimator_data/*.adm
 estimator_data/*.json
 estimator_data/__pycache__
+estimator_data/data_generated
+estimator_data/result
