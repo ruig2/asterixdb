@@ -27,3 +27,6 @@ dist
 *.swp
 .m2*
 ß
+estimator_data/*.adm
+estimator_data/*.json
+estimator_data/__pycache__
