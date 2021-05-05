@@ -2,11 +2,11 @@ import generate_data
 import load
 import execute_query
 
-# SCALE_INIT = 1000000
-# NUM_TEST = 4
-
-SCALE_INIT = 10
+SCALE_INIT = 1000000
 NUM_TEST = 4
+
+# SCALE_INIT = 10
+# NUM_TEST = 4
 
 scale = SCALE_INIT
 
